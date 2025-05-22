@@ -5,25 +5,26 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import {Height, Width} from '../constants/constants';
 import CustomAuthButton from '../Components/CustomAuthButton';
 
+
 const welcomeScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <ImageBackground
         style={styles.background}
         source={require('../../assets/Background/AuthBackground.png')}>
-        <View style={styles.header}>
+     <View style={styles.header}>
           <MaskedView
             maskElement={<Text style={styles.title}>Super Canteen</Text>}>
             <LinearGradient
-              colors={['#2E6074', '#00CED1']}
+              colors={['#2E6074', '#2E60746E']}
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}
               style={styles.gradient}
             />
           </MaskedView>
-        </View>
+        </View> 
 
-        <View style={styles.cardContainer}>
+         <View style={styles.cardContainer}>
           <Image
             source={require('../../assets/Background/LinearGradient2.png')}
             style={styles.cardImage}
@@ -40,8 +41,8 @@ const welcomeScreen = ({navigation}) => {
               br={3}
               textStyle={{fontSize: 16, fontWeight: 'bold'}}
             />
-
-            <CustomAuthButton
+          
+         <CustomAuthButton
                           onPress={() =>navigation.navigate('Signin')}
               title="Sign In"
               backgroundColor="#FFFFFF"
@@ -50,10 +51,10 @@ const welcomeScreen = ({navigation}) => {
               borderColor="#2E6074"
               textStyle={{color: '#2E6074', fontSize: 16, fontWeight: 'bold'}}
      
-              style={{marginTop: 18}}
-            />
+              
+            /> 
           </View>
-        </View>
+        </View> 
       </ImageBackground>
     </View>
   );
@@ -65,20 +66,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#D4E7F2',
+    alignItems:"center",
+    justifyContent:"center"
   },
   background: {
     flex: 1,
     width: '100%',
     height: '100%',
+    alignItems:"center",
   },
   header: {
-    marginTop: Height(60),
+    marginTop: Height(30),
     alignItems: 'center',
     justifyContent: 'center',
   },
   gradient: {
-    width: 250,
-    height: 40,
+   width:Height(250),
+   height:Width(40)
   },
   title: {
     fontSize: 32,
@@ -91,7 +95,7 @@ const styles = StyleSheet.create({
     width: Width(288),
     height: Height(350),
     alignSelf: 'center',
-    marginTop: Height(80),
+    marginTop: Height(100),
     position: 'relative',
   },
   cardImage: {
@@ -101,10 +105,9 @@ const styles = StyleSheet.create({
   },
   buttonGroup: {
     position: 'absolute',
-    bottom: Height(190),
     width: '100%',
     paddingHorizontal: 10,
-    alignItems: 'center',
-    rowGap: 20,
+    rowGap:Height(30),
+    marginTop:Height(50)
   },
 });

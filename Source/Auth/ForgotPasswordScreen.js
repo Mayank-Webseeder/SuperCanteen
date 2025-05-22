@@ -10,18 +10,30 @@ import CustomTextInput from '../Components/CustomTextInput';
 import CustomAuthButton from '../Components/CustomAuthButton';
 
 import { Height, Width } from '../constants/constants';
+import { validateEmail } from '../utils/validation';
 
 const ResetPasswordScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+   const [formData, setFormData] = useState({
+      email: '',
+    });
   const [linkSent, setLinkSent] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+const emailError = validateEmail(formData.email);
+     const newErrors = {
+      email: emailError,
+    };
+    setErrors(newErrors);
+    return !emailError;
+    
+  }
 
   const handleSendLink = () => {
-    if (!email.trim()) {
-      alert('Please enter your email');
-      return;
-    }
-    // TODO: trigger send reset link API here
+   if(validateForm()) {
+       // TODO: trigger send reset link API here
     setLinkSent(true);
+   }    
   };
 
   const handleResendLink = () => {
@@ -30,19 +42,24 @@ const ResetPasswordScreen = ({ navigation }) => {
     navigation.navigate('ResetPassword'); // Make sure this matches your route name in navigator
   };
 
+   const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors({ ...errors, [field]: null }); // clear error on change
+  };
+
   return (
     <View style={styles.container}>
-      <CustomAuthHeader title="Super Canteen" />
-
-      <View style={{ rowGap: 10 }}>
-        <Text style={styles.label}>Email</Text>
+      <CustomAuthHeader title= {linkSent ? "Reset Password" : "Forgot Password" } />
+      <View style={{ rowGap: 10 , paddingHorizontal:20 ,marginTop:20}}>
         <CustomTextInput
+          label={'Email'}
           borderColor="#d2d2d2"
           keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
+          value={formData.email}
+          onChangeText={(text) => handleInputChange('email', text)}
+          error={errors.email}
+          placeholder="Enter your email"
         />
-
         {!linkSent ? (
           <Text style={styles.infoText}>
             Enter your registered email address. We’ll send you a link to reset your password.
@@ -62,16 +79,16 @@ const ResetPasswordScreen = ({ navigation }) => {
       </View>
 
       <View style={{ marginTop: Height(20) }}>
-        <CustomAuthButton
-          width={Width(210)}
-          title={linkSent ? "Resend Link" : "Send Link"}
-          backgroundColor="#2E6074"
-          borderWidth={1}
-          borderColor="#2E6074"
-          br={5}
-          textStyle={{ fontSize: 18 }}
+         <CustomAuthButton
           onPress={linkSent ? handleResendLink : handleSendLink}
-        />
+            title={linkSent ? "Resend Link" : "Send Link"}
+            width={Width(300)}
+            height={Height(38)}
+            borderWidth={1}
+            borderColor="#2E6074"
+            br={3}
+            textStyle={{ fontSize: 16 , fontFamily: 'Inter-SemiBold', }}
+          />
       </View>
     </View>
   );
@@ -81,8 +98,6 @@ export default ResetPasswordScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
     backgroundColor: '#fff',
     flex: 1,
   },
@@ -93,10 +108,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   infoText: {
-    marginLeft: 10,
-    fontSize: 14,
+    marginLeft: 5,
+    fontSize: 12,
     color: '#2E6074',
     fontFamily: "Inter-Regular",
+    bottom:12,
+    lineHeight:15
   },
   resendText: {
     marginLeft: 10,

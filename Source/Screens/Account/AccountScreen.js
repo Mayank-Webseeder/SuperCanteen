@@ -11,6 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import CustomButton from '../../Components/CustomBotton';
+import { Height } from '../../constants/constants';
 
 const AccountScreen = () => {
   const handlePress = (label) => {
@@ -19,14 +20,14 @@ const AccountScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.scrollContainer}>
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContainer}>
       <View style={styles.container}>
         {/* Header */}
         <CustomHeader label="Your Account" />
-        <Text style={styles.greeting}>Hi, Apoorva!</Text>
+        <View style={{marginHorizontal:10}}>
+           <Text style={styles.greeting}>Hi, Apoorva!</Text>
         <Text style={styles.phone}>999-999-9999</Text>
-
-        {/* Action Icons */}
+         {/* Action Icons */}
         <View style={styles.containerBox}>
           <View style={styles.row}>
             <View style={styles.iconColumn}>
@@ -74,9 +75,8 @@ const AccountScreen = () => {
             </View>
           </View>
         </View>
-
-        {/* Account Settings */}
-        <View style={[styles.containerBox, styles.sectionBox]}>
+         {/* Account Settings */}
+        <View style={[styles.containerBox, styles.sectionBox,{marginTop:20}]}>
           <Text style={styles.sectionHeader}>Account Settings</Text>
           {[
             'Personal Information',
@@ -90,26 +90,25 @@ const AccountScreen = () => {
                 <Text style={styles.label}>{item}</Text>
                 <Ionicons
                   name="chevron-forward"
-                  size={24}
+                  size={18}
                   color="#2E6074E8"
                 />
               </View>
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Membership Section */}
-        <View style={[styles.containerBox, styles.sectionBox]}>
+         {/* Membership Section */}
+        <View style={[styles.containerBox, styles.sectionBox,{marginTop:20}]}>
           <Text style={styles.sectionHeader}>Membership and Offers</Text>
           <TouchableOpacity
             onPress={() => handlePress('Super Canteen Rewards')}>
             <View style={styles.settingsRow}>
               <Text style={styles.label}>Super Canteen Rewards</Text>
-              <Ionicons name="chevron-forward" size={24} color="#2E6074E8" />
+              <Ionicons name="chevron-forward" size={18} color="#2E6074E8" />
             </View>
           </TouchableOpacity>
         </View>
-
+        
         {/* Footer Links */}
         <View style={styles.footerLinks}>
           {['FAQ', 'ABOUT US', 'TERMS OF USE', 'PRIVACY POLICY'].map(
@@ -122,10 +121,10 @@ const AccountScreen = () => {
             ),
           )}
         </View>
-
+        </View>
 
         <View style={styles.logoutContainer}>
-         <CustomButton  textColor={'#2E6074E8'}   backgroundColor = '#ffff'label={"Logout"}/>
+         <CustomButton  textColor={'#fff'}   backgroundColor = '#2E6074E8'label={"Logout"}/>
         </View>
       </View>
     </ScrollView>
@@ -140,19 +139,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    marginHorizontal: 20,
+   marginHorizontal:10,
     paddingTop: 10,
     rowGap: 10,
   },
   greeting: {
     fontSize: 15,
-    fontWeight: '600',
-    marginTop: 10,
+    fontFamily:'Inter-Medium'
+
   },
   phone: {
     fontSize: 12,
     color: '#555',
     marginBottom: 10,
+    fontFamily:'Inter-Regular'
   },
   containerBox: {
     borderWidth: 1,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 10,
-    marginTop: 20,
+    marginTop: 10,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -192,8 +192,8 @@ const styles = StyleSheet.create({
   label: {
     marginTop: 8,
     fontSize: 14,
-    fontWeight: '500',
     color: '#333',
+    fontFamily:'Inter-Medium'
   },
   sectionBox: {
     paddingHorizontal: 20,
@@ -201,30 +201,32 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     fontSize: 16,
-    fontWeight: '900',
-    marginBottom: 12,
+    marginBottom: 5,
     color: '#333',
+    fontFamily:'Inter-SemiBold'
   },
   settingsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingBottom: 12,
+    paddingTop:8,
     borderBottomWidth: 1,
     borderBottomColor: '#EFEFEF',
   },
   footerLinks: {
-    paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: Height(20),
+    paddingHorizontal:Height(5)
   },
   footerText: {
     fontSize: 13,
     color: '#555',
     marginBottom: 10,
+    fontFamily:'Inter-Regular'
   },
   logoutContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 30,
+   paddingBottom: 30,
     alignContent:"center",
     justifyContent:"center",
     alignItems:"center",

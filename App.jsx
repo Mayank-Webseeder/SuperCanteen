@@ -36,6 +36,10 @@ import OrderConfirmFinal from './Source/Screens/Orders/OrderConfirmFinal';
 import CartScreen from './Source/Screens/Orders/CartScreen';
 import WishlistScreen from './Source/Screens/HomeScreen/WishlistScreen';
 import SearchScreen from './Source/Screens/SearchScreen/SearchScreen';
+import { HomeIcon } from './assets/Icons/svgIcons/home';
+import { CategoryIcon } from './assets/Icons/svgIcons/category';
+import { OrdersIcon } from './assets/Icons/svgIcons/orders';
+import { AccountIcon } from './assets/Icons/svgIcons/account_circle';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,43 +47,37 @@ const Tab = createBottomTabNavigator();
 const BottomTabs = () => {
   return (
     <Tab.Navigator
-      screenOptions={({route}) => ({
-        headerShown: false,
-        tabBarActiveTintColor: '#008ECC',
-        tabBarInactiveTintColor: '#999',
-        tabBarLabelStyle: {fontSize: 12},
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 6,
-        },
-        tabBarIcon: ({color, size}) => {
-          let iconName;
-
-          switch (route.name) {
-            case 'Home':
-              iconName = 'home';
-              break;
-            case 'Categories':
-              iconName = 'category';
-              break;
-            case 'Orders':
-              iconName = 'shopping-bag';
-              break;
-            case 'Account':
-              iconName = 'person';
-              break;
-            default:
-              iconName = 'home';
-          }
-
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-      })}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Categories" component={Categories} />
-      <Tab.Screen name="Orders" component={CartScreen} />
-      <Tab.Screen name="Account" component={AccountScreen} />
-    </Tab.Navigator>
+  screenOptions={({ route }) => ({
+    headerShown: false,
+    tabBarActiveTintColor: '#2E6074E8',
+    tabBarInactiveTintColor: '#B0B0B0',
+    tabBarLabelStyle: { fontSize: 12 },
+    tabBarStyle: {
+      height: 60,
+      paddingBottom: 6,
+      fontFamily: 'Inter-SemiBold'
+    },
+    tabBarIcon: ({ color, size }) => {
+      switch (route.name) {
+        case 'Home':
+          return <HomeIcon color={color} size={size} />;
+        case 'Categories':
+          return <CategoryIcon color={color} size={size} />;
+        case 'Orders':
+          return <OrdersIcon color={color} size={size} />;
+        case 'Account':
+          return <AccountIcon color={color} size={size} />;
+        default:
+          return <HomeIcon color={color} size={size} />;
+      }
+    },
+  })}
+>
+  <Tab.Screen name="Home" component={HomeScreen} />
+  <Tab.Screen name="Categories" component={Categories} />
+  <Tab.Screen name="Orders" component={CartScreen} />
+  <Tab.Screen name="Account" component={AccountScreen} />
+</Tab.Navigator>
   );
 };
 

@@ -3,69 +3,83 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
 } from 'react-native';
 import CustomAuthHeader from '../Components/CustomAuthHeader';
 import CustomTextInput from '../Components/CustomTextInput';
-import CustomPasswordInput from '../Components/CustomPasswordInput';
 import CustomAuthButton from '../Components/CustomAuthButton';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height, Width } from '../constants/constants';
+import { validateEmail, validatePassword } from '../utils/validation';
 
 const ResetPasswordScreen = ({ navigation }) => {
-  const [remember, setRemember] = useState(false);
+  const [formData, setFormData] = useState({
+      email: '',
+      password: '',
+    });
+  
+  const [errors, setErrors] = useState({});
+   const validateForm = () => {
+  const emailError = validateEmail(formData.email);
+  const passwordError = validatePassword(formData.password);
+
+  const newErrors = {
+    email: emailError,
+    password: passwordError,
+  };
+
+  setErrors(newErrors);
+  return !emailError && !passwordError; // returns true if both are valid
+};
+
+const onSignInPress = () => {
+  if (validateForm()) {
+    navigation.navigate('Signin');
+  }
+};
 
 
-
-  const onSignInPress = () => {
-    navigation.navigate('Main'); // or your sign in screen route
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors({ ...errors, [field]: null }); // clear error on change
   };
 
   return (
     <View style={styles.container}>
-      <CustomAuthHeader title="Super Canteen" />
+      <CustomAuthHeader title="Change Password" />
+      <View style={{rowGap:10,marginHorizontal:20}} >
+      <CustomTextInput
+          label={'Email'}
+          borderColor="#d2d2d2"
+          keyboardType="email-address"
+          value={formData.email}
+          onChangeText={(text) => handleInputChange('email', text)}
+          error={errors.email}
+          placeholder="Enter your email"
+        />
 
-
-      <View style={{rowGap:10}} >
-      {/* <Text style={styles.label}>Name</Text>
-      <CustomTextInput borderColor="#d2d2d2" /> */}
-
-      <Text style={styles.label}>Email</Text>
-      <CustomTextInput borderColor="#d2d2d2" keyboardType="email-address" />
-
-      <Text style={styles.label}>Password</Text>
-      <CustomPasswordInput borderColor="#d2d2d2" />
+        <CustomTextInput
+         label={'Choose Password'}
+          borderColor="#d2d2d2"
+          secureTextEntry
+          value={formData.password}
+          onChangeText={(text) => handleInputChange('password', text)}
+          error={errors.password}
+          placeholder="Enter your password"
+        />
       <Text style={styles.rememberText}>Your new password must be at least 8 characters long and include at least one uppercase letter, one number, and one special character (e.g., @, #, $).</Text>
-
-   
-
-
-
       </View>
 
       <View  style={{marginTop:Height(20)}} >
-      <CustomAuthButton
-      onPress={onSignInPress}
-      width={Width(210)}
-      
-        title="Sign in"
-        backgroundColor="#2E6074"
-        borderWidth={1}
-        borderColor="#2E6074"
-        br={7}
-        textStyle={{ fontSize: 18 }}
-        
-      />
-
+         <CustomAuthButton
+           onPress={onSignInPress}
+            width={Width(300)}
+            height={Height(38)}
+            title="Sign in"
+            borderWidth={1}
+            borderColor="#2E6074"
+            br={3}
+            textStyle={{ fontSize: 16 , fontFamily: 'Inter-SemiBold' }}
+          />
       </View>
-
-
-    
-
-     
-
-
     </View>
   );
 };
@@ -74,8 +88,6 @@ export default ResetPasswordScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
     backgroundColor: '#fff',
     flex: 1,
   },
@@ -100,9 +112,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rememberText: {
-    marginLeft: 10,
-    fontSize: 14,
+    marginLeft: 5,
+    fontSize: 12,
     color: '#2E6074',
+    fontFamily: "Inter-Regular",
+    bottom:12,
+    lineHeight:15
   },
   orContainer: {
     flexDirection: 'row',

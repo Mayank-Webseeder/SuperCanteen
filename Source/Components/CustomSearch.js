@@ -8,8 +8,10 @@ import {
   FlatList,
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Height, Width } from '../constants/constants';
+import { Search } from '../../assets/Icons/svgIcons/search';
+import { Camera } from '../../assets/Icons/svgIcons/camera';
+import { Mic } from '../../assets/Icons/svgIcons/mic';
 
 const demoData = [
   'Red T-shirt',
@@ -23,7 +25,7 @@ const demoData = [
 ];
 
 const CustomSearchInput = ({
-  placeholder = 'Search...',
+  placeholder = 'Search',
   onChangeText,
   onCameraPress,
   onMicPress,
@@ -58,7 +60,7 @@ const CustomSearchInput = ({
   );
 
   return (
-    <View style={{ width: WidthSize }}>
+    <View style={{ width: WidthSize }}>      
       <View
         style={[
           styles.container,
@@ -67,12 +69,11 @@ const CustomSearchInput = ({
           disabled && styles.disabledInput,
         ]}
       >
-        <Feather name="search" size={20} color="#888" style={styles.leftIcon} />
-
+       <Search/>
         <TextInput
           style={[styles.input, inputStyle]}
           placeholder={placeholder}
-          placeholderTextColor="#888"
+          placeholderTextColor="#9A9A9A"
           value={searchValue}
           onChangeText={handleSearchChange}
           editable={!disabled}
@@ -80,15 +81,10 @@ const CustomSearchInput = ({
 
         <View style={styles.rightIcons}>
           <TouchableOpacity onPress={onCameraPress} disabled={disabled}>
-            <MaterialIcons
-              name="camera-alt"
-              size={20}
-              color="#888"
-              style={styles.iconSpacing}
-            />
+         <Text><Camera/></Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onMicPress} disabled={disabled}>
-            <MaterialIcons name="keyboard-voice" size={20} color="#888" />
+         <Text><Mic/></Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -115,12 +111,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 20,
     paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    backgroundColor:"#fff"
+    backgroundColor:"#fff",
+     // Shadow for iOS
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  fontFamily:"Inter-Regular",
+
+  // Shadow for Android
+  elevation: 4,
+  paddingLeft:10,
+  borderColor:"#D4D4D4",
+  borderWidth:1.2,
+  height:Height(38)
   },
   disabledInput: {
 // no backgroundColor here!
@@ -132,6 +136,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#000',
+    top:1
   },
   rightIcons: {
     flexDirection: 'row',

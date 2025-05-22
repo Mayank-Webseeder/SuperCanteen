@@ -1,199 +1,77 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { FontSize, Height, Width } from '../../constants/constants';
 import CustomSearch from '../../Components/CustomSearch';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import EvilIcons from 'react-native-vector-icons/EvilIcons';
-import CustomCategoryList from '../../Components/CustomCategoryList';
-import CustomCasual from '../../Components/CustomCasual';
-import categories from '../../Mock/Data/categories';
 import { Pressable, ScrollView } from 'react-native-gesture-handler';
-import ColorCustomSlider from '../../Components/ColorCustomSlider';
-import Products from '../../Mock/Data/Prodcuts';
 import CustomOfferCard from '../../Components/CustomOfferCard';
 import offerData from '../../Mock/Data/offerData';
-import Fashion from '../../Mock/Data/Fashion';
-
-
-const Sliders = [
-  {
-    id: 1,
-    image: require('../../../assets/Sliders/Slider1.png')
-
-  },
-  {
-    id: 2,
-    image: require('../../../assets/Sliders/Slider1.png')
-
-  },
-  {
-    id: 2,
-    image: require('../../../assets/Sliders/Slider1.png')
-
-  }
-
-]
+import Ionicons from 'react-native-vector-icons/Ionicons';                 
+import ClosesCalled from '../../Components/closesCalled';
+import ClosestProductsData from '../../Mock/Data/closestProductData';
+import ProductCategories from '../../otherComponents/home/productCategories';
 
 const Categories = ({ navigation }) => {
-
-
-  const [selectedCategory, setSelectedCategory] = React.useState('All');
+ const [selectFashion,setSelectedFashion] = useState('')
+   const [selectBeauty,setSelectedBeauty] = useState('')
+   const [selectElectronics,setSelectedElectronics] = useState('')
   return (
-    <ScrollView>
-      <View
-        style={{
-          flex: 1,
-          marginVertical: Width(35),
-          marginHorizontal: Width(5),
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            columnGap: Width(10),
-          }}>
-          <Image
-            style={{ height: Height(16), width: Width(16) }}
-            source={require('../../../assets/Icons/location_on-2.png')}
-          />
-          <Text style={{ fontSize: 12 }}>
-            Deliver to{' '}
-            <Text style={{ fontFamily: 'Inter-Bold', fontWeight: '900' }}>
-              Maruti Apartments-Del..
-            </Text>
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.inner}>
+      <View>
+
+{/* Location and Profile */}
+      <View style={styles.main}>
+        <View style={styles.innerView}>
+          <Image re style={{ height: Height(16), width: Width(16) }} source={require('../../../assets/Icons/location_on-2.png')} />
+        <Text style={{ fontSize: FontSize(13.5) , marginHorizontal:10,fontFamily:'Inter-Regular'}}>
+          Deliver to{' '}
+          <Text style={{ fontFamily: 'Inter-SemiBold'}}>
+            Maruti Apartments-Del..
           </Text>
-          <View style={{ marginLeft: Width(100) }}>
-            <Pressable onPress={() => navigation.navigate('Profile')}>
-              <Image
-                style={{ height: Height(24), width: Width(24) }}
-                source={require('../../../assets/Icons/ProfileIcon.png')}
-              />
-            </Pressable>
-          </View>
+        </Text>
         </View>
-
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            justifyContent: 'space-between',
-          }}>
-          <View style={{ flex: 1, marginRight: 12 }}>
-            <CustomSearch />
-          </View>
-
-          {/* Icons section */}
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialIcons
-              size={15}
-              name={'favorite-border'}
-              style={{ marginRight: 16 }}
-            />
-            <Image
-              style={{ width: Width(15), height: Height(15) }}
-              source={require('../../../assets/Icons/shopping_cart.png')}
-            />
-          </View>
+        <View>
+          <Pressable onPress={() => navigation.navigate('Profile')}>
+            <Image  style={{ height: Height(27), width: Width(27),resizeMode:"cover" }} source={require('../../../assets/Icons/ProfileIcon.png')} />
+          </Pressable>
         </View>
+      </View>
 
-        {/* <View>
-          <CustomCategoryList
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            data={categories}
-            selected={selectedCategory}
-            onSelect={name => setSelectedCategory(name)}
-            bgColor="#D4E7F2"
-            imageSize={Width(30)}
-            gap={26}
-            containerStyle={{ marginTop: Height(12) }}
-            textStyle={{ fontSize: FontSize(11), fontWeight: '600' }}
+      {/* Search + Icons */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, paddingVertical: 8, justifyContent: 'space-between',marginTop:Height(7) }}>
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Pressable onPress={()=>navigation.navigate('Search')}>
+          <CustomSearch WidthSize={'98%'} backgroundColor={'#fff'}  disabled/>
+          </Pressable>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Pressable onPress={() => navigation.navigate('Wishlist')}>
+         <Ionicons
+            name={'heart-outline'}
+            size={20}
+            color={'#0E2D42'}
+            style={{right:Height(7)}}
           />
-        </View> */}
+          </Pressable>
+          <Pressable onPress={() => navigation.navigate('Orders')}>
+            <Image style={{ width: Width(17), height: Height(17),right:Height(2) }} source={require('../../../assets/Icons/shopping_cart.png')} />
+          </Pressable>
+        </View>
+      </View>
+   <View key="line" style={{ width: '100%', height: 1, backgroundColor: '#d2d2d2',marginTop:10 }} />,
+       
+      <ProductCategories selectFashion={selectFashion} setSelectedFashion={setSelectedFashion} selectBeauty={selectBeauty} setSelectedBeauty={setSelectedBeauty} selectElectronics={selectElectronics} setSelectedElectronics={setSelectedElectronics}/>
 
-        {/* <View>
-          <CustomCasual data={Sliders} />
-        </View> */}
-
-        <View>
-          <Text style={{ fontSize: 15, fontWeight: "500" }} >Fashion</Text>
-          <CustomCategoryList
-            data={Fashion}
-            horizontal={false}
-            numColumns={3}
-            bgColor="#D4DEF226"
-            width={Width(100)}
-            height={Height(105)}
-            borderRadius={Width(5)}
-            selectedBorderColor="#008ECC"
-            textColor="#333"
-            textStyle={{ fontSize: FontSize(13) }}
-            containerStyle={{ paddingTop: Height(12) }}
-            gap={Width(20)}
-            imageSize={Height(80)}
-          />
-          <Text
-            style={{ textAlign: 'right', textDecorationLine: "underline", color: "#2E6074E8", marginVertical: 20 }}
-            onPress={() => navigation.navigate('Fashion')}>
-            View all
-          </Text>
-        </View>
-        <View>
-          <Text>Beauty & Wellness</Text>
-          <CustomCategoryList
-            data={categories}
-            horizontal={false}
-            numColumns={3}
-            bgColor="#D4DEF226"
-            width={Width(100)}
-            height={Height(105)}
-            borderRadius={Width(5)}
-            selectedBorderColor="#008ECC"
-            textColor="#333"
-            textStyle={{ fontSize: FontSize(13) }}
-            containerStyle={{ paddingTop: Height(12) }}
-            gap={Width(20)}
-            imageSize={Height(80)}
-          />
-          <Text
-            style={{ textAlign: 'right', textDecorationLine: "underline", color: "#2E6074E8", marginVertical: 20 }}
-            onPress={() => navigation.navigate('Fashion')}>
-            View all
-          </Text>
-        </View>
-        <View>
-          <Text>Electronics & Home Essentials</Text>
-          <CustomCategoryList
-            data={Fashion}
-            horizontal={false}
-            numColumns={3}
-            bgColor="#D4DEF226"
-            width={Width(100)}
-            height={Height(105)}
-            borderRadius={Width(5)}
-            selectedBorderColor="#008ECC"
-            textColor="#333"
-            textStyle={{ fontSize: FontSize(13) }}
-            containerStyle={{ paddingTop: Height(12) }}
-            gap={Width(20)}
-            imageSize={Height(80)}
-          />
-          <Text
-            style={{ textAlign: 'right', textDecorationLine: "underline", color: "#2E6074E8", marginVertical: 20 }}
-            onPress={() => navigation.navigate('Fashion')}>
-            View all
-          </Text>
-        </View>
-
-        <View>
-          <ColorCustomSlider data={Products} />
-        </View>
-        <View>
-          <Text style={{fontSize:14,fontWeight:"700",top:40}} >HOT DEALS JUST FOR YOU..</Text>
-          <CustomOfferCard item={offerData} />
-        </View>
+       <ClosesCalled key={"slider"} data={ClosestProductsData}/> 
+     <View key="deals" style={{ marginTop: 40 }}>
+       <Text style={[styles.textStyle,{marginHorizontal:Height(13)}]}>HOT DEALS <Image style={{height:14,width:14}} source={require('../../../assets/Icons/local_fire_department.png')}/> JUST FOR YOU..</Text>
+       <CustomOfferCard item={offerData} />
+     </View> 
+      <View style={{ backgroundColor: "#F0F4F8" }} >
+       <View style={{flexDirection:"row",alignItems:"center"}}>
+       <Text style={{ top: 20, fontSize: 15, fontFamily:'Inter-SemiBold',marginLeft:20}} >Style That Doesn’t Clock Out</Text>
+       <Image style={{height:20,width:20,top:20,marginHorizontal:6}} source={require('../../../assets/Icons/av_timer.png')}/>
+       </View>
+     </View>
       </View>
     </ScrollView>
   );
@@ -201,4 +79,20 @@ const Categories = ({ navigation }) => {
 
 export default Categories;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  inner:{
+    flex:1,backgroundColor:"#fff"
+  },
+   main:{
+    flexDirection: 'row', alignItems: 'center', columnGap: Width(10),justifyContent:"space-between",paddingHorizontal:Width(10) ,
+    marginTop:Height(20)
+  },
+   innerView:{
+    flexDirection:"row",
+    alignItems:"center"
+  },
+   textStyle:{
+    fontSize: 15,
+    fontFamily:"Inter-SemiBold",
+  },
+});

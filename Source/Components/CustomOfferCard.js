@@ -8,6 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { Height, Width } from '../constants/constants';
 
 const OfferCardItem = ({ item, enableBadg, enablePriceRow }) => {
   const { image, title, price, mrp, discount } = item;
@@ -73,20 +74,21 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   card: {
-    width: 116,
-    height: 185,
+    width: Width(120),
+    height: Height(155),
     marginRight: 12,
     padding: 8,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: '#ccc',
     backgroundColor: '#fff',
+    marginHorizontal:Height(10)
   },
   badge: {
     position: 'absolute',
     top: -15,
     left: -10,
-    backgroundColor: '#8B0000',
+    backgroundColor: '#890D0D',
     borderRadius: 999,
     width: 40,
     height: 40,
@@ -111,7 +113,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily:'Inter-Medium',
     color: '#333',
   },
   priceRow: {
@@ -121,7 +123,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 13,
-    fontWeight: 'bold',
+    fontFamily:'Inter-Bold',
     color: '#000',
     marginRight: 6,
   },
@@ -129,5 +131,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#888',
     textDecorationLine: 'line-through',
+    fontFamily:'Inter-Regular'
   },
 });

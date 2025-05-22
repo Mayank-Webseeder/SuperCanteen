@@ -8,14 +8,42 @@ import {
 } from 'react-native';
 import CustomAuthHeader from '../Components/CustomAuthHeader';
 import CustomTextInput from '../Components/CustomTextInput';
-import CustomPasswordInput from '../Components/CustomPasswordInput';
 import CustomAuthButton from '../Components/CustomAuthButton';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Height, Width } from '../constants/constants';
+import { FontSize, Height, Width } from '../constants/constants';
+import { validateEmail, validatePassword } from '../utils/validation';
 
 const SigninScreen = ({ navigation }) => {
-  const [remember, setRemember] = useState(false);
 
+  const [formData, setFormData] = useState({
+      name: '',
+      email: '',
+      password: '',
+    });
+  
+    const [errors, setErrors] = useState({});
+
+   const handleInputChange = (field, value) => {
+      setFormData({ ...formData, [field]: value });
+      setErrors({ ...errors, [field]: null }); // clear error on change
+    };
+
+    const gotoScreen = () => {
+      if (validateForm()) {
+        navigation.navigate('Main')
+      }
+    }
+  
+    const validateForm = () => {
+      const emailError = validateEmail(formData.email);
+      const passwordError = validatePassword(formData.password);
+  
+      const newErrors = {
+        email: emailError,
+        password: passwordError,
+      };
+      setErrors(newErrors);
+      return  !emailError && !passwordError;
+    };
 
   const onGoogleSignIn = () => {
     console.log('Google Sign In pressed');
@@ -30,56 +58,56 @@ const SigninScreen = ({ navigation }) => {
 
   }
 
+  const gotoHome = () => {
+    if(validateForm){
+       navigation.navigate('Main');
+    }
+   
+  }
+
   return (
     <View style={styles.container}>
-      <CustomAuthHeader title="Super Canteen" />
+      <CustomAuthHeader title="Sign In" />
+      <View style={{ rowGap: 10,   marginTop:Height(15) ,   marginHorizontal:Height(20)}} >
+         <CustomTextInput
+          label={'Email'}
+          borderColor="#d2d2d2"
+          keyboardType="email-address"
+          value={formData.email}
+          onChangeText={(text) => handleInputChange('email', text)}
+          error={errors.email}
+          placeholder="Enter your email"
+        />
 
-
-      <View style={{ rowGap: 10 }} >
-        {/* <Text style={styles.label}>Name</Text>
-      <CustomTextInput borderColor="#d2d2d2" /> */}
-
-        <Text style={styles.label}>Email</Text>
-        <CustomTextInput borderColor="#d2d2d2" keyboardType="email-address" />
-
-        <Text style={styles.label}>Password</Text>
-        <CustomPasswordInput borderColor="#d2d2d2" />
+        <CustomTextInput
+         label={'Password'}
+          borderColor="#d2d2d2"
+          secureTextEntry
+          value={formData.password}
+          onChangeText={(text) => handleInputChange('password', text)}
+          error={errors.password}
+          placeholder="Enter your password"
+        />
         <Text onPress={onpresshandle} style={styles.rememberText}>Forgot Password</Text>
-
-
-
-
-
       </View>
 
       <View style={{ marginTop: Height(20) }} >
         <CustomAuthButton
-        onPress={()=>navigation.navigate('Main')}
-
-          width={Width(210)}
-          title="Sign in"
-          backgroundColor="#2E6074"
-          borderWidth={1}
-          borderColor="#2E6074"
-          br={1}
-          textStyle={{ fontSize: 18 }}
-
-        />
+            onPress={gotoScreen}
+            width={Width(300)}
+            height={Height(38)}
+            title="Sign In"
+            borderWidth={1}
+            borderColor="#2E6074"
+            br={3}
+            textStyle={{ fontSize: 16 , fontFamily: 'Inter-SemiBold', }}
+          />
 
       </View>
 
-
-
-
-
-
-      {/* Remember Me */}
-
       {/* OR divider */}
       <View style={styles.orContainer}>
-
         <Text style={styles.orText}>OR</Text>
-
       </View>
 
       {/* Google Sign In Button */}
@@ -96,7 +124,7 @@ const SigninScreen = ({ navigation }) => {
 
       {/* Footer Text */}
       <View style={styles.footerTextContainer}>
-        <Text style={styles.footerText}>Already have an account? </Text>
+        <Text style={styles.footerText}>Don’t have an account? </Text>
         <TouchableOpacity onPress={onSignInPress}>
           <Text style={[styles.footerText, styles.signInText]}>Sign Up</Text>
         </TouchableOpacity>
@@ -109,8 +137,6 @@ export default SigninScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
     backgroundColor: '#fff',
     flex: 1,
   },
@@ -136,14 +162,16 @@ const styles = StyleSheet.create({
   },
   rememberText: {
     marginLeft: 10,
-    fontSize: 14,
+    fontSize: 13,
     color: '#2E6074',
+    bottom:16
   },
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center', // Center horizontally
     marginVertical: 20,
+    marginTop:Height(30)
   },
   line: {
     flex: 1,
@@ -152,7 +180,7 @@ const styles = StyleSheet.create({
   },
   orText: {
     marginHorizontal: 10,
-    color: '#888',
+    color: '#000',
     fontWeight: '600',
   },
   googleButton: {
@@ -161,21 +189,23 @@ const styles = StyleSheet.create({
 
   },
   googleIcon: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
+      width: Height(40),
+    height: Height(40),
+    resizeMode: 'cover',
   },
   footerTextContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
+    marginTop: 15,
   },
   footerText: {
     fontSize: 14,
-    color: '#555',
+    color: '#2E6074',
+    fontFamily:"Inter-Regular"
   },
   signInText: {
-    color: '#2E6074',
-    fontWeight: 'bold',
+     color: '#2E6074',
+        fontFamily:"Inter-Medium",
+        fontSize:FontSize(14)
   },
 });

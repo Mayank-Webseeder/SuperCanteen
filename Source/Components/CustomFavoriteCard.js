@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   FlatList,
@@ -9,29 +9,30 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
+import { FontSize, Height } from '../constants/constants';
 
 const DATA = [
   {
     id: '1',
     title: 'Sonata',
     price: '₹ 4,000',
-    image: require('../../assets/MensWatch/m1b.png'),
+    image: require('../../assets/MensWatch/item2.png'),
   },
   {
     id: '2',
     title: 'Sonata',
     price: '₹ 4,000',
-    image: require('../../assets/MensWatch/m1b.png'),
+    image: require('../../assets/MensWatch/item1.png'),
   },
   {
     id: '3',
     title: 'Sonata',
     price: '₹ 4,000',
-    image: require('../../assets/MensWatch/m1b.png'),
+    image: require('../../assets/MensWatch/item2.png'),
   },
 ];
 
-const WatchCard = ({ item, useGradientBackground }) => {
+const WatchCard = ({ item, useGradientBackground, isFavourite, onToggleFavourite }) => {
   const CardWrapper = useGradientBackground ? LinearGradient : View;
   const wrapperProps = useGradientBackground
     ? {
@@ -46,28 +47,47 @@ const WatchCard = ({ item, useGradientBackground }) => {
     <CardWrapper {...wrapperProps}>
       <Image source={item.image} style={styles.image} resizeMode="contain" />
       <View style={styles.footer}>
-        <View>
+        <View style={{ marginHorizontal: 7 }}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.price}>{item.price}</Text>
         </View>
-        <TouchableOpacity>
-          <Ionicons name="heart-outline" size={20} color="#0E2D42" />
+        <TouchableOpacity onPress={() => onToggleFavourite(item.id)} style={{ marginHorizontal: Height(3) }}>
+          <Ionicons
+            name={isFavourite ? 'heart' : 'heart-outline'}
+            size={20}
+            color={isFavourite ? 'red' : '#0E2D42'}
+          />
         </TouchableOpacity>
       </View>
     </CardWrapper>
   );
 };
 
-export default function CustomFavoriteCard({ whiteBg = false }) {
+export default function CustomFavoriteCard({ whiteBg = false, listStyle }) {
+  const [favourites, setFavourites] = useState([]);
+
+  const toggleFavourite = (id) => {
+    setFavourites((prev) =>
+      prev.includes(id)
+        ? prev.filter((favId) => favId !== id)
+        : [...prev, id]
+    );
+  };
+
   return (
     <FlatList
       data={DATA}
       horizontal
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <WatchCard item={item} useGradientBackground={!whiteBg} />
+        <WatchCard
+          item={item}
+          useGradientBackground={!whiteBg}
+          isFavourite={favourites.includes(item.id)}
+          onToggleFavourite={toggleFavourite}
+        />
       )}
-      contentContainerStyle={styles.list}
+      contentContainerStyle={[styles.list, listStyle]}
       showsHorizontalScrollIndicator={false}
     />
   );
@@ -87,6 +107,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     padding: 8,
     justifyContent: 'space-between',
+    marginHorizontal: Height(4),
   },
   image: {
     width: '100%',
@@ -100,12 +121,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   title: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#0E2D42',
+    fontSize: FontSize(12),
+    fontFamily: 'Inter-SemiBold',
+    color: '#2E6074E8',
   },
   price: {
     fontSize: 11,
     color: '#555',
+    fontFamily: 'Inter-Regular',
   },
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign'; // Make sure to install this
 import { useNavigation } from '@react-navigation/native';
+import { FontSize, Height } from '../constants/constants';
 
 const CustomAuthHeader = ({ title = 'Title', onBackPress }) => {
   const navigation = useNavigation();
@@ -12,7 +13,7 @@ const CustomAuthHeader = ({ title = 'Title', onBackPress }) => {
         style={styles.backButton}
         onPress={onBackPress || (() => navigation.goBack())}
       >
-        <Icon name="left" size={24} color="#000" />
+        <Icon name="left" size={20} color="#000"  style={{left:8}}/>
       </TouchableOpacity>
 
       <Text style={styles.title}>{title}</Text>
@@ -27,11 +28,12 @@ export default CustomAuthHeader;
 
 const styles = StyleSheet.create({
   container: {
-    height: 56,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
-    marginTop:20
+    justifyContent:"center",
+    marginTop:Height(30),
+    marginBottom:Height(20)
  
   },
   backButton: {
@@ -42,9 +44,9 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 18,
-
+    fontSize: FontSize(22),
     color: '#000',
+    fontFamily:'Inter-SemiBold'
   },
   rightSpace: {
     width: 40, // To balance the left back button

@@ -15,7 +15,7 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
   const flatListRef = useRef();
 
   const width = cardWidth || SCREEN_WIDTH - Width(40);
-  const height = cardHeight || Height(180);
+  const height = cardHeight || Height(150);
   const radius = cardRadius || Width(14);
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -27,12 +27,12 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
   const renderItem = ({ item }) => (
-    <View style={[styles.card, { width, borderRadius: radius }]}>
-      <Image
+    <View style={[styles.card, { width, borderRadius: radius  }]}>
+       <Image
         source={item.image}
-        style={{ width: '100%', height, borderRadius: radius  ,borderWidth:1,    borderColor: '#E3E3E3',}}
+        style={{ resizeMode:"contain", width: '100%', height, borderRadius: radius  ,borderWidth:1, borderColor: '#E3E3E3'}}
 
-      />
+      /> 
     </View>
   );
 
@@ -60,7 +60,7 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
             style={[
               styles.dot,
               {
-                backgroundColor: index === currentIndex ? '#ccc' : '#fff',
+                backgroundColor: index === currentIndex ? '#D9D9D9' : '#fff',
               },
             ]}
           />
@@ -74,7 +74,7 @@ export default CustomCasual;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: Height(10),
+    marginTop: Height(12),
   },
   card: {
     marginRight: Width(12),
@@ -86,13 +86,13 @@ const styles = StyleSheet.create({
     marginTop: Height(18),
   },
   dot: {
-    width: Width(10),
-    height: Width(10),
-    borderRadius: Width(5),
-    marginHorizontal: Width(4),
+    width: Width(9),
+    height: Width(9),
+    borderRadius: Width(10),
+    marginHorizontal: Width(2),
     top: Height(-8),
     backgroundColor: '#fff',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#E3E3E3',
   },
 });

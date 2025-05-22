@@ -25,12 +25,12 @@ const CustomCategoryList = ({
   horizontal,
   numColumns = 1,
   gap = Width(14),
-  navigation, // ✅ receive navigation prop
+  navigation,
 }) => {
   return (
     <View style={[containerStyle]}>
       <FlatList
-      nestedScrollEnabled={true}
+        nestedScrollEnabled={true}
         numColumns={numColumns}
         horizontal={horizontal}
         showsHorizontalScrollIndicator={false}
@@ -42,24 +42,26 @@ const CustomCategoryList = ({
           return (
             <TouchableOpacity
               onPress={() => {
-                onSelect(item.name); // ✅ update selected
+                onSelect(item.name);
                 if (item.screen && navigation) {
-                  navigation.navigate(item.screen); // ✅ navigate if screen exists
+                  navigation.navigate(item.screen);
                 }
               }}
               style={[styles.categoryContainer, { marginRight: gap }]}
             >
               <View
                 style={{
-                  width: width,
-                  height: height,
+                  width: item.name === 'All' ? Width(40) : width,
+                  height: item.name === 'All' ? Height(48) : height,
                   borderRadius: borderRadius,
-                  backgroundColor: bgColor,
+                  backgroundColor: item.name === 'All' ? '' : bgColor,
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: Height(6),
-                  // borderWidth: isSelected ? 2 : 0,
-                  // borderColor: isSelected ? selectedBorderColor : 'transparent',
+                  borderWidth: item.name === 'All' ? 0 : isSelected ? 1 : 0,
+                  borderColor: isSelected ? selectedBorderColor : 'transparent',
+                  fontFamily: isSelected ? 'Inter-Bold' : 'Inter-SemiBold',
+              
                 }}
               >
                 <Image
@@ -68,14 +70,19 @@ const CustomCategoryList = ({
                     width: imageSize,
                     height: imageSize,
                   }}
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
               </View>
               <Text
                 style={[
                   styles.categoryText,
                   textStyle,
-                  { color: isSelected ? selectedBorderColor : textColor },
+                  {
+                    color: isSelected ? selectedBorderColor : textColor,
+                    marginTop: item.name === 'All' ? Height(-4) : 0,
+                   
+                   
+                  },
                 ]}
               >
                 {item.name}
@@ -96,7 +103,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: FontSize(12),
-    fontFamily: 'Inter_28pt-Medium',
     textAlign: 'center',
+    fontFamily:'Inter-Medium'
   },
 });
