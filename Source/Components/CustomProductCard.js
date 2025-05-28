@@ -1,4 +1,4 @@
-import React from 'react';
+import React , {useState} from 'react';
 import {
   View,
   Text,
@@ -18,8 +18,8 @@ const CustomProductCard = ({
   width = Width(45), // Adjusted for 2 columns
   height = Width(45),
   imageSize = Width(30),
-  borderRadius = Width(16),
-  selectedBorderColor = COLORS.primary,
+  borderRadius = borderRadius ? borderRadius : Width(16),
+  selectedBorderColor = '#416F81',
   textColor = '#000',
   containerStyle,
   textStyle,
@@ -28,21 +28,28 @@ const CustomProductCard = ({
   gap = Width(12),
   horizontalGap = Width(10),
   verticalGap = Height(14),
-  onFavoritePress = () => {},
   navigation
 }) => {
+  const [favourites, setFavourites] = useState([]);
+  
+    const onToggleFavourite = (id) => {
+      setFavourites((prev) =>
+        prev.includes(id)
+          ? prev.filter((favId) => favId !== id)
+          : [...prev, id]
+      );
+    };
+
+    
+
   return (
-    <View style={[{ paddingVertical: Height(10) }, containerStyle]}>
+    <View style={[styles.main,{...containerStyle}]}>
       <FlatList
         data={data}
         horizontal={horizontal}
         numColumns={numColumns}
         keyExtractor={(item) => item.name}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-
-
-        }}
         columnWrapperStyle={
           !horizontal
             ? {
@@ -55,7 +62,7 @@ const CustomProductCard = ({
         renderItem={({ item, index }) => {
           const isSelected = selected === item.name;
           const isLastItem = index === data.length - 1;
-
+          const isFavourite = favourites.includes(index) 
           return (
             <TouchableOpacity
             onPress={() => {
@@ -83,7 +90,7 @@ const CustomProductCard = ({
                     height,
                     borderRadius,
                     backgroundColor: bgColor,
-                    borderWidth: isSelected ? 2 : 0,
+                    borderWidth: isSelected ? 1 : 0,
                     borderColor: isSelected ? selectedBorderColor : 'transparent',
                   },
                 ]}
@@ -98,13 +105,13 @@ const CustomProductCard = ({
               {/* Top Row: Label + Heart */}
               <View style={[styles.topRow, { width: width - 4 }]}>
                 <Text style={styles.label}>{item.label || 'Label'}</Text>
-                <TouchableOpacity onPress={() => onFavoritePress(item)}>
-                  <Ionicons
-                    name={item.isFavorite ? 'heart' : 'heart-outline'}
-                    size={18}
-                    color={item.isFavorite ? 'red' : COLORS.grey}
-                  />
-                </TouchableOpacity>
+             <TouchableOpacity onPress={() => onToggleFavourite(index)} style={{ marginHorizontal: Height(3) }}>
+                      <Ionicons
+                        name={isFavourite ? 'heart' : 'heart-outline'}
+                        size={20}
+                        color={isFavourite ? '#416F81' : '#0E2D42'}
+                      />
+                    </TouchableOpacity>
               </View>
 
               {/* Title */}
@@ -118,7 +125,7 @@ const CustomProductCard = ({
 
               {/* Price */}
               <Text style={[styles.price, { width }]}>
-                {item.price ? `₹${item.price}` : ''}
+                {item.price ?`₹${item.price}` : ''}
               </Text>
             </TouchableOpacity>
           );
@@ -131,6 +138,9 @@ const CustomProductCard = ({
 export default CustomProductCard;
 
 const styles = StyleSheet.create({
+  main:{
+    paddingVertical:Height(10)
+  },
   card: {
     alignItems: 'center',
   },
@@ -142,9 +152,10 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   label: {
-    fontSize: FontSize(10),
+    fontSize: FontSize(12),
     color: COLORS.grey,
-    fontWeight: '900',
+    fontFamily:'Inter-Bold' ,
+    right:Width(3)
   },
   imageWrapper: {
     alignItems: 'center',
@@ -155,12 +166,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize(12),
     color: '#545454',
     marginTop: 6,
+    fontFamily:'Inter-SemiBold'
   },
   price: {
     fontSize: FontSize(12),
     color: '#545454',
     marginTop: 2,
     textAlign: 'left',
-    paddingLeft: 4,
+    paddingLeft: Width(2),
+    fontFamily:'Inter-Regular'
   },
 });

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     marginRight: 8, // spacing between icon and text
   },
   text: {
-    fontWeight: '600',
+    fontFamily:'Inter-SemiBold',
     fontSize: 12,
   },
 })

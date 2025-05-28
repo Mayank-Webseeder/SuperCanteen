@@ -12,7 +12,7 @@ const ClosestProductsData = [
     {
         id:3,
       label: 'Tuxedo',
-      image: require('../../../assets/closestCalled/product2.png'),
+      image: require('../../../assets/closestCalled/img1.png'),
     },
    
   ];

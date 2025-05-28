@@ -9,15 +9,15 @@ import {
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-const CustomSimilarProdcuts = ({ cardHeight = 230, cardWidth = 160, data }) => {
+const CustomSimilarProducts = ({ cardHeight = 240, cardWidth = 160, data }) => {
   const renderItem = ({ item }) => {
-    const fullStars = Math.floor(item.rating);
+    const fullStars = Math.floor(item.rating || 0);
     const stars = [...Array(5)].map((_, i) => (
       <FontAwesome
         key={i}
-        name="star"
+        name={i < fullStars ? 'star' : 'star-o'}
         size={14}
-        color={i < fullStars ? 'green' : 'lightgray'}
+        color={i < fullStars ? '#4CAF50' : '#CFCFCF'}
         style={{ marginRight: 2 }}
       />
     ));
@@ -25,18 +25,18 @@ const CustomSimilarProdcuts = ({ cardHeight = 230, cardWidth = 160, data }) => {
     return (
       <View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
         <Image
-          source={{ uri: item.image }}
+          source={typeof item.image === 'string' ? { uri: item.image } : item.image}
           style={styles.image}
-          resizeMode="contain"
+          resizeMode="cover"
         />
-        <Text style={styles.title}>
+        <Text numberOfLines={1} style={styles.title}>
           <Text style={styles.bold}>Timex </Text>
-          {item.name.length > 12 ? item.name.slice(0, 12) + '..' : item.name}
+          {item.name}
         </Text>
         <Text style={styles.price}>₹{item.price}</Text>
         <View style={styles.ratingRow}>
           {stars}
-          <Text style={styles.reviews}>{item.reviews}</Text>
+          <Text style={styles.reviews}>({item.reviews || 0})</Text>
         </View>
       </View>
     );
@@ -54,48 +54,51 @@ const CustomSimilarProdcuts = ({ cardHeight = 230, cardWidth = 160, data }) => {
   );
 };
 
-export default CustomSimilarProdcuts;
+export default CustomSimilarProducts;
 
 const styles = StyleSheet.create({
   flatListContent: {
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    paddingBottom: 20,
+    paddingHorizontal: 5,
+    paddingVertical: 10,
   },
   card: {
     backgroundColor: '#fff',
-    marginRight: 14,
+    marginRight: 16,
     padding: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   image: {
     width: '100%',
     height: 130,
-    borderRadius: 4,
+    borderRadius: 10,
   },
   title: {
     fontSize: 14,
     color: '#333',
-    marginTop: 6,
+    marginTop: 8,
   },
   bold: {
     fontWeight: 'bold',
   },
   price: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     marginVertical: 4,
-    color: '#000',
+    color: '#1B1B1B',
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 4,
   },
   reviews: {
-    marginLeft: 6,
-    color: 'gray',
-    fontSize: 13,
+    marginLeft: 4,
+    color: '#666',
+    fontSize: 12,
   },
 });

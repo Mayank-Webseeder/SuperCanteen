@@ -4,32 +4,37 @@ import {
   View,
   StyleSheet,
   Animated,
-  TouchableWithoutFeedback,
   TouchableOpacity,
   Text,
   ScrollView,
+  Dimensions,
+  Platform
 } from 'react-native';
-import { Height, Width } from '../../constants/constants';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { COLORS, Height } from '../../constants/constants';
+import BottomActionButtons from '../../otherComponents/productCategory/BottomActionButtons';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const BOTTOM_SHEET_HEIGHT = Height(650);
 
 const filterCategories = ['Brand', 'Color', 'Size', 'New', 'Popular'];
 const colorOptions = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Grey', 'Pink', 'Orange', 'Purple', 'Brown', 'Beige', 'Maroon'];
 const sizeOptions = ['XS', 'S', 'M', 'L', 'XL'];
 
 const CustomBottomSheet = ({ visible, onClose }) => {
-  const slideAnim = useRef(new Animated.Value(Height(1000))).current;
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [selectedCategory, setSelectedCategory] = useState('Color');
-  const [selectedColors, setSelectedColors] = useState(['White', 'Blue', 'Yellow', 'Pink', 'Orange']);
-  const [selectedSizes, setSelectedSizes] = useState(['XS']);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
 
   const toggleSelection = (item, type) => {
     if (type === 'color') {
-      setSelectedColors((prev) =>
-        prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
+      setSelectedColors(prev =>
+        prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
       );
     } else {
-      setSelectedSizes((prev) =>
-        prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
+      setSelectedSizes(prev =>
+        prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
       );
     }
   };
@@ -37,13 +42,13 @@ const CustomBottomSheet = ({ visible, onClose }) => {
   useEffect(() => {
     if (visible) {
       Animated.timing(slideAnim, {
-        toValue: Height(1000) - Height(860),
+        toValue: SCREEN_HEIGHT - BOTTOM_SHEET_HEIGHT,
         duration: 300,
         useNativeDriver: false,
       }).start();
     } else {
       Animated.timing(slideAnim, {
-        toValue: Height(1000),
+        toValue: SCREEN_HEIGHT,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -51,255 +56,281 @@ const CustomBottomSheet = ({ visible, onClose }) => {
   }, [visible]);
 
   const renderRightPane = () => {
-    if (selectedCategory === 'Color') {
-      return (
-        <View>
-          <Text style={styles.sectionTitle}>Color</Text>
-          <View style={{ gap: 12 }}>
-            {colorOptions.map((color) => (
-              <TouchableOpacity
-                key={color}
-                style={styles.optionRow}
-                onPress={() => toggleSelection(color, 'color')}
-              >
-                <Ionicons
-                  name={
-                    selectedColors.includes(color)
-                      ? 'checkbox'
-                      : 'square-outline'
-                  }
-                  size={20}
-                  color="#376275"
-                />
-                <Text style={styles.optionText}>{color}</Text>
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity>
-              <Text style={styles.seeMore}>See More</Text>
-            </TouchableOpacity>
+    switch (selectedCategory) {
+      case 'Color':
+        return (
+          <View style={styles.rightPaneContainer}>
+            <Text style={styles.sectionTitle}>Select Colors</Text>
+            <View style={styles.optionsGrid}>
+              {colorOptions.map(color => (
+                <TouchableOpacity
+                  key={color}
+                  style={[
+                    styles.optionItem,
+                    selectedColors.includes(color) && styles.optionItemSelected
+                  ]}
+                  onPress={() => toggleSelection(color, 'color')}
+                >
+                  <View style={[
+                    styles.colorCircle,
+                    { backgroundColor: color.toLowerCase() }
+                  ]} />
+                  <Text style={styles.optionText}>{color}</Text>
+                  {selectedColors.includes(color) && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#376275"
+                      style={styles.checkIcon}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
-      );
-    }
-
-    if (selectedCategory === 'Size') {
-      return (
-        <View>
-          <Text style={styles.sectionTitle}>Size</Text>
-          <View style={{ gap: 12 }}>
-            {sizeOptions.map((size) => (
-              <TouchableOpacity
-                key={size}
-                style={styles.optionRow}
-                onPress={() => toggleSelection(size, 'size')}
-              >
-                <Ionicons
-                  name={
-                    selectedSizes.includes(size)
-                      ? 'checkbox'
-                      : 'square-outline'
-                  }
-                  size={20}
-                  color="#376275"
-                />
-                <Text style={styles.optionText}>{size}</Text>
-              </TouchableOpacity>
-            ))}
+        );
+      
+      case 'Size':
+        return (
+          <View style={styles.rightPaneContainer}>
+            <Text style={styles.sectionTitle}>Select Sizes</Text>
+            <View style={styles.optionsGrid}>
+              {sizeOptions.map(size => (
+                <TouchableOpacity
+                  key={size}
+                  style={[
+                    styles.sizeOption,
+                    selectedSizes.includes(size) && styles.sizeOptionSelected
+                  ]}
+                  onPress={() => toggleSelection(size, 'size')}
+                >
+                  <Text style={[
+                    styles.sizeText,
+                    selectedSizes.includes(size) && styles.sizeTextSelected
+                  ]}>
+                    {size}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
-      );
+        );
+      
+      default:
+        return (
+          <View style={styles.rightPaneContainer}>
+            <Text style={styles.sectionTitle}>No Options Available</Text>
+          </View>
+        );
     }
-
-    return (
-      <View>
-        <Text style={styles.sectionTitle}>No Options</Text>
-      </View>
-    );
   };
 
   return (
-    <Modal  animationType="none" transparent visible={visible} onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop} />
-      </TouchableWithoutFeedback>
+    <Modal animationType="none" transparent visible={visible} onRequestClose={onClose}>
+      <View style={styles.backdrop}>
+        <TouchableOpacity 
+          style={styles.backdropTouchable}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+        
+        <Animated.View style={[
+          styles.sheet, 
+          { 
+            transform: [{ translateY: slideAnim }],
+            height: BOTTOM_SHEET_HEIGHT,
+            ...Platform.select({
+              ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: -3 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+              },
+              android: {
+                elevation: 20,
+              },
+            }),
+          }
+        ]}>
+          <View style={styles.dragHandle} />
+          
+          <View style={styles.mainContent}>
+            <View style={styles.leftColumn}>
+              <ScrollView 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.leftColumnContent}
+              >
+                {filterCategories.map(category => (
+                  <TouchableOpacity
+                    key={category}
+                    style={[
+                      styles.categoryButton,
+                      selectedCategory === category && styles.categoryButtonSelected
+                    ]}
+                    onPress={() => setSelectedCategory(category)}
+                  >
+                    <Text style={[
+                      styles.categoryText,
+                      selectedCategory === category && styles.categoryTextSelected
+                    ]}>
+                      {category}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
 
-      <Animated.View style={[styles.sheet, { top: slideAnim }]}>
-        <View style={styles.dragHandle} />
+            <View style={styles.rightColumn}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.rightColumnContent}
+              >
+                {renderRightPane()}
+              </ScrollView>
+            </View>
+          </View>
 
-        {/* Main Content */}
-        <View style={{ flex: 1 }}>
-  <View style={styles.container}>
-    {/* Left Categories */}
-    <View style={styles.leftColumn}>
-      <View style={{ gap: 16 }}>
-        {filterCategories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={[
-              styles.categoryRow,
-              selectedCategory === category && styles.categorySelected,
-            ]}
-            onPress={() => setSelectedCategory(category)}
-          >
-            <Ionicons
-              name={
-                selectedCategory === category
-                  ? 'checkbox'
-                  : 'square-outline'
-              }
-              size={20}
-              color="#376275"
-            />
-            <Text
-              style={[
-                styles.categoryText,
-                selectedCategory === category && { fontWeight: 'bold' },
-              ]}
-            >
-              {category}
-            </Text>
-          </TouchableOpacity>
-        ))}
+          
+        </Animated.View>
+      <BottomActionButtons
+  onCancel={onClose}
+  onApply={() => {
+    // console.log('Selected sort:', selectedOption);
+    onClose();
+  }}
+  // applyDisabled={!selectedOption}
+/>
       </View>
-    </View>
-
-    {/* Right Options */}
-    <ScrollView
-      style={styles.rightColumn}
-      contentContainerStyle={{ paddingBottom: 24 }} // adds space before footer
-      showsVerticalScrollIndicator={false}
-    >
-      {renderRightPane()}
-    </ScrollView>
-  </View>
-
-  {/* Footer */}
-  <View style={styles.footer}>
-    <TouchableOpacity onPress={onClose}>
-      <Text style={styles.cancelText}>Cancel</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={() => console.log('Apply filters')}>
-      <Text style={styles.applyText}>Apply</Text>
-    </TouchableOpacity>
-  </View>
-</View>
-
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => console.log('Apply filters')}>
-            <Text style={styles.applyText}>Apply</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
     </Modal>
   );
 };
 
-export default CustomBottomSheet;
-
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  backdropTouchable: {
+    flex: 1,
   },
   sheet: {
+    position: 'absolute',
     left: 0,
     right: 0,
-    height: Height(750), // increased from 600 to 750
+    bottom: 0,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingHorizontal: 16,
-
-
   },
-  
-  
   dragHandle: {
-    width: Width(40),
+    width: 50,
     height: 5,
-    backgroundColor: '#ccc',
-    borderRadius: 2.5,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 3,
     alignSelf: 'center',
-    marginBottom: 16,
+    marginVertical: 10,
   },
-  container: {
-    flexDirection: 'row',
+  mainContent: {
     flex: 1,
-    gap: 12,
+    flexDirection: 'row',
   },
   leftColumn: {
-    width: Width(100),
+    width: 120,
     borderRightWidth: 1,
-    borderRightColor: '#eee',
-    paddingRight: 12,
+    borderRightColor: '#f0f0f0',
+  },
+  leftColumnContent: {
+    paddingBottom: 20,
   },
   rightColumn: {
     flex: 1,
-    paddingLeft: 12,
   },
-  categoryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
+  rightColumnContent: {
+    paddingBottom: 100, // Ensure space for footer
+  },
+  rightPaneContainer: {
+    paddingLeft: 12,
+    paddingBottom: 20,
+  },
+  categoryButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginVertical: 4,
+    borderRadius: 8,
+  },
+  categoryButtonSelected: {
+    backgroundColor: '#f0f8ff',
   },
   categoryText: {
-    marginLeft: 8,
     fontSize: 14,
-    color: '#333',
+    color: '#555',
   },
-  categorySelected: {
-    backgroundColor: '#eaf4f9',
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 6,
-    
+  categoryTextSelected: {
+    color: '#376275',
+    fontWeight: '600',
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 16,
-    color: '#111',
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  optionText: {
-    marginLeft: 10,
-    fontSize: 14,
     color: '#333',
   },
-  seeMore: {
-    color: '#376275',
-    textDecorationLine: 'underline',
-    marginTop: 8,
-    fontSize: 14,
-  },
-  footer: {
+  optionsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    paddingHorizontal: 12,
-    marginBottom:130
-
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  cancelText: {
-    fontSize: 16,
-    color: '#666',
-
+  optionItem: {
+    width: '50%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#f9f9f9',
   },
-  applyText: {
-    fontSize: 16,
+  optionItemSelected: {
+    borderColor: '#376275',
+    backgroundColor: '#f0f8ff',
+  },
+  colorCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  optionText: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+  },
+  checkIcon: {
+    marginLeft: 'auto',
+  },
+  sizeOption: {
+    width: '22%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    backgroundColor: '#f9f9f9',
+  },
+  sizeOptionSelected: {
+    borderColor: '#376275',
+    backgroundColor: '#f0f8ff',
+  },
+  sizeText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  sizeTextSelected: {
     color: '#376275',
-    fontWeight: 'bold',
-  },
+    fontWeight: '600',
+  }
 });
+
+export default CustomBottomSheet;

@@ -7,9 +7,9 @@ import {
   Image,
   ScrollView
 } from 'react-native';
-import CustomAuthHeader from '../Components/CustomAuthHeader';
-import CustomTextInput from '../Components/CustomTextInput';
-import CustomAuthButton from '../Components/CustomAuthButton';
+import CustomAuthHeader from '../Components/customAuthHeader';
+import CustomTextInput from '../Components/customTextInput';
+import CustomAuthButton from '../Components/customAuthButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { FontSize, Height, Width } from '../constants/constants';
 import {

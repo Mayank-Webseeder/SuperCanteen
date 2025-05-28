@@ -1,75 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   Image,
+  BackHandler, // <- Import added
 } from 'react-native';
-import CustomAuthHeader from '../Components/CustomAuthHeader';
-import CustomTextInput from '../Components/CustomTextInput';
-import CustomAuthButton from '../Components/CustomAuthButton';
+import CustomAuthHeader from '../Components/customAuthHeader';
+import CustomTextInput from '../Components/customTextInput';
+import CustomAuthButton from '../Components/customAuthButton';
 import { FontSize, Height, Width } from '../constants/constants';
 import { validateEmail, validatePassword } from '../utils/validation';
 
 const SigninScreen = ({ navigation }) => {
-
   const [formData, setFormData] = useState({
-      name: '',
-      email: '',
-      password: '',
-    });
-  
-    const [errors, setErrors] = useState({});
+    name: '',
+    email: '',
+    password: '',
+  });
 
-   const handleInputChange = (field, value) => {
-      setFormData({ ...formData, [field]: value });
-      setErrors({ ...errors, [field]: null }); // clear error on change
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    const backAction = () => {
+      BackHandler.exitApp(); // Exits the app
+      return true;
     };
 
-    const gotoScreen = () => {
-      if (validateForm()) {
-        navigation.navigate('Main')
-      }
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setErrors({ ...errors, [field]: null });
+  };
+
+  const gotoScreen = () => {
+    if (validateForm()) {
+      navigation.navigate('Main');
     }
-  
-    const validateForm = () => {
-      const emailError = validateEmail(formData.email);
-      const passwordError = validatePassword(formData.password);
-  
-      const newErrors = {
-        email: emailError,
-        password: passwordError,
-      };
-      setErrors(newErrors);
-      return  !emailError && !passwordError;
+  };
+
+  const validateForm = () => {
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    const newErrors = {
+      email: emailError,
+      password: passwordError,
     };
+    setErrors(newErrors);
+    return !emailError && !passwordError;
+  };
 
   const onGoogleSignIn = () => {
     console.log('Google Sign In pressed');
   };
 
   const onSignInPress = () => {
-    navigation.navigate('SignUp'); // or your sign in screen route
+    navigation.navigate('SignUp');
   };
 
-  const onpresshandle = () =>{
-    navigation.navigate('ForgotPassword'); // or your sign in screen route
-
-  }
-
-  const gotoHome = () => {
-    if(validateForm){
-       navigation.navigate('Main');
-    }
-   
-  }
+  const onpresshandle = () => {
+    navigation.navigate('ForgotPassword');
+  };
 
   return (
     <View style={styles.container}>
       <CustomAuthHeader title="Sign In" />
-      <View style={{ rowGap: 10,   marginTop:Height(15) ,   marginHorizontal:Height(20)}} >
-         <CustomTextInput
+      <View style={{ rowGap: 10, marginTop: Height(15), marginHorizontal: Height(20) }}>
+        <CustomTextInput
           label={'Email'}
           borderColor="#d2d2d2"
           keyboardType="email-address"
@@ -80,7 +86,7 @@ const SigninScreen = ({ navigation }) => {
         />
 
         <CustomTextInput
-         label={'Password'}
+          label={'Password'}
           borderColor="#d2d2d2"
           secureTextEntry
           value={formData.password}
@@ -88,41 +94,32 @@ const SigninScreen = ({ navigation }) => {
           error={errors.password}
           placeholder="Enter your password"
         />
-        <Text onPress={onpresshandle} style={styles.rememberText}>Forgot Password</Text>
+        <Text onPress={onpresshandle} style={styles.rememberText}>
+          Forgot Password
+        </Text>
       </View>
 
-      <View style={{ marginTop: Height(20) }} >
+      <View style={{ marginTop: Height(20) }}>
         <CustomAuthButton
-            onPress={gotoScreen}
-            width={Width(300)}
-            height={Height(38)}
-            title="Sign In"
-            borderWidth={1}
-            borderColor="#2E6074"
-            br={3}
-            textStyle={{ fontSize: 16 , fontFamily: 'Inter-SemiBold', }}
-          />
-
+          onPress={gotoScreen}
+          width={Width(300)}
+          height={Height(38)}
+          title="Sign In"
+          borderWidth={1}
+          borderColor="#2E6074"
+          br={3}
+          textStyle={{ fontSize: 16, fontFamily: 'Inter-SemiBold' }}
+        />
       </View>
 
-      {/* OR divider */}
       <View style={styles.orContainer}>
         <Text style={styles.orText}>OR</Text>
       </View>
 
-      {/* Google Sign In Button */}
-      <TouchableOpacity
-        onPress={onGoogleSignIn}
-        activeOpacity={0.7}
-        style={styles.googleButton}
-      >
-        <Image
-          source={require('../../assets/Icons/GoogleIcon.png')}
-          style={styles.googleIcon}
-        />
+      <TouchableOpacity onPress={onGoogleSignIn} activeOpacity={0.7} style={styles.googleButton}>
+        <Image source={require('../../assets/Icons/GoogleIcon.png')} style={styles.googleIcon} />
       </TouchableOpacity>
 
-      {/* Footer Text */}
       <View style={styles.footerTextContainer}>
         <Text style={styles.footerText}>Don’t have an account? </Text>
         <TouchableOpacity onPress={onSignInPress}>

@@ -1,18 +1,17 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { Width } from '../constants/constants';
 
-const CustomHeader = ({ onBackPress, onLovePress, onCartPress, label , showRightIcons }) => {
+const CustomHeader = ({ navigation , label , showRightIcons,containerStyle,notShowingBackIcon }) => {
   return (
-    <View style={styles.container}>
-
+    <View style={[styles.container,containerStyle]}>
       {/* Left Arrow */}
-      <TouchableOpacity onPress={onBackPress} style={styles.leftIcon}>
+     {!notShowingBackIcon &&  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.leftIcon}>
         <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
       </TouchableOpacity>
-
+}
       {/* Center Label */}
       <View style={styles.centerContainer}>
         <Text style={styles.label}>{label}</Text>
@@ -20,11 +19,11 @@ const CustomHeader = ({ onBackPress, onLovePress, onCartPress, label , showRight
 
       {/* Right Icons */}
      {showRightIcons &&  <View style={styles.rightIcons}>
-        <TouchableOpacity onPress={onLovePress} style={styles.icon}>
-          <Ionicons name="heart-outline" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.navigate('Wishlist')} style={styles.icon}>
+         <EvilIcons name="heart" size={26} color="#000000" /> 
         </TouchableOpacity>
-        <TouchableOpacity onPress={onCartPress} style={styles.icon}>
-          <MaterialCommunityIcons name="cart-outline" size={24} color="#000" />
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')} >
+          <EvilIcons name="cart" size={26} color="#000000"/>
         </TouchableOpacity>
       </View>}
 
@@ -40,7 +39,7 @@ const styles = StyleSheet.create({
     // marginTop:Platform.OS === 'android' ? 40 : 40,
   },
   leftIcon: {
-    width: 40,
+    width:Width(30),
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
@@ -61,7 +60,7 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   icon: {
-    marginLeft: 16,
+    marginHorizontal: Width(4),
   },
 });
 

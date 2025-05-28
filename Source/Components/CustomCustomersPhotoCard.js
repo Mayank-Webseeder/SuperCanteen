@@ -1,26 +1,32 @@
 import React from 'react';
 import {
   View,
-  Text,
   FlatList,
   Image,
+  Text,
   StyleSheet,
-  Dimensions,
 } from 'react-native';
-import  FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { Height, Width } from '../constants/constants';
 
-const CustomCustomersPhotoCard = ({ cardHeight = 200, cardWidth = 160, data }) => {
+const CustomCustomersPhotoCard = ({
+  cardHeight = Height(90),
+  cardWidth = Width(100),
+  data,
+}) => {
   const renderItem = ({ item }) => {
-    const fullStars = Math.floor(item.rating);
-   
     return (
       <View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
-         <Image
-        source={typeof item.image === 'string' ? { uri: item.image } : item.image}
-        style={styles.image}
-        resizeMode="contain"
-      />
-      
+        <Image
+          source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        {item.name && <Text style={styles.name}>{item.name}</Text>}
+        {item.review && (
+          <Text numberOfLines={2} style={styles.review}>
+            “{item.review}”
+          </Text>
+        )}
       </View>
     );
   };
@@ -32,6 +38,7 @@ const CustomCustomersPhotoCard = ({ cardHeight = 200, cardWidth = 160, data }) =
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderItem}
       showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.listContainer}
     />
   );
 };
@@ -39,38 +46,38 @@ const CustomCustomersPhotoCard = ({ cardHeight = 200, cardWidth = 160, data }) =
 export default CustomCustomersPhotoCard;
 
 const styles = StyleSheet.create({
+  listContainer: {
+    paddingHorizontal: Height(3),
+    marginVertical:Height(5)
+  },
   card: {
-
-    borderRadius: 10,
-    marginRight: 14,
-    padding: 10,
-   
-  },
-  image: {
-    width: '100%',
-    height: 130,
-  },
-  title: {
-    fontSize: 14,
-    color: '#333',
-    marginTop: 6,
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-  price: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginVertical: 4,
-    color: '#000',
-  },
-  ratingRow: {
-    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
     alignItems: 'center',
   },
-  reviews: {
-    marginLeft: 6,
-    color: 'gray',
+  image: {
+    width: Width(80),
+    height: Height(80),
+    borderRadius: 12,
+    resizeMode:"contain"
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 10,
+  },
+  review: {
     fontSize: 13,
+    fontStyle: 'italic',
+    color: '#666',
+    marginTop: 6,
+    textAlign: 'center',
   },
 });

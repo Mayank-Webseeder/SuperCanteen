@@ -10,11 +10,16 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { Height, Width } from '../constants/constants';
 
-const OfferCardItem = ({ item, enableBadg, enablePriceRow }) => {
+const OfferCardItem = ({ item, enableBadg, enablePriceRow,navigation }) => {
   const { image, title, price, mrp, discount } = item;
 
   return (
-    <LinearGradient
+    <TouchableOpacity   onPress={() => {
+                if (item.screen && navigation) {
+                  navigation.navigate(item.screen);
+                }
+              }}>
+ <LinearGradient
       colors={['#D4E7F2', '#FFFFFF']}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
@@ -46,10 +51,12 @@ const OfferCardItem = ({ item, enableBadg, enablePriceRow }) => {
         )}
       </View>
     </LinearGradient>
+    </TouchableOpacity>
+   
   );
 };
 
-const CustomOfferCard = ({ item, enableBadg = true, enablePriceRow = true }) => {
+const CustomOfferCard = ({ item, enableBadg = true, enablePriceRow = true , navigation }) => {
   return (
     <FlatList
       nestedScrollEnabled={true}
@@ -57,7 +64,7 @@ const CustomOfferCard = ({ item, enableBadg = true, enablePriceRow = true }) => 
       data={item}
       keyExtractor={(offer) => offer.id}
       renderItem={({ item }) => (
-        <OfferCardItem item={item} enableBadg={enableBadg} enablePriceRow={enablePriceRow} />
+        <OfferCardItem navigation={navigation} item={item} enableBadg={enableBadg} enablePriceRow={enablePriceRow} />
       )}
       contentContainerStyle={styles.list}
       showsHorizontalScrollIndicator={false}

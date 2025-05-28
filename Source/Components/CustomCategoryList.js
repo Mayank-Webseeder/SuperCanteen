@@ -26,6 +26,7 @@ const CustomCategoryList = ({
   numColumns = 1,
   gap = Width(14),
   navigation,
+  contentContainerStyle
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -36,7 +37,7 @@ const CustomCategoryList = ({
         showsHorizontalScrollIndicator={false}
         data={data}
         keyExtractor={(item) => item.name}
-        contentContainerStyle={{ paddingHorizontal: Width(10) }}
+        contentContainerStyle={[{paddingHorizontal: Width(10)},contentContainerStyle]}
         renderItem={({ item }) => {
           const isSelected = selected === item.name;
           return (
@@ -44,7 +45,7 @@ const CustomCategoryList = ({
               onPress={() => {
                 onSelect(item.name);
                 if (item.screen && navigation) {
-                  navigation.navigate(item.screen);
+                  navigation.navigate(item.screen, {title: item.name});
                 }
               }}
               style={[styles.categoryContainer, { marginRight: gap }]}

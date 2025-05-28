@@ -10,26 +10,21 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomCommonHeader from '../../Components/Common/CustomCommonHeader';
+import { COLORS, FontSize, Width } from '../../constants/constants';
 
 const OrderConfirmPage = () => {
   const navigation = useNavigation();
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
-      {/* <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Order Confirm Page</Text>
-      </View> */}
-      <CustomCommonHeader title={'Order Confirm Page'}/>
+      <CustomCommonHeader navigation={navigation} title={'Order Confirm Page'}/>
 
       {/* Order Placed */}
       <Text style={styles.title}>Order Placed!</Text>
 
       {/* Delivery Address */}
-      <Text style={styles.sectionTitle}>Delivering to..</Text>
+      <View style={{marginHorizontal:Width(20)}}>
+               <Text style={styles.sectionTitle}>Delivering to..</Text>
       <View style={styles.addressCard}>
         <View style={styles.addressRow}>
           <Icon name="location-outline" size={20} color="#2E6074" />
@@ -81,10 +76,12 @@ const OrderConfirmPage = () => {
   style={[styles.thankYouImage, { transform: [{ rotate: '45deg' }] }]}
 />
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity onPress={() => navigation.navigate('Main')} style={styles.button}>
           <Text style={styles.buttonText}>Continue Shopping</Text>
         </TouchableOpacity>
       </View>
+      </View>
+
     </ScrollView>
   );
 };
@@ -95,7 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -104,18 +100,18 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily:'Inter-SemiBold',
     marginLeft: 8,
   },
   title: {
     fontSize: 22,
-    fontWeight: '700',
+   fontFamily:'Inter-SemiBold',
     textAlign: 'center',
     marginVertical: 16,
   },
   sectionTitle: {
     color: '#2E6074',
-    fontWeight: '600',
+   fontFamily:'Inter-SemiBold',
     marginBottom: 8,
     fontSize: 14,
   },
@@ -133,12 +129,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   addressName: {
-    fontWeight: '700',
+  fontFamily:'Inter-SemiBold',
     marginBottom: 4,
+   
   },
   addressDetails: {
     fontSize: 13,
     color: '#333',
+    fontFamily:'Inter-Regular',
+    color:'#8A8A8A',
+    right:Width(10)
   },
   itemCard: {
     flexDirection: 'row',
@@ -157,9 +157,10 @@ const styles = StyleSheet.create({
   itemInfo: {
     flex: 1,
     justifyContent: 'space-between',
+    fontFamily:'Inter-Regular'
   },
   itemBrand: {
-    fontWeight: '700',
+    fontFamily:'Inter-SemiBold',
     fontSize: 15,
     marginBottom: 2,
   },
@@ -167,21 +168,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     marginBottom: 4,
+     fontFamily:'Inter-Regular'
   },
   itemDelivery: {
     color: '#2E6074',
     fontSize: 12,
     marginBottom: 4,
+     fontFamily:'Inter-Regular'
   },
   itemPrice: {
-    fontWeight: '700',
+     fontFamily:'Inter-SemiBold',
     fontSize: 14,
     marginBottom: 2,
   },
   viewDetails: {
     color: '#2E6074',
     fontSize: 13,
-    fontWeight: '600',
+     fontFamily:'Inter-SemiBold',
     marginTop: 4,
   },
   notificationContainer: {
@@ -191,14 +194,15 @@ const styles = StyleSheet.create({
 
   },
   notificationText: {
-    fontWeight: '600',
-    fontSize: 15,
+     fontFamily:'Inter-SemiBold',
+    fontSize: FontSize(13),
     width:210,
     marginBottom: 12,
   },
   notificationImage: {
     width: 160,
     height: 120,
+    right:Width(20)
   },
   thankYouContainer: {
     alignItems: 'center',
@@ -210,6 +214,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
     paddingHorizontal: 20,
+    fontFamily:'Inter-Regular'
   },
   thankYouImage: {
     width: 100,
@@ -224,7 +229,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   buttonText: {
-    fontWeight: '600',
+     fontFamily:'Inter-SemiBold',
     fontSize: 15,
   },
 });

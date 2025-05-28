@@ -1,5 +1,6 @@
 const FashionData = [
-    {
+    { 
+      
       name: 'Shoes',
       label: 'Zyra',
       image: require('../../../assets/fashion/F1.png'),
@@ -15,6 +16,7 @@ const FashionData = [
       title: 'Luxury Watch',
       price: 4999,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Bag',
@@ -23,6 +25,7 @@ const FashionData = [
       title: 'Leather Bag',
       price: 1899,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Sunglasses',
@@ -31,6 +34,7 @@ const FashionData = [
       title: 'UV Sunglasses',
       price: 999,
       isFavorite: true,
+      screen:"ProductDetails"
     },
     {
       name: 'Hat',
@@ -39,6 +43,7 @@ const FashionData = [
       title: 'Summer Hat',
       price: 499,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Hat',
@@ -47,8 +52,11 @@ const FashionData = [
       title: 'Summer Hat',
       price: 499,
       isFavorite: false,
+      screen:"ProductDetails"
     },
   ];
   
   export default FashionData;
+
+  
   

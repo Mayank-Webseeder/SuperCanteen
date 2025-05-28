@@ -5,9 +5,9 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import CustomAuthHeader from '../Components/CustomAuthHeader';
-import CustomTextInput from '../Components/CustomTextInput';
-import CustomAuthButton from '../Components/CustomAuthButton';
+import CustomAuthHeader from '../Components/customAuthHeader';
+import CustomTextInput from '../Components/customTextInput';
+import CustomAuthButton from '../Components/customAuthButton';
 
 import { Height, Width } from '../constants/constants';
 import { validateEmail } from '../utils/validation';

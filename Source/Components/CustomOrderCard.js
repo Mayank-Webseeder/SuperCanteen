@@ -1,6 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View, Image } from 'react-native';
-import CustomAuthButton from './CustomAuthButton';
+import CustomAuthButton from './customAuthButton';
+import { Height, Width } from '../constants/constants';
+import Icon from 'react-native-vector-icons/Entypo';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const OrderCard = ({
   onCancel,
@@ -13,6 +16,8 @@ const OrderCard = ({
   enableCancel = true,
   enableTrack = true,
   enableReplace = true,
+  item,
+  status
 }) => {
   return (
     <View style={styles.card}>
@@ -20,15 +25,15 @@ const OrderCard = ({
         <View style={styles.iconContainer}>
           <Image
             style={styles.icon}
-            source={require('../../assets/Icons/WatchIcon.png')}
+            source={item.image}
           />
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.brand}>Timex</Text>
-          <Text style={styles.productName}>Arriving by Saturday, 24th May</Text>
+          <Text style={styles.brand}>{item.brand}</Text>
+  <Text style={styles.productName}>{item.name}</Text>
 
-          <View style={styles.productRow}>
+{status === "arriving" &&  <View style={styles.productRow}>
             <Image
               style={styles.truckIcon}
               source={require('../../assets/Icons/delivery_truck_speed.png')}
@@ -36,16 +41,74 @@ const OrderCard = ({
             <Text style={styles.productDescription}>
               Bella Analog Watch for Women
             </Text>
-          </View>
+          </View> }
+
+   <View style={styles.productRow}>
+       { status === "cancelled"  &&  (
+        <>
+           <Icon name="circle-with-cross" size={18} color="#8E8E8E" />
+            <Text style={styles.productDescription}>Cancelled on your request</Text>
+        </>
+       )
+     }
+   </View>
+
+{status === "delivered" &&
+<>
+<View style={styles.productRow}>
+      <Image
+                    style={styles.truckIcon}
+                    source={require('../../assets/Icons/deployed_code_account.png')}
+                  />
+        <Text style={styles.productDescription}>Delivered on 20th May</Text>
+     </View> 
+      <View style={[styles.buttonRow,{marginBottom:20,marginTop:6}]}>
+         <CustomAuthButton
+                width={65}
+                height={30}
+                title={'Recorder'}
+                textStyle={[styles.buttonText, { fontSize: 10 }]}
+                backgroundColor="#fff"
+                onPress={() => {}}
+                borderColor="#2E607426"
+                borderWidth={1}
+              />
+               <CustomAuthButton
+                width={65}
+                height={30}
+                title={'Exchange'}
+                textStyle={[styles.buttonText, { fontSize: 10}]}
+                backgroundColor="#fff"
+                onPress={() => {}}
+                borderColor="#2E607426"
+                borderWidth={1}
+              />
+               <CustomAuthButton
+                width={65}
+                height={30}
+                title={'Return'}
+                textStyle={[styles.buttonText, { fontSize: 10 }]}
+                backgroundColor="#fff"
+                onPress={() => {}}
+                borderColor="#2E607426"
+                borderWidth={1}
+              />
+      </View>
+      </>
+     }
+
+
+
+     
 
           <Text
             onPress={onViewDetails}
-            style={styles.linkText}
+            style={[styles.linkText , {marginTop: status === "cancelled" ? Height(15) : ""}]}
           >
             View Order Details
           </Text>
 
-          <View style={styles.buttonRow}>
+          {status === "arriving"  && <View style={styles.buttonRow}>
             {enableCancel && (
               <CustomAuthButton
                 width={65}
@@ -82,7 +145,41 @@ const OrderCard = ({
                 borderWidth={1}
               />
             )}
-          </View>
+          </View>}
+
+{status === "exchange_initiated" && (
+  <>
+  
+           <View style={styles.productRow}>
+                      <Image
+                        style={styles.truckIcon}
+                        source={require('../../assets/Icons/currency_rupee_circle.png')}
+                      />
+                      <Text style={styles.productDescription}>Exchange Delivered on 16th April</Text>
+                    </View>
+          
+                    <Text style={styles.productDescription}>Exchange/Return portal closed on 20th April</Text>
+          
+                    {/* Feedback Section */}
+                    <View style={styles.feedbackContainer}>
+                      <Text style={styles.feedbackText}>Rate and Review</Text>
+                      <View style={styles.starRow}>
+                        {[...Array(5)].map((_, index) => (
+                          <FontAwesome
+                            key={index}
+                            name="star"
+                            size={20}
+                            color="#D9D9D9"
+                            style={styles.starIcon}
+                          />
+                        ))}
+                      </View>
+                    </View>
+  
+  </>
+)}
+
+          
         </View>
       </View>
     </View>
@@ -113,8 +210,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   icon: {
-    width: 100,
-    height: 100,
+    width: Height(80),
+    height: Height(80),
+    resizeMode:"cover"
   },
   infoContainer: {
     flex: 1,
@@ -143,6 +241,7 @@ const styles = StyleSheet.create({
   productDescription: {
     fontSize: 12,
     color: '#8E8E8E',
+    right:Width(2)
   },
   linkText: {
     color: '#2E6074',
@@ -159,4 +258,21 @@ const styles = StyleSheet.create({
     color: '#2E6074E8',
     fontSize: 14,
   },
+   feedbackContainer: {
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  feedbackText: {
+    fontSize: 15,
+    color: '#333',
+    marginBottom: 10,
+    fontWeight: '600',
+  },
+  starRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  starIcon: {
+    marginRight: 8,
+  }
 });

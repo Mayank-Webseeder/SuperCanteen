@@ -4,14 +4,18 @@ import {
   View,
   StyleSheet,
   Animated,
-  TouchableWithoutFeedback,
   TouchableOpacity,
   Text,
   ScrollView,
+  Dimensions,
+  Platform
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Height, Width } from '../../constants/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Height } from '../../constants/constants';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const BOTTOM_SHEET_HEIGHT = Height(650)
 
 const sortOptions = [
   'Discount',
@@ -24,56 +28,92 @@ const sortOptions = [
 ];
 
 const SortBottomSheet = ({ visible, onClose }) => {
-  const slideAnim = useRef(new Animated.Value(Height(1000))).current;
-  const [selectedSortOptions, setSelectedSortOptions] = useState(['Popular', 'Price: Low to High']);
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const [selectedOption, setSelectedOption] = useState('Popular');
   const insets = useSafeAreaInsets();
-
-  const toggleOption = (option) => {
-    setSelectedSortOptions((prev) =>
-      prev.includes(option)
-        ? prev.filter((v) => v !== option)
-        : [...prev, option]
-    );
-  };
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
-      Animated.timing(slideAnim, {
-        toValue: Height(1000) - Height(860),
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: SCREEN_HEIGHT - BOTTOM_SHEET_HEIGHT,
+          duration: 300,
+          useNativeDriver: false,
+        })
+      ]).start();
     } else {
-      Animated.timing(slideAnim, {
-        toValue: Height(1000),
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      Animated.parallel([
+        Animated.timing(backdropOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: SCREEN_HEIGHT,
+          duration: 300,
+          useNativeDriver: false,
+        })
+      ]).start();
     }
   }, [visible]);
 
+  const selectOption = (option) => {
+    setSelectedOption(option);
+  };
+
   return (
-    <Modal animationType="none" transparent visible={visible} onRequestClose={onClose}>
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop} />
-      </TouchableWithoutFeedback>
+    <Modal animationType={'fade'} transparent visible={visible} onRequestClose={onClose}>
+      <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
+        <TouchableOpacity 
+          style={styles.backdropTouchable}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+      </Animated.View>
 
-      <Animated.View style={[styles.sheet, { top: slideAnim }]}>
+      <Animated.View style={[
+        styles.sheet, 
+        { 
+          transform: [{ translateY: slideAnim }],
+          height: BOTTOM_SHEET_HEIGHT,
+          ...Platform.select({
+            ios: {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -3 },
+              shadowOpacity: 0.2,
+              shadowRadius: 5,
+            },
+            android: {
+              elevation: 20,
+            },
+          }),
+        }
+      ]}>
         <View style={styles.dragHandle} />
-        <Text style={styles.header}>Sort</Text>
+        <Text style={styles.header}>Sort By</Text>
 
-        
-
-        <View >
-          <ScrollView contentContainerStyle={{ paddingBottom: 24 }}>
+        <View style={styles.contentContainer}>
+          <ScrollView 
+            contentContainerStyle={styles.optionsContainer}
+            showsVerticalScrollIndicator={false}
+          >
             {sortOptions.map((option) => (
               <TouchableOpacity
                 key={option}
-                style={styles.optionRow}
-                onPress={() => toggleOption(option)}
+                style={[
+                  styles.optionItem,
+                  selectedOption === option && styles.optionItemSelected
+                ]}
+                onPress={() => selectOption(option)}
               >
                 <Ionicons
-                  name={selectedSortOptions.includes(option) ? 'checkbox' : 'square-outline'}
+                  name={selectedOption === option ? 'radio-button-on' : 'radio-button-off'}
                   size={22}
                   color="#2E6074"
                 />
@@ -82,82 +122,132 @@ const SortBottomSheet = ({ visible, onClose }) => {
             ))}
           </ScrollView>
 
-          <View style={[styles.footer, { paddingBottom: insets.top || 42 }]}>
-            <TouchableOpacity onPress={onClose}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => console.log('Apply sort:', selectedSortOptions)}>
-              <Text style={styles.applyText}>Apply</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer always visible at the bottom */}
-      
+       
         </View>
       </Animated.View>
+         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+            <TouchableOpacity 
+              onPress={onClose} 
+              style={[styles.footerButton, styles.cancelButton]}
+            >
+              <Text style={styles.footerButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => {
+                console.log('Selected sort:', selectedOption);
+                onClose();
+              }} 
+              style={[styles.footerButton, styles.applyButton]}
+            >
+              <Text style={[styles.footerButtonText, styles.applyButtonText]}>Apply</Text>
+            </TouchableOpacity>
+          </View>
     </Modal>
   );
 };
 
-export default SortBottomSheet;
-
 const styles = StyleSheet.create({
   backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  backdropTouchable: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   sheet: {
     position: 'absolute',
     left: 0,
     right: 0,
-    height: Height(750),
+    bottom: 0,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingHorizontal: 20,
-    paddingTop: 12,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  contentContainer: {
+    flex: 1,
   },
   dragHandle: {
-    width: Width(40),
+    width: 50,
     height: 5,
-    backgroundColor: '#ccc',
-    borderRadius: 2.5,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 3,
     alignSelf: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#444',
-    marginBottom: 18,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 24,
+    paddingHorizontal: 8,
   },
-  optionRow: {
+  optionsContainer: {
+    paddingBottom: 100, // Space for footer
+  },
+  optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  optionItemSelected: {
+    backgroundColor: '#f5f9fa',
   },
   optionText: {
-    fontSize: 15,
-    marginLeft: 12,
-    color: '#222',
+    fontSize: 16,
+    marginLeft: 16,
+    color: '#444',
+    flex: 1,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 14,
+    paddingHorizontal: 24,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: '#eee',
     backgroundColor: '#fff',
-    paddingHorizontal: 8,
-    marginTop:230
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
-  cancelText: {
-    fontSize: 16,
-    color: '#666',
+  footerButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
   },
-  applyText: {
+  cancelButton: {
+    backgroundColor: '#f5f5f5',
+  },
+  applyButton: {
+    backgroundColor: '#2E6074',
+  },
+  footerButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2E6074',
+    fontFamily:'Inter-Medium'
+  },
+  applyButtonText: {
+    color: '#fff',
   },
 });
+
+export default SortBottomSheet;

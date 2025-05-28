@@ -9,14 +9,14 @@ const OrderConfirm = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigation.navigate('OrderConfirmFinal'); // Ensure this screen is registered in your navigator
-    }, 1000);
+    }, 500);
 
     return () => clearTimeout(timer); // cleanup if component unmounts early
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <CustomCommonHeader title="Order Confirm Page" />
+      <CustomCommonHeader navigation={navigation} title="Order Confirm Page" />
       <View style={styles.content}>
         <Text style={styles.title}>Order Placed!</Text>
         <Text style={styles.subtitle}>
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight:'Inter-Medium',
     marginBottom: 12,
     color: '#216213',
     textAlign: 'center',

@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import  FontAwesome  from 'react-native-vector-icons/FontAwesome';
+import { Verified } from '../../assets/Icons/svgIcons/verified';
+import { Width } from '../constants/constants';
 
 const productDetails = [
   { label: 'Features', value: 'Reset Time' },
@@ -34,10 +36,10 @@ const CustomProductDetailsData = () => {
       <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Ratings & Reviews</Text>
       <View style={styles.ratingRow}>
         <Text style={styles.ratingNumber}>4.9</Text>
-        <FontAwesome name="star" size={18} color="#4CAF50" style={styles.icon} />
+        <FontAwesome name="star" size={18} color="#0B450C" style={styles.icon} />
         <Text style={styles.grayText}>895 Ratings | 200 Reviews</Text>
-        <FontAwesome name="certificate" size={18} color="#4CAF50" style={styles.icon} />
-        <TouchableOpacity>
+        <Verified/>
+        <TouchableOpacity style={styles.containerStyle}>
           <Text style={styles.viewMore}>View More</Text>
         </TouchableOpacity>
       </View>
@@ -49,9 +51,11 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: '#fff',
+    flex:1,
+   
   },
   sectionTitle: {
-    fontWeight: 'bold',
+    fontFamily:'Inter-Bold',
     fontSize: 16,
     marginBottom: 12,
   },
@@ -65,7 +69,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontWeight: '600',
+   fontFamily:'Inter-SemiBold',
     fontSize: 14,
     color: '#333',
   },
@@ -73,12 +77,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 2,
+    fontFamily:'Inter-Regular'
   },
   more: {
-    color: '#5a9cae',
+    color: '#2E6074AD',
     textDecorationLine: 'underline',
     fontSize: 14,
-    marginTop: 4,
+    fontFamily:'Inter-Medium'
   },
   ratingRow: {
     flexDirection: 'row',
@@ -89,7 +94,7 @@ const styles = StyleSheet.create({
   ratingNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#0B450C',
     marginRight: 4,
   },
   icon: {
@@ -99,12 +104,17 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
     marginRight: 8,
+    fontFamily:'Inter-Regular'
   },
   viewMore: {
     color: '#5a9cae',
     textDecorationLine: 'underline',
     fontSize: 14,
+    fontFamily:'Inter-Medium'
   },
+  containerStyle:{
+    left:Width(10)
+  }
 });
 
 export default CustomProductDetailsData;

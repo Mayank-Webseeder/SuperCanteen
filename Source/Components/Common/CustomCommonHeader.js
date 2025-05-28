@@ -1,16 +1,15 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
+import { FontSize, Height } from '../../constants/constants';
 
-const CustomCommonHeader = ({ title, onLeftPress, leftIconName = 'chevron-small-left' }) => {
+const CustomCommonHeader = ({ title, navigation, leftIconName = 'chevron-small-left', notShowingBackIcon }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.leftIconContainer} onPress={onLeftPress}>
+    {!notShowingBackIcon &&   <TouchableOpacity style={styles.leftIconContainer} onPress={() => navigation.goBack()}>
         <Entypo name={leftIconName} size={24} color="#333" />
-      </TouchableOpacity>
-
+      </TouchableOpacity>}
       <Text style={styles.title}>{title}</Text>
-
       {/* Placeholder for right space to center the title */}
       <View style={styles.rightSpace} />
     </View>
@@ -21,17 +20,12 @@ export default CustomCommonHeader;
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-
+    padding:Height(10),
     width:"100%",
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginTop:20,
-
-    borderColor:"#d1d1d1"
+    marginTop:Height(10),
   },
   leftIconContainer: {
     width: 40,
@@ -40,9 +34,9 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-
-    fontSize: 18,
+    fontSize: FontSize(18),
     color: '#333',
+    fontFamily:'Inter-SemiBold'
   },
   rightSpace: {
     width: 40, // same as left icon to center the title

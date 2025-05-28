@@ -5,12 +5,13 @@ import {
   Image,
   StyleSheet,
   Dimensions,
+  Text,
 } from 'react-native';
 import { COLORS, Height, Width } from '../constants/constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHorizontal}) => {
+const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHorizontal, borderWidth,resizeMode}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef();
 
@@ -27,12 +28,19 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
   const renderItem = ({ item }) => (
-    <View style={[styles.card, { width, borderRadius: radius  }]}>
-       <Image
-        source={item.image}
-        style={{ resizeMode:"contain", width: '100%', height, borderRadius: radius  ,borderWidth:1, borderColor: '#E3E3E3'}}
-
-      /> 
+    <View style={[styles.card, { width, borderRadius: radius , borderWidth: borderWidth  }]}>
+        <Image
+      source={item.image}
+      style={{
+        resizeMode: resizeMode ? resizeMode : "contain",
+        width: '100%',
+        height,
+        borderRadius: radius ?? 1,
+        borderWidth: borderWidth ?? 1,
+        borderColor: '#E3E3E3',
+        
+      }}
+    />
     </View>
   );
 
@@ -78,6 +86,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginRight: Width(12),
+    
 
   },
   pagination: {

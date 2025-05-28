@@ -3,7 +3,7 @@ import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import {Height, Width} from '../constants/constants';
-import CustomAuthButton from '../Components/CustomAuthButton';
+import CustomAuthButton from '../Components/customAuthButton';
 
 
 const welcomeScreen = ({navigation}) => {

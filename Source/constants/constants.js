@@ -24,6 +24,9 @@ export const COLORS = {
   danger: '#EF4444',
   success: '#10B981',
   warning: '#F59E0B',
+  modal:'rgba(0,0,0,0.4)',
+  green:'#2E6074',
+  card:"#F0F4F8"
 };
 
 // FONT FAMILY

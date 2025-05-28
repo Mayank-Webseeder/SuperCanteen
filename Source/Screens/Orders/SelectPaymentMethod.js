@@ -6,16 +6,20 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import CustomCommonHeader from '../../Components/Common/CustomCommonHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
+import { COLORS, Height, Width } from '../../constants/constants';
+import BankOfferView from '../../otherComponents/checkOut/bankOffer';
 
 const PaymentMethodScreen = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [showUPIDropdown, setShowUPIDropdown] = useState(false);
   const [selectedUPIApp, setSelectedUPIApp] = useState(null);
   const [agreed, setAgreed] = useState(false);
+  const [showAgreementError, setShowAgreementError] = useState(false);
 
   const onlineOptions = ['UPI', 'Credit/Debit Card', 'Wallets', 'EMI', 'Net Banking'];
   const deliveryOption = 'Cash on Delivery';
@@ -38,307 +42,440 @@ const PaymentMethodScreen = ({ navigation }) => {
     setShowUPIDropdown(option === 'UPI');
   };
 
+  const handleConfirmOrder = () => {
+    if (!agreed) {
+      setShowAgreementError(true);
+      return;
+    }
+    if (!selectedOption) {
+      Alert.alert('Select Payment Method', 'Please select a payment method to continue');
+      return;
+    }
+    navigation.navigate('Cart');
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <CustomCommonHeader title="Select Payment Method" />
+    <View style={styles.container}>
+      <CustomCommonHeader navigation={navigation} title="Select Payment Method" />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* Bank Offers Section */}
+     <BankOfferView navigation={navigation} cardStyle={{marginTop:Height(8)}}/>
 
-      <MaterialCommunityIcons size={15} style={[styles.subHeading]} name="bank">
-        {' '}
-        Bank Offers
-      </MaterialCommunityIcons>
-
-      <View style={styles.bankOffers}>
-        <Image source={require('../../../assets/Icons/Banks/b1.png')} style={styles.bankLogo} />
-        <Image source={require('../../../assets/Icons/Banks/b2.jpg')} style={styles.bankLogo} />
-        <Image source={require('../../../assets/Icons/Banks/b3.png')} style={styles.bankLogo} />
-        <Image source={require('../../../assets/Icons/Banks/b4.png')} style={styles.bankLogo} />
-        <Text style={styles.viewOffers}>View Available Offers →</Text>
-      </View>
-
-      <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>
-      <Text style={styles.optionHeader}>Online Payment Options</Text>
-
-      {onlineOptions.map((option) => {
-        const isSelected = selectedOption === option;
-        const content = (
-          <TouchableOpacity style={styles.optionBox} onPress={() => handleOptionSelect(option)}>
-            <View style={styles.radioCircle}>
-              {isSelected && <View style={styles.selectedDot} />}
-            </View>
-            <Text>{option}</Text>
-          </TouchableOpacity>
-        );
-
-        return (
-          <View key={option}>
-            {isSelected ? (
-              <LinearGradient
-                colors={[
-                  'rgba(255, 255, 255, 0.48)',
-                  'rgba(150, 176, 186, 0.2)',
-                  'rgba(46, 96, 116, 0.08)',
-                ]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              >
-                {content}
-              </LinearGradient>
-            ) : (
-              content
-            )}
-{option === 'UPI' && isSelected && showUPIDropdown && (
-              <View style={styles.dropdown}>
-                {upiApps.map((upi) => {
-                  const isUPISelected = selectedUPIApp === upi.name;
-                  return (
-                    <TouchableOpacity
+        {/* Payment Options */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>
+          
+          <Text style={styles.subSectionTitle}>Online Payment Options</Text>
+          {onlineOptions.map((option) => (
+            <PaymentOption 
+              key={option}
+              option={option}
+              isSelected={selectedOption === option}
+              onSelect={handleOptionSelect}
+            >
+              {option === 'UPI' && selectedOption === 'UPI' && showUPIDropdown && (
+                <View style={styles.dropdownContainer}>
+                  {upiApps.map((upi) => (
+                    <UPIOption
                       key={upi.name}
-                      style={styles.dropdownItem}
-                      onPress={() => setSelectedUPIApp(upi.name)}
-                    >
-                      <View style={styles.upiOption}>
-                        <View style={[styles.radioIndicatorOuter, { marginRight: 10 }]}>
-                          {isUPISelected && <View style={styles.radioIndicatorInner} />}
-                        </View>
-                        <Image source={upi.logo} style={styles.upiLogo} />
-                        <Text style={styles.upiText}>{upi.name}</Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-        );
-      })}
+                      upi={upi}
+                      isSelected={selectedUPIApp === upi.name}
+                      onSelect={setSelectedUPIApp}
+                    />
+                  ))}
+                </View>
+              )}
+            </PaymentOption>
+          ))}
 
-      <Text style={styles.optionHeader}>Pay on Delivery Options</Text>
-      {selectedOption === deliveryOption ? (
-        <LinearGradient
-          colors={[
-            'rgba(255, 255, 255, 0.48)',
-            'rgba(150, 176, 186, 0.2)',
-            'rgba(46, 96, 116, 0.08)',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-  
-        >
-          <TouchableOpacity style={styles.optionBox} onPress={() => handleOptionSelect(deliveryOption)}>
-            <View style={styles.radioCircle}>
-              <View style={styles.selectedDot} />
+          <Text style={styles.subSectionTitle}>Pay on Delivery Options</Text>
+          <PaymentOption 
+            option={deliveryOption}
+            isSelected={selectedOption === deliveryOption}
+            onSelect={handleOptionSelect}
+          />
+        </View>
+
+        {/* Agreement Checkbox */}
+        <View style={styles.agreementContainer}>
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => {
+              setAgreed(!agreed);
+              setShowAgreementError(false);
+            }}
+          >
+            <View style={[styles.checkbox, agreed && styles.checkboxSelected]}>
+              {agreed && (
+                <MaterialCommunityIcons name="check" size={14} color="#fff" />
+              )}
             </View>
-            <Text>{deliveryOption}</Text>
+            <Text style={styles.agreementText}>
+              I agree to the terms and policy of the company
+            </Text>
           </TouchableOpacity>
-        </LinearGradient>
-      ) : (
-        <TouchableOpacity style={styles.optionBox} onPress={() => handleOptionSelect(deliveryOption)}>
-          <View style={styles.radioCircle}>
-            {selectedOption === deliveryOption && <View style={styles.selectedDot} />}
-          </View>
-          <Text>{deliveryOption}</Text>
+          {showAgreementError && (
+            <Text style={styles.errorText}>Please accept the terms to continue</Text>
+          )}
+        </View>
+
+        {/* Price Details */}
+        <PriceDetails 
+          totalAmount={totalAmount} 
+          priceDetails={priceDetails} 
+        />
+
+        {/* Confirm Button */}
+        <TouchableOpacity
+          style={[
+            styles.confirmButton,
+            !agreed && styles.disabledButton
+          ]}
+          onPress={handleConfirmOrder}
+          disabled={!agreed}
+        >
+          <Text style={styles.confirmButtonText}>Confirm Your Order</Text>
         </TouchableOpacity>
-      )}
-
-      <TouchableOpacity style={styles.checkboxContainer} onPress={() => setAgreed(!agreed)}>
-        <View style={[styles.customCheckbox, agreed && styles.checkboxChecked]}>
-          {agreed && <Text style={styles.checkmark}>✓</Text>}
-        </View>
-        <Text style={styles.checkboxText}>
-          I agree to the terms and policy of the company
-        </Text>
-      </TouchableOpacity>
-
-      <Text style={styles.sectionTitle}>Price Details</Text>
-      <View style={styles.priceCard}>
-        <Text style={styles.totalAmount}>
-          <Image style={{height:20,width:20}} source={require('../../../assets/Icons/money_bag.png')}/>
-           Total Amount: <Text style={{ color: 'green' }}>₹{totalAmount}</Text>
-        </Text>
-        <View style={styles.priceRow}>
-          <Text>Total MRP</Text>
-          <Text>₹{priceDetails.totalMRP}</Text>
-        </View>
-        <View style={styles.priceRow}>
-          <Text>Discount on MRP</Text>
-          <Text style={styles.discount}>-₹{priceDetails.discountMRP}</Text>
-        </View>
-        <View style={styles.priceRow}>
-          <Text>Coupon Discount</Text>
-          <Text style={styles.discount}>-₹{priceDetails.couponDiscount}</Text>
-        </View>
-        <View style={styles.priceRow}>
-          <Text>Shipping Fee</Text>
-          <Text>₹{priceDetails.shippingFee}</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.confirmButton, !agreed && { backgroundColor: '#ccc' }]}
-
-        onPress={() => navigation.navigate('PaymentConfirmationProcess')}
-      >
-        <Text style={styles.confirmText}>Confirm Your Order</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
-export default PaymentMethodScreen;
+// Reusable Payment Option Component
+const PaymentOption = ({ option, isSelected, onSelect, children }) => {
+  return (
+    <View style={styles.paymentOptionContainer}>
+      {isSelected ? (
+        <LinearGradient
+          colors={['rgba(46, 96, 116, 0.1)', 'rgba(46, 96, 116, 0.05)', 'rgba(46, 96, 116, 0.02)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.selectedOption}
+        >
+          <TouchableOpacity 
+            style={styles.optionContent}
+            onPress={() => onSelect(option)}
+          >
+            <View style={styles.radioButton}>
+              {isSelected && <View style={styles.radioButtonSelected} />}
+            </View>
+            <Text style={styles.optionText}>{option}</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      ) : (
+        <TouchableOpacity 
+          style={styles.optionContent}
+          onPress={() => onSelect(option)}
+        >
+          <View style={styles.radioButton}>
+            {isSelected && <View style={styles.radioButtonSelected} />}
+          </View>
+          <Text style={styles.optionText}>{option}</Text>
+        </TouchableOpacity>
+      )}
+      {children}
+    </View>
+  );
+};
+
+// Reusable UPI Option Component
+const UPIOption = ({ upi, isSelected, onSelect }) => {
+  return (
+    <TouchableOpacity
+      style={styles.upiOption}
+      onPress={() => onSelect(upi.name)}
+    >
+      <View style={styles.upiRadioButton}>
+        {isSelected && <View style={styles.upiRadioButtonSelected} />}
+      </View>
+      <Image source={upi.logo} style={styles.upiLogo} />
+      <Text style={styles.upiText}>{upi.name}</Text>
+    </TouchableOpacity>
+  );
+};
+
+// Reusable Price Details Component
+const PriceDetails = ({ totalAmount, priceDetails }) => {
+  return (
+    <View style={styles.priceDetailsContainer}>
+      <View style={styles.priceHeader}>
+        <Image 
+          source={require('../../../assets/Icons/money_bag.png')}
+          style={styles.moneyIcon}
+        />
+        <Text style={styles.priceTitle}>PRICE DETAILS</Text>
+      </View>
+      
+      <View style={styles.priceRow}>
+        <Text style={styles.priceLabel}>Total MRP</Text>
+        <Text style={styles.priceValue}>₹{priceDetails.totalMRP.toLocaleString()}</Text>
+      </View>
+      
+      <View style={styles.priceRow}>
+        <Text style={styles.priceLabel}>Discount on MRP</Text>
+        <Text style={styles.discountValue}>-₹{priceDetails.discountMRP.toLocaleString()}</Text>
+      </View>
+      
+      <View style={styles.priceRow}>
+        <Text style={styles.priceLabel}>Coupon Discount</Text>
+        <Text style={styles.discountValue}>-₹{priceDetails.couponDiscount.toLocaleString()}</Text>
+      </View>
+      
+      <View style={styles.priceRow}>
+        <Text style={styles.priceLabel}>Shipping Fee</Text>
+        <Text style={styles.priceValue}>₹{priceDetails.shippingFee.toLocaleString()}</Text>
+      </View>
+      
+      <View style={styles.totalRow}>
+        <Text style={styles.totalLabel}>Total Amount</Text>
+        <Text style={styles.totalValue}>₹{totalAmount.toLocaleString()}</Text>
+      </View>
+      
+      <Text style={styles.savingsText}>
+        You save ₹{(priceDetails.discountMRP + priceDetails.couponDiscount).toLocaleString()} on this order
+      </Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom:Height(30)
+  },
+  sectionContainer: {
     backgroundColor: '#fff',
-  },
-  subHeading: {
-    fontWeight: '500',
-    marginBottom: 8,
-    paddingVertical: 10,
-  },
-  bankOffers: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexWrap: 'wrap',
-    marginBottom: 16,
-    borderWidth: 0.5,
-    paddingHorizontal: 10,
-    paddingVertical: 20,
-    borderColor: '#d1d1d1',
-  },
-  bankLogo: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-  },
-  viewOffers: {
-    color: '#2E6074',
-    marginLeft: 'auto',
-    fontSize: 10,
-  },
-  sectionTitle: {
-    fontWeight: '700',
-    fontSize: 16,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  optionHeader: {
-    color: '#006f94',
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  optionBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d6d6d6',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: '#f6fafd',
-  },
-  radioCircle: {
-    height: 20,
-    width: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#267A14C4',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  selectedDot: {
-    height: 10,
-    width: 10,
-    borderRadius: 5,
-    backgroundColor: '#267A14C4',
-  },
-  dropdown: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    marginLeft: 32,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  dropdownItem: {
-    paddingVertical: 6,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  customCheckbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#555',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxChecked: {
-    backgroundColor: '#2E6074E8',
-    borderColor: '#007bff',
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  checkboxText: {
-    marginLeft: 10,
-    fontSize: 14,
-  },
-  priceCard: {
-    borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 12,
     padding: 16,
-    backgroundColor: '#f9f9f9',
-    marginBottom: 20,
-  },
-  totalAmount: {
-    fontWeight: '600',
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  discount: {
-    color: 'green',
-  },
-  confirmButton: {
-    backgroundColor: '#2E6074E8',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  confirmText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+    marginBottom: Height(6),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2E6074',
+   // marginLeft: 8,
+  },
+  subSectionTitle: {
+    fontSize: 14,
+    color: '#006f94',
+    fontWeight: '500',
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  viewAllText: {
+    color: '#2E6074',
+    fontSize: 12,
+    fontWeight: '500',
+    marginRight: 4,
+  },
+  paymentOptionContainer: {
+    marginBottom: 8,
+  },
+  selectedOption: {
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#F6FAFD',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#D6E7FF',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#2E6074',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  radioButtonSelected: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#2E6074',
+  },
+  optionText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  dropdownContainer: {
+    marginVertical: Height(10),
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
   upiOption: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 8,
+  },
+  upiRadioButton: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: '#2E6074',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  upiRadioButtonSelected: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#2E6074',
   },
   upiLogo: {
     width: 30,
     height: 30,
-    resizeMode: 'contain',
-    marginRight: 10,
+    marginRight: 12,
   },
   upiText: {
-    fontSize: 15,
+    fontSize: 14,
+    color: '#333',
+  },
+  agreementContainer: {
+    marginVertical: 16,
+    marginHorizontal:Width(4),
+    marginBottom:Height(15)
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#2E6074',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  checkboxSelected: {
+    backgroundColor: '#2E6074',
+    borderColor: '#2E6074',
+  },
+  agreementText: {
+    fontSize: 14,
+    color: '#555',
+    flex: 1,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 30,
+  },
+  priceDetailsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  priceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  moneyIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  priceTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2E6074',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  priceLabel: {
+    fontSize: 14,
+    color: '#555',
+  },
+  priceValue: {
+    fontSize: 14,
+    color: '#333',
     fontWeight: '500',
   },
+  discountValue: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2E6074',
+  },
+  savingsText: {
+    fontSize: 12,
+    color: '#4CAF50',
+    textAlign: 'right',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  confirmButton: {
+    backgroundColor: '#2E6074',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
+
+export default PaymentMethodScreen;

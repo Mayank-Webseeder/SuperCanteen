@@ -15,6 +15,7 @@ const Products = [
       title: 'Luxury Watch',
       price: 4999,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Bag',
@@ -23,6 +24,7 @@ const Products = [
       title: 'Leather Bag',
       price: 1899,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Sunglasses',
@@ -31,6 +33,7 @@ const Products = [
       title: 'UV Sunglasses',
       price: 999,
       isFavorite: true,
+      screen:"ProductDetails"
     },
     {
       name: 'Hat',
@@ -39,6 +42,7 @@ const Products = [
       title: 'Summer Hat',
       price: 499,
       isFavorite: false,
+      screen:"ProductDetails"
     },
     {
       name: 'Hat',
@@ -47,6 +51,7 @@ const Products = [
       title: 'Summer Hat',
       price: 499,
       isFavorite: false,
+      screen:"ProductDetails"
     },
   ];
   

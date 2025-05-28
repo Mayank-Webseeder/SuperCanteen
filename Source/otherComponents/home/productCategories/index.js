@@ -1,7 +1,7 @@
-import { View, Text } from 'react-native'
+import { View } from 'react-native'
 import React from 'react'
 import HeaderRow from '../headerRow'
-import CustomCategoryList from '../../../Components/CustomCategoryList'
+import CustomCategoryList from '../../../Components/customCategoryList'
 import Fashion from '../../../Mock/Data/Fashion'
 import { FontSize, Height, Width } from '../../../constants/constants'
 import BeautyData from '../../../Mock/Data/BeautyData'
@@ -10,9 +10,10 @@ import ElectronicsHome from '../../../Mock/Data/ElectronicsHome'
 export default function ProductCategories(props) {
   return (
    <>
-         <View key="fashion">
+    <View key="fashion">
       <HeaderRow title={'Fashion'} navigation={props.navigation}/>
        <CustomCategoryList
+        navigation={props.navigation}
         data={Fashion}
         horizontal={false}
         numColumns={3}
@@ -36,6 +37,7 @@ export default function ProductCategories(props) {
    <View key="beauty">
         <HeaderRow title={'Beauty & Wellness'} navigation={props.navigation}/>
        <CustomCategoryList
+        navigation={props.navigation}
        data={BeautyData}
         horizontal={false}
         numColumns={3}
@@ -58,6 +60,7 @@ export default function ProductCategories(props) {
        <View key="electronics">
         <HeaderRow title={'Electronics & Home Essentials'} navigation={props.navigation}/>
        <CustomCategoryList
+        navigation={props.navigation}
         data={ElectronicsHome}
         horizontal={false}
         numColumns={3}
