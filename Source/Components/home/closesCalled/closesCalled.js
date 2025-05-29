@@ -4,13 +4,19 @@ import {
   Text,
   Image,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient'; // Ensure it's installed
 import { styles } from './styles';
 
-const WatchCard = ({ item, index }) => {
+const WatchCard = ({ item, index,navigation }) => {
   return (
-    <LinearGradient
+    <TouchableOpacity  onPress={() => {
+                if (item.screen && navigation) {
+                  navigation.navigate(item.screen, {title: item.label});
+                }
+              }} >
+       <LinearGradient
       colors={['#D4E7F2', '#7B868C']}
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
@@ -23,10 +29,12 @@ const WatchCard = ({ item, index }) => {
         </Text>
       </View>
     </LinearGradient>
+    </TouchableOpacity>
+   
   );
 };
 
-const ClosesCalled = ({ data, containerStyle }) => {
+const ClosesCalled = ({ data, containerStyle,navigation }) => {
   return (
     <View style={[styles.wrapper,{...containerStyle}]}>
       <Image
@@ -40,7 +48,7 @@ const ClosesCalled = ({ data, containerStyle }) => {
         data={data}
         horizontal
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <WatchCard item={item} />}
+        renderItem={({ item }) => <WatchCard navigation={navigation} item={item} />}
         contentContainerStyle={styles.listContent}
         showsHorizontalScrollIndicator={false}
       />

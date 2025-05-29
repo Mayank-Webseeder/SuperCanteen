@@ -132,7 +132,7 @@ return (
                     borderRadius={Height(4)}
                   />
                 </View>
-                <ClosesCalled key={"slider"} data={ClosestProductsData} containerStyle={{marginTop:Height(-8)}}/> 
+                <ClosesCalled navigation={navigation} key={"slider"} data={ClosestProductsData} containerStyle={{marginTop:Height(-8)}}/> 
                 <View style={{ marginTop: 20 }}>
                   <CustomProductCard
                     bgColor="#D4DEF226"
@@ -158,6 +158,7 @@ return (
                   enableBadg={false}
                   enablePriceRow={false}
                   item={OccationData}
+                  navigation={navigation}
                 />
               </View>
             </>

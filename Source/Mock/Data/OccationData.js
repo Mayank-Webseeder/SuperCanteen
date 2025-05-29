@@ -6,6 +6,7 @@ const offerData = [
     price: 999,
     mrp: 1999,
     discount: 50,
+    screen:"ProdcutCategory"
   },
   {
     id: '2',
@@ -14,6 +15,7 @@ const offerData = [
     price: 1299,
     mrp: 2499,
     discount: 48,
+    screen:"ProdcutCategory"
   },
   {
     id: '3',
@@ -22,6 +24,7 @@ const offerData = [
     price: 1299,
     mrp: 2499,
     discount: 48,
+    screen:"ProdcutCategory"
   },
   {
     id: '4',
@@ -30,6 +33,7 @@ const offerData = [
     price: 1299,
     mrp: 2499,
     discount: 48,
+    screen:"ProdcutCategory"
   },
 
 ];

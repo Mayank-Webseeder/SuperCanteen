@@ -64,7 +64,7 @@ const HomeScreen = ({ navigation }) => {
     <HorizontalLine/>
     <CustomCasual cardRadius={Height(0.5)} key="casual"  paddingHorizontal={10} data={Sliders} />
     <ProductCategories navigation={navigation} selectFashion={selectFashion} setSelectedFashion={setSelectedFashion} selectBeauty={selectBeauty} setSelectedBeauty={setSelectedBeauty} selectElectronics={selectElectronics} setSelectedElectronics={setSelectedElectronics}/>
-    <ClosesCalled key={"slider"} data={ClosestProductsData}/> 
+    <ClosesCalled navigation={navigation} key={"slider"} data={ClosestProductsData}/> 
     <HotDealsSection navigation={navigation}/>
     <SponsordSection navigation={navigation}/>
      <View key="women">
