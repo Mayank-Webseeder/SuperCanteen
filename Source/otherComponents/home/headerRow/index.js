@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { Height } from '../../../constants/constants'
+import { Height } from '../../../constants'
 
 export default function HeaderRow({navigation,title,containerStyle}) {
   return (

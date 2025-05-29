@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { FontSize, Height, Width } from "../../../constants/constants";
+import { FontSize, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   wrapper: {

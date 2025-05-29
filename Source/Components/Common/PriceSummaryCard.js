@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { FontSize } from '../../constants/constants';
+import { FontSize } from '../../constants';
 
 const PriceSummaryCard = () => {
   return (

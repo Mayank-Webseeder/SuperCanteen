@@ -1,9 +1,9 @@
 // components/couponCardStyles.js
 
 import { StyleSheet } from 'react-native';
-import { COLORS } from '../../../constants/constants';
-import { FontSize } from '../../../constants/constants';
-import { Height , Width } from '../../../constants/constants';
+import { COLORS } from '../../../constants';
+import { FontSize } from '../../../constants';
+import { Height , Width } from '../../../constants';
 
 export const styles = StyleSheet.create({
   card: {

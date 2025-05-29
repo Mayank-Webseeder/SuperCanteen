@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import { COLORS, FontSize, Height, Width } from '../constants/constants';
+import { COLORS, FontSize, Height, Width } from '../constants';
 
 const CustomCategoryList = ({
   data = [],
@@ -38,59 +38,56 @@ const CustomCategoryList = ({
         data={data}
         keyExtractor={(item) => item.name}
         contentContainerStyle={[{paddingHorizontal: Width(10)},contentContainerStyle]}
-        renderItem={({ item }) => {
-          const isSelected = selected === item.name;
-          return (
-            <TouchableOpacity
-              onPress={() => {
-                onSelect(item.name);
-                if (item.screen && navigation) {
-                  navigation.navigate(item.screen, {title: item.name});
-                }
-              }}
-              style={[styles.categoryContainer, { marginRight: gap }]}
-            >
-              <View
-                style={{
-                  width: item.name === 'All' ? Width(40) : width,
-                  height: item.name === 'All' ? Height(48) : height,
-                  borderRadius: borderRadius,
-                  backgroundColor: item.name === 'All' ? '' : bgColor,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: Height(6),
-                  borderWidth: item.name === 'All' ? 0 : isSelected ? 1 : 0,
-                  borderColor: isSelected ? selectedBorderColor : 'transparent',
-                  fontFamily: isSelected ? 'Inter-Bold' : 'Inter-SemiBold',
-              
-                }}
-              >
-                <Image
-                  source={item.image}
-                  style={{
-                    width: imageSize,
-                    height: imageSize,
-                  }}
-                  resizeMode="cover"
-                />
-              </View>
-              <Text
-                style={[
-                  styles.categoryText,
-                  textStyle,
-                  {
-                    color: isSelected ? selectedBorderColor : textColor,
-                    marginTop: item.name === 'All' ? Height(-4) : 0,
-                   
-                   
-                  },
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          );
+     renderItem={({ item, index }) => {
+  const isSelected = selected === index; // compare using index
+
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        onSelect(index); // pass index instead of item.name
+        if (item.screen && navigation) {
+          navigation.navigate(item.screen, { title: item.name });
+        }
+      }}
+      style={[styles.categoryContainer, { marginRight: gap }]}
+    >
+      <View
+        style={{
+          width: item.name === 'All' ? Width(40) : width,
+          height: item.name === 'All' ? Height(48) : height,
+          borderRadius: borderRadius,
+          backgroundColor: item.name === 'All' ? '' : bgColor,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: Height(6),
+          borderWidth: item.name === 'All' ? 0 : isSelected ? 1 : 0,
+          borderColor: isSelected ? selectedBorderColor : 'transparent',
         }}
+      >
+        <Image
+          source={item.image}
+          style={{
+            width: imageSize,
+            height: imageSize,
+          }}
+          resizeMode="cover"
+        />
+      </View>
+      <Text
+        style={[
+          styles.categoryText,
+          textStyle,
+          {
+            color: isSelected ? selectedBorderColor : textColor,
+            marginTop: item.name === 'All' ? Height(-4) : 0,
+          },
+        ]}
+      >
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  );
+}}
       />
     </View>
   );

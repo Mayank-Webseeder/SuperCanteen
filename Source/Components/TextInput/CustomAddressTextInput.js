@@ -1,6 +1,5 @@
 import React from 'react';
 import { TextInput, StyleSheet, View } from 'react-native';
-import { Height, Width } from '../../constants/constants';
 
 const CustomAddressTextInput = ({ value, onChangeText, placeholder }) => {
   return (

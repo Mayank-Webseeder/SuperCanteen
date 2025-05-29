@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign'; // Make sure to install this
 import { useNavigation } from '@react-navigation/native';
-import { FontSize, Height } from '../constants/constants';
+import { FontSize, Height } from '../constants';
 
 const CustomAuthHeader = ({ title = 'Title', onBackPress }) => {
   const navigation = useNavigation();

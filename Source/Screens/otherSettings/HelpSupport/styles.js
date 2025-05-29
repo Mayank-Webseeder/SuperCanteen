@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS, FontSize, Height, Width } from "../../../constants/constants";
+import { COLORS, FontSize, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   container: {
@@ -79,7 +79,7 @@ fontSize: FontSize(16),
   },
    listContent: {
     paddingHorizontal: 10,
-    paddingBottom:Height(440)
+    paddingBottom:Height(70)
   },
   emptyText: {
     textAlign: 'center',

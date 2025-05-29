@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import  FontAwesome  from 'react-native-vector-icons/FontAwesome';
 import { Verified } from '../../assets/Icons/svgIcons/verified';
-import { Width } from '../constants/constants';
+import { Width } from '../constants';
 
 const productDetails = [
   { label: 'Features', value: 'Reset Time' },

@@ -9,13 +9,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { styles } from './styles';
-import CustomHeader from '../../../Components/customHeader';
-import { COLORS, Width } from '../../../constants/constants';
-import CustomBtn from '../../../Components/customFilterBtn';
+import CustomHeader from '../../../components/customHeader';
+import { COLORS, Width } from '../../../constants';
+import CustomBtn from '../../../components/customFilterBtn';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
-import { dummyOrders } from '../../../Mock/Data/OrdersData';
+import { dummyOrders } from '../../../mock/Data/OrdersData';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
-import OrderFilterModal from '../../../otherComponents/orderFilter';
+import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 
 export default function HelpScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);

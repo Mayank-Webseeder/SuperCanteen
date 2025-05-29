@@ -2,9 +2,9 @@ import { View, Text, Pressable, Image } from 'react-native'
 import React from 'react'
 import { styles } from './styles'
 import { LocationIcon } from '../../../../assets/Icons/svgIcons/location_on'
-import CustomSearch from '../../../Components/customSearch'
+import CustomSearch from '../../../components/searchInput'
 import Ionicons from 'react-native-vector-icons/Ionicons'; 
-import { Height } from '../../../constants/constants'
+import { Height } from '../../../constants'
 
 export default function Header({navigation}) {
   return (

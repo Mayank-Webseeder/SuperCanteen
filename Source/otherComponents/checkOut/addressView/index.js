@@ -1,8 +1,7 @@
-import { View, Text, StyleSheet,TouchableOpacity, Image } from 'react-native'
+import { View, Text,TouchableOpacity, Image } from 'react-native'
 import React from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Height } from '../../../constants/constants';
-
+import { styles } from './styles';
 
 export default function AddressView(props) {
   return (
@@ -37,81 +36,3 @@ export default function AddressView(props) {
   )
 }
 
-const styles = StyleSheet.create({
-     card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    
-  },
-   addIcon: {
-    height: 16,
-    width: 16,
-    marginRight: 6,
-    tintColor: '#2E6074',
-  },
-   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-   sectionTitle: {
-    fontSize: 16,
-    fontFamily:'Inter-SemiBold',
-    color: '#2E6074',
-    marginLeft: 8,
-  },
-   addressContainer: {
-    marginBottom: 12,
-  },
-  addressText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-    marginBottom: 8,
-    fontFamily:'Inter-Regular'
-  },
-  changeButton: {
-    alignSelf: 'flex-start',
-    fontFamily:'Inter-SemiBold',
-  },
-  changeText: {
-    color: '#2E6074',
-    fontSize: 14,
-    fontWeight: '500',
-    textDecorationLine: 'underline',
-  },
-  addAddressContainer: {
-    backgroundColor: '#F0F7FF',
-    borderRadius: 8,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  addAddressPrompt: {
-    flex: 1,
-    fontSize: 12,
-    color: '#555',
-    fontFamily:'Inter-Regular',
-    lineHeight:Height(15)
-  },
-  addAddressButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E1EDFF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-   addAddressText: {
-    color: '#2E6074',
-    fontSize: 13,
-   
-  },
-})

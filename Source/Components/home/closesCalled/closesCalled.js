@@ -34,7 +34,7 @@ const WatchCard = ({ item, index,navigation }) => {
   );
 };
 
-const ClosesCalled = ({ data, containerStyle,navigation }) => {
+const ClosesCalled = ({ data, containerStyle,navigation ,listContentStyle }) => {
   return (
     <View style={[styles.wrapper,{...containerStyle}]}>
       <Image
@@ -49,7 +49,7 @@ const ClosesCalled = ({ data, containerStyle,navigation }) => {
         horizontal
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <WatchCard navigation={navigation} item={item} />}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent,listContentStyle]}
         showsHorizontalScrollIndicator={false}
       />
     </View>

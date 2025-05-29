@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { FontSize, Height } from '../../constants/constants';
+import { FontSize, Height } from '../../constants';
 
 const CustomCommonHeader = ({ title, navigation, leftIconName = 'chevron-small-left', notShowingBackIcon }) => {
   return (

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
-import CustomHeader from '../../../Components/customHeader';
+import CustomHeader from '../../../components/customHeader';
 
 const notifications = [
   {

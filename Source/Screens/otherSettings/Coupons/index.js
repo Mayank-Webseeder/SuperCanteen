@@ -4,8 +4,8 @@ import {
   Text,
   FlatList
 } from 'react-native';
-import { COUPONSDATA } from '../../../Mock/Data/couponsData';
-import CustomCommonHeader from '../../../Components/Common/CustomCommonHeader';
+import { COUPONSDATA } from '../../../mock/Data/couponsData';
+import CustomCommonHeader from '../../../components/common/customCommonHeader';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import { styles } from './styles';
 import CouponCard from '../../../otherComponents/otherSettings/couponCard';

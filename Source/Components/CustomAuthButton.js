@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Width, Height } from '../constants/constants';
+import { Width, Height } from '../constants';
 
 const CustomAuthButton = ({
   title,

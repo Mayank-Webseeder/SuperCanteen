@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // or use MaterialIcons, etc.
-import { FontSize, Width } from '../constants/constants';
+import { FontSize, Width } from '../constants';
 
 const AddressRow = (props) => {
   return (

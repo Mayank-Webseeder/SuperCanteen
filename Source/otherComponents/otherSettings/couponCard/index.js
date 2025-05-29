@@ -5,7 +5,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CopyIcon } from '../../../../assets/Icons/svgIcons/copy';
-import { COLORS } from '../../../constants/constants';
+import { COLORS } from '../../../constants';
 import { styles } from './styles';
 
 const CouponCard = ({ item, isSingleCard,isCoupons }) => {

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Height } from "../../constants/constants";
+import { Height } from "../../constants";
 
 export const styles = StyleSheet.create({
   scrollContainer: {

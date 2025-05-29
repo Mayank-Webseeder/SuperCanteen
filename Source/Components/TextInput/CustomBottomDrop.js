@@ -7,7 +7,6 @@ import {
   FlatList,
   Text,
 } from 'react-native';
-import { Height } from '../../constants/constants';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const CustomBottomDrop = ({ value, onChangeText, placeholder, dropdownData = [] }) => {

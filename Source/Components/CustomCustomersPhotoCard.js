@@ -6,7 +6,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-import { Height, Width } from '../constants/constants';
+import { Height, Width } from '../constants';
 
 const CustomCustomersPhotoCard = ({
   cardHeight = Height(90),

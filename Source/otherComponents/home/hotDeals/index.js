@@ -1,8 +1,8 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { styles } from './styles'
-import offerData from '../../../Mock/Data/offerData'
-import CustomOfferCard from '../../../Components/customOfferCard'
+import offerData from '../../../mock/Data/offerData'
+import CustomOfferCard from '../../../components/offerCard'
 
 export default function HotDealsSection({navigation}) {
   return (

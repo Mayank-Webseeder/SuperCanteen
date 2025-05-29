@@ -1,6 +1,6 @@
 import { View, Text, Image } from 'react-native'
 import {styles} from './styles'
-import CustomFavoriteCard from '../../../Components/customFavoriteCard';
+import CustomFavoriteCard from '../../../components/favoriteCard/customFavoriteCard';
 
 export default function SponsordSection({navigation,searchText}) {
   return (

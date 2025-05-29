@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet,Image, TouchableOpacity } from 'react-native'
+import { View, Text,Image, TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Height, Width } from '../../../constants/constants'
+import { Height } from '../../../constants'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-
+import { styles } from './styles';
 
 export default function BankOfferView(props) {
   return (
@@ -31,51 +30,3 @@ export default function BankOfferView(props) {
 }
 
 
-const styles = StyleSheet.create({
-     card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-    sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-    bankContainer: {
-    marginTop: 8,
-  },
-  bankLogos: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Height(18),
-  },
-  bankLogo: {
-    width: 48,
-    height: 32,
-    resizeMode: 'contain',
-  },
-    viewAllButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      alignSelf: 'flex-end',
-    },
-    viewAllText: {
-      color: '#2E6074',
-      fontSize: 13,
-      fontFamily:'Inter-SemiBold',
-      marginHorizontal:Width(8)
-    },
-     sectionTitle: {
-    fontSize: 16,
-    fontFamily:'Inter-SemiBold',
-    color: '#2E6074',
-    marginLeft: 8,
-  }
-})

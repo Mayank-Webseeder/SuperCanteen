@@ -1,7 +1,8 @@
-// Components/BottomActionButtons.js
+// components/BottomActionButtons.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles } from './styles';
 
 const BottomActionButtons = ({
   onCancel,
@@ -40,34 +41,4 @@ const BottomActionButtons = ({
 
 export default BottomActionButtons;
 
-const styles = StyleSheet.create({
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderColor: '#E0E0E0',
-    paddingTop: 10,
-  },
-  footerButton: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginHorizontal: 5,
-    borderRadius: 6,
-  },
-  cancelButton: {
-    backgroundColor: '#F0F0F0',
-  },
-  applyButton: {
-   backgroundColor: '#2E6074',
-  },
-  footerButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  applyButtonText: {
-    color: '#fff',
-  },
-});
+

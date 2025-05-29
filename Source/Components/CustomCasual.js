@@ -5,9 +5,8 @@ import {
   Image,
   StyleSheet,
   Dimensions,
-  Text,
 } from 'react-native';
-import { COLORS, Height, Width } from '../constants/constants';
+import {  Height, Width } from '../constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
