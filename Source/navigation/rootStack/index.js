@@ -16,6 +16,7 @@ import OrderDetailScreen from '../../screens/orders/detail/orderDetailScreen';
 import OrderConfirmFinal from '../../screens/orders/orderConfirm/orderFinal'
 import WishlistScreen from '../../screens/home/wishlist';
 import ProductsScreen from '../../screens/categories/product';
+import PaymentMethodScreen from '../../screens/orders/payment/selectPayment';
 import PaymentConfirmationProcess from '../../screens/orders/payment/confirm';
 import CreateAddressScreen from '../../components/address/createAddress';
 import CouponScreen from '../../screens/otherSettings/Coupons';
@@ -23,6 +24,7 @@ import PaymentScreen from '../../screens/otherSettings/paymentMethods';
 import NotificationScreen from '../../screens/otherSettings/notification';
 import OffersScreen from '../../screens/otherSettings/offers';
 import HelpScreen from '../../screens/otherSettings/helpSupport';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +50,9 @@ export default function RootStack() {
                <Stack.Screen name="OrderConfirmFinal" component={OrderConfirmFinal} />
               <Stack.Screen name="Wishlist" component={WishlistScreen} />
             <Stack.Screen name="Products" component={ProductsScreen} />
+            <Stack.Screen name="PaymentMethodScreen" component={  PaymentMethodScreen} />
+
+          
             <Stack.Screen name="PaymentConfirmationProcess" component={PaymentConfirmationProcess} />
           <Stack.Screen name="CreateAddressScreen" component={CreateAddressScreen} />
           <Stack.Screen name="Coupons" component={CouponScreen} />
