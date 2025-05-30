@@ -1,13 +1,13 @@
 import React from 'react'
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import { HomeIcon } from '../../../assets/Icons/svgIcons/home';
-import { CategoryIcon } from '../../../assets/Icons/svgIcons/category';
-import { OrdersIcon } from '../../../assets/Icons/svgIcons/orders';
-import { AccountIcon } from '../../../assets/Icons/svgIcons/account_circle';
-import HomeScreen from '../../Screens/Home/home';
-import Categories from '../../Screens/categories';
-import Orders from '../../Screens/Orders/order';
-import AccountStack from '../accountStack';
+import { HomeIcon } from '../../assets/Icons/svgIcons/home';
+import { CategoryIcon } from '../../assets/Icons/svgIcons/category';
+import { OrdersIcon } from '../../assets/Icons/svgIcons/orders';
+import { AccountIcon } from '../../assets/Icons/svgIcons/account_circle';
+import HomeScreen from '../Screens/Home/home';
+import Categories from '../Screens/categories';
+import Orders from '../Screens/Orders/order';
+import AccountStack from './accountStack';
 
 const Tab = createBottomTabNavigator();
 

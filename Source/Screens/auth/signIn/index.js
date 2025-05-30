@@ -13,6 +13,8 @@ import { Height , Width } from '../../../constants';
 import { validateEmail , validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
 import CustomAuthHeader from '../../../Components/CustomAuthHeader'
+import { useSelector , useDispatch } from 'react-redux';
+import { loginUser } from '../../../redux/slices/authSlice';
 
 const SigninScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -22,6 +24,8 @@ const SigninScreen = ({ navigation }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+    const { loading } = useSelector(state => state.auth);
 
   useEffect(() => {
     const backAction = () => {
@@ -42,11 +46,28 @@ const SigninScreen = ({ navigation }) => {
     setErrors({ ...errors, [field]: null });
   };
 
-  const gotoScreen = () => {
-    if (validateForm()) {
-      navigation.navigate('Main');
-    }
-  };
+   const onpressSignIn = async () => {
+      if (validateForm()) {
+        const resultAction = await dispatch(
+          loginUser({
+             identifier:formData.email,
+             password:formData.password
+          })
+        );
+  
+        if (loginUser.fulfilled.match(resultAction)) {
+            showMessage({
+                  message: 'SignIn Successful!',
+                  type: 'success',
+                  color: '#fff',
+                  icon: 'success',
+                  duration: 3000,
+                  animated: true,
+                });
+           navigation.navigate('Main');
+        }
+      }
+    };
 
   const validateForm = () => {
     const emailError = validateEmail(formData.email);
@@ -102,7 +123,7 @@ const SigninScreen = ({ navigation }) => {
 
       <View style={styles.buttonView}>
         <CustomAuthButton
-          onPress={gotoScreen}
+          onPress={onpressSignIn}
           width={Width(300)}
           height={Height(38)}
           title="Sign In"
@@ -110,6 +131,7 @@ const SigninScreen = ({ navigation }) => {
           borderColor="#2E6074"
           br={3}
           textStyle={styles.textStyle}
+          loading={loading}
         />
       </View>
 

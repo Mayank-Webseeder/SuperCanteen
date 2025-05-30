@@ -3,10 +3,10 @@ import { Height } from "../../constants";
 
 export const styles = StyleSheet.create({
   container: {
-    marginBottom: 15,
+    marginBottom: Height(9),
   },
   label: {
-    marginBottom: Height(10),
+    marginBottom: Height(8),
     rowGap: 10 ,
     fontFamily: 'Inter-SemiBold',
     
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     borderColor: 'red',
   },
   errorText: {
-    marginTop: Height(8),
+    marginTop: Height(6),
     color: 'red',
     fontSize: 13,
   },

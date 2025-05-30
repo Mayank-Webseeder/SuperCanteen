@@ -13,6 +13,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height ,  Width } from '../../../constants';
 import { validateEmail , validateName , validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
+import { useSelector , useDispatch } from 'react-redux';
+import { signupUser } from '../../../redux/slices/authSlice';
+import { showMessage } from 'react-native-flash-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = ({ navigation }) => {
   const [remember, setRemember] = useState(false);
@@ -23,6 +27,8 @@ const SignUpScreen = ({ navigation }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+  const { loading } = useSelector(state => state.auth);
 
   const toggleRemember = () => setRemember(!remember);
 
@@ -47,11 +53,49 @@ const SignUpScreen = ({ navigation }) => {
     return !nameError && !emailError && !passwordError;
   };
 
-  const onpressHome = () => {
-    if (validateForm()) {
-      navigation.navigate('Signin');
-    } 
-  };
+
+
+   const onpressSignUp = async () => {
+  if (validateForm()) {
+    const resultAction = await dispatch(
+      signupUser({
+        username: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
+    );
+
+    if (signupUser.fulfilled.match(resultAction)) {
+      // ✅ Show flash message
+     showMessage({
+    message: 'Signup failed. Please try again.',
+    type: 'danger',
+    color: '#fff',
+    icon: 'danger',
+    duration: 3000,
+    animated: true,
+  });
+
+      // ✅ Save credentials if remember is true
+      if (remember) {
+        await AsyncStorage.setItem(
+          'rememberedCredentials',
+          JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          })
+        );
+      } else {
+        await AsyncStorage.removeItem('rememberedCredentials');
+      }
+
+     navigation.reset({
+          index: 0,
+          routes: [{ name: 'Signin' }],
+         });
+    }
+  }
+};
 
   const onGoogleSignIn = () => {
     console.log('Google Sign In pressed');
@@ -97,7 +141,7 @@ const SignUpScreen = ({ navigation }) => {
 
         <View style={{ marginTop: Height(10) }}>
           <CustomAuthButton
-            onPress={onpressHome}
+            onPress={onpressSignUp}
             width={Width(300)}
             height={Height(38)}
             title="Sign Up"
@@ -105,6 +149,7 @@ const SignUpScreen = ({ navigation }) => {
             borderColor="#2E6074"
             br={3}
             textStyle={styles.textStyle}
+            loading={loading}
           />
         </View>
 

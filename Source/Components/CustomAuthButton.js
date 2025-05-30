@@ -1,6 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Width, Height } from '../constants';
+import { TouchableOpacity, Text, StyleSheet , ActivityIndicator } from 'react-native';
+import { Width, Height, COLORS } from '../constants';
 
 const CustomAuthButton = ({
   title,
@@ -12,7 +12,8 @@ const CustomAuthButton = ({
   br = 10, // borderRadius default
   width = Width(248),  // default width prop
   height = Height(40),
-  marginLeft // default height prop
+  marginLeft, // default height prop,
+  loading
 }) => {
   return (
     <TouchableOpacity
@@ -31,7 +32,8 @@ const CustomAuthButton = ({
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+      {loading ?   <ActivityIndicator color={COLORS.white} /> :  <Text style={[styles.buttonText, textStyle]}>{title}</Text> }
+
     </TouchableOpacity>
   );
 };

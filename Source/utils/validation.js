@@ -1,15 +1,18 @@
-// src/utils/validation.js
-export const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// utils/validation.js
+export const validateEmail = email => {
+  const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+
   if (!email.trim()) {
     return 'Email is required';
   } else if (!emailRegex.test(email.trim())) {
     return 'Please enter a valid email';
   }
-  return null; // No error
+
+  return null;
 };
 
-export const validatePassword = (password) => {
+
+export const validatePassword = password => {
   if (!password.trim()) {
     return 'Password is required';
   } else if (password.trim().length < 6) {
@@ -18,8 +21,7 @@ export const validatePassword = (password) => {
   return null;
 };
 
-// You can add more like:
-export const validateName = (name) => {
+export const validateName = name => {
   if (!name.trim()) {
     return 'Name is required';
   }
