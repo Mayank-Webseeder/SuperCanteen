@@ -1,13 +1,13 @@
 import React from 'react';
 import {  Text, ScrollView,View, Image, Linking, TouchableOpacity } from 'react-native';
-import CustomCommonHeader from '../../../components/common/customCommonHeader';
+import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
 import OrderStatusCard from '../../../otherComponents/orders/statusCard/OrderStatusCard';
 import OrderTimeline from '../../../otherComponents/orders/timeLine/OrderTimeline';
 import DeliveryAddress from '../../../otherComponents/orders/DeliveryAddress';
 import RatingSection from '../../../otherComponents/orders/rating/ratingSection';
-import CustomSimilarProducts from '../../../components/order/similarProducts/customSimilarProdcuts';
-import PriceSummaryCard from '../../../components/common/priceSummaryCard';
-import { SimilarProductData } from '../../../mock/Data/SimilarProductData';
+import CustomSimilarProducts from '../../../Components/order/similarProducts/customSimilarProdcuts';
+import PriceSummaryCard from '../../../Components/Common/priceSummaryCard';
+import { SimilarProductData } from '../../../Mock/Data/SimilarProductData';
 import { styles } from './styles';
 
 const OrderDetailScreen = ({ route, navigation }) => {

@@ -5,16 +5,16 @@ import {
     TouchableOpacity,
   } from 'react-native';
   import React, { useState } from 'react';
-  import CustomHeader from '../customHeader';
+  import CustomHeader from '../CustomHeader';
   import CustomSearchInput from '../searchInput';
-  import CustomCasual from '../customCasual';
- import { Menwatch } from '../../mock/Data/Menwatch';
+  import CustomCasual from '../CustomCasual';
+ import { Menwatch } from '../../Mock/Data/Menwatch';
   import {Height} from '../../constants';
-  import CUstomAddressRow from '../customAddressRow';
-  import CustomProductDetailsData from '../customProductDetailsData';
+  import CUstomAddressRow from '../CustomAddressRow';
+  import CustomProductDetailsData from '../CustomProductDetailsData';
   import Ionicons from 'react-native-vector-icons/Ionicons';
   import CustomSimilarProdcuts from '../order/similarProducts/customSimilarProdcuts';
-  import { SimilarProductData } from '../../mock/Data/SimilarProductData';
+  import { SimilarProductData } from '../../Mock/Data/SimilarProductData';
   import { styles } from './styles';
 import HorizontalLine from '../../otherComponents/home/horizontalLine';
 import Description from './description';

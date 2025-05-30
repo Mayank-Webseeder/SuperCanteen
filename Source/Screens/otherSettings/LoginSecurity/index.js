@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import CustomHeader from '../../../components/customHeader';
+import CustomHeader from '../../../Components/CustomHeader';
 import { COLORS } from '../../../constants';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import { styles } from './styles';

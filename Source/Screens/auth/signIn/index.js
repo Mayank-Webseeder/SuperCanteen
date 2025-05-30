@@ -7,12 +7,12 @@ import {
   BackHandler, // <- Import added
 } from 'react-native';
 
-import CustomTextInput from '../../../components/inputField/customTextInput'
-import CustomAuthButton from '../../../components/customAuthButton';
+import CustomTextInput from '../../../Components/inputField/customTextInput';
+import CustomAuthButton from '../../../Components/CustomAuthButton';
 import { Height , Width } from '../../../constants';
 import { validateEmail , validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
-import CustomAuthHeader from '../../../components/customAuthHeader';
+import CustomAuthHeader from '../../../Components/CustomAuthHeader'
 
 const SigninScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({

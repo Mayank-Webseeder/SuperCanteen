@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {  Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import CustomCommonHeader from '../../../components/common/customCommonHeader';
-import CustomAddressTextInput from '../../../components/textInput/customAddressTextInput';
-import CustomBottomDrop from '../../../components/textInput/customBottomDrop';
-import CustomButton from '../../../components/customBotton';
+import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
+import CustomAddressTextInput from '../../../Components/TextInput/customAddressTextInput';
+import CustomBottomDrop from '../../../Components/TextInput/customBottomDrop';
+import CustomButton from '../../../Components/CustomBotton';
 import Toast from 'react-native-toast-message';
 import { styles } from './styles';
 

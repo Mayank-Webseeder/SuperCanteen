@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
-import { paymentMethodsData } from '../../../mock/Data/paymentData';
-import CustomHeader from '../../../components/customHeader';
+import { paymentMethodsData } from '../../../Mock/Data/paymentData';
+import CustomHeader from '../../../Components/CustomHeader';
 
 const PaymentMethodItem = ({ item }) => {
   return (

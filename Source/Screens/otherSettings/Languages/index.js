@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import CustomHeader from '../../../components/customHeader';
+import CustomHeader from '../../../Components/CustomHeader';
 import { styles } from './styles';
 
 const languages = ['English', 'Hindi'];

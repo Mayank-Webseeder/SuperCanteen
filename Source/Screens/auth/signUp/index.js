@@ -6,9 +6,9 @@ import {
   Image,
   ScrollView
 } from 'react-native';
-import CustomAuthHeader from '../../../components/customAuthHeader';
-import CustomTextInput from '../../../components/inputField/customTextInput';
-import CustomAuthButton from '../../../components/customAuthButton';
+import CustomAuthHeader from '../../../Components/CustomAuthHeader';
+import CustomTextInput from '../../../Components/inputField/customTextInput';
+import CustomAuthButton from '../../../Components/CustomAuthButton';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height ,  Width } from '../../../constants';
 import { validateEmail , validateName , validatePassword } from '../../../utils/validation';

@@ -1,11 +1,11 @@
 import { View } from 'react-native'
 import React from 'react'
 import HeaderRow from '../headerRow'
-import CustomCategoryList from '../../../components/customCategoryList'
-import Fashion from '../../../mock/Data/Fashion'
+import CustomCategoryList from '../../../Components/CustomCategoryList'
+import Fashion from '../../../Mock/Data/Fashion'
 import { FontSize, Height, Width } from '../../../constants'
-import BeautyData from '../../../mock/Data/BeautyData'
-import ElectronicsHome from '../../../mock/Data/ElectronicsHome'
+import BeautyData from '../../../Mock/Data/BeautyData'
+import ElectronicsHome from '../../../Mock/Data/ElectronicsHome'
 
 export default function ProductCategories(props) {
   return (

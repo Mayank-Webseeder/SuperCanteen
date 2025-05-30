@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { styles } from './styles';
-import CustomHeader from '../../../components/customHeader';
+import CustomHeader from '../../../Components/CustomHeader';
 import { COLORS, Width } from '../../../constants';
-import CustomBtn from '../../../components/customFilterBtn';
+import CustomBtn from '../../../Components/CustomFilterBtn';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
-import { dummyOrders } from '../../../mock/Data/OrdersData';
+import { dummyOrders } from '../../../Mock/Data/OrdersData';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 

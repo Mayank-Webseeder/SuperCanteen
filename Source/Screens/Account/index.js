@@ -5,11 +5,11 @@ import {
   View,
   ScrollView,
 } from 'react-native';
-import CustomHeader from '../../components/customHeader';
+import CustomHeader from '../../Components/CustomHeader'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import CustomButton from '../../components/customBotton';
+import CustomButton from '../../Components/CustomBotton';
 import { styles } from './styles';
-import { footerItems , iconOptions, settingsOptions } from '../../mock/Data/settingOptions';
+import { footerItems , iconOptions, settingsOptions } from '../../Mock/Data/settingOptions';
 
 const AccountScreen = ({ navigation }) => {
   return (

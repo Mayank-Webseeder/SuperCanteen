@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import CustomCommonHeader from '../../../components/common/customCommonHeader';
+import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
 import { useNavigation } from '@react-navigation/native';
 
 const OrderConfirm = () => {

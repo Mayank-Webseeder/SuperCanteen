@@ -2,12 +2,12 @@ import { TouchableOpacity, View, Text, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { Height, Width } from '../../constants';
 import CustomSearch from '../searchInput';
-import CustomCategoryList from '../customCategoryList';
+import CustomCategoryList from '../CustomCategoryList';
 import HeaderRow from '../../otherComponents/home/headerRow';
 import { BackArrow } from '../../../assets/Icons/svgIcons/arrow_back';
-import Fashion from '../../mock/Data/Fashion';
-import BeautyData from '../../mock/Data/BeautyData';
-import ElectronicsHome from '../../mock/Data/ElectronicsHome';
+import Fashion from '../../Mock/Data/Fashion';
+import BeautyData from '../../Mock/Data/BeautyData';
+import ElectronicsHome from '../../Mock/Data/ElectronicsHome';
 import { styles } from './styles';
 
 const SearchScreen = ({ navigation }) => {

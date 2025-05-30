@@ -1,6 +1,6 @@
 import React from 'react';
 import {  Text, View, Image } from 'react-native';
-import CustomAuthButton from '../../customAuthButton';
+import CustomAuthButton from '../../CustomAuthButton';
 import { Height } from '../../../constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';

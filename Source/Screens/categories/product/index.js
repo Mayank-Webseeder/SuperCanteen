@@ -1,19 +1,19 @@
 import {  Text, View, FlatList,Image } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import CustomHeader from '../../../components/customHeader';
-import CustomSearchInput from '../../../components/searchInput';
+import CustomHeader from '../../../Components/CustomHeader';
+import CustomSearchInput from '../../../Components/searchInput';
 import {  Height, Width } from '../../../constants';
-import CustomCasual from '../../../components/customCasual';
-import CustomCategoryList from '../../../components/customCategoryList';
-import CustomProductCard from '../../../components/productCard';
-import FashionCatogory from '../../../mock/Data/FashionCatogory';
-import FashionData from '../../../mock/Data/FashionData';
-import CustomOfferCard from '../../../components/offerCard';
-import OccationData from '../../../mock/Data/OccationData';
+import CustomCasual from '../../../Components/CustomCasual';
+import CustomCategoryList from '../../../Components/CustomCategoryList';
+import CustomProductCard from '../../../Components/productCard';
+import FashionCatogory from '../../../Mock/Data/FashionCatogory';
+import FashionData from '../../../Mock/Data/FashionData';
+import CustomOfferCard from '../../../Components/offerCard';
+import OccationData from '../../../Mock/Data/OccationData';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
-import ClosesCalled from '../../../components/home/closesCalled/closesCalled';
-import ClosestProductsData from '../../../mock/Data/closestProductData';
-import ProducsData from '../../../mock/Data/productsData';
+import ClosesCalled from '../../../Components/home/closesCalled/closesCalled';
+import ClosestProductsData from '../../../Mock/Data/closestProductData';
+import ProducsData from '../../../Mock/Data/productsData';
 import { styles } from './styles';
 
 const Sliders = [

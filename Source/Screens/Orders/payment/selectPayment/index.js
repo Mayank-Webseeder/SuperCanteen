@@ -7,7 +7,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import CustomCommonHeader from '../../../../components/common/customCommonHeader';
+import CustomCommonHeader from '../../../../Components/Common/customCommonHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { Height } from '../../../../constants';

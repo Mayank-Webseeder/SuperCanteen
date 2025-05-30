@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import CustomCommonHeader from '../../../components/common/customCommonHeader';
+import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
 import ConfirmationModal from '../../../otherComponents/confirmationModal';
 import Toast from 'react-native-toast-message';
 import { styles } from './styles';

@@ -4,9 +4,9 @@ import { HomeIcon } from '../../../assets/Icons/svgIcons/home';
 import { CategoryIcon } from '../../../assets/Icons/svgIcons/category';
 import { OrdersIcon } from '../../../assets/Icons/svgIcons/orders';
 import { AccountIcon } from '../../../assets/Icons/svgIcons/account_circle';
-import HomeScreen from '../../screens/home/home';
-import Categories from '../../screens/categories';
-import Orders from '../../screens/orders/order';
+import HomeScreen from '../../Screens/Home/home';
+import Categories from '../../Screens/categories';
+import Orders from '../../Screens/Orders/order';
 import AccountStack from '../accountStack';
 
 const Tab = createBottomTabNavigator();

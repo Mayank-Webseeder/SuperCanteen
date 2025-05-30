@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Height } from '../../constants';
-import CustomOrderCard from '../../components/order/orderCard/customOrderCard';
+import CustomOrderCard from '../../Components/order/orderCard/customOrderCard';
 
 const OrderListItem = ({ order, onPress }) => {
   const { product, status } = order;

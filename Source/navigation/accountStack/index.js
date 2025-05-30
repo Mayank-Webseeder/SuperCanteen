@@ -1,10 +1,10 @@
 import React from 'react'
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import AccountScreen from '../../screens/account';
-import AddressListScreen from '../../components/address/addressList';
-import LoginSecurityScreen from '../../screens/otherSettings/loginSecurity';
-import EditFieldScreen from '../../screens/otherSettings/loginSecurity/editFieldScreen';
-import LanguageScreen from '../../screens/otherSettings/languages';
+import AccountScreen from '../../Screens/Account';
+import AddressListScreen from '../../Components/address/addressList';
+import LoginSecurityScreen from '../../Screens/otherSettings/loginSecurity';
+import EditFieldScreen from '../../Screens/otherSettings/loginSecurity/editFieldScreen';
+import LanguageScreen from '../../Screens/otherSettings/languages';
 
 const Stack = createNativeStackNavigator();
 

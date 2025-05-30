@@ -5,8 +5,8 @@ import {
     ScrollView,
     TouchableOpacity,
 } from 'react-native';
-import CustomCommonHeader from '../../../../components/common/customCommonHeader';
-import CustomCartCard from '../../../../components/cartCard/customCartCard';
+import CustomCommonHeader from '../../../..//Components/Common/customCommonHeader';
+import CustomCartCard from '../../../../Components/cartCard/customCartCard';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
 import {  Height } from '../../../../constants';
 import { useNavigation } from '@react-navigation/native';

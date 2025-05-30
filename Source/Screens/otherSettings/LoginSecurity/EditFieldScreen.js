@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   
 } from 'react-native';
-import CustomHeader from '../../../components/customHeader';
+import CustomHeader from '../../../Components/CustomHeader';
 import { COLORS } from '../../../constants';
 
 export default function EditFieldScreen({ route, navigation }) {

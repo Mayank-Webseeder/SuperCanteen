@@ -4,15 +4,15 @@ import {
   Text,
   View,
 } from 'react-native';
-import CustomCommonHeader from '../../../components/common/customCommonHeader';
-import CustomSearchInput from '../../../components/searchInput';
-import CustomBtn from '../../../components/customFilterBtn';
+import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
+import CustomSearchInput from '../../../Components/searchInput';
+import CustomBtn from '../../../Components/CustomFilterBtn';
 import {useNavigation} from '@react-navigation/native';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
 import { FlatList } from 'react-native-gesture-handler';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
-import { dummyOrders } from '../../../mock/Data/OrdersData';
+import { dummyOrders } from '../../../Mock/Data/OrdersData';
 import { styles } from './styles';
 
 const Orders = () => {
