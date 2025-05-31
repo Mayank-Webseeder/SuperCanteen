@@ -4,70 +4,53 @@ import {
   View,
   TouchableOpacity,
   Image,
-  BackHandler, // <- Import added
+  BackHandler,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomTextInput from '../../../Components/inputField/customTextInput';
 import CustomAuthButton from '../../../Components/CustomAuthButton';
-import { Height , Width } from '../../../constants';
-import { validateEmail , validatePassword } from '../../../utils/validation';
+import { Height, Width } from '../../../constants';
+import { validateEmail, validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
-import CustomAuthHeader from '../../../Components/CustomAuthHeader'
-import { useSelector , useDispatch } from 'react-redux';
+import CustomAuthHeader from '../../../Components/CustomAuthHeader';
+import { useSelector, useDispatch } from 'react-redux';
 import { loginUser } from '../../../redux/slices/authSlice';
+import CheckBox from '@react-native-community/checkbox'; // or any custom checkbox
 
 const SigninScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
   });
-
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
-    const { loading } = useSelector(state => state.auth);
+  const { loading } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const backAction = () => {
-      BackHandler.exitApp(); // Exits the app
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      BackHandler.exitApp();
       return true;
-    };
+    });
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction
-    );
+    loadRememberedCredentials();
 
     return () => backHandler.remove();
   }, []);
+
+  const loadRememberedCredentials = async () => {
+    const saved = await AsyncStorage.getItem('rememberedCredentials');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setFormData(parsed);
+      setRememberMe(true);
+    }
+  };
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
     setErrors({ ...errors, [field]: null });
   };
-
-   const onpressSignIn = async () => {
-      if (validateForm()) {
-        const resultAction = await dispatch(
-          loginUser({
-             identifier:formData.email,
-             password:formData.password
-          })
-        );
-  
-        if (loginUser.fulfilled.match(resultAction)) {
-            showMessage({
-                  message: 'SignIn Successful!',
-                  type: 'success',
-                  color: '#fff',
-                  icon: 'success',
-                  duration: 3000,
-                  animated: true,
-                });
-           navigation.navigate('Main');
-        }
-      }
-    };
 
   const validateForm = () => {
     const emailError = validateEmail(formData.email);
@@ -79,6 +62,37 @@ const SigninScreen = ({ navigation }) => {
     };
     setErrors(newErrors);
     return !emailError && !passwordError;
+  };
+
+  const onpressSignIn = async () => {
+    if (validateForm()) {
+      const resultAction = await dispatch(
+        loginUser({
+          identifier: formData.email,
+          password: formData.password,
+        })
+      );
+
+      if (loginUser.fulfilled.match(resultAction)) {
+        // 🔐 Save or Remove Credentials
+        if (rememberMe) {
+          await AsyncStorage.setItem('rememberedCredentials', JSON.stringify(formData));
+        } else {
+          await AsyncStorage.removeItem('rememberedCredentials');
+        }
+
+        showMessage({
+          message: 'SignIn Successful!',
+          type: 'success',
+          color: '#fff',
+          icon: 'success',
+          duration: 3000,
+          animated: true,
+        });
+
+        // 🔄 Navigation handled by RootStack via token
+      }
+    }
   };
 
   const onGoogleSignIn = () => {
@@ -116,6 +130,16 @@ const SigninScreen = ({ navigation }) => {
           error={errors.password}
           placeholder="Enter your password"
         />
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
+          <CheckBox
+            value={rememberMe}
+            onValueChange={setRememberMe}
+            tintColors={{ true: '#2E6074', false: '#aaa' }}
+          />
+          <Text style={{ marginLeft: 10 }}>Remember Me</Text>
+        </View>
+
         <Text onPress={onpresshandle} style={styles.rememberText}>
           Forgot Password
         </Text>
@@ -154,4 +178,3 @@ const SigninScreen = ({ navigation }) => {
 };
 
 export default SigninScreen;
-

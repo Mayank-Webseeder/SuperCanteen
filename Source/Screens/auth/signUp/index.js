@@ -66,16 +66,15 @@ const SignUpScreen = ({ navigation }) => {
     );
 
     if (signupUser.fulfilled.match(resultAction)) {
-      // ✅ Show flash message
-     showMessage({
-    message: 'Signup failed. Please try again.',
-    type: 'danger',
-    color: '#fff',
-    icon: 'danger',
-    duration: 3000,
-    animated: true,
-  });
-
+        showMessage({
+                  message: 'Signup Successful!',
+                  type: 'success',
+                  color: '#fff',
+                  icon: 'success',
+                  duration: 3000,
+                  animated: true,
+                });
+           navigation.navigate('Main');
       // ✅ Save credentials if remember is true
       if (remember) {
         await AsyncStorage.setItem(
@@ -88,7 +87,7 @@ const SignUpScreen = ({ navigation }) => {
       } else {
         await AsyncStorage.removeItem('rememberedCredentials');
       }
-
+      
      navigation.reset({
           index: 0,
           routes: [{ name: 'Signin' }],
