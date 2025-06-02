@@ -12,14 +12,29 @@ export const validateEmail = email => {
 };
 
 
-export const validatePassword = password => {
+export const validatePassword = (password) => {
   if (!password.trim()) {
     return 'Password is required';
-  } else if (password.trim().length < 6) {
-    return 'Password must be at least 6 characters';
   }
+
+  const trimmed = password.trim();
+
+  if (trimmed.length < 8) {
+    return 'Password must be at least 8 characters long';
+  }
+
+  const hasUpperCase = /[A-Z]/.test(trimmed);
+  const hasLowerCase = /[a-z]/.test(trimmed);
+  const hasNumber = /[0-9]/.test(trimmed);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(trimmed);
+
+  if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+    return 'Password must include uppercase, lowercase, number, and special character';
+  }
+
   return null;
 };
+
 
 export const validateName = name => {
   if (!name.trim()) {

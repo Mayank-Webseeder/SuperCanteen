@@ -1,6 +1,6 @@
 import { createSlice , createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { LOGINAPI ,  SIGNUPAPI } from "../../api";
+import { FORGOTPASSWORD, LOGINAPI ,  SENDRESETPASSWORDOTP,  SIGNUPAPI } from "../../api";
 import { showMessage } from "react-native-flash-message";
 
 export const loginUser = createAsyncThunk(
@@ -11,7 +11,15 @@ export const loginUser = createAsyncThunk(
                 identifier,
                 password
             });
-            return response.data
+            showMessage({
+               message: 'SignIn Successful!',
+               type: 'success',
+               color: '#fff',
+               icon: 'success',
+               duration: 3000,
+               animated: true,
+            });
+          return response.data
         } catch (error) {
             const message = error?.response?.data?.message || 'Login failed. Please try again!';
             showMessage({
@@ -23,11 +31,9 @@ export const loginUser = createAsyncThunk(
                  animated: true,
             });
             return rejectWithValue(message)
-        }
-        
+        }     
      }
 )
-
 
 export const signupUser = createAsyncThunk(
     'auth/signupUser',
@@ -38,6 +44,14 @@ export const signupUser = createAsyncThunk(
                 email,
                 password
             });
+              showMessage({
+                  message: 'Signup Successful!',
+                  type: 'success',
+                  color: '#fff',
+                  icon: 'success',
+                  duration: 3000,
+                  animated: true,
+                });
             return response.data
         } catch (error) {
             const message = error?.response?.data?.message || 'Signup failed. Please try again!';
@@ -53,6 +67,70 @@ export const signupUser = createAsyncThunk(
         }
     }
 )
+
+
+export const sendResetPasswordOtp  = createAsyncThunk(
+    'auth/email',
+     async ({email} , {rejectWithValue}) => {
+        try {
+            const response = await axios.post(SENDRESETPASSWORDOTP,{
+               email
+            });
+             showMessage({
+              message: response.data?.message || 'OTP sent successfully!',
+              type: 'success',
+              icon: 'success',
+              color: "#fff",
+              duration: 3000,
+      });
+            return response.data
+        } catch (error) {
+            const message = error?.response?.data?.message || 'Failed to send OTP!';
+            showMessage({
+                 message: message,
+                 type: "danger",
+                 color: "#fff",
+                 icon: "danger",
+                 duration: 3000,
+                 animated: true,
+            });
+            return rejectWithValue(message)
+        }
+        
+     }
+)
+
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ email, otp , newPassword }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(FORGOTPASSWORD, {
+        email,
+        otp,
+        newPassword,
+      
+      });
+      showMessage({
+        message: response.data?.message || 'Password reset successfully!',
+        type: 'success',
+        icon: 'success',
+        duration: 3000,
+      });
+      return response.data;
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Failed to reset password';
+      showMessage({
+        message,
+        type: 'danger',
+        icon: 'danger',
+        duration: 3000,
+      });
+      return rejectWithValue(message);
+    }
+  }
+);
+
 
 
 const authSlice = createSlice({
@@ -109,6 +187,33 @@ const authSlice = createSlice({
             state.error = action.payload
         })
 
+        // sendResetPasswordOtp
+        .addCase(sendResetPasswordOtp.pending, (state) => {
+              state.loading = true;
+              state.error = null;
+              })
+       .addCase(sendResetPasswordOtp.fulfilled, (state) => {
+         state.loading = false;
+            })
+      .addCase(sendResetPasswordOtp.rejected, (state, action) => {
+         state.loading = false;
+         state.error = action.payload;
+         })
+
+        //resetPassword
+       .addCase(resetPassword.pending, (state) => {
+         state.loading = true;
+         state.error = null;
+         })
+       .addCase(resetPassword.fulfilled, (state) => {
+         state.loading = false;
+         })
+      .addCase(resetPassword.rejected, (state, action) => {
+
+        console.log("ERROR OCCURED",action)
+         state.loading = false;
+         state.error = action.payload;
+        })
       }
 });
 

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS , FontSize , Height } from "../../../constants";
+import { COLORS , FontSize , Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   container: {
@@ -10,7 +10,13 @@ export const styles = StyleSheet.create({
     rowGap: 10, marginTop: Height(15), marginHorizontal: Height(20)
   },
   buttonView:{
-    marginTop: Height(20)
+    marginTop: Height(20),
+   
+  },
+  rowContainer:{
+    flexDirection: 'row', alignItems: 'center', marginVertical: 10,
+     marginTop:Width(14),
+     marginHorizontal:Width(24)
   },
   label: {
     marginTop: 20,
@@ -24,24 +30,31 @@ export const styles = StyleSheet.create({
     marginTop: 15,
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: 17,
+    height: 17,
     borderWidth: 1,
-    borderColor: COLORS.green,
-    borderRadius: 4,
+    borderColor:COLORS.green,
+    borderRadius: 2,
     justifyContent: 'center',
     alignItems: 'center',
+  
   },
   rememberText: {
-    marginLeft: 10,
     fontSize: 13,
     color: COLORS.green,
-    bottom:16
+    bottom:16,
+    fontFamily:"Inter-Regular"
+  },
+  text:{
+      fontSize: FontSize(12.5),
+      fontFamily:"Inter-Regular",
+      marginHorizontal:Width(9),
+      color:COLORS.green
   },
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Center horizontally
+    justifyContent: 'center', 
     marginVertical: 20,
     marginTop:Height(30)
   },

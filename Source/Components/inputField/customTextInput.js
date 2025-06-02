@@ -16,6 +16,7 @@ const CustomInput = ({
   placeholder,
   error,
   secureTextEntry = false,
+  keyboardType
 }) => {
   const [hidePassword, setHidePassword] = useState(secureTextEntry);
 
@@ -31,6 +32,7 @@ const CustomInput = ({
           onChangeText={onChangeText}
           placeholderTextColor="#aaa"
           secureTextEntry={hidePassword}
+          keyboardType = {keyboardType}
         />
 
         {secureTextEntry && (

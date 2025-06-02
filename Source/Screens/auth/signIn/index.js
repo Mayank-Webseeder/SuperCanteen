@@ -15,7 +15,7 @@ import { styles } from './styles';
 import CustomAuthHeader from '../../../Components/CustomAuthHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import { loginUser } from '../../../redux/slices/authSlice';
-import CheckBox from '@react-native-community/checkbox'; // or any custom checkbox
+import { CheckBoxIcon } from '../../../../assets/Icons/svgIcons/checkBoxIcon';
 
 const SigninScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -72,25 +72,14 @@ const SigninScreen = ({ navigation }) => {
           password: formData.password,
         })
       );
-
       if (loginUser.fulfilled.match(resultAction)) {
         // 🔐 Save or Remove Credentials
         if (rememberMe) {
           await AsyncStorage.setItem('rememberedCredentials', JSON.stringify(formData));
         } else {
           await AsyncStorage.removeItem('rememberedCredentials');
-        }
-
-        showMessage({
-          message: 'SignIn Successful!',
-          type: 'success',
-          color: '#fff',
-          icon: 'success',
-          duration: 3000,
-          animated: true,
-        });
-
-        // 🔄 Navigation handled by RootStack via token
+        }    
+        navigation.navigate('Main');
       }
     }
   };
@@ -130,19 +119,9 @@ const SigninScreen = ({ navigation }) => {
           error={errors.password}
           placeholder="Enter your password"
         />
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10 }}>
-          <CheckBox
-            value={rememberMe}
-            onValueChange={setRememberMe}
-            tintColors={{ true: '#2E6074', false: '#aaa' }}
-          />
-          <Text style={{ marginLeft: 10 }}>Remember Me</Text>
-        </View>
-
-        <Text onPress={onpresshandle} style={styles.rememberText}>
+         <Text onPress={onpresshandle} style={styles.rememberText}>
           Forgot Password
-        </Text>
+        </Text> 
       </View>
 
       <View style={styles.buttonView}>
@@ -158,6 +137,13 @@ const SigninScreen = ({ navigation }) => {
           loading={loading}
         />
       </View>
+
+      <View style={styles.rowContainer}>
+       <TouchableOpacity onPress={() => setRememberMe(!rememberMe)} style={styles.checkbox}>
+          {rememberMe &&   <CheckBoxIcon/>}
+          </TouchableOpacity>
+          <Text style={styles.text}>Remember Me</Text>
+        </View>
 
       <View style={styles.orContainer}>
         <Text style={styles.orText}>OR</Text>

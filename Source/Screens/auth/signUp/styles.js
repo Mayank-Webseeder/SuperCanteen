@@ -13,27 +13,8 @@ export const styles = StyleSheet.create({
   mainContainer:{
     marginHorizontal:Height(20)
   },
-  rememberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 15,
-  },
   textStyle:{
     fontSize: 16 , fontFamily: 'Inter-SemiBold'
-  },
-  checkbox: {
-    width: 19,
-    height: 19,
-    borderWidth: 1,
-    borderColor: COLORS.green,
-    borderRadius: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rememberText: {
-    marginLeft: 10,
-    fontSize: FontSize(15),
-    color: '#2E60749C',
   },
   orContainer: {
     flexDirection: 'row',

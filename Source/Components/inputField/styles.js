@@ -44,5 +44,6 @@ export const styles = StyleSheet.create({
     marginTop: Height(6),
     color: 'red',
     fontSize: 13,
+    lineHeight:Height(16)
   },
 });

@@ -9,17 +9,13 @@ import {
 import CustomAuthHeader from '../../../Components/CustomAuthHeader';
 import CustomTextInput from '../../../Components/inputField/customTextInput';
 import CustomAuthButton from '../../../Components/CustomAuthButton';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height ,  Width } from '../../../constants';
 import { validateEmail , validateName , validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
 import { useSelector , useDispatch } from 'react-redux';
 import { signupUser } from '../../../redux/slices/authSlice';
-import { showMessage } from 'react-native-flash-message';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignUpScreen = ({ navigation }) => {
-  const [remember, setRemember] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -29,8 +25,6 @@ const SignUpScreen = ({ navigation }) => {
   const [errors, setErrors] = useState({});
   const dispatch = useDispatch();
   const { loading } = useSelector(state => state.auth);
-
-  const toggleRemember = () => setRemember(!remember);
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -47,9 +41,8 @@ const SignUpScreen = ({ navigation }) => {
       email: emailError,
       password: passwordError,
     };
-
+    
     setErrors(newErrors);
-
     return !nameError && !emailError && !passwordError;
   };
 
@@ -66,29 +59,7 @@ const SignUpScreen = ({ navigation }) => {
     );
 
     if (signupUser.fulfilled.match(resultAction)) {
-        showMessage({
-                  message: 'Signup Successful!',
-                  type: 'success',
-                  color: '#fff',
-                  icon: 'success',
-                  duration: 3000,
-                  animated: true,
-                });
-           navigation.navigate('Main');
-      // ✅ Save credentials if remember is true
-      if (remember) {
-        await AsyncStorage.setItem(
-          'rememberedCredentials',
-          JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          })
-        );
-      } else {
-        await AsyncStorage.removeItem('rememberedCredentials');
-      }
-      
-     navigation.reset({
+        navigation.reset({
           index: 0,
           routes: [{ name: 'Signin' }],
          });
@@ -150,13 +121,6 @@ const SignUpScreen = ({ navigation }) => {
             textStyle={styles.textStyle}
             loading={loading}
           />
-        </View>
-
-        <View style={styles.rememberContainer}>
-          <TouchableOpacity onPress={toggleRemember} style={styles.checkbox}>
-            {remember && <Icon name="check" size={18} color="#2E6074" />}
-          </TouchableOpacity>
-          <Text style={styles.rememberText}>Remember Me</Text>
         </View>
       </View>
 
