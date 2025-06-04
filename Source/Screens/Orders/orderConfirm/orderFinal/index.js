@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import CustomCommonHeader from '../../../../Components/Common/customCommonHeader';
-import { Width } from '../../../../constants';
+import CustomCommonHeader from '@components/Common/CustomCommonHeader';
+import { Width } from "@constants";
 import { styles } from './styles';
 
 const OrderConfirmPage = () => {

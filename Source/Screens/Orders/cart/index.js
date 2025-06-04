@@ -5,14 +5,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import CustomCommonHeader from '../../../Components/Common/customCommonHeader'
+import CustomCommonHeader from '@components/Common/CustomCommonHeader'
 import CustomCartCard from '../../../Components/cartCard/customCartCard';
 import CustomBtn from '../../../Components/CustomFilterBtn';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
 import {  Height } from '../../../constants';
 import AddressView from '../../../otherComponents/checkOut/addressView';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
-import PriceSummaryCard from '../../../Components/Common/priceSummaryCard';
+import PriceSummaryCard from '@components/Common/PriceSummaryCard';
 import BankOfferView from '../../../otherComponents/checkOut/bankOffer';
 import CouponView from '../../../otherComponents/checkOut/couponView';
 import { styles } from './styles';

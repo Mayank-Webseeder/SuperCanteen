@@ -1,9 +1,8 @@
 import { Text, View, FlatList } from 'react-native';
 import React , {useState} from 'react';
-import { FontSize, Height, Width } from '../../../constants';
+import { FontSize, Height, Width } from "@constants";
 import CustomCategoryList from '../../../Components/CustomCategoryList';
 import CustomCasual from '../../../Components/CustomCasual';
-import categories from '../../../Mock/Data/categories';
 import ClosesCalled from '../../../Components/home/closesCalled/closesCalled';
 import ClosestProductsData from '../../../Mock/Data/closestProductData';
 import ProductCategories from '../../../otherComponents/home/productCategories';
@@ -15,6 +14,8 @@ import Header from '../../../otherComponents/home/header';
 import { styles } from './styles';
 import HotDealsSection from '../../../otherComponents/home/hotDeals';
 import SponsordSection from '../../../otherComponents/home/sponsord'
+import GetCategory from '../../../otherComponents/home/getAllCategories';
+import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 
 const Sliders = [
   { id: 1, image: require('../../../../assets/Sliders/Slider1.png') },
@@ -26,7 +27,6 @@ const Sliders = [
 ];
 
 const HomeScreen = ({ navigation }) => {
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectFashion,setSelectedFashion] = useState('')
   const [selectBeauty,setSelectedBeauty] = useState('')
   const [selectElectronics,setSelectedElectronics] = useState('')
@@ -41,28 +41,10 @@ const HomeScreen = ({ navigation }) => {
   end={{ x: 0.5, y: 1 }}
   style={styles.gradient}>
   <Header navigation={navigation}/>
-   <View style={styles.categories} >
-      <CustomCategoryList
-        key="categories"
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={categories}
-        bgColor="#D4E7F2"
-        width={Width(48)}
-        height={Width(48)}
-        borderRadius={Width(32)}
-        selectedBorderColor="#008ECC"
-        textColor="#333"
-        textStyle={{ fontSize: FontSize(13),fontFamily:"Inter-Medium" }}
-        imageSize={Height(38)}
-        selected={selectedCategory}
-       onSelect={(name) => setSelectedCategory(name)}
-       navigation={navigation}
-      />
-    </View>
+  <GetCategory/>
     </LinearGradient>
     <HorizontalLine/>
-    <CustomCasual cardRadius={Height(0.5)} key="casual"  paddingHorizontal={10} data={Sliders} />
+    <Brandcarousel />
     <ProductCategories navigation={navigation} selectFashion={selectFashion} setSelectedFashion={setSelectedFashion} selectBeauty={selectBeauty} setSelectedBeauty={setSelectedBeauty} selectElectronics={selectElectronics} setSelectedElectronics={setSelectedElectronics}/>
     <ClosesCalled navigation={navigation} key={"slider"} data={ClosestProductsData}/> 
     <HotDealsSection navigation={navigation}/>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
-import CustomCommonHeader from '../../../../Components/Common/customCommonHeader';
+import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomAuthButton from '../../../../Components/CustomAuthButton';
-import {  Width } from '../../../../constants';
-import PriceSummaryCard from '../../../../Components/Common/priceSummaryCard';
+import {  Width } from "@constants";
+import PriceSummaryCard from '@components/Common/PriceSummaryCard';
 import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
 import CouponView from '../../../../otherComponents/checkOut/couponView';

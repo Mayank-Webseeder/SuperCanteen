@@ -1,7 +1,10 @@
-BASE_URL = "https://super-canteen-backend.onrender.com/api"
+export const BASE_URL = "https://super-canteen-backend.onrender.com/api"
 
+export const IMG_URL = "https://super-canteen-backend.onrender.com/";
 
 export const LOGINAPI = `${BASE_URL}/users/auth`
 export const SIGNUPAPI = `${BASE_URL}/users/signup`
 export const SENDRESETPASSWORDOTP = `${BASE_URL}/users/sendResetPassword-otp`
 export const FORGOTPASSWORD = `${BASE_URL}/users/forgot-password`
+export const GETALLCATEGORIES = `${BASE_URL}/category/getAllCategories`
+

@@ -1,12 +1,12 @@
 import React from 'react';
 import {  Text, ScrollView,View, Image, Linking, TouchableOpacity } from 'react-native';
-import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
+import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import OrderStatusCard from '../../../otherComponents/orders/statusCard/OrderStatusCard';
 import OrderTimeline from '../../../otherComponents/orders/timeLine/OrderTimeline';
 import DeliveryAddress from '../../../otherComponents/orders/DeliveryAddress';
 import RatingSection from '../../../otherComponents/orders/rating/ratingSection';
 import CustomSimilarProducts from '../../../Components/order/similarProducts/customSimilarProdcuts';
-import PriceSummaryCard from '../../../Components/Common/priceSummaryCard';
+import PriceSummaryCard from "@components/Common/PriceSummaryCard";
 import { SimilarProductData } from '../../../Mock/Data/SimilarProductData';
 import { styles } from './styles';
 

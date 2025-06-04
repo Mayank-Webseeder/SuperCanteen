@@ -7,10 +7,10 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import CustomCommonHeader from '../../../../Components/Common/customCommonHeader';
+import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { Height } from '../../../../constants';
+import { Height } from "@constants";
 import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import { styles } from './styles';
 

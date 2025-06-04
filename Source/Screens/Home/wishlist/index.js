@@ -7,7 +7,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import CustomCommonHeader from '../../../Components/Common/customCommonHeader';
+import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomSearchInput from '../../../Components/searchInput';
 import { WishlistProducts } from '../../../Mock/Data/WishlistProduct';
 import Ionicons from 'react-native-vector-icons/Ionicons';
