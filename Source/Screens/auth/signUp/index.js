@@ -3,7 +3,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   ScrollView
 } from 'react-native';
 import CustomAuthHeader from '../../../Components/CustomAuthHeader';
@@ -14,6 +13,7 @@ import { validateEmail , validateName , validatePassword } from '../../../utils/
 import { styles } from './styles';
 import { useSelector , useDispatch } from 'react-redux';
 import { signupUser } from '../../../redux/slices/authSlice';
+import FastImage from 'react-native-fast-image';
 
 const SignUpScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -133,7 +133,7 @@ const SignUpScreen = ({ navigation }) => {
         activeOpacity={0.7}
         style={styles.googleButton}
       >
-        <Image
+        <FastImage
           source={require('../../../../assets/Icons/GoogleIcon.png')}
           style={styles.googleIcon}
         />

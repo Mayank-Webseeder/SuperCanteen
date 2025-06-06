@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
@@ -11,6 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import { Width } from "@constants";
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const OrderConfirmPage = () => {
   const navigation = useNavigation();
@@ -41,7 +41,7 @@ const OrderConfirmPage = () => {
       {/* Your Items */}
       <Text style={styles.sectionTitle}>YOUR ITEMS</Text>
       <View style={styles.itemCard}>
-        <Image
+        <FastImage
           source={require('../../../../../assets/Icons/Op.png')}
           style={styles.productImage}
         />
@@ -59,7 +59,7 @@ const OrderConfirmPage = () => {
   <Text style={styles.notificationText}>
     Turn ON notifications to receive your order updates!
   </Text>
-  <Image
+  <FastImage
     source={require('../../../../../assets/Icons/Notification.png')}
     style={styles.notificationImage}
   />
@@ -71,7 +71,7 @@ const OrderConfirmPage = () => {
         <Text style={styles.thankYouText}>
           Thank you for your purchase — we look forward to seeing you again soon.
         </Text>
-        <Image
+        <FastImage
   source={require('../../../../../assets/Icons/Bag.png')}
   style={[styles.thankYouImage, { transform: [{ rotate: '45deg' }] }]}
 />

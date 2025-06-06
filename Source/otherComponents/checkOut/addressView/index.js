@@ -1,7 +1,8 @@
-import { View, Text,TouchableOpacity, Image } from 'react-native'
+import { View, Text,TouchableOpacity } from 'react-native'
 import React from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 export default function AddressView(props) {
   return (
@@ -25,7 +26,7 @@ export default function AddressView(props) {
                   Got another doorstep in mind? Add your new spot here
                 </Text>
                 <TouchableOpacity onPress={() => props?.navigation.navigate('CreateAddressScreen')} style={styles.addAddressButton}>
-                  <Image 
+                  <FastImage 
                     style={styles.addIcon} 
                     source={require('../../../../assets/Icons/add_home.png')}
                   />

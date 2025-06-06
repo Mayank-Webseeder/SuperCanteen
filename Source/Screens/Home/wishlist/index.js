@@ -5,13 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
-  Image,
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomSearchInput from '../../../Components/searchInput';
 import { WishlistProducts } from '../../../Mock/Data/WishlistProduct';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const categories = ['All', 'Watches', 'Shoes', 'Bags', 'Sunglasses', 'Smartwatch'];
 
@@ -64,7 +64,7 @@ const WishlistScreen = ({navigation}) => {
       </TouchableOpacity>
 
       {/* Product Image */}
-      <Image source={item.image} style={styles.image} />
+      <FastImage source={item.image} style={styles.image} />
 
       {/* Product Info */}
       <View style={styles.content}>

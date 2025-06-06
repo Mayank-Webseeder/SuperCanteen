@@ -2,37 +2,36 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   FlatList,
-  Image,
   Dimensions,
-  ActivityIndicator,
+  Text
 } from 'react-native';
 import { Height , Width } from '../../../constants';
 import { useSelector, useDispatch } from 'react-redux';
 import { getBrands } from '../../../redux/slices/brandSlice';
 import {formatBrandData} from '../../../utils/dataFormatters'
-import { COLORS } from '../../../constants';
 import { styles } from './styles';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
+import { stripHtml } from '../../../utils/validation';
+import LinearGradient from 'react-native-linear-gradient';
+import FastImage from 'react-native-fast-image';
 
 const Brandcarousel = () => {
-  const dispatch = useDispatch();
+  
+  const SCREEN_WIDTH = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef();
 
-  const width =  SCREEN_WIDTH - Width(40);
-  const height =   Height(150);
-  const radius =  Width(14);
+  const width = SCREEN_WIDTH - Width(40);
+  const height = Height(150);
+  const radius = Width(14);
 
-   const { brands, loading } = useSelector((state) => state.brand);
+  const { brands, loading } = useSelector((state) => state.brand);
+  const dispatch = useDispatch();
+  
+  useEffect(() => {
+    dispatch(getBrands());
+  }, []);
 
-    useEffect(() => {
-       dispatch(getBrands());
-     }, []);
-   
-     if (loading) return <View style={styles.loadingContainer}><ActivityIndicator color={COLORS.green}  /></View>;
-     const formattedBrands = formatBrandData(brands);
-
+  const formattedBrands = formatBrandData(brands); // ✅ Moved above the return
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -42,22 +41,34 @@ const Brandcarousel = () => {
 
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.card, { width, borderRadius: radius  }]}>
-        <Image
-      source={{uri:item.image}}
-      style={{
-        resizeMode:"contain",
-        width: '100%',
-        height,
-        borderRadius: radius ?? 1,
-        borderWidth: 1,
-        borderColor: '#E3E3E3',
-        
-      }}
-    />
+ const renderItem = ({ item }) => (
+  <View style={[styles.card, { width, borderRadius: radius, overflow: 'hidden' }]}>
+    <View style={{ position: 'relative' }}>
+      <FastImage
+        source={{ uri: item.image }}
+        style={{
+          resizeMode: 'cover',
+          width: '100%',
+          height,
+          borderRadius: 12,
+        }}
+      />
+
+      {/* 🟢 Funky Brand Name at Top-Right */}
+      <Text style={styles.brandName}>{item.name}</Text>
+
+      {/* 🟣 Funky Bottom Overlay with Gradient */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.6)']}
+        style={styles.bottomGradient}
+      >
+        <Text numberOfLines={2} style={styles.brandAbout}>
+          {stripHtml(item.aboutTheBrand)}
+        </Text>
+      </LinearGradient>
     </View>
-  );
+  </View>
+);
 
   return (
     <View style={styles.container}>
@@ -67,16 +78,17 @@ const Brandcarousel = () => {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        keyExtractor={(item, index) => item._id?.toString() || index.toString()}
         snapToAlignment="center"
         decelerationRate="fast"
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewConfigRef.current}
+        contentContainerStyle={styles.contentContainerStyle}
       />
 
       <View style={styles.pagination}>
-        {(data || []).map((_, index) => (
+        {(formattedBrands || []).map((_, index) => (
           <View
             key={index}
             style={[
@@ -91,6 +103,8 @@ const Brandcarousel = () => {
     </View>
   );
 };
+
+
 
 export default Brandcarousel;
 

@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
@@ -13,6 +12,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { Height } from "@constants";
 import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const PaymentMethodScreen = ({ navigation }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -188,7 +188,7 @@ const UPIOption = ({ upi, isSelected, onSelect }) => {
       <View style={styles.upiRadioButton}>
         {isSelected && <View style={styles.upiRadioButtonSelected} />}
       </View>
-      <Image source={upi.logo} style={styles.upiLogo} />
+      <FastImage source={upi.logo} style={styles.upiLogo} />
       <Text style={styles.upiText}>{upi.name}</Text>
     </TouchableOpacity>
   );
@@ -199,7 +199,7 @@ const PriceDetails = ({ totalAmount, priceDetails }) => {
   return (
     <View style={styles.priceDetailsContainer}>
       <View style={styles.priceHeader}>
-        <Image 
+        <FastImage 
           source={require('../../../../../assets/Icons/money_bag.png')}
           style={styles.moneyIcon}
         />

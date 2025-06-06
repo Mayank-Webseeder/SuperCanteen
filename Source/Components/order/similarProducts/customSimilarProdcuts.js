@@ -3,10 +3,10 @@ import {
   View,
   Text,
   FlatList,
-  Image
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const CustomSimilarProducts = ({ cardHeight = 240, cardWidth = 160, data }) => {
   const renderItem = ({ item }) => {
@@ -23,7 +23,7 @@ const CustomSimilarProducts = ({ cardHeight = 240, cardWidth = 160, data }) => {
 
     return (
       <View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
-        <Image
+        <FastImage
           source={typeof item.image === 'string' ? { uri: item.image } : item.image}
           style={styles.image}
           resizeMode="cover"

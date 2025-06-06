@@ -2,13 +2,18 @@ import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
 import { Height } from '../../../constants'
 
-export default function HeaderRow({navigation,title,containerStyle}) {
+export default function HeaderRow({navigation, title, containerStyle, selectedCategoryId, categoryData}) {
   return (
      <View style={[styles.row,{...containerStyle}]}>
             <Text style={styles.textStyle}>{title}</Text>
-            <Text style={styles.viewAll} onPress={() => navigation.navigate('Products',{title:title})}>
+            {/* <Text style={styles.viewAll} 
+            onPress={() => navigation.navigate('Products', { 
+          title: title,
+          selectedCategory: selectedCategoryId,
+          categoryData: categoryData,
+        })}>
             View More
-        </Text>
+        </Text> */}
     </View>
   )
 }

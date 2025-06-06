@@ -1,8 +1,9 @@
-import { View, Text,Image, TouchableOpacity } from 'react-native'
+import { View, Text,TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Height } from '../../../constants'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 export default function BankOfferView(props) {
   return (
@@ -14,10 +15,10 @@ export default function BankOfferView(props) {
           
           <View style={styles.bankContainer}>
             <View style={styles.bankLogos}>
-              <Image source={require('../../../../assets/Icons/Banks/b1.png')} style={styles.bankLogo} />
-              <Image source={require('../../../../assets/Icons/Banks/b2.jpg')} style={styles.bankLogo} />
-              <Image source={require('../../../../assets/Icons/Banks/b3.png')} style={styles.bankLogo} />
-              <Image source={require('../../../../assets/Icons/Banks/b4.png')} style={styles.bankLogo} />
+              <FastImage source={require('../../../../assets/Icons/Banks/b1.png')} style={styles.bankLogo} />
+              <FastImage source={require('../../../../assets/Icons/Banks/b2.jpg')} style={styles.bankLogo} />
+              <FastImage source={require('../../../../assets/Icons/Banks/b3.png')} style={styles.bankLogo} />
+              <FastImage source={require('../../../../assets/Icons/Banks/b4.png')} style={styles.bankLogo} />
             </View>
             
             <TouchableOpacity onPress={() => props?.navigation.navigate('Offers')} style={styles.viewAllButton}>

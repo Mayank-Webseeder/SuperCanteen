@@ -3,7 +3,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Image,
   BackHandler,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,6 +15,7 @@ import CustomAuthHeader from '../../../Components/CustomAuthHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import { loginUser } from '../../../redux/slices/authSlice';
 import { CheckBoxIcon } from '../../../../assets/Icons/svgIcons/checkBoxIcon';
+import FastImage from 'react-native-fast-image';
 
 const SigninScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -150,7 +150,7 @@ const SigninScreen = ({ navigation }) => {
       </View>
 
       <TouchableOpacity onPress={onGoogleSignIn} activeOpacity={0.7} style={styles.googleButton}>
-        <Image source={require('../../../../assets/Icons/GoogleIcon.png')} style={styles.googleIcon} />
+        <FastImage source={require('../../../../assets/Icons/GoogleIcon.png')} style={styles.googleIcon} />
       </TouchableOpacity>
 
       <View style={styles.footerTextContainer}>

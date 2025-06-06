@@ -1,9 +1,10 @@
-import {ImageBackground, View, Text, Image} from 'react-native';
+import {ImageBackground, View, Text} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import CustomAuthButton from '../../../Components/CustomAuthButton';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const welcomeScreen = ({navigation}) => {
   return (
@@ -24,7 +25,7 @@ const welcomeScreen = ({navigation}) => {
         </View> 
 
          <View style={styles.cardContainer}>
-          <Image
+          <FastImage
             source={require('../../../../assets/Background/LinearGradient2.png')}
             style={styles.cardImage}
           />

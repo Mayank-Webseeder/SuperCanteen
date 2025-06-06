@@ -1,10 +1,11 @@
-import { View, Text, Pressable, Image } from 'react-native'
+import { View, Text, Pressable } from 'react-native'
 import React from 'react'
 import { styles } from './styles'
 import { LocationIcon } from '../../../../assets/Icons/svgIcons/location_on'
 import CustomSearch from '../../../Components/searchInput'
 import Ionicons from 'react-native-vector-icons/Ionicons'; 
 import { Height } from '../../../constants'
+import FastImage from 'react-native-fast-image'
 
 export default function Header({navigation}) {
   return (
@@ -21,7 +22,7 @@ export default function Header({navigation}) {
            </View>
            <View style={styles.innerView}>
              <Pressable onPress={() => navigation.navigate('Account')}>
-               <Image  style={styles.image} source={require('../../../../assets/Icons/ProfileIcon.png')} />
+               <FastImage  style={styles.image} source={require('../../../../assets/Icons/ProfileIcon.png')} />
              </Pressable>
            </View>
          </View>
@@ -42,7 +43,7 @@ export default function Header({navigation}) {
                      />
                      </Pressable>
                      <Pressable onPress={() => navigation.navigate('Cart')}>
-                       <Image style={styles.cartImg} source={require('../../../../assets/Icons/shopping_cart.png')} />
+                       <FastImage style={styles.cartImg} source={require('../../../../assets/Icons/shopping_cart.png')} />
                      </Pressable>
                    </View>
          </View>

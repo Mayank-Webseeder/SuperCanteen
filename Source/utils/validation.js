@@ -42,3 +42,8 @@ export const validateName = name => {
   }
   return null;
 };
+
+
+export const stripHtml = (html) => {
+  return html.replace(/<[^>]*>?/gm, '');
+};

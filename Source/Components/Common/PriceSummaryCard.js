@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { FontSize } from '../../constants';
+import FastImage from 'react-native-fast-image';
 
 const PriceSummaryCard = () => {
   return (
@@ -12,7 +13,7 @@ const PriceSummaryCard = () => {
       <View style={styles.card}>
         {/* Title Section */}
         <View style={styles.titleContainer}>
-          <Image 
+          <FastImage 
             style={styles.moneyIcon} 
             source={require('../../../assets/Icons/money_bag.png')}
           />

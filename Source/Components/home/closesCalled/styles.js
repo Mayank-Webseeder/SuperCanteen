@@ -5,7 +5,6 @@ export const styles = StyleSheet.create({
   wrapper: {
     position: 'relative',
     paddingBottom: Height(20),
-    marginTop: Height(20),
   },
   background: {
     position: 'absolute',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomAuthButton from '../../../../Components/CustomAuthButton';
 import {  Width } from "@constants";
@@ -8,6 +8,7 @@ import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
 import CouponView from '../../../../otherComponents/checkOut/couponView';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const ConfirmOrderScreen = ({ navigation }) => {
   return (
@@ -20,7 +21,7 @@ const ConfirmOrderScreen = ({ navigation }) => {
 
         {/* Delivery Date */}
         <View style={styles.deliveryCard}>
-          <Image
+          <FastImage
             source={require('../../../../../assets/MensWatch/item1.png')}
             style={styles.deliveryImage}
           />

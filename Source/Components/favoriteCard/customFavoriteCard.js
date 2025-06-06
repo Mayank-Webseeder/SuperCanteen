@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   FlatList,
-  Image,
   Text,
   TouchableOpacity,
   Animated,
@@ -11,6 +10,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 import { COLORS } from '../../constants';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const DATA = [
   {
@@ -94,7 +94,7 @@ const WatchCard = ({ item, useGradientBackground, isFavourite, onToggleFavourite
             <Text style={styles.adBadgeText}>SPONSORED</Text>
           </View>
 
-          <Image source={item.image} style={styles.image} resizeMode="contain" />
+          <FastImage source={item.image} style={styles.image} resizeMode="contain" />
 
           {/* Brand and rating */}
           <View style={styles.brandContainer}>

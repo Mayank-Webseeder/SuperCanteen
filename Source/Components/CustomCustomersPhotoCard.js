@@ -2,11 +2,11 @@ import React from 'react';
 import {
   View,
   FlatList,
-  Image,
   Text,
   StyleSheet,
 } from 'react-native';
 import { Height, Width } from '../constants';
+import FastImage from 'react-native-fast-image';
 
 const CustomCustomersPhotoCard = ({
   cardHeight = Height(90),
@@ -16,7 +16,7 @@ const CustomCustomersPhotoCard = ({
   const renderItem = ({ item }) => {
     return (
       <View style={[styles.card, { height: cardHeight, width: cardWidth }]}>
-        <Image
+        <FastImage
           source={typeof item.image === 'string' ? { uri: item.image } : item.image}
           style={styles.image}
           resizeMode="cover"

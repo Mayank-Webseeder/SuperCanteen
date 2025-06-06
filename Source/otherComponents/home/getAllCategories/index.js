@@ -1,22 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { getCategories } from '../../../redux/slices/categorySlice';
+import React from 'react';
+import { View } from 'react-native';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
-import { useSelector, useDispatch } from 'react-redux';
 import { styles } from './styles';
-import { COLORS } from "@constants";
 import { formatCategoryData } from '../../../utils/dataFormatters';
 
-const GetCategory = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const { categories, loading } = useSelector((state) => state.category);
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  
-  useEffect(() => {
-    dispatch(getCategories());
-  }, []);
-
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator color={COLORS.green}  /></View>;
+const GetCategory = ({ selectedIndex,setSelectedIndex,categories}) => {
   const formattedCategories = formatCategoryData(categories);
 
   return (
@@ -27,7 +15,6 @@ const GetCategory = ({ navigation }) => {
         horizontal
         selected={selectedIndex}
         onSelect={setSelectedIndex}
-        navigation={navigation}
         bgColor="#D4E7F2"
         width={52}
         height={52}

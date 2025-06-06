@@ -2,12 +2,12 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   FlatList,
   TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient'; // Ensure it's installed
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const WatchCard = ({ item, index,navigation }) => {
   return (
@@ -22,7 +22,7 @@ const WatchCard = ({ item, index,navigation }) => {
       end={{ x: 0, y: 1 }}
       style={styles.card}
     >
-      <Image source={item.image} style={styles.image} resizeMode="contain" />
+      <FastImage source={item.image} style={styles.image} resizeMode="contain" />
       <View style={styles.cardFooter}>
         <Text style={styles.cardText} numberOfLines={1}>
           {item.label}
@@ -37,7 +37,7 @@ const WatchCard = ({ item, index,navigation }) => {
 const ClosesCalled = ({ data, containerStyle,navigation ,listContentStyle }) => {
   return (
     <View style={[styles.wrapper,{...containerStyle}]}>
-      <Image
+      <FastImage
         style={styles.background}
         source={require('../../../../assets/Background/SliderBg.png')}
       />

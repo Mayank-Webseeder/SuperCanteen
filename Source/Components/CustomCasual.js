@@ -2,15 +2,15 @@ import React, { useRef, useState } from 'react';
 import {
   View,
   FlatList,
-  Image,
   StyleSheet,
   Dimensions,
 } from 'react-native';
 import {  Height, Width } from '../constants';
+import FastImage from 'react-native-fast-image';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHorizontal, borderWidth,resizeMode}) => {
+const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHorizontal, borderWidth,resizeMode,cardStyle}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef();
 
@@ -27,8 +27,8 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
   const renderItem = ({ item }) => (
-    <View style={[styles.card, { width, borderRadius: radius , borderWidth: borderWidth  }]}>
-        <Image
+    <View style={[styles.card, { width, borderRadius: radius , borderWidth: borderWidth,...cardStyle  }]}>
+        <FastImage
       source={item.image}
       style={{
         resizeMode: resizeMode ? resizeMode : "contain",
@@ -59,8 +59,7 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewConfigRef.current}
       />
-
-      <View style={styles.pagination}>
+{data.length > 1 &&   <View style={styles.pagination}>
         {(data || []).map((_, index) => (
           <View
             key={index}
@@ -72,7 +71,8 @@ const CustomCasual = ({ data = [], cardWidth, cardHeight, cardRadius  ,paddingHo
             ]}
           />
         ))}
-      </View>
+      </View> }
+    
     </View>
   );
 };

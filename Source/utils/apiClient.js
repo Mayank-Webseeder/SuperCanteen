@@ -15,6 +15,8 @@ export const getData = async (endpoint) => {
   return response.data;
 };
 
+
+
 // Generic POST request
 export const postData = async (endpoint, body) => {
   const response = await apiClient.post(endpoint, body);

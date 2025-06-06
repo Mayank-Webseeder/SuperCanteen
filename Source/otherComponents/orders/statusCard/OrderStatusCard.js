@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const OrderStatusCard = ({ order, actions, onActionPress }) => {
   const getStatusText = () => {
@@ -22,7 +23,7 @@ const OrderStatusCard = ({ order, actions, onActionPress }) => {
     <View style={styles.card}>
       <View style={styles.productInfo}>
         <View style={styles.row}>
-           <Image source={order.product.image} style={styles.image}/>
+           <FastImage source={order.product.image} style={styles.image}/>
        <View style={styles.mainContainerStyle}>
 <Text style={styles.brand}>{order.product.brand}</Text>
         <Text style={styles.name}>{order.product.name}</Text>

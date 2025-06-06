@@ -1,10 +1,11 @@
 import React from 'react';
-import {  Text, View, Image } from 'react-native';
+import {  Text, View } from 'react-native';
 import CustomAuthButton from '../../CustomAuthButton';
 import { Height } from '../../../constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const OrderCard = ({
   onCancel,
@@ -24,7 +25,7 @@ const OrderCard = ({
     <View style={styles.card}>
       <View style={styles.row}>
         <View style={styles.iconContainer}>
-          <Image
+          <FastImage
             style={styles.icon}
             source={item.image}
           />
@@ -35,7 +36,7 @@ const OrderCard = ({
   <Text style={styles.productName}>{item.name}</Text>
 
 {status === "arriving" &&  <View style={styles.productRow}>
-            <Image
+            <FastImage
               style={styles.truckIcon}
               source={require('../../../../assets/Icons/delivery_truck_speed.png')}
             />
@@ -57,7 +58,7 @@ const OrderCard = ({
 {status === "delivered" &&
 <>
 <View style={styles.productRow}>
-      <Image
+      <FastImage
                     style={styles.truckIcon}
                     source={require('../../../../assets/Icons/deployed_code_account.png')}
                   />
@@ -147,7 +148,7 @@ const OrderCard = ({
   <>
   
            <View style={styles.productRow}>
-                      <Image
+                      <FastImage
                         style={styles.truckIcon}
                         source={require('../../../../assets/Icons/currency_rupee_circle.png')}
                       />

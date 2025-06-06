@@ -4,11 +4,11 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Height, Width } from '../../constants';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const CustomProductCard = ({
   data = [],
@@ -94,15 +94,15 @@ const CustomProductCard = ({
           },
         ]}
       >
-        <Image
-          source={item.image}
+        <FastImage
+          source={typeof item.image === 'string' ? { uri: item.image } : item.image}
           style={{ width: imageSize, height: imageSize }}
           resizeMode="contain"
         />
       </View>
 
       <View style={[styles.topRow, { width: width - 4 }]}>
-        <Text style={styles.label}>{item.label || 'Label'}</Text>
+        <Text style={styles.label}>{item.name}</Text>
         <TouchableOpacity onPress={() => onToggleFavourite(index)} style={{ marginHorizontal: Height(3) }}>
           <Ionicons
             name={isFavourite ? 'heart' : 'heart-outline'}
@@ -117,16 +117,14 @@ const CustomProductCard = ({
         numberOfLines={1}
         style={[styles.title, { width }]}
       >
-        {item.title || item.name}
+        {item.description}
       </Text>
-
       <Text style={[styles.price, { width }]}>
-        {item.price ? `₹${item.price}` : ''}
+        {item.mrp ? `₹${item.mrp}` : ''}
       </Text>
     </TouchableOpacity>
   );
 }}
-
       />
     </View>
   );

@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import { useNavigation } from '@react-navigation/native';
+import FastImage from 'react-native-fast-image';
 
 const OrderConfirm = () => {
   const navigation = useNavigation();
@@ -22,7 +23,7 @@ const OrderConfirm = () => {
         <Text style={styles.subtitle}>
           Your order's on its way — and we're already excited for your next visit!
         </Text>
-        <Image
+        <FastImage
           source={require('../../../../assets/OrderPlaced.png')}
           style={styles.image}
           resizeMode="contain"

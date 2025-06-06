@@ -3,7 +3,6 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   TouchableOpacity,
   Modal,
   Animated,
@@ -15,6 +14,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const cartItems = [
   {
@@ -209,7 +209,7 @@ const CartCard = ({
         </View>
       </TouchableOpacity>
 
-      <Image source={item.image} style={styles.image} />
+      <FastImage source={item.image} style={styles.image} />
       <View style={styles.details}>
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={1}>

@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
-  ScrollView,
   FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -16,6 +14,7 @@ import SortIcon from 'react-native-vector-icons/MaterialIcons';
 import { dummyOrders } from '../../../Mock/Data/OrdersData';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
+import FastImage from 'react-native-fast-image';
 
 export default function HelpScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -69,7 +68,7 @@ export default function HelpScreen({ navigation }) {
           Your order's on its way — and we’re already excited for your next visit!
         </Text>
       </View>
-         <Image
+         <FastImage
           source={require('../../../../assets/Background/help-order.png')} 
           style={styles.image}
           resizeMode={'contain'}
@@ -78,7 +77,7 @@ export default function HelpScreen({ navigation }) {
 
       {/* Section 2 */}
       <View style={styles.card}>
-        <Image
+        <FastImage
           source={require('../../../../assets/Background/help-chat.png')} 
           style={[styles.image,{right:Width(20)}]}
           resizeMode="contain"

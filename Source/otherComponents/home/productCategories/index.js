@@ -1,44 +1,41 @@
-import { View } from 'react-native'
-import React from 'react'
-import HeaderRow from '../headerRow'
-import CustomCategoryList from '../../../Components/CustomCategoryList'
-import Fashion from '../../../Mock/Data/Fashion'
-import { FontSize, Height, Width } from '../../../constants'
-import BeautyData from '../../../Mock/Data/BeautyData'
-import ElectronicsHome from '../../../Mock/Data/ElectronicsHome'
+import React, { useMemo } from 'react';
+import { View } from 'react-native';
+import HeaderRow from '../headerRow';
+import CustomCategoryList from '../../../Components/CustomCategoryList';
+import { FontSize, Height, Width } from '../../../constants';
+import { IMG_URL } from '../../../api';
+import { formatSubcategoryData } from '../../../utils/dataFormatters';
+import { useSelector } from 'react-redux';
 
-export default function ProductCategories(props) {
+export default function ProductCategories({
+  navigation,
+  subcategories = [],
+  selectedCategoryId,
+  selectedCategoryItems = {},
+  setSelectedCategoryItems,
+}) {
+  if (!subcategories.length) return null;
+  const { categories } = useSelector((state) => state.category);
+  const currentCategoryData = categories.find(cat => cat._id === selectedCategoryId);
+  const formattedSubcategories = useMemo(() => formatSubcategoryData(subcategories), [subcategories]); 
+  const formattedCurrentCategoryData = currentCategoryData
+    ? {
+        ...currentCategoryData,
+        image: `${IMG_URL}${currentCategoryData.image}`,
+      }
+    : null;
+ 
   return (
-   <>
-    <View key="fashion">
-      <HeaderRow title={'Fashion'} navigation={props.navigation}/>
-       <CustomCategoryList
-        navigation={props.navigation}
-        data={Fashion}
-        horizontal={false}
-        numColumns={3}
-        bgColor="#D4DEF226"
-        width={Width(95)}
-        height={Height(105)}
-        borderRadius={Width(5)}
-        selectedBorderColor="#008ECC"
-        textColor="#333"
-        textStyle={{ fontSize: FontSize(13),marginBottom:Height(12) }}
-        containerStyle={{ paddingTop: Height(8),marginHorizontal:Width(12)}}
-        gap={Width(20)}
-        imageSize={Height(80)}
-        selected={props.selectFashion}
-        onSelect={(name) => props.setSelectedFashion(name)}
-       
+    <View style={{ marginBottom: Height(5) }}>
+      <HeaderRow
+   title={subcategories[0]?.category?.name || 'Category'}
+  navigation={navigation}
+  selectedCategoryId={subcategories[0]?.category?._id}
+  categoryData={formattedCurrentCategoryData}
       />
-      
-    </View>
-
-   <View key="beauty">
-        <HeaderRow title={'Beauty & Wellness'} navigation={props.navigation}/>
-       <CustomCategoryList
-        navigation={props.navigation}
-       data={BeautyData}
+      <CustomCategoryList
+        navigation={navigation}
+        data={formattedSubcategories}
         horizontal={false}
         numColumns={3}
         bgColor="#D4DEF226"
@@ -47,39 +44,18 @@ export default function ProductCategories(props) {
         borderRadius={Width(5)}
         selectedBorderColor="#008ECC"
         textColor="#333"
-        textStyle={{ fontSize: FontSize(13),marginBottom:Height(12) }}
-        containerStyle={{ paddingTop: Height(13),marginHorizontal:Height(12)}}
+        textStyle={{ fontSize: FontSize(13), marginBottom: Height(12) }}
+        containerStyle={{ paddingTop: Height(8), marginHorizontal: Width(12) }}
         gap={Width(20)}
         imageSize={Height(70)}
-         selected={props.selectBeauty}
-        onSelect={(name) => props.setSelectedBeauty(name)}
+        selected={selectedCategoryItems[selectedCategoryId] || ''}
+        onSelect={(name) =>
+          setSelectedCategoryItems((prev) => ({
+            ...prev,
+            [selectedCategoryId]: name,
+          }))
+        }
       />
-      
     </View>
-
-       <View key="electronics">
-        <HeaderRow title={'Electronics & Home Essentials'} navigation={props.navigation}/>
-       <CustomCategoryList
-        navigation={props.navigation}
-        data={ElectronicsHome}
-        horizontal={false}
-        numColumns={3}
-        bgColor="#D4DEF226"
-        width={Width(90)}
-        height={Height(105)}
-        borderRadius={Width(5)}
-        selectedBorderColor="#008ECC"
-        textColor="#333"
-       textStyle={{ fontSize: FontSize(13),marginBottom:Height(12) }}
-         containerStyle={{ paddingTop: Height(13),marginHorizontal:Height(13)}}
-        gap={Width(20)}
-        imageSize={Height(70)}
-         selected={props.selectElectronics}
-        onSelect={(name) => props.setSelectedElectronics(name)}
-      />
-     
-    </View> 
-
-   </>
-  )
+  );
 }

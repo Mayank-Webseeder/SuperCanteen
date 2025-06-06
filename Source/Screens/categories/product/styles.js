@@ -9,7 +9,9 @@ export const styles = StyleSheet.create({
   },
   mainView: {
     paddingHorizontal: Height(13),
-    
+  },
+  loadingContainer:{
+    marginTop:Height(28)
   },
   headerView:{
     marginHorizontal:10
@@ -21,6 +23,10 @@ export const styles = StyleSheet.create({
   sectionSpacing: {
     marginTop: 10,
     marginBottom: Height(5),
+  },
+  cardStyle:{
+   borderColor:COLORS.border,
+   borderWidth:1
   },
   searchResultsContainer: {
     padding: 10,

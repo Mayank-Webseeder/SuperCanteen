@@ -1,5 +1,5 @@
 import React from 'react';
-import {  Text, ScrollView,View, Image, Linking, TouchableOpacity } from 'react-native';
+import {  Text, ScrollView,View, Linking, TouchableOpacity } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import OrderStatusCard from '../../../otherComponents/orders/statusCard/OrderStatusCard';
 import OrderTimeline from '../../../otherComponents/orders/timeLine/OrderTimeline';
@@ -9,6 +9,7 @@ import CustomSimilarProducts from '../../../Components/order/similarProducts/cus
 import PriceSummaryCard from "@components/Common/PriceSummaryCard";
 import { SimilarProductData } from '../../../Mock/Data/SimilarProductData';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const OrderDetailScreen = ({ route, navigation }) => {
   const { order } = route.params;
@@ -67,7 +68,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
               <PriceSummaryCard/>
                  {order.status !== 'cancelled' && <View style={styles.paymentBox}>
         <View style={styles.row}>
-            <Image
+            <FastImage
              style={styles.currencyIcon}
              source={require('../../../../assets/Icons/money_bag.png')}
            />

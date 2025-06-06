@@ -4,10 +4,10 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
-  Image,
+  StyleSheet
 } from 'react-native';
 import { COLORS, FontSize, Height, Width } from '../constants';
+import FastImage from 'react-native-fast-image';
 
 const CustomCategoryList = ({
   data = [],
@@ -26,7 +26,8 @@ const CustomCategoryList = ({
   numColumns = 1,
   gap = Width(14),
   navigation,
-  contentContainerStyle
+  contentContainerStyle,
+  imageStyle
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -38,15 +39,16 @@ const CustomCategoryList = ({
         data={data}
         keyExtractor={(item) => item.name}
         contentContainerStyle={[{paddingHorizontal: Width(10)},contentContainerStyle]}
-     renderItem={({ item, index }) => {
-  const isSelected = selected === index; // compare using index
+     renderItem={({ item }) => {
+  const isSelected = selected === item.id; // compare using index
 
   return (
     <TouchableOpacity
       onPress={() => {
-        onSelect(index); // pass index instead of item.name
-        if (item.screen && navigation) {
-          navigation.navigate(item.screen, { title: item.name });
+        onSelect(item?.id); 
+        if (navigation) {
+          navigation.navigate('Products', {  selectedCategory: item.id,
+            categoryData: item});
         }
       }}
       style={[styles.categoryContainer, { marginRight: gap }]}
@@ -64,11 +66,16 @@ const CustomCategoryList = ({
           borderColor: isSelected ? selectedBorderColor : 'transparent',
         }}
       >
-        <Image
-          source={item.image}
+        <FastImage
+          source={
+    typeof item.image === 'string'
+      ? { uri: item.image } 
+      : item.image          
+  }
           style={{
             width: imageSize,
             height: imageSize,
+            ...imageStyle
           }}
           resizeMode="cover"
         />

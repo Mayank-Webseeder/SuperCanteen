@@ -1,8 +1,8 @@
-import {  Text, View, FlatList,Image } from 'react-native';
+import {  Text, View, FlatList, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import CustomHeader from '../../../Components/CustomHeader';
 import CustomSearchInput from '../../../Components/searchInput';
-import {  Height, Width } from '../../../constants';
+import {  COLORS, Height, Width } from '../../../constants';
 import CustomCasual from '../../../Components/CustomCasual';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
 import CustomProductCard from '../../../Components/productCard';
@@ -15,12 +15,12 @@ import ClosesCalled from '../../../Components/home/closesCalled/closesCalled';
 import ClosestProductsData from '../../../Mock/Data/closestProductData';
 import ProducsData from '../../../Mock/Data/productsData';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductsBySubcategory } from '../../../redux/slices/subCategoryProductSlice';
+import {formatProductData} from '../../../utils/dataFormatters'
 
-const Sliders = [
-  { id: 1, image: require('../../../../assets/Sliders/banner.png') },
-  { id: 2, image: require('../../../../assets/Sliders/banner.png') },
-  { id: 3, image: require('../../../../assets/Sliders/banner.png') },
-];
+
 
 const allDataSources = {
   fashionData: FashionData,
@@ -34,10 +34,37 @@ const ProductsScreen = ({ navigation , route }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState(null);
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [selectedProduct,setSelectedProduct] = useState(null)
-  const [selectedItem,setSelectedItem] = useState(null)
-  const { title } = route?.params;
+   const { productsBySubcategory, loading } = useSelector(state => state.subCategoryProducts);
+   const { selectedCategory, categoryData } = route?.params || {};
+   const dispatch = useDispatch() 
+  const currentProducts = formatProductData(
+  selectedCategory ? productsBySubcategory[selectedCategory] || [] : []
+);
+
+    useEffect(() => {
+    if (selectedCategory) {
+      dispatch(fetchProductsBySubcategory(selectedCategory));
+    }
+  }, [selectedCategory, dispatch]);
+
+
+   const [currentCategory, setCurrentCategory] = useState(
+    selectedCategory || null
+  );
+
+  const Sliders = [
+  {
+    id: categoryData.id,
+    image: { uri: categoryData.image }
+  }
+];
+
+  useEffect(() => {
+    if (selectedCategory && !currentCategory) {
+      setCurrentCategory(selectedCategory);
+    }
+  }, [selectedCategory]);
+  
 
   useEffect(() => {
     if (searchQuery.length > 0) {
@@ -79,6 +106,16 @@ const ProductsScreen = ({ navigation , route }) => {
     }
   };
 
+
+    if (loading) {
+    return (
+      <View style={styles.loadingContainer} >
+        <ActivityIndicator size="large" color={COLORS.green} />
+      </View>
+    );
+  }
+
+
 return (
   <View style={styles.container}>
     <FlatList
@@ -87,7 +124,7 @@ return (
       ListHeaderComponent={
         <View>
           <View style={styles.headerView}>
-          <CustomHeader  showRightIcons navigation={navigation} label={title ? title : "Fashion"} />
+          <CustomHeader  showRightIcons navigation={navigation} label={categoryData?.name} />
           </View>
           <View style={styles.searchContainer}>
             <CustomSearchInput 
@@ -103,7 +140,7 @@ return (
             <>
               <View style={styles.mainView}>
                   <View style={styles.sectionSpacing}>
-                <CustomCasual data={Sliders} borderWidth={0} cardRadius={Height(15)} resizeMode={"cover"} />
+                <CustomCasual cardStyle={styles.cardStyle} data={Sliders} borderWidth={0} cardRadius={Height(15)} resizeMode={"cover"} />
               </View>
               <View style={styles.sectionSpacing}>
                 <CustomCategoryList
@@ -122,23 +159,25 @@ return (
               <HorizontalLine/>
               <View style={styles.mainView}>
                 <View style={styles.cardContainer}>
-                  <CustomProductCard
-                    bgColor="#D4DEF226"
-                    numColumns={3}
-                    width={Width(95)}
-                    height={Height(105)}
-                    horizontal={false}
-                    data={FashionData}
-                    imageSize={100}
-                    gap={20}
-                    navigation={navigation}
-                    borderRadius={Height(4)}
-                    selected={selectedProduct}
-                    onSelect={(index) => setSelectedProduct(index)}
-                  />
+                  {currentProducts.length > 0 ? (
+              <CustomProductCard
+                bgColor="#D4DEF226"
+                numColumns={3}
+                width={Width(95)}
+                height={Height(105)}
+                horizontal={false}
+                data={currentProducts}
+                imageSize={100}
+                gap={20}
+                navigation={navigation}
+                borderRadius={Height(4)}
+              />
+            ) : (
+             <></>
+            )}
                 </View>
                 <ClosesCalled navigation={navigation} key={"slider"} data={ClosestProductsData} containerStyle={styles.containerStyle} listContentStyle={styles.listContentStyle}/> 
-                <View style={styles.marginTop}>
+                {/* <View style={styles.marginTop}>
                   <CustomProductCard
                     bgColor="#D4DEF226"
                     numColumns={3}
@@ -154,12 +193,12 @@ return (
                     selected={selectedItem}
                     onSelect={(index) => setSelectedItem(index)}
                   />
-                </View>
+                </View> */}
               </View>
               <View style={styles.offerCardContainer} >
                 <View style={styles.rowContainer}>
                   <Text style={styles.textStyle} >SHOP BY OCASSION</Text>
-                  <Image style={styles.imageStyle} source={require('../../../../assets/Icons/av_timer.png')}/>
+                  <FastImage style={styles.imageStyle} source={require('../../../../assets/Icons/av_timer.png')}/>
                 </View>
                 <CustomOfferCard
                   enableBadg={false}
@@ -177,20 +216,24 @@ return (
                     <Text style={styles.searchSectionTitle}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                     </Text>
-                    <CustomProductCard
-                      bgColor="#D4DEF226"
-                      numColumns={3}
-                      width={Width(95)}
-                      height={Height(105)}
-                      horizontal={false}
-                      data={searchResults[key]}
-                      imageSize={100}
-                      gap={20}
-                      navigation={navigation}
-                      borderRadius={Height(4)}
-                      selected={selectedIndex}
-                     onSelect={(index) => setSelectedIndex(index)}
-                    />
+                   {currentProducts.length > 0 ? (
+              <CustomProductCard
+                bgColor="#D4DEF226"
+                numColumns={3}
+                width={Width(95)}
+                height={Height(105)}
+                horizontal={false}
+                data={currentProducts}
+                imageSize={100}
+                gap={20}
+                navigation={navigation}
+                borderRadius={Height(4)}
+              />
+            ) : (
+              <View >
+                <Text>No products found in this category</Text>
+              </View>
+            )}
                   </View>
                 )
               ))}
@@ -202,7 +245,7 @@ return (
         </View>
       }
       showsVerticalScrollIndicator={false}
-    />
+    /> 
   </View>
 );
 

@@ -209,8 +209,6 @@ const authSlice = createSlice({
          state.loading = false;
          })
       .addCase(resetPassword.rejected, (state, action) => {
-
-        console.log("ERROR OCCURED",action)
          state.loading = false;
          state.error = action.payload;
         })

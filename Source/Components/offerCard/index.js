@@ -2,12 +2,12 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { styles } from './styles';
+import FastImage from 'react-native-fast-image';
 
 const OfferCardItem = ({ item, enableBadg, enablePriceRow,navigation }) => {
   const { image, title, price, mrp, discount } = item;
@@ -30,7 +30,7 @@ const OfferCardItem = ({ item, enableBadg, enablePriceRow,navigation }) => {
         </View>
       )}
 
-      <Image
+      <FastImage
         source={image}
         style={styles.image}
         resizeMode="contain"
