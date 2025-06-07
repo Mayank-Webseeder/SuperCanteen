@@ -5,7 +5,8 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    paddingTop: Height(8)
+    paddingTop: Height(8),
+    paddingBottom:Height(30)
   },
   mainView: {
     paddingHorizontal: Height(13),
@@ -21,8 +22,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionSpacing: {
-    marginTop: 10,
     marginBottom: Height(5),
+  },
+  CasualStyle:{
+    marginTop:0
   },
   cardStyle:{
    borderColor:COLORS.border,
@@ -56,7 +59,7 @@ export const styles = StyleSheet.create({
     marginTop:10
   },
   containerStyle:{
-    marginTop:Height(-8)
+    marginTop:Height(-18)
   },
   marginTop:{
     marginTop: 20
@@ -94,6 +97,10 @@ export const styles = StyleSheet.create({
     paddingTop: 3
   },
   listContentStyle:{
-    marginLeft:Width(-10)
+    marginLeft:Width(-10),
+    marginBottom:Height(30)
+  },
+  productContainer:{
+    marginHorizontal:Width(0)
   }
 });

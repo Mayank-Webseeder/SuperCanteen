@@ -14,7 +14,8 @@ export const styles = StyleSheet.create({
     marginTop:Height(2)
   },
   textStyle:{
-    fontSize: FontSize(13.5) , marginHorizontal:10,fontFamily:'Inter-SemiBold'
+    fontSize: FontSize(13.5) , marginHorizontal:10,fontFamily:'Inter-SemiBold',
+    
   },
   image:{
      height: Height(24), width: Width(28),resizeMode:"cover" 

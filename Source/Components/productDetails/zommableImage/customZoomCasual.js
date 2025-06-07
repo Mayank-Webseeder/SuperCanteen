@@ -4,14 +4,16 @@ import {
   FlatList,
   StyleSheet,
   Dimensions,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableOpacity
 } from 'react-native';
-import { Height, Width } from '../constants';
 import FastImage from 'react-native-fast-image';
+import ImageZoomViewer from './ImageZoomViewer';
+import { Height, Width } from '@constants/index';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const CustomCasual = ({
+const CustomZoomCasual = ({
   data = [],
   cardWidth,
   cardHeight,
@@ -24,13 +26,15 @@ const CustomCasual = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loadingFirstImage, setLoadingFirstImage] = useState(true);
+  const [zoomVisible, setZoomVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
   const flatListRef = useRef();
 
   const width = cardWidth || SCREEN_WIDTH - Width(40);
   const height = cardHeight || Height(150);
   const radius = cardRadius || Width(14);
 
-  // 1. Fix for URL normalization
+  // Enhanced URL normalization
   const normalizeUri = (uri) => {
     if (!uri) return null;
     
@@ -43,15 +47,10 @@ const CustomCasual = ({
     // Remove any remaining double slashes in path
     normalized = normalized.replace(/([^:]\/)\/+/g, '$1');
     
-    // Ensure proper protocol
-    if (!normalized.startsWith('http')) {
-      normalized = `https://${normalized}`;
-    }
-    
     return normalized;
   };
 
-  // 2. Preload first image when data changes
+  // Preload first image specifically
   useEffect(() => {
     if (data.length > 0) {
       const firstImage = data[0];
@@ -67,17 +66,26 @@ const CustomCasual = ({
       
       if (firstImageUri) {
         const normalizedUri = normalizeUri(firstImageUri);
-        console.log('Preloading image:', normalizedUri);
         
         setLoadingFirstImage(true);
+        
+        // Preload only the first image with high priority
         FastImage.preload([{
           uri: normalizedUri,
           priority: FastImage.priority.high
         }]);
         
-        // Small timeout to ensure preload completes
-        setTimeout(() => setLoadingFirstImage(false), 100);
+        // Set a timeout to ensure first image has time to load
+        const timer = setTimeout(() => {
+          setLoadingFirstImage(false);
+        }, 300);
+        
+        return () => clearTimeout(timer);
+      } else {
+        setLoadingFirstImage(false);
       }
+    } else {
+      setLoadingFirstImage(false);
     }
   }, [data]);
 
@@ -92,26 +100,32 @@ const CustomCasual = ({
     minimumViewTime: 300
   });
 
-  const renderItem = ({ item, index }) => {
-    // 3. Enhanced source determination with fallbacks
-    let source = null;
-    let uri = '';
-    
-    if (typeof item === 'string') {
-      uri = item;
-    } else if (item?.image) {
-      uri = typeof item.image === 'string' ? item.image : item.image.uri;
-    } else if (item?.uri) {
-      uri = item.uri;
-    }
-    
+  const handleImagePress = (item) => {
+    const uri = typeof item === 'string' ? item : 
+               item?.image ? (typeof item.image === 'string' ? item.image : item.image.uri) : 
+               item?.uri ? item.uri : null;
     if (uri) {
-      source = { uri: normalizeUri(uri) };
-    } else if (typeof item === 'number') {
-      source = item; // Local require() images
+      setSelectedImage(normalizeUri(uri));
+      setZoomVisible(true);
     }
+  };
 
-    // 4. Special handling for first image
+  const getImageSource = (item) => {
+    if (typeof item === 'string') return { uri: normalizeUri(item) };
+    if (item?.image) {
+      return typeof item.image === 'string' 
+        ? { uri: normalizeUri(item.image) } 
+        : { uri: normalizeUri(item.image.uri) };
+    }
+    if (item?.uri) return { uri: normalizeUri(item.uri) };
+    if (typeof item === 'number') return item; // Local require() images
+    return null;
+  };
+
+  const renderItem = ({ item, index }) => {
+    const source = getImageSource(item);
+
+    // Special handling for first image loading
     if (index === 0 && loadingFirstImage) {
       return (
         <View style={[
@@ -130,78 +144,71 @@ const CustomCasual = ({
     }
 
     return (
-      <View style={[
-        styles.card,
-        { 
-          width, 
-          borderRadius: radius, 
-          borderWidth: borderWidth ?? 1,
-          borderColor: '#E3E3E3',
-          ...cardStyle 
-        }
-      ]}>
-        {source ? (
-          <FastImage
-            source={source}
-            style={{
-              width: '100%',
-              height,
+      <TouchableOpacity 
+        activeOpacity={0.9}
+        onPress={() => handleImagePress(item)}
+      >
+        <View style={[
+          styles.card,
+          { 
+            width, 
+            borderRadius: radius, 
+            borderWidth: borderWidth ?? 1,
+            borderColor: '#E3E3E3',
+            ...cardStyle 
+          }
+        ]}>
+          {source ? (
+            <FastImage
+              source={source}
+              style={{
+                width: '100%',
+                height,
+                borderRadius: radius,
+                resizeMode: resizeMode || 'cover'
+              }}
+              onError={(error) => console.warn('Image failed to load:', error)}
+              priority={index === 0 ? FastImage.priority.high : FastImage.priority.normal}
+              fallback={true}
+            />
+          ) : (
+            <View style={{ 
+              width: '100%', 
+              height, 
+              backgroundColor: '#F0F0F0',
               borderRadius: radius,
-              resizeMode: resizeMode || 'cover'
-            }}
-            onError={(error) => {
-              console.warn('Image load error:', {
-                error: error.nativeEvent.error,
-                uri: source.uri,
-                index
-              });
-            }}
-            onLoadStart={() => console.log('Load start:', index)}
-            onLoadEnd={() => console.log('Load end:', index)}
-            priority={index === 0 ? FastImage.priority.high : FastImage.priority.normal}
-            fallback={true} // Important for Android
-          />
-        ) : (
-          <View style={{ 
-            width: '100%', 
-            height, 
-            backgroundColor: '#F0F0F0',
-            borderRadius: radius,
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            {/* Placeholder content */}
-          </View>
-        )}
-      </View>
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              {/* Placeholder content */}
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
     );
-  };
-
-  // 5. FlatList optimization props
-  const flatListProps = {
-    ref: flatListRef,
-    data,
-    horizontal: true,
-    pagingEnabled: true,
-    showsHorizontalScrollIndicator: false,
-    keyExtractor: (item, index) => item.id?.toString() || index.toString(),
-    snapToAlignment: 'center',
-    decelerationRate: 'fast',
-    contentContainerStyle: { paddingHorizontal },
-    renderItem,
-    onViewableItemsChanged,
-    viewabilityConfig: viewConfigRef.current,
-    initialNumToRender: 3,
-    maxToRenderPerBatch: 5,
-    windowSize: 5,
-    removeClippedSubviews: false, // Important for first image rendering
-    updateCellsBatchingPeriod: 100,
-    initialScrollIndex: 0
   };
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <FlatList {...flatListProps} />
+      <FlatList
+        ref={flatListRef}
+        data={data}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        contentContainerStyle={{ paddingHorizontal }}
+        renderItem={renderItem}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewConfigRef.current}
+        initialNumToRender={3}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+        removeClippedSubviews={false} // Critical for first image rendering
+        extraData={loadingFirstImage} // Re-render when loading state changes
+      />
       
       {data.length > 1 && (
         <View style={styles.pagination}>
@@ -219,6 +226,12 @@ const CustomCasual = ({
           ))}
         </View>
       )}
+      
+ <ImageZoomViewer
+  visible={zoomVisible}
+  imageUrls={[{ url: selectedImage }]} // KEEP THIS SAME
+  onClose={() => setZoomVisible(false)}
+/>
     </View>
   );
 };
@@ -236,7 +249,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     backgroundColor: '#FFF',
-    overflow: 'hidden' // Important for borderRadius
+    overflow: 'hidden'
   },
   pagination: {
     flexDirection: 'row',
@@ -258,4 +271,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CustomCasual;
+export default CustomZoomCasual;

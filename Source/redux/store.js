@@ -5,19 +5,21 @@ import { persistStore , persistReducer } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import categoryReducer from './slices/categorySlice'
 import brandReducer from './slices/brandSlice'
-import categoriesByIdReducer from './slices/categoryByIdSlice'
-import subCategoryByIdReducer from './slices/subcategoryByIdSlice'
 import subCategoryReducer from './slices/subcategorySlice'
 import subCategoryProductReducer from './slices/subCategoryProductSlice'
+import productReducer from './slices/productSlice'
+import productDetailReducer from './slices/productDetailSlice'
+import smilarProductReducer from './slices/similarProductSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
     category:categoryReducer,
     brand:brandReducer,
-    categoryById: categoriesByIdReducer,
-    subCategoryById: subCategoryByIdReducer,
     subCategory: subCategoryReducer,
-    subCategoryProducts:subCategoryProductReducer
+    subCategoryProducts:subCategoryProductReducer,
+    product:productReducer,
+    productDetail: productDetailReducer,
+    similarProduct:smilarProductReducer
 });
 
 const persistConfig = {

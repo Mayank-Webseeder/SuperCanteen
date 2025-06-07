@@ -1,17 +1,50 @@
+// GetAllCategories.js
 import React from 'react';
-import { View } from 'react-native';
+import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
 import { styles } from './styles';
 import { formatCategoryData } from '../../../utils/dataFormatters';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { COLORS } from '@constants/index';
 
-const GetCategory = ({ selectedIndex,setSelectedIndex,categories}) => {
+const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }) => {
+  // Handle loading and empty states
+  if (!categories) {
+    return (
+      <View style={styles.categories}>
+        <ActivityIndicator size="small" color={COLORS.green} />
+      </View>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <View style={styles.categories}>
+        <Text style={styles.noDataText}>No categories available</Text>
+      </View>
+    );
+  }
+
   const formattedCategories = formatCategoryData(categories);
-
+  
   return (
-    <>
     <View style={styles.categories}>
-    <CustomCategoryList
-        data={formattedCategories}
+      <View style={styles.categoriesHeader}>
+        <View style={styles.headerTextContainer}>
+          <Text style={styles.headerTitle}>Top Categories</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.viewAllButton}
+          onPress={() => navigation.navigate('Main', { screen: 'Categories' })}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.viewAllText}>View All</Text>
+          <Icon name="arrow-forward" size={16} color={COLORS.green} />
+        </TouchableOpacity>
+      </View>
+
+      <CustomCategoryList
+        data={formattedCategories.slice(0, 5)}
         horizontal
         selected={selectedIndex}
         onSelect={setSelectedIndex}
@@ -19,15 +52,15 @@ const GetCategory = ({ selectedIndex,setSelectedIndex,categories}) => {
         width={52}
         height={52}
         borderRadius={32}
-        selectedBorderColor="#008ECC"
+        selectedBorderColor={COLORS.green}
         textColor="#333"
         textStyle={styles.textStyle}
         imageSize={38}
         showsHorizontalScrollIndicator={false}
         imageStyle={styles.imageStyle}
-      /> 
+        colors={['#30A46C', '#5BD18B']}
+      />
     </View>
-    </>
   );
 };
 

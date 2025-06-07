@@ -1,57 +1,101 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+// Description.js
+import React from 'react';
+import { View, Text } from 'react-native';
 import { styles } from './styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import moment from 'moment';
 
-export default function Description() {
-  const [rating, setRating] = useState(0);
-  const [maxRating] = useState([1, 2, 3, 4, 5]);
+export default function Description({ productData }) {
+  const rating = productData?.rating || 0;
+  const reviews = productData?.numReviews || 0;
 
-  const handleRating = (selectedRating) => {
-    // If the star clicked is already the current rating, reset to 0
-    // Otherwise set to the new rating
-    setRating(selectedRating === rating ? 0 : selectedRating);
-  };
+  // Round to nearest half-star:
+  const fullStars = Math.floor(rating);
+  const halfStar = rating - fullStars >= 0.5;
+  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+  // Delivery date
+  const deliveryDate = moment()
+    .add(productData?.deliveryDays, 'days')
+    .format('Do MMMM');
 
   return (
     <View style={styles.detailsWrapper}>
-      <Text style={styles.title}>
-        Titan Karishma Analog Watch – For Women 2480SM02
-      </Text>
+      {/* Name */}
+      {productData?.name && (
+        <Text style={styles.title}>{productData.name}</Text>
+      )}
 
-      {/* Rating Component */}
+      {/* Rating */}
       <View style={styles.ratingContainer}>
         <View style={styles.starContainer}>
-          {maxRating.map((item) => (
-            <TouchableOpacity
-              activeOpacity={0.7}
-              key={item}
-              onPress={() => handleRating(item)}
-            >
-              {item <= rating ? (
-                <AntDesign name="star" size={20} color ='#2E6074E8' />
-              ) : (
-                <AntDesign name="staro" size={20} color="#D9D9D9" />
-              )}
-            </TouchableOpacity>
+          {/* Full stars */}
+          {Array.from({ length: fullStars }).map((_, i) => (
+            <AntDesign key={`full-${i}`} name="star" size={20} color="#2E6074E8" />
+          ))}
+
+          {/* Half star */}
+          {halfStar && (
+            <AntDesign name="staro" size={20} color="#2E6074E8">
+              {/* you can swap for a half-star icon if you have one */}
+            </AntDesign>
+          )}
+
+          {/* Empty stars */}
+          {Array.from({ length: emptyStars }).map((_, i) => (
+            <AntDesign key={`empty-${i}`} name="staro" size={20} color="#D9D9D9" />
           ))}
         </View>
-        {rating > 0 ? (
+
+        {reviews > 0 ? (
           <Text style={styles.ratingText}>
-            {rating.toFixed(0)} / 5 {rating === 1 ? 'star' : 'stars'}
+            {rating.toFixed(1)} / 5 • {reviews}{' '}
+            {reviews === 1 ? 'review' : 'reviews'}
           </Text>
         ) : (
           <Text style={styles.noRatingText}>No ratings yet</Text>
         )}
       </View>
 
-      {/* Rest of your component remains the same */}
-      <Text style={styles.price}>₹1,995</Text>
-      <Text style={styles.subText}>Free delivery by 24th May</Text>
-      <Text style={[styles.subText, {color: "#416F81"}]}>
-        Seller: EliteEdge Pvt Limited
-      </Text>
-      <Text style={styles.label}>Size: Onesize</Text>
+      {/* Price */}
+      <View style={styles.priceContainer}>
+        {productData?.offerPrice != null && (
+          <Text style={styles.price}>₹{productData.offerPrice}</Text>
+        )}
+        {productData?.mrp && productData.offerPrice < productData.mrp && (
+          <Text style={styles.originalPrice}>₹{productData.mrp}</Text>
+        )}
+        {productData?.discountPercent > 0 && (
+          <Text style={styles.discount}>{productData?.discountPercent}% OFF</Text>
+        )}
+      </View>
+
+      {/* Delivery */}
+    {productData?.shippingInfo &&   <Text style={styles.subText}>
+        {productData?.shippingInfo?.shippingRate === 0
+          ? 'FREE'
+          : `₹${productData?.shippingInfo?.shippingRate}`}{' '}
+        delivery by {deliveryDate}
+      </Text>}
+
+      {/* Seller */}
+      {productData?.seller && (
+        <Text style={[styles.subText, { color: '#416F81' }]}>
+          Seller: {productData.seller}
+        </Text>
+      )}
+
+      {/* Size */}
+      {productData?.size && (
+        <Text style={styles.label}>Size: {productData.size}</Text>
+      )}
+
+      {/* Warranty */}
+      {productData?.warrantyPeriod && (
+        <Text style={[styles.subText, { marginTop: 4 }]}>
+          Warranty: {productData.warrantyPeriod} months
+        </Text>
+      )}
     </View>
   );
 }

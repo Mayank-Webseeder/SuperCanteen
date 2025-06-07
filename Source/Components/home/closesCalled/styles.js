@@ -4,7 +4,7 @@ import { FontSize, Height, Width } from "../../../constants";
 export const styles = StyleSheet.create({
   wrapper: {
     position: 'relative',
-    paddingBottom: Height(20),
+     paddingBottom: Height(20),
   },
   background: {
     position: 'absolute',

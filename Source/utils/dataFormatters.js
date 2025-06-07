@@ -81,7 +81,69 @@ const calculateDiscount = (mrp, sellingPrice) => {
 };
 
 // Helper to strip HTML tags
-const stripHtml = (html) => {
+export const stripHtml = (html) => {
   if (!html) return '';
   return html.replace(/<[^>]*>?/gm, '');
+};
+
+
+
+// utils/productFormatters.js
+const IMGURL = "https://super-canteen-backend.onrender.com";
+
+export const formatProductDetailData = (product) => {
+  if (!product) return null;
+  
+  return {
+    id: product._id,
+    name: product.name,
+    images: Array.isArray(product.images)
+      ? product.images.map(img => `${IMG_URL}${img}`)
+      : [],
+    brand: product.brand ? {
+      id: product.brand._id,
+      name: product.brand.name,
+      image: product.brand.image ? `${IMGURL}${product.brand.image}` : null,
+      about: product.brand.aboutTheBrand
+    } : null,
+    category: product.category,
+    subCategory: product.subCategory,
+    description: product.description,
+    specification: product.specification,
+    mrp: product.mrp,
+    offerPrice: product.offerPrice,
+    discountPercent: product.discountPercent || 
+      Math.round(((product.mrp - product.offerPrice) / product.mrp * 100)),
+    rating: product.rating,
+    numReviews: product.numReviews,
+    stock: product.countInStock,
+    variants: product.variants,
+    attributes: product.attributes,
+    returnPolicy: {
+      returnable: product.returnable,
+      returnWindow: product.returnWindow
+    },
+    shippingInfo: {
+      height: product.height,
+      width: product.width,
+      weight: product.weight,
+      shippingRate: product.shippingRate
+    },
+    slabs: product.slabs,
+    createdAt: product.createdAt
+  };
+};
+
+export const formatSimilarProducts = (products = []) => {
+  return products.map(product => ({
+    id: product._id,
+    name: product.name,
+    brand: product.brand?.name || '',
+    image: product.images[0] ? `${IMGURL}${product.images[0]}` : null,
+    price: product.offerPrice || product.price,
+    mrp: product.mrp,
+    discount: Math.round(((product.mrp - (product.offerPrice || product.price)) / product.mrp) * 100),
+    rating: product.rating || 0,
+    reviews: product.numReviews || 0
+  }));
 };

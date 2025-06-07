@@ -1,16 +1,38 @@
+// AddressRow.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // or use MaterialIcons, etc.
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FontSize, Width } from '../constants';
 
-const AddressRow = (props) => {
+const AddressRow = ({ navigation, address }) => {
+  // Format address for display
+  const formatAddress = () => {
+    if (!address) return '';
+    
+    const parts = [
+      address.apartment,
+      address.street,
+      address.landmark,
+      address.city,
+      address.pincode
+    ].filter(Boolean);
+    
+    return parts.join(', ');
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.left}>
+     {address &&  <View style={styles.left}>
         <Ionicons name="location-outline" size={20} color="black" />
-        <Text style={styles.addressText}>123 Street, Delhi-009900</Text>
-      </View>
-      <TouchableOpacity onPress={() => props.navigation.navigate('CreateAddressScreen')} >
+        <Text 
+          style={styles.addressText}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          {formatAddress()}
+        </Text>
+      </View>}
+      <TouchableOpacity onPress={() => navigation.navigate('CreateAddressScreen')}>
         <Text style={styles.changeText}>Change Address</Text>
       </TouchableOpacity>
     </View>
@@ -26,24 +48,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#E8E8E8', // light gray divider
-
+    borderColor: '#E8E8E8',
   },
   left: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
   },
   addressText: {
     marginLeft: Width(6),
     fontSize: FontSize(12),
     color: '#333',
-    fontFamily:'Inter-Regular'
+    fontFamily: 'Inter-Regular',
+    flexShrink: 1,
   },
   changeText: {
     color: '#2E60749E',
-   fontFamily:'Inter-SemiBold',
+    fontFamily: 'Inter-SemiBold',
     fontSize: FontSize(12),
-    textDecorationLine:"underline"
+    textDecorationLine: "underline"
   },
 });
 

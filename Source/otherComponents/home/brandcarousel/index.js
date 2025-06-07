@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   FlatList,
@@ -6,15 +6,13 @@ import {
   Text
 } from 'react-native';
 import { Height , Width } from '../../../constants';
-import { useSelector, useDispatch } from 'react-redux';
-import { getBrands } from '../../../redux/slices/brandSlice';
 import {formatBrandData} from '../../../utils/dataFormatters'
 import { styles } from './styles';
 import { stripHtml } from '../../../utils/validation';
 import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 
-const Brandcarousel = () => {
+const Brandcarousel = ({brands}) => {
   
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,14 +22,7 @@ const Brandcarousel = () => {
   const height = Height(150);
   const radius = Width(14);
 
-  const { brands, loading } = useSelector((state) => state.brand);
-  const dispatch = useDispatch();
-  
-  useEffect(() => {
-    dispatch(getBrands());
-  }, []);
-
-  const formattedBrands = formatBrandData(brands); // ✅ Moved above the return
+  const formattedBrands = formatBrandData(brands); 
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -71,6 +62,7 @@ const Brandcarousel = () => {
 );
 
   return (
+    formattedBrands.length > 0 &&  
     <View style={styles.container}>
       <FlatList
         ref={flatListRef}
@@ -87,7 +79,7 @@ const Brandcarousel = () => {
         contentContainerStyle={styles.contentContainerStyle}
       />
 
-      <View style={styles.pagination}>
+{brands.length > 1 &&   <View style={styles.pagination}>
         {(formattedBrands || []).map((_, index) => (
           <View
             key={index}
@@ -99,7 +91,8 @@ const Brandcarousel = () => {
             ]}
           />
         ))}
-      </View>
+      </View> }
+    
     </View>
   );
 };

@@ -8,9 +8,6 @@ export const styles = StyleSheet.create({
   marginHorizontal:Height(5),
   marginTop:Height(10)
   },
-  mainStyle:{
-    marginTop:Height(20)
-  },
   subTitle:{
     marginHorizontal:Width(15),
     fontSize:FontSize(12),
@@ -18,5 +15,11 @@ export const styles = StyleSheet.create({
     color:'#828282',
     marginBottom:Height(10),
     marginTop:Height(4)
+  },
+   containerStyle:{
+    marginTop:Height(-8)
+  },
+   listContentStyle:{
+    marginLeft:Width(-10)
   }
 });

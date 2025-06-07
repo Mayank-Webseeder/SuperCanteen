@@ -1,22 +1,54 @@
-import { StyleSheet, View } from 'react-native';
-import React, { useState } from 'react';
-import {Height } from '../../constants';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {COLORS, FontSize, Height, Width } from '../../constants';
 import { ScrollView } from 'react-native-gesture-handler';
-import ProductCategories from '../../otherComponents/home/productCategories';
 import HorizontalLine from '../../otherComponents/home/horizontalLine';
 import Header from '../../otherComponents/home/header';
+import CustomCategoryList from '@components/CustomCategoryList';
+import { useSelector } from 'react-redux';
+import { formatCategoryData } from '../../utils/dataFormatters';
 
 const Categories = ({ navigation }) => {
-   const [selectFashion,setSelectedFashion] = useState('')
-   const [selectBeauty,setSelectedBeauty] = useState('')
-   const [selectElectronics,setSelectedElectronics] = useState('')
+    const [selectedCategoryIndex, setSelectedCategoryIndex] = useState();
+    const { categories, loading: categoriesLoading } = useSelector((state) => state.category);
+    const formattedCategories = formatCategoryData(categories);
+
+  useEffect(() => {
+    if (!categoriesLoading && categories?.length > 0) {
+      if (selectedCategoryIndex == null) {
+        setSelectedCategoryIndex(categories[0]._id);
+      }
+    }
+  }, [categoriesLoading, categories]);
+
+
   return (
     <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} style={styles.inner}>
       <View>
-
-<Header navigation={navigation}/>
-      <HorizontalLine/>       
-      <ProductCategories navigation={navigation} selectFashion={selectFashion} setSelectedFashion={setSelectedFashion} selectBeauty={selectBeauty} setSelectedBeauty={setSelectedBeauty} selectElectronics={selectElectronics} setSelectedElectronics={setSelectedElectronics}/>
+      
+      <Header navigation={navigation}/>
+      <HorizontalLine/>    
+        {categoriesLoading &&   <ActivityIndicator size="large" color={COLORS.green} style={{ marginVertical: Height(22) }} />
+        }
+          <CustomCategoryList
+        navigation={navigation}
+        data={formattedCategories}
+        horizontal={false}
+        numColumns={3}
+        bgColor="#D4DEF226"
+        width={Width(90)}
+        height={Height(105)}
+        borderRadius={Width(5)}
+        selectedBorderColor="#008ECC"
+        textColor="#333"
+        textStyle={styles.textStyle}
+        containerStyle={styles.containerStyle}
+        gap={Width(20)}
+        imageSize={Height(70)}
+          selected={selectedCategoryIndex}
+        onSelect={setSelectedCategoryIndex}
+      
+      />
       </View>
     </ScrollView>
   );
@@ -30,5 +62,11 @@ const styles = StyleSheet.create({
   },
   contentContainerStyle:{
     paddingBottom:Height(40)
+  },
+  containerStyle:{
+paddingTop: Height(20), marginHorizontal: Width(12)
+  },
+  textStyle:{
+    fontSize: FontSize(13), marginBottom: Height(12)
   }
 });

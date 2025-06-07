@@ -9,6 +9,11 @@ export const styles = StyleSheet.create({
     container: {
       backgroundColor: '#fff',
     },
+    loadingContainer:{
+      flex:1,
+      alignItems:"center",
+      justifyContent:"center"
+    },
     mainContainer:{
       paddingHorizontal:Width(10)
     },
@@ -145,7 +150,8 @@ export const styles = StyleSheet.create({
       alignItems: 'center',
       paddingHorizontal: 16,
       marginVertical: 6,
-      marginTop:10
+      marginTop:10,
+      // paddingVertical:6
     },
     borderStyle:{
        borderTopWidth: 1,

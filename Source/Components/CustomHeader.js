@@ -3,8 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { Width } from '../constants';
+import { useNavigation } from '@react-navigation/native';
 
-const CustomHeader = ({ navigation , label , showRightIcons,containerStyle,notShowingBackIcon }) => {
+const CustomHeader = ({  label , showRightIcons,containerStyle,notShowingBackIcon }) => {
+  const navigation = useNavigation()
   return (
     <View style={[styles.container,containerStyle]}>
       {/* Left Arrow */}

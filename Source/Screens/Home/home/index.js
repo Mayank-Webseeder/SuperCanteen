@@ -1,127 +1,214 @@
-import { Text, View, FlatList, ActivityIndicator } from 'react-native';
-import React , { useEffect, useMemo, useState} from 'react';
-import { FontSize, Height, Width } from "@constants";
-import CustomCategoryList from '../../../Components/CustomCategoryList';
+// HomeScreen.js
+import { View, FlatList } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Height } from "@constants";
 import ClosesCalled from '../../../Components/home/closesCalled/closesCalled';
-import ClosestProductsData from '../../../Mock/Data/closestProductData';
 import ProductCategories from '../../../otherComponents/home/productCategories';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
-import WatchHome from '../../../Mock/Data/WomenHome';
-import HeaderRow from '../../../otherComponents/home/headerRow';
 import LinearGradient from 'react-native-linear-gradient';
 import Header from '../../../otherComponents/home/header';
 import { styles } from './styles';
 import HotDealsSection from '../../../otherComponents/home/hotDeals';
-import SponsordSection from '../../../otherComponents/home/sponsord'
+import SponsordSection from '../../../otherComponents/home/sponsord';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 import { useSelector } from 'react-redux';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { useDispatch } from 'react-redux';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
-import { COLORS } from '@constants/index';
+import { getProductsByCategory } from '../../../redux/slices/productSlice';
+import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
+import FullScreenLoader from '../../../Components/Common/fullScreenLoader';
+import PullToRefresh from '.././../../Components/Common/pullToRefresh';
+import ErrorView from '../../../Components/Common/errorView';
+import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
+import ClosestProductsData from '../../../Mock/Data/closestProductData';
+
 
 const HomeScreen = ({ navigation }) => {
-   const [selectedWomenCategory, setSelectedWomenCategory] = useState('');
-   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState();
-   const [selectedCategoryItems,setSelectedCategoryItems] = useState()
-   const { categories,loading:categoriesLoading } = useSelector((state) => state.category);
-   const {subCategories,loading: subCategoriesLoading} = useSelector((state) => state.subCategory )
-   const dispatch = useDispatch();
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
+  const [selectedCategoryItems, setSelectedCategoryItems] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
-   console.log("SELECTEDcATEGORYiNDEX IS",selectedCategoryIndex)
+  const { 
+    categories, 
+    loading: categoriesLoading, 
+    error: categoriesError 
+  } = useSelector((state) => state.category);
+  
+  const { 
+    subCategories, 
+    loading: subCategoriesLoading, 
+    error: subCategoriesError 
+  } = useSelector((state) => state.subCategory);
+  
+  const { 
+    products, 
+    loading: productsLoading, 
+    error: productsError 
+  } = useSelector((state) => state.product);
+  
+  const dispatch = useDispatch();
 
-   useEffect(() => {
-       dispatch(getCategories());
-     }, []);
-     
- useEffect(() => {
-    if (!categoriesLoading && categories?.length > 0) {
-      // Only set default if not already set (null or undefined)
-      if (selectedCategoryIndex == null) {
-        setSelectedCategoryIndex(categories[0]._id);
+  // Handle errors
+  useEffect(() => {
+    const apiError = categoriesError || subCategoriesError || productsError;
+    if (apiError) {
+      setError(apiError);
+      setPageLoading(false);
+    }
+  }, [categoriesError, subCategoriesError, productsError]);
+
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      // Refresh all necessary data
+      await Promise.all([
+        dispatch(getCategories()),
+        selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
+        dispatch(getSubCategories())
+      ]);
+    } catch (err) {
+      setError('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setError(null);
+      try {
+        await Promise.all([
+          dispatch(getCategories()),
+          dispatch(getSubCategories())
+        ]);
+      } catch (err) {
+        setError('Failed to load initial data');
+        setPageLoading(false);
       }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // Set initial category when categories load
+  useEffect(() => {
+    if (!categoriesLoading && categories?.length > 0 && selectedCategoryIndex === null) {
+      setSelectedCategoryIndex(categories[0]._id);
     }
   }, [categoriesLoading, categories]);
 
-   useEffect(() => {
-    dispatch(getSubCategories())
+  // Fetch products when category is selected
+  useEffect(() => {
+    if (selectedCategoryIndex) {
+      dispatch(getProductsByCategory(selectedCategoryIndex));
+    }
   }, [selectedCategoryIndex]);
 
-    const filteredSubcategories = useMemo(() => {
+  // Track page loading state
+  useEffect(() => {
+    if (!categoriesLoading && !subCategoriesLoading && !productsLoading) {
+      setPageLoading(false);
+    }
+  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
+
+  // Filter subcategories based on selected category
+  const filteredSubcategories = useMemo(() => {
     return subCategories?.filter(item => item.category?._id === selectedCategoryIndex) || [];
   }, [subCategories, selectedCategoryIndex]);
 
- 
-  const renderSection = ({ item }) => item;
-  const sections = [
-    <View style={styles.container}>
-    <LinearGradient
-  colors={['#A3B9C3', '#FFFFFF']} 
-  start={{ x: 0.5, y: 0 }}
-  end={{ x: 0.5, y: 1 }}
-  style={styles.gradient}>
-  <Header navigation={navigation}/>
-  <GetCategory  
-  categories={categories}
-  navigation={navigation}
-  selectedIndex={selectedCategoryIndex} 
-  setSelectedIndex={setSelectedCategoryIndex} />
-    </LinearGradient>
-    <HorizontalLine/>
-    <Brandcarousel />
-   {subCategoriesLoading ? (
-  <ActivityIndicator size="large" color={COLORS.green} style={{ marginVertical: Height(22) }} />
-) : (
-  <ProductCategories
-    navigation={navigation}
-    subcategories={filteredSubcategories} 
-    selectedCategoryId={selectedCategoryIndex}
-    selectedCategoryItems={selectedCategoryItems}
-    setSelectedCategoryItems={setSelectedCategoryItems}
-  />
-)}
+  // Extract unique brands from products
+  const brands = useMemo(() => {
+    const brandMap = {};
+    products?.forEach(product => {
+      if (product.brand && !brandMap[product.brand._id]) {
+        brandMap[product.brand._id] = product.brand;
+      }
+    });
+    return Object.values(brandMap);
+  }, [products]);
 
-    <ClosesCalled navigation={navigation} key={"slider"} data={ClosestProductsData}/> 
-    <HotDealsSection navigation={navigation}/>
-    <SponsordSection navigation={navigation}/>
-     <View key="women">
-      <View style={styles.mainStyle}>
-         <HeaderRow title={'For the Woman Who Leads Time'} navigation={navigation}/>
-         <Text style={styles.subTitle}>Explore elegant watches crafted for timeless grace.</Text>
-      </View>
-       <CustomCategoryList
-        navigation={navigation}
-        data={WatchHome}
-        horizontal={false}
-        numColumns={3}
-        bgColor="#D4DEF226"
-        width={Width(90)}
-        height={Height(105)}
-        borderRadius={Width(5)}
-        selectedBorderColor="#008ECC"
-        textColor="#333"
-        textStyle={{ fontSize: FontSize(13),marginBottom:Height(12) }}
-        containerStyle={{ paddingTop: Height(8),marginHorizontal:Width(12)}}
-        gap={Width(20)}
-        imageSize={Height(70)}
-        selected={selectedWomenCategory}
-        onSelect={(name) => setSelectedWomenCategory(name)}   
-      />
-    </View>
+  // Check if content is loading
+  const contentLoading = useMemo(() => {
+    return subCategoriesLoading || productsLoading;
+  }, [subCategoriesLoading, productsLoading]);
+
+  // Render each section of the home screen
+  const renderSection = ({ item }) => item;
+
+  const sections = [
+    <View style={styles.container} key="main-content">
+      <LinearGradient
+        colors={['#A3B9C3', '#FFFFFF']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={styles.gradient}
+      >
+        <Header navigation={navigation} />
+        <GetCategory
+          categories={categories}
+          navigation={navigation}
+          selectedIndex={selectedCategoryIndex}
+          setSelectedIndex={setSelectedCategoryIndex}
+        />
+      </LinearGradient>
+      <HorizontalLine />
+      {error ? (
+        <ErrorView 
+          message={error} 
+          onRetry={handleRefresh} 
+          containerStyle={{ marginVertical: Height(20) }}
+        />
+      ) : contentLoading ? (
+        <ContentSkeletonLoader 
+          type="home"
+          itemCount={3}
+        />
+      ) : (
+        <>
+          <Brandcarousel brands={brands} />
+           <ProductCategories
+            navigation={navigation}
+            subcategories={filteredSubcategories}
+            selectedCategoryId={selectedCategoryIndex}
+            selectedCategoryItems={selectedCategoryItems}
+            setSelectedCategoryItems={setSelectedCategoryItems}
+          />
+          <ProductCarousel  horizontal={true} navigation={navigation} products={products} />
+              <ClosesCalled
+                navigation={navigation}
+                key={"slider"}
+                  data={ClosestProductsData}
+              
+              />
+          <HotDealsSection navigation={navigation} />
+          <SponsordSection navigation={navigation} />
+        </>
+      )}
     </View>
   ];
 
+  // Show full screen loader during first page load
+  if (pageLoading) {
+    return <FullScreenLoader />;
+  }
+
   return (
-    <FlatList
-      data={sections}
-      renderItem={renderSection}
-      keyExtractor={(_, index) => index.toString()}
-      showsVerticalScrollIndicator={false}
-    />
+    <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
+      <FlatList
+        data={sections}
+        renderItem={renderSection}
+        keyExtractor={(_, index) => index.toString()}
+        showsVerticalScrollIndicator={false}
+      />
+    </PullToRefresh>
   );
 };
 
 export default HomeScreen;
-
-
