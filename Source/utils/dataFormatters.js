@@ -147,3 +147,70 @@ export const formatSimilarProducts = (products = []) => {
     reviews: product.numReviews || 0
   }));
 };
+
+
+export const formateSubCategoryProducts = (products = []) => {
+  return products.map(product => ({
+    id: product._id,
+    name: product.name,
+    brandId: product.brand?._id || '',
+    brandName: product.brand?.name || '',
+    categoryId: product.category?._id || '',
+    categoryName: product.category?.name || '',
+    subCategoryId: product.subCategory?._id || '',
+    subCategoryName: product.subCategory?.name || '',
+    image: product.images?.[0] ? `${IMGURL}${product.images[0]}` : null,
+    images: product.images?.map(img => `${IMGURL}${img}`) || [],
+    price: product.offerPrice || product.price,
+    mrp: product.mrp,
+    discountPercent: Math.round(((product.mrp - (product.offerPrice || product.price)) / product.mrp) * 100),
+    rating: product.rating || 0,
+    reviews: product.numReviews || 0,
+    description: product.description || '',
+    aboutTheBrand: product.aboutTheBrand || '',
+    specification: product.specification || '',
+    tags: product.tags || [],
+    keywords: product.keywords || [],
+    countInStock: product.countInStock || 0,
+    outOfStock: product.outOfStock || false,
+    isEnable: product.isEnable || false,
+    isFeatured: product.isFeatured || false,
+    isBestSeller: product.isBestSeller || false,
+    unit: product.unit || '',
+    height: product.height || '',
+    width: product.width || '',
+    breadth: product.breadth || '',
+    weight: product.weight || '',
+    tax: product.tax || 0,
+    shippingRate: product.shippingRate || 0,
+    deliveryDays: product.deliveryDays || 0,
+    returnable: product.returnable || false,
+    returnWindow: product.returnWindow || 0,
+    warrantyPeriod: product.warrantyPeriod || '',
+    isDigital: product.isDigital || false,
+    downloadLink: product.downloadLink || '',
+    visibility: product.visibility || 'false',
+    attributes: product.attributes?.map(attr => ({
+      key: attr.key || '',
+      value: attr.value || ''
+    })) || [],
+    slabs: product.slabs?.map(slab => ({
+      minQuantity: slab.minQuantity,
+      maxQuantity: slab.maxQuantity,
+      price: slab.price,
+      couponId: slab.couponId,
+      expire: slab.expire
+    })) || [],
+    variants: product.variants?.map(variant => ({
+      color: variant.color || '',
+      size: variant.size || '',
+      additionalPrice: variant.additionalPrice || 0,
+      images: variant.images?.map(img => `${IMGURL}${img}`) || [],
+      countInStock: variant.countInStock || 0,
+      sku: variant.sku || ''
+    })) || [],
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt
+  }));
+};
+

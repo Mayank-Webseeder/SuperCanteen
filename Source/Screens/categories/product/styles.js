@@ -6,16 +6,14 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     paddingTop: Height(8),
-    paddingBottom:Height(30)
-  },
-  mainView: {
-    paddingHorizontal: Height(13),
+ 
   },
   loadingContainer:{
     marginTop:Height(28)
   },
   headerView:{
-    marginHorizontal:10
+    marginHorizontal:10,
+
   },
   searchContainer: {
     marginTop: Height(5),
@@ -82,13 +80,15 @@ export const styles = StyleSheet.create({
   },
   mainContainer:{
      paddingHorizontal: Height(10),
+     marginTop:Height(8)
   },
     mianView: {
     paddingHorizontal: Height(20),
     paddingTop: Height(15),
   },
   categoryList:{
-     marginVertical: 20
+     marginVertical: 10,
+     marginBottom:20
   },
   bottomSheetContainer:{
     flexDirection: 'row', marginHorizontal: 10, columnGap: 10, marginBottom: Height(15)
@@ -101,6 +101,6 @@ export const styles = StyleSheet.create({
     marginBottom:Height(30)
   },
   productContainer:{
-    marginHorizontal:Width(0)
+    paddingHorizontal:Width(10)
   }
 });

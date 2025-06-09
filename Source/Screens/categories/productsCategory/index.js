@@ -1,125 +1,183 @@
-import { Pressable, View } from 'react-native';
+import { View, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import CustomHeader from '../../../Components/CustomHeader';
-import CustomSearchInput from '../../../Components/searchInput';
-import CustomCategoryList from '../../../Components/CustomCategoryList';
-import Products from '../../../Mock/Data/Prodcuts';
-import CustomProductCard from '../../../Components/productCard';
 import { COLORS, Height, Width } from '../../../constants';
+import CustomCategoryList from '../../../Components/CustomCategoryList';
+import CustomProductCard from '../../../Components/productCard';
 import CustomBottomSheet from '../../../Components/modals/bottomSheet';
-import CustomFilterBtn from '../../../Components/CustomFilterBtn';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import WatchStoreData from '../../../Mock/Data/WatchStoreData';
 import SortBottomSheet from '../../../Components/modals/sortBottomsheet';
-import { FlatList } from 'react-native';
 import SponsordSection from '../../../otherComponents/home/sponsord';
 import { styles } from '../product/styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProductsBySubcategory } from '../../../redux/slices/subCategoryProductSlice';
+import FullScreenLoader from '../../../Components/Common/fullScreenLoader';
+import PullToRefresh from '../../../Components/Common/pullToRefresh';
+import ErrorView from '../../../Components/Common/errorView';
+import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
+import HorizontalLine from '../../../otherComponents/home/horizontalLine';
+import CustomFilterBtn from '../../../Components/CustomFilterBtn'
+import {formateSubCategoryProducts} from '../../../utils/dataFormatters'
 
-const ProdcutCategory = ({ navigation }) => {
+const ProductCategoryScreen = ({ navigation, route }) => {
+  const { selectedCategory, categoryData } = route?.params || {};
   const [showSheet, setShowSheet] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
-  const [searchText, setSearchText] = useState(''); // Search/filter state
-  const [filteredProducts, setFilteredProducts] = useState(Products);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Filter products based on searchText
+  const dispatch = useDispatch();
+
+  console.log("SELECTED CATEGORY",selectedCategory)
+  
+  // Redux state
+  const { 
+    productsBySubcategory, 
+    loading: productsLoading, 
+    error: productsError 
+  } = useSelector((state) => state.subCategoryProducts);
+
+  // Fetch products on mount
   useEffect(() => {
-    if (searchText.trim() === '') {
-      setFilteredProducts(Products);
-    } else {
-      const filtered = Products.filter((product) =>
-        product.name.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setFilteredProducts(filtered);
+    const fetchData = async () => {
+      setError(null);
+      try {
+        if (selectedCategory) {
+          await dispatch(fetchProductsBySubcategory(selectedCategory));
+        }
+      } catch (err) {
+        setError('Failed to load products');
+      } finally {
+        setPageLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [selectedCategory]);
+
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      if (selectedCategory) {
+        await dispatch(fetchProductsBySubcategory(selectedCategory));
+      }
+    } catch (err) {
+      setError('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
     }
-  }, [searchText]);
+  };
+
+  // Get products for the current category
+  const products = productsBySubcategory[selectedCategory] || [];
+
+  // Render each section of the screen
+  const renderSection = ({ item }) => item;
+
+  const sections = [
+    <View key="product-category-content">
+      {/* Header */}
+      <View style={styles.headerView}>
+        <CustomHeader navigation={navigation} label={categoryData?.name || 'Products'} />
+      </View>
+
+      {/* Category List */}
+      <View style={styles.categoryList}>
+        <CustomCategoryList
+          height={50}
+          width={62}
+          gap={15}
+          horizontal={true}
+          borderRadius={5}
+          data={WatchStoreData}
+        />
+      </View>
+
+      {/* Filter Buttons */}
+      <View style={styles.bottomSheetContainer}>
+        <SortBottomSheet visible={sortSheetVisible} onClose={() => setSortSheetVisible(false)} />
+        <CustomFilterBtn
+          title="Filter"
+          width={80}
+          height={30}
+          onPress={() => setShowSheet(true)}
+          icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
+        />
+        <CustomFilterBtn
+          title="Sort"
+          width={80}
+          height={30}
+          onPress={() => setSortSheetVisible(true)}
+          icon={
+            <View style={{ transform: [{ rotate: '270deg' }] }}>
+              <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
+            </View>
+          }
+        />
+      </View>
+
+      {/* Filter Bottom Sheet */}
+      <CustomBottomSheet visible={showSheet} onClose={() => setShowSheet(false)}>
+        <CustomFilterBtn onPress={() => console.log('Filter pressed')} label="Filter Options" />
+      </CustomBottomSheet>
+
+      <HorizontalLine />
+
+      {/* Products Section */}
+      {error ? (
+        <ErrorView
+          message={error}
+          onRetry={handleRefresh}
+          containerStyle={{ marginVertical: Height(20) }}
+        />
+      ) : productsLoading ? (
+        <ContentSkeletonLoader type="grid" itemCount={4} />
+      ) : products.length > 0 ? (
+        <View style={styles.mainContainer}>
+          <CustomProductCard
+            height={Height(120)}
+            imageSize={Width(130)}
+            navigation={navigation}
+            bgColor="#D4DEF226"
+            numColumns={2}
+            width={Width(140)}
+            horizontal={false}
+            data={formateSubCategoryProducts(products)}
+          />
+        </View>
+      ) : (
+        <Text style={{ textAlign: 'center', color: '#999', marginVertical: Height(20) }}>
+          No products found
+        </Text>
+      )}
+
+      {/* Sponsored Section */}
+      {/* <SponsordSection navigation={navigation} /> */}
+    </View>
+  ];
+
+  // Show full screen loader during initial load
+  if (pageLoading) {
+    return <FullScreenLoader />;
+  }
 
   return (
-    <FlatList
-      data={[]} // No list data, just header scroll
-      keyExtractor={(item, index) => index.toString()}
-      ListHeaderComponent={
-        <View style={[styles.main,{backgroundColor : sortSheetVisible ? COLORS.modal : COLORS.white}]}>
-          <View style={styles.mainContainer}>
-            <CustomHeader navigation={navigation} label={'Watch Store'} />
-            <View style={styles.serachView} />
-            {/* Pass setSearchText to CustomSearchInput so it updates searchText */}
-            <CustomSearchInput
-              // value={searchText}
-              // onChangeText={setSearchText}
-              placeholder="Search products..."
-            />
-            <View style={styles.categoryList}>
-              <CustomCategoryList
-                height={50}
-                width={62}
-                gap={15}
-                horizontal={true}
-                borderRadius={5}
-                data={WatchStoreData}
-              />
-            </View>
-
-            <View style={styles.bottomSheetContainer}>
-              <SortBottomSheet visible={sortSheetVisible} onClose={() => setSortSheetVisible(false)} />
-              <CustomFilterBtn
-                title="Filter"
-                width={80}
-                height={30}
-                onPress={() => setShowSheet(true)}
-                icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
-              />
-              <CustomFilterBtn
-                title="Sort"
-                width={80}
-                height={30}
-                onPress={() => setSortSheetVisible(true)}
-                icon={
-                  <View style={{ transform: [{ rotate: '270deg' }] }}>
-                    <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
-                  </View>
-                }
-              />
-            </View>
-
-            <CustomBottomSheet visible={showSheet} onClose={() => setShowSheet(false)}>
-              <CustomFilterBtn onPress={() => console.log('Filter pressed')} label="Filter Options" />
-              {/* You can add more filter options here to update filtering state */}
-            </CustomBottomSheet>
-
-            <View style={styles.mainContainer}>
-              <Pressable>
-                <CustomProductCard
-                  height={Height(120)}
-                  imageSize={Width(130)}
-                  navigation={navigation}
-                  bgColor="#D4DEF226"
-                  numColumns={2}
-                  width={Width(140)}
-                  horizontal={false}
-                  data={filteredProducts} // use filtered data here
-                />
-              </Pressable>
-            </View>
-          </View>
-         <SponsordSection navigation={navigation} searchText={searchText} />
-          <View style={styles.mianView}>
-            <Pressable>
-              <CustomProductCard
-                height={Height(120)}
-                imageSize={Width(130)}
-                navigation={navigation}
-                bgColor="#D4DEF226"
-                numColumns={2}
-                width={Width(140)}
-                horizontal={false}
-                data={filteredProducts} // Also filter here if needed
-              />
-            </Pressable>
-          </View>
-        </View>
-      }
-      showsVerticalScrollIndicator={false}
-    />
+   <View style={styles.container}>
+     <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
+      <FlatList
+        data={sections}
+        renderItem={renderSection}
+        keyExtractor={(_, index) => index.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: Height(20) }}
+      />
+    </PullToRefresh>
+   </View>
   );
 };
-export default ProdcutCategory;
+
+export default ProductCategoryScreen;

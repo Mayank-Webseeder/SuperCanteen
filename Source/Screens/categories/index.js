@@ -30,7 +30,7 @@ const Categories = ({ navigation }) => {
       <HorizontalLine/>    
         {categoriesLoading &&   <ActivityIndicator size="large" color={COLORS.green} style={{ marginVertical: Height(22) }} />
         }
-          <CustomCategoryList
+        <CustomCategoryList
         navigation={navigation}
         data={formattedCategories}
         horizontal={false}
@@ -45,8 +45,9 @@ const Categories = ({ navigation }) => {
         containerStyle={styles.containerStyle}
         gap={Width(20)}
         imageSize={Height(70)}
-          selected={selectedCategoryIndex}
+        selected={selectedCategoryIndex}
         onSelect={setSelectedCategoryIndex}
+       
       
       />
       </View>

@@ -143,7 +143,7 @@ const HomeScreen = ({ navigation }) => {
   const renderSection = ({ item }) => item;
 
   const sections = [
-    <View style={styles.container} key="main-content">
+    <View key="main-content">
       <LinearGradient
         colors={['#A3B9C3', '#FFFFFF']}
         start={{ x: 0.5, y: 0 }}
@@ -173,22 +173,23 @@ const HomeScreen = ({ navigation }) => {
       ) : (
         <>
           <Brandcarousel brands={brands} />
-           <ProductCategories
+          <ProductCategories
             navigation={navigation}
             subcategories={filteredSubcategories}
             selectedCategoryId={selectedCategoryIndex}
             selectedCategoryItems={selectedCategoryItems}
             setSelectedCategoryItems={setSelectedCategoryItems}
-          />
-          <ProductCarousel  horizontal={true} navigation={navigation} products={products} />
-              <ClosesCalled
+            gotoScreen={'ProdcutCategory'}
+          /> 
+   <ProductCarousel  horizontal={true} navigation={navigation} products={products} /> 
+              {/* <ClosesCalled
                 navigation={navigation}
                 key={"slider"}
                   data={ClosestProductsData}
               
-              />
-          <HotDealsSection navigation={navigation} />
-          <SponsordSection navigation={navigation} />
+              /> */}
+          {/* <HotDealsSection navigation={navigation} /> */}
+          {/* <SponsordSection navigation={navigation} /> */}
         </>
       )}
     </View>
@@ -200,7 +201,8 @@ const HomeScreen = ({ navigation }) => {
   }
 
   return (
-    <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
+    <View style={styles.container  }>
+      <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
       <FlatList
         data={sections}
         renderItem={renderSection}
@@ -208,6 +210,8 @@ const HomeScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       />
     </PullToRefresh>
+    </View>
+   
   );
 };
 

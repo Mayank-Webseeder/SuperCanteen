@@ -33,6 +33,7 @@ import {formatSimilarProducts} from '../../utils/dataFormatters'
   
   const ProductDetails = ({navigation,route}) => {
    const { productId } = route?.params;
+   console.log("product details is=============>",productId)
   const dispatch = useDispatch();
   const { product, loading, error } = useSelector(state => state.productDetail);
   const [isFavourite, setIsFavourite] = useState(false);

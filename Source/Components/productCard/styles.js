@@ -1,43 +1,98 @@
 import { StyleSheet } from "react-native";
-import { FontSize, Height, Width } from "../../constants";
-import { COLORS } from "../../constants";
 export const styles = StyleSheet.create({
-  main:{
-    paddingVertical:Height(10)
+  container: {
+    padding: 8,
+  },
+  listContent: {
+    paddingHorizontal: 4,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   card: {
-    alignItems: 'center',
+    width: '48%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    marginTop: 6,
-  },
-  label: {
-    fontSize: FontSize(12),
-    color: COLORS.grey,
-    fontFamily:'Inter-Bold' ,
-    right:Width(3)
-  },
-  imageWrapper: {
-    alignItems: 'center',
+  imageContainer: {
+   
+    backgroundColor: '#F8F9FA',
     justifyContent: 'center',
-    marginBottom: Height(6),
+    alignItems: 'center',
+    position: 'relative',
   },
-  title: {
-    fontSize: FontSize(12),
-    color: '#545454',
-    marginTop: 6,
-    fontFamily:'Inter-SemiBold'
+  productImage: {
+    width: '80%',
+    height: '80%',
+    resizeMode: 'contain',
   },
-  price: {
-    fontSize: FontSize(12),
-    color: '#545454',
-    marginTop: 2,
-    textAlign: 'left',
-    paddingLeft: Width(2),
-    fontFamily:'Inter-Regular'
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
+  favouriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 20,
+    padding: 6,
+  },
+  discountBadge: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    backgroundColor: '#E53E3E',
+    borderRadius: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+  },
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: 'Inter-Bold',
+  },
+  detailsContainer: {
+    padding: 12,
+  },
+  brandName: {
+    fontSize: 10,
+    color: '#718096',
+    fontFamily: 'Inter-Medium',
+    marginBottom: 4,
+  },
+  productName: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#2D3748',
+    marginBottom: 8,
+    height: 40,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  currentPrice: {
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+    color: '#2C3E50',
+  },
+  originalPrice: {
+    fontSize: 12,
+    fontFamily: 'Inter-Regular',
+    color: '#A0AEC0',
+    textDecorationLine: 'line-through',
+    marginLeft: 6,
   },
 });

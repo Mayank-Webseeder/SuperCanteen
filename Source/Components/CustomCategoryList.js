@@ -30,7 +30,8 @@ const CustomCategoryList = ({
   navigation,
   contentContainerStyle,
   imageStyle,
-  colors
+  colors,
+  gotoScreen
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -54,10 +55,10 @@ const CustomCategoryList = ({
               onPress={() => {
                 onSelect(item?.id);
                 if (navigation) {
-                  navigation.navigate('Products', {
-                    selectedCategory: item.id,
-                    categoryData: item,
-                  });
+                navigation.navigate(gotoScreen || 'Products', {
+  selectedCategory: item.id,
+  categoryData: item,
+});
                 }
               }}
               style={[

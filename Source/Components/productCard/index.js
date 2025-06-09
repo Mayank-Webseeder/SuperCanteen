@@ -1,135 +1,177 @@
-import React , {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Height, Width } from '../../constants';
-import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
+import VariantSelector from './variantSelector';
+import { styles } from './styles';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const CustomProductCard = ({
   data = [],
-  selected,
-  onSelect = () => {},
-  bgColor = '#D4E7F2',
-  width = Width(45), // Adjusted for 2 columns
-  height = Width(45),
-  imageSize = Width(30),
-  borderRadius = borderRadius ? borderRadius : Width(16),
-  selectedBorderColor = '#416F81',
-  textColor = '#000',
-  containerStyle,
-  textStyle,
-  horizontal = false,
-  numColumns = 1,
-  gap = Width(12),
-  horizontalGap = Width(10),
-  verticalGap = Height(14),
-  navigation
+  navigation,
+  numColumns = 2,
+  containerStyle
 }) => {
   const [favourites, setFavourites] = useState([]);
-  
-    const onToggleFavourite = (id) => {
-      setFavourites((prev) =>
-        prev.includes(id)
-          ? prev.filter((favId) => favId !== id)
-          : [...prev, id]
-      );
-    };
+  const [selectedVariants, setSelectedVariants] = useState({});
+  const [loadingImages, setLoadingImages] = useState({});
 
+  console.log("DATA IS ==========>",data)
+
+  const onToggleFavourite = (id) => {
+    setFavourites((prev) =>
+      prev.includes(id)
+        ? prev.filter((favId) => favId !== id)
+        : [...prev, id]
+    );
+  };
+
+  const handleImageLoadStart = (id) => {
+    setLoadingImages(prev => ({ ...prev, [id]: true }));
+  };
+
+  const handleImageLoadEnd = (id) => {
+    setLoadingImages(prev => ({ ...prev, [id]: false }));
+  };
+
+  const getDisplayImage = (product) => {
+    // If variant is selected, use variant image
+    if (selectedVariants[product._id] && product.variants) {
+      const selectedVariant = product.variants.find(
+        v => v._id === selectedVariants[product._id]
+      );
+      if (selectedVariant?.images?.[0]) {
+        return { uri: `${selectedVariant.images[0]}` };
+      }
+    }
     
+    // Fallback to main product image
+    if (product.images?.[0]) {
+      return { uri: `${product.images[0]}` };
+    }
+    
+    // Final fallback
+   
+  };
+
+  const getDisplayPrice = (product) => {
+  const basePrice = product.offerPrice ?? product.price ?? 0;
+
+  if (selectedVariants[product._id] && product.variants) {
+    const selectedVariant = product.variants.find(
+      v => v._id === selectedVariants[product._id]
+    );
+    if (selectedVariant?.additionalPrice) {
+      return basePrice + selectedVariant.additionalPrice;
+    }
+  }
+  
+  return basePrice;
+};
+
 
   return (
-    <View style={[styles.main,{...containerStyle}]}>
+    <View style={[styles.container, containerStyle]}>
       <FlatList
         data={data}
-        horizontal={horizontal}
         numColumns={numColumns}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item._id}
         showsHorizontalScrollIndicator={false}
-        columnWrapperStyle={
-          !horizontal
-            ? {
-                justifyContent: 'space-between',
-                marginBottom: verticalGap,
-              }
-            : undefined
-        }
-        
-    renderItem={({ item, index }) => {
-  const isSelected = selected === index;
-  const isLastItem = index === data.length - 1;
-  const isFavourite = favourites.includes(index);
+        contentContainerStyle={styles.listContent}
+        columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : null}
+        renderItem={({ item }) => {
+          const isFavourite = favourites.includes(item._id);
+          const displayImage = getDisplayImage(item);
+          const displayPrice = getDisplayPrice(item);
+          const isLoading = loadingImages[item._id];
 
-  return (
-    <TouchableOpacity
-      onPress={() => {
-        onSelect(index); // pass index instead of item.name
-        if (item.screen && navigation) {
-          navigation.navigate(item.screen);
-        }
-      }}
-      style={[
-        styles.card,
-        {
-          marginRight: horizontal && !isLastItem ? horizontalGap : 0,
-          marginBottom: !horizontal ? verticalGap : 0,
-          width,
-        },
-      ]}
-    >
-      <View
-        style={[
-          styles.imageWrapper,
-          {
-            width,
-            height,
-            borderRadius,
-            backgroundColor: bgColor,
-            borderWidth: isSelected ? 1 : 0,
-            borderColor: isSelected ? selectedBorderColor : 'transparent',
-          },
-        ]}
-      >
-        <FastImage
-          source={typeof item.image === 'string' ? { uri: item.image } : item.image}
-          style={{ width: imageSize, height: imageSize }}
-          resizeMode="contain"
-        />
-      </View>
+          console.log("ITEM IS",item)
+          return (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('ProductDetail', { product: item })}
+              style={styles.card}
+            >
+              {/* Product Image */}
+              <View style={[styles.imageContainer,{ height: SCREEN_WIDTH / 2.5}]}>
+                {isLoading && (
+                  <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="small" color="#416F81" />
+                  </View>
+                )}
+                <FastImage
+                  source={displayImage}
+                  style={styles.productImage}
+                  resizeMode="contain"
+                  onLoadStart={() => handleImageLoadStart(item._id)}
+                  onLoadEnd={() => handleImageLoadEnd(item._id)}
+                />
+                
+                {/* Favourite Button */}
+                <TouchableOpacity 
+                  style={styles.favouriteButton}
+                  onPress={() => onToggleFavourite(item._id)}
+                >
+                  <Ionicons
+                    name={isFavourite ? 'heart' : 'heart-outline'}
+                    size={20}
+                    color={isFavourite ? '#E53E3E' : '#2D3748'}
+                  />
+                </TouchableOpacity>
+                
+                {/* Discount Badge */}
+                {item.discountPercent > 0 && (
+                  <View style={styles.discountBadge}>
+                    <Text style={styles.discountText}>{item.discountPercent}% OFF</Text>
+                  </View>
+                )}
+              </View>
 
-      <View style={[styles.topRow, { width: width - 4 }]}>
-        <Text style={styles.label}>{item.name}</Text>
-        <TouchableOpacity onPress={() => onToggleFavourite(index)} style={{ marginHorizontal: Height(3) }}>
-          <Ionicons
-            name={isFavourite ? 'heart' : 'heart-outline'}
-            size={20}
-            color={isFavourite ? '#416F81' : '#0E2D42'}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <Text
-        ellipsizeMode="tail"
-        numberOfLines={1}
-        style={[styles.title, { width }]}
-      >
-        {item.description}
-      </Text>
-      <Text style={[styles.price, { width }]}>
-        {item.mrp ? `₹${item.mrp}` : ''}
-      </Text>
-    </TouchableOpacity>
-  );
-}}
+              {/* Product Details */}
+              <View style={styles.detailsContainer}>
+                <Text style={styles.brandName}>{item.brand?.name}</Text>
+                <Text style={styles.productName} numberOfLines={2}>
+                  {item.name}
+                </Text>
+                
+                {/* Price */}
+                <View style={styles.priceContainer}>
+                  <Text style={styles.currentPrice}>₹{displayPrice}</Text>
+                  {item.price > displayPrice && (
+                    <Text style={styles.originalPrice}>₹{item.price}</Text>
+                  )}
+                </View>
+                
+                {/* Variant Selector */}
+                {item.variants?.length > 0 && (
+                  <VariantSelector 
+                    variants={item.variants}
+                    selectedVariant={selectedVariants[item._id]}
+                    onSelect={(variantId) => 
+                      setSelectedVariants(prev => ({
+                        ...prev,
+                        [item._id]: variantId
+                      }))
+                    }
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
 };
 
+
+
 export default CustomProductCard;
-
-
