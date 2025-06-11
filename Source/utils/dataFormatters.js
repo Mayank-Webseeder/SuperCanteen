@@ -89,7 +89,7 @@ export const stripHtml = (html) => {
 
 
 // utils/productFormatters.js
-const IMGURL = "https://super-canteen-backend.onrender.com";
+export const IMGURL = "https://super-canteen-backend.onrender.com";
 
 export const formatProductDetailData = (product) => {
   if (!product) return null;
@@ -166,7 +166,7 @@ export const formateSubCategoryProducts = (products = []) => {
     discountPercent: Math.round(((product.mrp - (product.offerPrice || product.price)) / product.mrp) * 100),
     rating: product.rating || 0,
     reviews: product.numReviews || 0,
-    description: product.description || '',
+    description: product.description || '', 
     aboutTheBrand: product.aboutTheBrand || '',
     specification: product.specification || '',
     tags: product.tags || [],
@@ -201,11 +201,123 @@ export const formateSubCategoryProducts = (products = []) => {
       couponId: slab.couponId,
       expire: slab.expire
     })) || [],
-    variants: product.variants?.map(variant => ({
+    variants: product.variants?.filter(v => v.color || v.size) || [],
+    // variants: product.variants?.map(variant => ({
+    //   color: variant.color || '',
+    //   size: variant.size || '',
+    //   additionalPrice: variant.additionalPrice || 0,
+    //   images: variant.images?.map(img => `${IMGURL}${img}`) || [],
+    //   countInStock: variant.countInStock || 0,
+    //   sku: variant.sku || ''
+    // })) || [],
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt
+  }));
+};
+
+
+export const formateSubCategorySegments = (segments = []) => {
+  return segments.map(segment => ({
+    id: segment._id,
+    name: segment.name,
+    subCategoryId: segment.subCategory || '',
+    image: segment.image ? `${IMGURL}/${segment.image.replace(/^\/+/, '')}` : null,
+    images: segment.image ? [`${IMGURL}/${segment.image.replace(/^\/+/, '')}`] : [],
+    keywords: segment.keywords || [],
+    isActive: segment.isActive || false,
+    createdAt: segment.createdAt,
+    updatedAt: segment.updatedAt
+  }));
+};
+
+
+
+
+export const formatProductGroupedData = (groupedData = {}) => {
+  const formattedGrouped = {};
+
+  for (const categoryId in groupedData) {
+    formattedGrouped[categoryId] = groupedData[categoryId].map(product => {
+      let image = null;
+
+      if (product.images?.[0]) {
+        const cleanedPath = product.images[0]
+          .replace(/^\/+/, '') // remove leading slashes
+          .replace(/\/{2,}/g, '/'); // replace double slashes with one inside the path
+
+        image = `${cleanedPath}`;
+      }
+
+      return {
+        ...product,
+        image,
+      };
+    });
+  }
+
+  return formattedGrouped;
+};
+
+
+export const formatProductBySegment = (products = []) => {
+  return products.map(product => ({
+    id: product._id,
+    name: product.name,
+    brandId: product.brand?._id || '',
+    brandName: product.brand?.name || '',
+    categoryId: product.category?._id || '',
+    categoryName: product.category?.name || '',
+    subCategoryId: product.subCategory?._id || '',
+    subCategoryName: product.subCategory?.name || '',
+    segmentId: product.segment?._id || '',
+    segmentName: product.segment?.name || '',
+    image: product.images?.[0] ? `${IMGURL}/${product.images[0].replace(/^\/+/, '')}` : null,
+    images: product.images?.map(img => `${IMGURL}/${img.replace(/^\/+/, '')}`) || [],
+    price: product.offerPrice || product.price,
+    mrp: product.mrp,
+    discountPercent: product.mrp ? Math.round(((product.mrp - (product.offerPrice || product.price)) / product.mrp) * 100) : 0,
+    rating: product.rating || 0,
+    reviews: product.numReviews || 0,
+    description: product.description || '',
+    aboutTheBrand: product.aboutTheBrand || '',
+    specification: product.specification || '',
+    tags: product.tags || [],
+    keywords: product.keywords || [],
+    countInStock: product.countInStock || 0,
+    outOfStock: product.outOfStock || false,
+    isEnable: product.isEnable || false,
+    isFeatured: product.isFeatured || false,
+    isBestSeller: product.isBestSeller || false,
+    unit: product.unit || '',
+    height: product.height || '',
+    width: product.width || '',
+    breadth: product.breadth || '',
+    weight: product.weight || '',
+    tax: product.tax || 0,
+    shippingRate: product.shippingRate || 0,
+    deliveryDays: product.deliveryDays || 0,
+    returnable: product.returnable || false,
+    returnWindow: product.returnWindow || 0,
+    warrantyPeriod: product.warrantyPeriod || '',
+    isDigital: product.isDigital || false,
+    downloadLink: product.downloadLink || '',
+    visibility: product.visibility || 'false',
+    attributes: product.attributes?.map(attr => ({
+      key: attr.key || '',
+      value: attr.value || ''
+    })) || [],
+    slabs: product.slabs?.map(slab => ({
+      minQuantity: slab.minQuantity,
+      maxQuantity: slab.maxQuantity,
+      price: slab.price,
+      couponId: slab.couponId || '',
+      expire: slab.expire || null
+    })) || [],
+    variants: product.variants?.filter(v => v.color || v.size).map(variant => ({
       color: variant.color || '',
       size: variant.size || '',
       additionalPrice: variant.additionalPrice || 0,
-      images: variant.images?.map(img => `${IMGURL}${img}`) || [],
+      images: variant.images?.map(img => `${IMGURL}/${img.replace(/^\/+/, '')}`) || [],
       countInStock: variant.countInStock || 0,
       sku: variant.sku || ''
     })) || [],
@@ -213,4 +325,3 @@ export const formateSubCategoryProducts = (products = []) => {
     updatedAt: product.updatedAt
   }));
 };
-

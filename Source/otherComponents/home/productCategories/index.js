@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import HeaderRow from '../headerRow';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
-import { COLORS, FontSize, Height, Width } from '../../../constants';
+import { FontSize, Height, Width } from '../../../constants';
 import { IMG_URL } from '../../../api';
 import { formatSubcategoryData } from '../../../utils/dataFormatters';
 import { useSelector } from 'react-redux';

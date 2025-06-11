@@ -1,4 +1,4 @@
-import { View, FlatList, Text } from 'react-native';
+import { View, FlatList, Text, Pressable } from 'react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import CustomHeader from '../../../Components/CustomHeader';
 import { Height } from '../../../constants';
@@ -17,6 +17,7 @@ import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
 import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
 import ClosestProductsData from '../../../Mock/Data/closestProductData';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
+import CustomSearch from '../../../Components/searchInput'
 
 const ProductsScreen = ({ navigation, route }) => {
   const { selectedCategory, categoryData } = route?.params || {};
@@ -142,6 +143,16 @@ useEffect(() => {
             {/* Header */}
             <View style={styles.headerView}>
               <CustomHeader showRightIcons navigation={navigation} label={categoryData?.name} />
+               <View style={styles.searchView}>
+          <Pressable onPress={() => navigation.navigate('Search')}>
+            <CustomSearch
+              disabledStyle={styles.disabledStyle}
+              WidthSize={'98%'}
+              backgroundColor={'#fff'}
+              disabled
+            />
+          </Pressable>
+        </View>
             </View> 
 
             {/* Banner */}
@@ -170,8 +181,8 @@ useEffect(() => {
 />
               </View>
             ) : !subCategoriesLoading && (
-              <Text style={{ textAlign: 'center', color: '#999', marginBottom: Height(10), marginTop: Height(20) }}>
-                No subcategories found
+              <Text style={{ textAlign: 'center', color: '#999' }}>
+                {/* No subcategories found */}
               </Text>
             )}
 

@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getData } from '../../utils/apiClient';
+import {  GETALLSUBCATEGORIES } from '../../api';
 
 export const getSubCategories = createAsyncThunk(
   'subCategory/getAll',
   async (_, thunkAPI) => {
     try {
-      const data = await getData('/subcategories/getAllsubCategoriesList');
+      const data = await getData(GETALLSUBCATEGORIES);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);

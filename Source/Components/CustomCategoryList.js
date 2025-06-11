@@ -5,7 +5,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Animated,
 } from 'react-native';
 import { COLORS, FontSize, Height, Width } from '../constants';
 import FastImage from 'react-native-fast-image';
@@ -48,19 +47,30 @@ const CustomCategoryList = ({
         ]}
         renderItem={({ item }) => {
           const isSelected = selected === item.id;
-
           return (
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => {
-                onSelect(item?.id);
-                if (navigation) {
-                navigation.navigate(gotoScreen || 'Products', {
-  selectedCategory: item.id,
-  categoryData: item,
-});
-                }
-              }}
+  onPress={() => {
+  onSelect(item?.id); // Keep your selection logic if needed
+  
+  if (!navigation) return; // Early exit if no navigation
+  
+  // Determine navigation parameters based on gotoScreen
+  const navigateConfig = gotoScreen === 'ProductDetails' 
+    ? { 
+        name: 'ProductDetails',
+        params: { productId: item._id } 
+      }
+    : {
+        name: gotoScreen || 'Products',
+        params: { 
+          selectedCategory: item.id, 
+          categoryData: item 
+        }
+      };
+
+  navigation.navigate(navigateConfig.name, navigateConfig.params);
+}}
               style={[
                 styles.categoryContainer,
                 {
@@ -70,7 +80,7 @@ const CustomCategoryList = ({
             >
              
               <LinearGradient
-               colors={isSelected ? (colors || ['#FFFFFF', '#FFFFFF']) : ['#FFFFFF', '#FFFFFF']}
+               colors={isSelected ? (colors || ['#FFFFFF', '#FFFFFF']) : [ '#FFFFFF', '#FFFFFF']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../../constants";
+import { COLORS, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   backdrop: {
@@ -13,11 +13,15 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: Height(30),
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 16,
+   
+  },
+  panelContainer:{
+   padding:15
   },
   dragHandle: {
     width: 50,
@@ -87,15 +91,20 @@ export const styles = StyleSheet.create({
     borderColor: '#e0e0e0',
     backgroundColor: '#f9f9f9',
   },
+  colorItem:{
+ width: '50%',
+   flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
   optionItemSelected: {
     borderColor: '#376275',
     backgroundColor: '#f0f8ff',
   },
-  colorCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 8,
+  colorCircleStyle: {
+    width: Height(40),
+    height:  Width(30),
+    marginRight: 8
   },
   optionText: {
     fontSize: 14,
@@ -126,5 +135,77 @@ export const styles = StyleSheet.create({
   sizeTextSelected: {
     color: '#376275',
     fontWeight: '600',
-  }
+  },
+  // Add these to your existing styles
+checkboxContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 15,
+},
+checkboxLabel: {
+  marginLeft: 10,
+  fontSize: 16,
+  color: '#333',
+},
+rightPaneContainer: {
+  padding: 15,
+},
+sectionTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 15,
+  color: '#333',
+},
+optionsGrid: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'flex-start',
+},
+optionItem: {
+  width: '30%',
+  flexDirection: 'row',
+  alignItems: 'center',
+  padding: 8,
+  marginBottom: 10,
+  borderRadius: 5,
+  borderWidth: 1,
+  borderColor: '#ddd',
+},
+optionItemSelected: {
+  borderColor: '#376275',
+  backgroundColor: '#f0f8ff',
+},
+colorCircle: {
+  width: 20,
+  height: 20,
+  borderRadius: 10,
+  marginRight: 8,
+},
+optionText: {
+  fontSize: 14,
+},
+checkIcon: {
+  marginLeft: 'auto',
+},
+sizeOption: {
+  width: 60,
+  height: 40,
+  justifyContent: 'center',
+  alignItems: 'center',
+  margin: 5,
+  borderRadius: 5,
+  borderWidth: 1,
+  borderColor: '#ddd',
+},
+sizeOptionSelected: {
+  borderColor: '#376275',
+  backgroundColor: '#f0f8ff',
+},
+sizeText: {
+  fontSize: 16,
+},
+sizeTextSelected: {
+  color: '#376275',
+  fontWeight: 'bold',
+},
 });

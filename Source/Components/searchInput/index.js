@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
   TouchableOpacity,
+  Keyboard,
 } from 'react-native';
-import {  Width } from '../../constants';
+import { Width } from '../../constants';
 import { Search } from '../../../assets/Icons/svgIcons/search';
 import { Cross } from '../../../assets/Icons/svgIcons/close';
 import { styles } from './styles';
@@ -22,8 +23,21 @@ const CustomSearchInput = ({
   onBlur,
   showCrossIcon,
   onCrossPress,
-  disabledStyle
+  disabledStyle,
+  onSubmitEditing
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    onFocus && onFocus();
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    onBlur && onBlur();
+  };
+
   return (
     <View style={{ width: WidthSize }}>      
       <View
@@ -32,6 +46,7 @@ const CustomSearchInput = ({
           containerStyle,
           { backgroundColor: backgroundColor || '#fff' },
           disabled && disabledStyle ? disabledStyle : styles.disabledInput,
+          isFocused && styles.focusedContainer
         ]}
       >
         <Search/>
@@ -43,13 +58,20 @@ const CustomSearchInput = ({
           onChangeText={onChangeText}
           editable={!disabled}
           returnKeyType="search"
-          onFocus={onFocus}
-          onBlur={onBlur}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           autoCorrect={false}
           autoCapitalize="none"
+          onSubmitEditing={onSubmitEditing}
         />
         {showCrossIcon && (
-          <TouchableOpacity onPress={onCrossPress} style={styles.rightIcons}>
+          <TouchableOpacity 
+            onPress={() => {
+              onCrossPress();
+              Keyboard.dismiss();
+            }} 
+            style={styles.rightIcons}
+          >
             <Cross/>
           </TouchableOpacity>
         )}

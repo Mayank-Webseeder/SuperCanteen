@@ -15,23 +15,27 @@ import { Height } from '../../../constants';
 import { styles } from './styles';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const BOTTOM_SHEET_HEIGHT = Height(650)
+const BOTTOM_SHEET_HEIGHT = Height(650);
 
 const sortOptions = [
-  'Discount',
   'Popular',
   'Price: Low to High',
   'Price: High to Low',
+  'Discount',
   'Best Seller',
   'Rating: High to Low',
   'Rating: Low to High',
 ];
 
-const SortBottomSheet = ({ visible, onClose }) => {
+const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelectedOption }) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const [selectedOption, setSelectedOption] = useState('Popular');
+  const [selectedOption, setSelectedOption] = useState(propSelectedOption);
   const insets = useSafeAreaInsets();
   const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    setSelectedOption(propSelectedOption);
+  }, [propSelectedOption]);
 
   useEffect(() => {
     if (visible) {
@@ -65,6 +69,11 @@ const SortBottomSheet = ({ visible, onClose }) => {
 
   const selectOption = (option) => {
     setSelectedOption(option);
+  };
+
+  const handleApply = () => {
+    onApply(selectedOption);
+    onClose();
   };
 
   return (
@@ -122,24 +131,22 @@ const SortBottomSheet = ({ visible, onClose }) => {
             ))}
           </ScrollView>
         </View>
+
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+          <TouchableOpacity 
+            onPress={onClose} 
+            style={[styles.footerButton, styles.cancelButton]}
+          >
+            <Text style={styles.footerButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleApply} 
+            style={[styles.footerButton, styles.applyButton]}
+          >
+            <Text style={[styles.footerButtonText, styles.applyButtonText]}>Apply</Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
-         <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-            <TouchableOpacity 
-              onPress={onClose} 
-              style={[styles.footerButton, styles.cancelButton]}
-            >
-              <Text style={styles.footerButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => {
-                console.log('Selected sort:', selectedOption);
-                onClose();
-              }} 
-              style={[styles.footerButton, styles.applyButton]}
-            >
-              <Text style={[styles.footerButtonText, styles.applyButtonText]}>Apply</Text>
-            </TouchableOpacity>
-          </View>
     </Modal>
   );
 };

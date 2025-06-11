@@ -76,12 +76,11 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     color: '#2D3748',
     marginBottom: 8,
-    height: 40,
+  
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   currentPrice: {
     fontSize: 16,

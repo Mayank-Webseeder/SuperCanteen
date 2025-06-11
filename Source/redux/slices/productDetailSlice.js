@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getData } from '../../utils/apiClient';
+import { GETALLBRANDS, PRODUCTBYID } from '../../api';
 
 export const fetchProductById = createAsyncThunk(
   'productDetail/fetchProductById',
   async (productId, { rejectWithValue }) => {
     try {
-      const data = await getData(`/products/getProductById/${productId}`);
+      const data = await getData(`${PRODUCTBYID}/${productId}`);
       return data;
     } catch (err) {
       return rejectWithValue(err.response.data);

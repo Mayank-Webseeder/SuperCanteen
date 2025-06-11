@@ -1,12 +1,13 @@
 // subCategoryProductSlice.js (new file)
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getData } from '../../utils/apiClient';
+import { FETCHPRODUCTBYSUBCATEGORY } from '../../api';
 
 export const fetchProductsBySubcategory = createAsyncThunk(
   'product/fetchBySubcategory',
   async (subcategoryId, thunkAPI) => {
     try {
-      const data = await getData(`/products/getProductBySubCategory/${subcategoryId}`);
+      const data = await getData(`${FETCHPRODUCTBYSUBCATEGORY}/${subcategoryId}`);
       return { subcategoryId, data };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);

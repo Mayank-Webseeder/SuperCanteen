@@ -7,37 +7,34 @@ import {
   Text,
   ScrollView,
   Dimensions,
-  Platform
+  Platform,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Height } from '../../../constants';
 import BottomActionButtons from '../../../otherComponents/productCategory/bottomActionButtons';
 import { styles } from './styles';
+import { getColorHex } from '../../../utils/helper';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = Height(650);
 
 const filterCategories = ['Brand', 'Color', 'Size', 'New', 'Popular'];
-const colorOptions = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Grey', 'Pink', 'Orange', 'Purple', 'Brown', 'Beige', 'Maroon'];
-const sizeOptions = ['XS', 'S', 'M', 'L', 'XL'];
 
-const CustomBottomSheet = ({ visible, onClose }) => {
+const CustomBottomSheet = ({ 
+  visible, 
+  onClose, 
+  onApply, 
+  initialFilters, 
+  filterOptions,
+  onReset
+}) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [selectedCategory, setSelectedCategory] = useState('Color');
-  const [selectedColors, setSelectedColors] = useState([]);
-  const [selectedSizes, setSelectedSizes] = useState([]);
-
-  const toggleSelection = (item, type) => {
-    if (type === 'color') {
-      setSelectedColors(prev =>
-        prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
-      );
-    } else {
-      setSelectedSizes(prev =>
-        prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
-      );
-    }
-  };
+  const [selectedColors, setSelectedColors] = useState(initialFilters.colors || []);
+  const [selectedSizes, setSelectedSizes] = useState(initialFilters.sizes || []);
+  const [selectedBrands, setSelectedBrands] = useState(initialFilters.brands || []);
+  const [isNew, setIsNew] = useState(initialFilters.isNew || false);
+  const [isPopular, setIsPopular] = useState(initialFilters.isPopular || false);
 
   useEffect(() => {
     if (visible) {
@@ -55,24 +52,85 @@ const CustomBottomSheet = ({ visible, onClose }) => {
     }
   }, [visible]);
 
+  const toggleSelection = (item, type) => {
+    switch (type) {
+      case 'color':
+        setSelectedColors(prev =>
+          prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
+        );
+        break;
+      case 'size':
+        setSelectedSizes(prev =>
+          prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
+        );
+        break;
+      case 'brand':
+        setSelectedBrands(prev =>
+          prev.includes(item) ? prev.filter(v => v !== item) : [...prev, item]
+        );
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleReset = () => {
+    setSelectedColors([]);
+    setSelectedSizes([]);
+    setSelectedBrands([]);
+    setIsNew(false);
+    setIsPopular(false);
+    if (onReset) onReset();
+  };
+
   const renderRightPane = () => {
     switch (selectedCategory) {
-      case 'Color':
+      case 'Brand':
         return (
           <View style={styles.rightPaneContainer}>
-            <Text style={styles.sectionTitle}>Select Colors</Text>
+            <Text style={styles.sectionTitle}>Select Brands</Text>
             <View style={styles.optionsGrid}>
-              {colorOptions.map(color => (
+              {filterOptions.brands.map(brand => (
+                <TouchableOpacity
+                  key={brand}
+                  style={[
+                    styles.optionItem,
+                    selectedBrands.includes(brand) && styles.optionItemSelected
+                  ]}
+                  onPress={() => toggleSelection(brand, 'brand')}
+                >
+                  <Text style={styles.optionText}>{brand}</Text>
+                  {selectedBrands.includes(brand) && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={20}
+                      color="#376275"
+                      style={styles.checkIcon}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        );
+
+      case 'Color':
+        return (
+          <View style={styles.panelContainer}>
+            <Text style={styles.sectionTitle}>Select Colors</Text>
+            <View style={styles.colorContainer}>
+              {filterOptions.colors.map(color => (
+                
                 <TouchableOpacity
                   key={color}
                   style={[
-                    styles.optionItem,
-                    selectedColors.includes(color) && styles.optionItemSelected
+                    styles.colorItem,
+                    selectedColors.includes(color) 
                   ]}
                   onPress={() => toggleSelection(color, 'color')}
                 >
                   <View style={[
-                    styles.colorCircle,
+                    styles.colorCircleStyle,
                     { backgroundColor: color.toLowerCase() }
                   ]} />
                   <Text style={styles.optionText}>{color}</Text>
@@ -89,13 +147,13 @@ const CustomBottomSheet = ({ visible, onClose }) => {
             </View>
           </View>
         );
-      
+
       case 'Size':
         return (
           <View style={styles.rightPaneContainer}>
             <Text style={styles.sectionTitle}>Select Sizes</Text>
             <View style={styles.optionsGrid}>
-              {sizeOptions.map(size => (
+              {filterOptions.sizes.map(size => (
                 <TouchableOpacity
                   key={size}
                   style={[
@@ -115,7 +173,47 @@ const CustomBottomSheet = ({ visible, onClose }) => {
             </View>
           </View>
         );
-      
+
+      case 'New':
+        return (
+          <View style={styles.rightPaneContainer}>
+            <Text style={styles.sectionTitle}>New Arrivals</Text>
+            <View style={styles.checkboxContainer}>
+              <TouchableOpacity 
+                onPress={() => setIsNew(!isNew)} 
+                style={styles.checkboxTouchable}
+              >
+                <Ionicons
+                  name={isNew ? 'checkbox' : 'checkbox-outline'}
+                  size={24}
+                  color={isNew ? '#376275' : '#ccc'}
+                />
+                <Text style={styles.checkboxLabel}>Show only new products</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+
+      case 'Popular':
+        return (
+          <View style={styles.rightPaneContainer}>
+            <Text style={styles.sectionTitle}>Popular Items</Text>
+            <View style={styles.checkboxContainer}>
+              <TouchableOpacity 
+                onPress={() => setIsPopular(!isPopular)} 
+                style={styles.checkboxTouchable}
+              >
+                <Ionicons
+                  name={isPopular ? 'checkbox' : 'checkbox-outline'}
+                  size={24}
+                  color={isPopular ? '#376275' : '#ccc'}
+                />
+                <Text style={styles.checkboxLabel}>Show only popular products</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+
       default:
         return (
           <View style={styles.rightPaneContainer}>
@@ -188,19 +286,24 @@ const CustomBottomSheet = ({ visible, onClose }) => {
               </ScrollView>
             </View>
           </View>
+
+          <BottomActionButtons
+            onCancel={onClose}
+            onReset={handleReset}
+            onApply={() => {
+              onApply({
+                colors: selectedColors,
+                sizes: selectedSizes,
+                brands: selectedBrands,
+                isNew,
+                isPopular
+              });
+            }}
+          />
         </Animated.View>
-      <BottomActionButtons
-  onCancel={onClose}
-  onApply={() => {
-    // console.log('Selected sort:', selectedOption);
-    onClose();
-  }}
-  // applyDisabled={!selectedOption}
-/>
       </View>
     </Modal>
   );
 };
-
 
 export default CustomBottomSheet;

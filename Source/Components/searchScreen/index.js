@@ -1,32 +1,62 @@
-import { TouchableOpacity, View, Text, ScrollView } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height, Width } from '../../constants';
 import CustomSearch from '../searchInput';
 import CustomCategoryList from '../CustomCategoryList';
 import HeaderRow from '../../otherComponents/home/headerRow';
 import { BackArrow } from '../../../assets/Icons/svgIcons/arrow_back';
-import Fashion from '../../Mock/Data/Fashion';
-import BeautyData from '../../Mock/Data/BeautyData';
-import ElectronicsHome from '../../Mock/Data/ElectronicsHome';
 import { styles } from './styles';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchSearchResults,
+  clearResults,
+  fetchInitialSuggestions,
+  addRecentSearch
+} from '../../redux/slices/searchSlice';
+import { formatCategoryData, formatProductGroupedData } from '../../utils/dataFormatters';
 
 const SearchScreen = ({ navigation }) => {
-  const [selectFashion, setSelectedFashion] = useState('');
-  const [selectBeauty, setSelectedBeauty] = useState('');
-  const [selectElectronics, setSelectedElectronics] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const dispatch = useDispatch();
 
-  // Filter data based on search query
-  const filterData = (data) => {
-    if (!searchQuery) return data;
-    return data.filter(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
+  const {
+    loading,
+    results,
+    error,
+    recentSearches,
+    popularSearches,
+  } = useSelector(state => state.search);
 
-  const filteredFashion = filterData(Fashion);
-  const filteredBeauty = filterData(BeautyData);
-  const filteredElectronics = filterData(ElectronicsHome);
+  const { categories, loading: categoriesLoading } = useSelector((state) => state.category)
+  const formattedCategories = formatCategoryData(categories);
+
+  // Debounce logic
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timerId);
+  }, [searchQuery]);
+
+  // Trigger search and store recent term
+  useEffect(() => {
+    if (debouncedQuery) {
+      dispatch(fetchSearchResults(debouncedQuery));
+      dispatch(addRecentSearch(debouncedQuery));
+      setShowSuggestions(false);
+    } else {
+      dispatch(clearResults());
+      setShowSuggestions(true);
+    }
+  }, [debouncedQuery, dispatch]);
+
+  // Load initial suggestions on mount
+  useEffect(() => {
+    dispatch(fetchInitialSuggestions());
+  }, [dispatch]);
 
   const handleSearchChange = (text) => {
     setSearchQuery(text);
@@ -34,49 +64,76 @@ const SearchScreen = ({ navigation }) => {
 
   const clearSearch = () => {
     setSearchQuery('');
+    dispatch(clearResults());
+    setShowSuggestions(true);
   };
 
-  // Check if all categories are empty
-  const noDataFound = searchQuery && 
-    filteredFashion.length === 0 && 
-    filteredBeauty.length === 0 && 
-    filteredElectronics.length === 0;
+  const handleRecentSearchPress = (searchTerm) => {
+    setSearchQuery(searchTerm);
+    dispatch(fetchSearchResults(searchTerm));
+    dispatch(addRecentSearch(searchTerm));
+    setShowSuggestions(false);
+  };
+
+  // Group products by category
+  const groupProductsByCategory = () => {
+    const grouped = {};
+    results.forEach(product => {
+      if (!grouped[product.category]) {
+        grouped[product.category] = [];
+      }
+      grouped[product.category].push(product);
+    });
+    return grouped;
+  };
+
+  const groupedProducts = formatProductGroupedData(groupProductsByCategory())
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack('')} style={styles.iconStyle}>
-          <BackArrow/>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconStyle}>
+          <BackArrow />
         </TouchableOpacity>
         <View style={styles.searchContainer}>
-          <CustomSearch 
-            showCrossIcon={true}
+          <CustomSearch
+            showCrossIcon={!!searchQuery}
             onChangeText={handleSearchChange}
             value={searchQuery}
             onCrossPress={clearSearch}
+            placeholder="Search in SuperCanteen store"
+            autoFocus={true}
+            containerStyle={{PaddingLeft:20}}
           />
         </View>
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
-        {noDataFound ? (
+        {loading ? (
+          <ActivityIndicator size="large" color="#008ECC" />
+        ) : error ? (
           <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>No data found</Text>
+            <Text style={styles.noDataText}>{error}</Text>
           </View>
-        ) : (
-          <>
-            {filteredFashion.length > 0 && (
-              <View key="fashion">
-                <HeaderRow 
-                  containerStyle={{marginHorizontal: Height(15)}} 
-                  title={'Fashion'} 
+        ) : searchQuery && results.length === 0 ? (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.noDataText}>No products found for "{searchQuery}"</Text>
+            <Text style={styles.suggestionText}>Try searching for something else</Text>
+          </View>
+        ) : searchQuery && !showSuggestions ? (
+          Object.keys(groupedProducts).map(categoryId => {
+            const category = formattedCategories.find(cat => cat.id === categoryId);
+            return (
+              <View key={categoryId}>
+                <HeaderRow
+                  title={category?.name || 'Products'}
                   navigation={navigation}
                 />
                 <CustomCategoryList
-                  data={filteredFashion}
+                  data={groupedProducts[categoryId]}
                   horizontal={false}
                   numColumns={3}
                   bgColor="#D4DEF226"
@@ -89,67 +146,83 @@ const SearchScreen = ({ navigation }) => {
                   containerStyle={styles.containerView}
                   gap={Width(20)}
                   imageSize={Height(65)}
-                  selected={selectFashion}
-                  onSelect={(name) => setSelectedFashion(name)}
                   navigation={navigation}
+                  gotoScreen={"ProductDetails"}
                 />
               </View>
-            )}
-           
-            {filteredBeauty.length > 0 && (
-              <View key="beauty" >
-                <HeaderRow title={'Beauty & Wellness'} navigation={navigation}/>
-                <CustomCategoryList
-                  data={filteredBeauty}
-                  horizontal={false}
-                  numColumns={3}
-                  bgColor="#D4DEF226"
-                  width={Width(90)}
-                  height={Height(105)}
-                  borderRadius={Width(5)}
-                  selectedBorderColor="#008ECC"
-                  textColor="#333"
-                  textStyle={styles.textStyle}
-                  containerStyle={styles.mainStyle}
-                  gap={Width(20)}
-                  imageSize={Height(70)}
-                  selected={selectBeauty}
-                  onSelect={(name) => setSelectedBeauty(name)}
-                  navigation={navigation}
-                />
+            );
+          })
+        ) : (
+          <>
+            {/* Recent Searches - Now at the top */}
+            {recentSearches.length > 0 && (
+              <View style={styles.suggestionSection}>
+                <View style={styles.sectionHeader}>
+                  <Icon name="history" size={20} color="#666" />
+                  <Text style={styles.suggestionTitle}>Recent Searches</Text>
+                </View>
+                <View style={styles.suggestionsGrid}>
+                  {recentSearches.map((search, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.searchSuggestionItem}
+                      onPress={() => handleRecentSearchPress(search)}
+                    >
+                      <Text style={styles.searchSuggestionText}>{search}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             )}
-           
-            {filteredElectronics.length > 0 && (
-              <View key="electronics" >
-                <HeaderRow title={'Electronics & Home Essentials'} navigation={navigation}/>
-                <CustomCategoryList
-                  data={filteredElectronics}
-                  horizontal={false}
-                  numColumns={3}
-                  bgColor="#D4DEF226"
-                  width={Width(90)}
-                  height={Height(105)}
-                  borderRadius={Width(5)}
-                  selectedBorderColor="#008ECC"
-                  textColor="#333"
-                  textStyle={styles.textStyle}
-                  containerStyle={styles.section}
-                  gap={Width(20)}
-                  imageSize={Height(70)}
-                  selected={selectElectronics}
-                  onSelect={(name) => setSelectedElectronics(name)}
-                  navigation={navigation}
-                />
+
+            {/* Popular Searches */}
+            {popularSearches.length > 0 && (
+              <View style={styles.suggestionSection}>
+                <View style={styles.sectionHeader}>
+                  <Icon name="local-fire-department" size={20} color="#666" />
+                  <Text style={styles.suggestionTitle}>Popular Searches</Text>
+                </View>
+                <View style={styles.suggestionsGrid}>
+                  {popularSearches.map((term, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.searchSuggestionItem}
+                      onPress={() => handleRecentSearchPress(term)}
+                    >
+                      <Text style={styles.searchSuggestionText}>{term}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             )}
+
+            {/* Popular Categories */}
+            <View style={[styles.suggestionSection,{paddingHorizontal:0}]}>
+              <View style={[styles.sectionHeader,{ paddingHorizontal:Height(15)}]}>
+                <Icon name="search" size={20} color="#666" />
+                <Text style={styles.suggestionTitle}>Browse Categories</Text>
+              </View>
+              <CustomCategoryList
+                data={formattedCategories}
+                horizontal={false}
+                numColumns={3}
+                bgColor="#D4DEF226"
+                width={Width(95)}
+                height={Height(105)}
+                borderRadius={Width(5)}
+                textColor="#333"
+                textStyle={styles.textStyle}
+                containerStyle={styles.containerView}
+                gap={Width(20)}
+                imageSize={Height(65)}
+                navigation={navigation}
+              />
+            </View>
           </>
         )}
       </ScrollView>
     </View>
   );
 };
-
-
 
 export default SearchScreen;

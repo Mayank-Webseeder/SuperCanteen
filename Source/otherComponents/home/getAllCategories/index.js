@@ -20,7 +20,7 @@ const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }
   if (categories.length === 0) {
     return (
       <View style={styles.categories}>
-        <Text style={styles.noDataText}>No categories available</Text>
+        {/* <Text style={styles.noDataText}>No categories available</Text> */}
       </View>
     );
   }
