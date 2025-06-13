@@ -13,6 +13,8 @@ import smilarProductReducer from './slices/similarProductSlice'
 import segmentReducer from './slices/segmentSlice'
 import serachReducer from './slices/searchSlice'
 import productBySegmentReducer from './slices/productBySegmentSlice';
+import productByBrandReducer from './slices/productsByBrandSlice'
+import cartReducer from './slices/cartSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
@@ -25,7 +27,9 @@ const rootReducer = combineReducers({
     similarProduct:smilarProductReducer,
     segment: segmentReducer,
     search:serachReducer,
-    productsBySegment: productBySegmentReducer
+    productsBySegment: productBySegmentReducer,
+    productsByBrand : productByBrandReducer,
+    cart:cartReducer
 });
 
 const persistConfig = {

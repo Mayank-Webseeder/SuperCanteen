@@ -1,13 +1,11 @@
 import { View, FlatList, Text, TouchableOpacity, Pressable } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import CustomHeader from '../../../Components/CustomHeader';
 import { COLORS, Height, Width } from '../../../constants';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
 import CustomProductCard from '../../../Components/productCard';
 import CustomBottomSheet from '../../../Components/modals/bottomSheet';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import WatchStoreData from '../../../Mock/Data/WatchStoreData';
-import SortBottomSheet from '../../../Components/modals/sortBottomsheet';
 import { styles } from '../product/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductsBySubcategory } from '../../../redux/slices/subCategoryProductSlice';
@@ -17,21 +15,23 @@ import ErrorView from '../../../Components/Common/errorView';
 import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import CustomFilterBtn from '../../../Components/CustomFilterBtn';
-import { formateSubCategoryProducts, formateSubCategorySegments,formatProductBySegment } from '../../../utils/dataFormatters';
+import { formateSubCategoryProducts, formateSubCategorySegments, formatProductBySegment } from '../../../utils/dataFormatters';
 import CustomSearch from '../../../Components/searchInput'
 import { fetchGetSegmentsByCategory } from '../../../redux/slices/segmentSlice';
-import { fetchProductsBySegment , clearSegmentProducts } from '../../../redux/slices/productBySegmentSlice';
+import { fetchProductsBySegment, clearSegmentProducts } from '../../../redux/slices/productBySegmentSlice';
 import EmptyComponent from '@components/emptyComponent';
-
+import { fetchProductsByBrand  } from '../../../redux/slices/productsByBrandSlice';
+import SortBottomSheet from '@components/modals/sortBottomsheet';
 
 const ProductCategoryScreen = ({ navigation, route }) => {
-  const { selectedCategory, categoryData } = route?.params || {};
+  const { selectedCategory, categoryData, brandId } = route?.params || {};
   const [showSheet, setShowSheet] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { segmentProducts } = useSelector(state => state.productsBySegment);
+  const [selectedSegment, setSelectedSegment] = useState(null);
+
 
   // Filter and sort states
   const [filters, setFilters] = useState({
@@ -42,57 +42,37 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     isPopular: false
   });
   const [sortOption, setSortOption] = useState('Popular');
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedSegment, setSelectedSegment] = useState(null);
-
-  
 
   const dispatch = useDispatch();
   
-  // Redux state
+  // Redux state selectors with memoization
   const { 
     productsBySubcategory, 
     loading: productsLoading, 
     error: productsError 
   } = useSelector((state) => state.subCategoryProducts);
 
-    const { 
+  const { 
     segmentsByCategory, 
-    loading
+    loading: segmentsLoading 
   } = useSelector((state) => state.segment);
 
+  const {
+    brandProducts,
+    loading: brandLoading
+  } = useSelector((state) => state.productsByBrand);
 
-  // Get products for the current category
-  const products = productsBySubcategory[selectedCategory] || [];
- const segments = segmentsByCategory.segments || [];
- const formattedSegments = formateSubCategorySegments(segments);
+  const { segmentProducts } = useSelector(state => state.productsBySegment);
+  
+  // Memoized data transformations
+  const products = useMemo(() => productsBySubcategory[selectedCategory] || [], [productsBySubcategory, selectedCategory]);
+  const segments = useMemo(() => segmentsByCategory.segments || [], [segmentsByCategory]);
+  const formattedSegments = useMemo(() => formateSubCategorySegments(segments), [segments]);
+  const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
+  const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
 
-
-
-
- // Set initial category when categories load
-   useEffect(() => {
-     if (!loading && segmentsByCategory?.length > 0 && selectedSegment === null) {
-       setSelectedSegment(segmentsByCategory[0]._id);
-     }
-   }, [loading, segmentsByCategory]);
-
-    const formattedProducts = formatProductBySegment(segmentProducts);
-
-
-
-   useEffect(() => {
-    if (selectedSegment) {
-       dispatch(clearSegmentProducts());
-      dispatch(fetchProductsBySegment(selectedSegment));
-    }
-  }, [selectedSegment]);
-
- 
-
-
-  // Extract filter options from products
-  const extractFilterOptions = (products) => {
+  // Filter options extraction with memoization
+  const filterOptions = useMemo(() => {
     const brands = new Set();
     const colors = new Set();
     const sizes = new Set();
@@ -100,10 +80,8 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     let hasPopularProducts = false;
 
     products.forEach(product => {
-      // Extract brands
       if (product.brandName) brands.add(product.brandName);
       
-      // Extract colors from variants
       product.variants?.forEach(variant => {
         if (variant.color && variant.color.trim() !== '') {
           colors.add(variant.color.trim());
@@ -116,53 +94,45 @@ const ProductCategoryScreen = ({ navigation, route }) => {
         }
       });
       
-      // Check for new products (created in last 30 days)
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
       if (new Date(product.createdAt) > oneMonthAgo) hasNewProducts = true;
       
-      // Check for popular products
       if (product.isBestSeller) hasPopularProducts = true;
     });
 
     return {
-      brands: Array.from(brands).filter(b => b),
-      colors: Array.from(colors).filter(c => c),
-      sizes: Array.from(sizes).filter(s => s),
+      brands: Array.from(brands).filter(Boolean),
+      colors: Array.from(colors).filter(Boolean),
+      sizes: Array.from(sizes).filter(Boolean),
       hasNewProducts,
       hasPopularProducts
     };
-  };
+  }, [products]);
 
-  const filterOptions = extractFilterOptions(products);
+  // Apply filters and sorting with memoization
+  const filteredProducts = useMemo(() => {
+    if (products.length === 0) return [];
 
-  // Apply filters and sorting whenever products, filters or sort option changes
-  useEffect(() => {
-    if (products.length > 0) {
-      applyFiltersAndSorting();
-    }
-  }, [products, filters, sortOption]);
-
-  const applyFiltersAndSorting = () => {
     let result = [...products];
 
     // Apply filters
     if (filters.colors.length > 0) {
-      result = result.filter(product => {
-        return product.variants?.some(variant => 
+      result = result.filter(product => 
+        product.variants?.some(variant => 
           variant.color && filters.colors.includes(variant.color.trim())
-        );
-      });
+        )
+      );
     }
 
     if (filters.sizes.length > 0) {
-      result = result.filter(product => {
-        return product.variants?.some(variant => {
+      result = result.filter(product => 
+        product.variants?.some(variant => {
           if (!variant.size) return false;
           const sizes = variant.size.split(',').map(s => s.trim());
           return sizes.some(size => filters.sizes.includes(size));
-        });
-      });
+        })
+      );
     }
 
     if (filters.brands.length > 0) {
@@ -209,11 +179,11 @@ const ProductCategoryScreen = ({ navigation, route }) => {
         break;
     }
 
-    setFilteredProducts(result);
-  };
+    return result;
+  }, [products, filters, sortOption]);
 
   // Reset all filters
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setFilters({
       colors: [],
       sizes: [],
@@ -222,62 +192,97 @@ const ProductCategoryScreen = ({ navigation, route }) => {
       isPopular: false
     });
     setSortOption('Popular');
-  };
+  }, []);
 
-  // Fetch products on mount
+  // Handle segment selection
+  const handleSegmentSelect = useCallback((segmentId) => {
+    setSelectedSegment(segmentId);
+    dispatch(clearSegmentProducts());
+    dispatch(fetchProductsBySegment(segmentId));
+  }, [dispatch]);
+
+  // Fetch data functions
+  const fetchBrandProducts = useCallback(async () => {
+    if (!brandId) return;
+    setError(null);
+    try {
+      await dispatch(fetchProductsByBrand(brandId));
+    } catch (err) {
+      setError('Failed to load brand products');
+    } finally {
+      setPageLoading(false);
+    }
+  }, [brandId, dispatch]);
+
+  const fetchCategoryData = useCallback(async () => {
+    if (!selectedCategory) return;
+    setError(null);
+    try {
+      await Promise.all([
+        dispatch(fetchProductsBySubcategory(selectedCategory)),
+        dispatch(fetchGetSegmentsByCategory(selectedCategory))
+      ]);
+    } catch (err) {
+      setError('Failed to load category products or segments');
+    } finally {
+      setPageLoading(false);
+    }
+  }, [selectedCategory, dispatch]);
+
+  // Initial data loading
   useEffect(() => {
-    const fetchData = async () => {
-      setError(null);
-      try {
-        if (selectedCategory) {
-          await dispatch(fetchProductsBySubcategory(selectedCategory));
-          await dispatch(fetchGetSegmentsByCategory(selectedCategory))
-        }
-      } catch (err) {
-        setError('Failed to load products');
-      } finally {
-        setPageLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [selectedCategory]);
+    if (brandId) {
+      fetchBrandProducts();
+    } else if (selectedCategory) {
+      fetchCategoryData();
+    }
+  }, [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
+
+  // Set initial segment when segments load
+  useEffect(() => {
+    if (!segmentsLoading && segments.length > 0 && selectedSegment === null) {
+      setSelectedSegment(segments[0]._id);
+    }
+  }, [segmentsLoading, segments, selectedSegment]);
 
   // Handle pull-to-refresh
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
-      if (selectedCategory) {
-        await dispatch(fetchProductsBySubcategory(selectedCategory));
-        await dispatch(fetchGetSegmentsByCategory(selectedCategory))
+      if (brandId) {
+        await fetchBrandProducts();
+      } else if (selectedCategory) {
+        await fetchCategoryData();
       }
     } catch (err) {
       setError('Failed to refresh data');
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
 
   // Handle sort apply
-  const handleSortApply = (option) => {
+  const handleSortApply = useCallback((option) => {
     setSortOption(option);
     setSortSheetVisible(false);
-  };
+  }, []);
 
   // Handle filter apply
-  const handleFilterApply = (newFilters) => {
+  const handleFilterApply = useCallback((newFilters) => {
     setFilters(newFilters);
     setShowSheet(false);
-  };
+  }, []);
 
-  const renderSection = ({ item }) => item;
-  const sections = [
+  // Render sections
+  const renderSection = useCallback(({ item }) => item, []);
+  
+  const sections = useMemo(() => [
     <View key="product-category-content">
       {/* Header */}
       <View style={styles.headerView}>
         <CustomHeader navigation={navigation} label={categoryData?.name || 'Products'} />
-         <View style={styles.searchView}>
+        <View style={styles.searchView}>
           <Pressable onPress={() => navigation.navigate('Search')}>
             <CustomSearch
               disabledStyle={styles.disabledStyle}
@@ -287,30 +292,28 @@ const ProductCategoryScreen = ({ navigation, route }) => {
             />
           </Pressable>
         </View>
-        
       </View>
 
       {/* Category List */}
-      {formattedSegments.length > 0 && 
-      <View style={styles.categoryList}>
-        <CustomCategoryList
-         width={53}
-        height={53}
-          gap={15}
-          horizontal={true}
-          borderRadius={32}
-          data={formattedSegments}
-           colors={['#2E6074', '#3CAEA3']}
-          textStyle={styles.text}
-           selected={selectedSegment}
-          onSelect={setSelectedSegment}
-           selectedBorderColor={COLORS.green}
-             bgColor="#D4E7F2"
-               imageSize={38}
-             
-        />
-      </View> }
-   
+      {formattedSegments.length > 0 && (
+        <View style={styles.categoryList}>
+          <CustomCategoryList
+            width={53}
+            height={53}
+            gap={15}
+            horizontal={true}
+            borderRadius={32}
+            data={formattedSegments}
+            colors={['#2E6074', '#3CAEA3']}
+            textStyle={styles.text}
+            selected={selectedSegment}
+            onSelect={handleSegmentSelect}
+            selectedBorderColor={COLORS.green}
+            bgColor="#D4E7F2"
+            imageSize={38}
+          />
+        </View>
+      )}
 
       {/* Filter Buttons */}
       <View style={styles.bottomSheetContainer}>
@@ -351,73 +354,111 @@ const ProductCategoryScreen = ({ navigation, route }) => {
 
       <HorizontalLine />
 
-     
-     {/* Products Section */}
-{productsLoading ? (
-  // Loading state - shows skeleton loader
-  <ContentSkeletonLoader 
-    type="grid" 
-    itemCount={4} 
-    containerStyle={styles.skeletonContainer}
-  />
-) : error ? (
-  // Error state - shows error message with retry option
-  <ErrorView
-    message={error}
-    onRetry={handleRefresh}
-    containerStyle={styles.errorContainer}
-  />
-) : selectedSegment ? (
-  // Segment-specific products display
-  formattedProducts?.length > 0 ? (
-    <View style={styles.mainContainer}>
-      <CustomProductCard
-        height={Height(120)}
-        imageSize={Width(130)}
-        navigation={navigation}
-        bgColor="#D4DEF226"
-        numColumns={2}
-        width={Width(140)}
-        horizontal={false}
-        data={formattedProducts}
-      />
+      {/* Products Section */}
+      {brandId ? (
+        // Brand products display
+        brandLoading ? (
+          <ContentSkeletonLoader 
+            type="grid" 
+            itemCount={4} 
+            containerStyle={styles.skeletonContainer}
+          />
+        ) : formattedBrandProducts?.length > 0 ? (
+          <View style={styles.mainContainer}>
+            <CustomProductCard
+              height={Height(120)}
+              imageSize={Width(130)}
+              navigation={navigation}
+              bgColor="#D4DEF226"
+              numColumns={2}
+              width={Width(140)}
+              horizontal={false}
+              data={formattedBrandProducts}
+            />
+          </View>
+        ) : (
+          <EmptyComponent resetFilters={resetFilters} />
+        )
+      ) : productsLoading ? (
+        <ContentSkeletonLoader 
+          type="grid" 
+          itemCount={4} 
+          containerStyle={styles.skeletonContainer}
+        />
+      ) : error ? (
+        <ErrorView
+          message={error}
+          onRetry={handleRefresh}
+          containerStyle={styles.errorContainer}
+        />
+      ) : selectedSegment ? (
+        formattedProducts?.length > 0 ? (
+          <View style={styles.mainContainer}>
+            <CustomProductCard
+              height={Height(120)}
+              imageSize={Width(130)}
+              navigation={navigation}
+              bgColor="#D4DEF226"
+              numColumns={2}
+              width={Width(140)}
+              horizontal={false}
+              data={formattedProducts}
+            />
+          </View>
+        ) : (
+          <View style={styles.emptyStateContainer}>
+            <Icon name="package-variant-closed-remove" size={40} color="#888" />
+            <Text style={styles.emptyStateText}>
+              No products available in this category
+            </Text>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Search')}
+              style={styles.secondaryButton}
+            >
+              <Text style={styles.secondaryButtonText}>Browse Other Categories</Text>
+            </TouchableOpacity>
+          </View>
+        )
+      ) : filteredProducts.length > 0 ? (
+        <View style={styles.mainContainer}>
+          <CustomProductCard
+            height={Height(120)}
+            imageSize={Width(130)}
+            navigation={navigation}
+            bgColor="#D4DEF226"
+            numColumns={2}
+            width={Width(140)}
+            horizontal={false}
+            data={formateSubCategoryProducts(filteredProducts)}
+          />
+        </View>
+      ) : (
+        <EmptyComponent resetFilters={resetFilters} />
+      )}
     </View>
-  ) : (
-    // Empty state for selected segment
-    <View style={styles.emptyStateContainer}>
-      <Icon name="package-variant-closed-remove" size={40} color="#888" />
-      <Text style={styles.emptyStateText}>
-        No products available in this category
-      </Text>
-      <TouchableOpacity 
-        onPress={() => navigation.navigate('Search')}
-        style={styles.secondaryButton}
-      >
-        <Text style={styles.secondaryButtonText}>Browse Other Categories</Text>
-      </TouchableOpacity>
-    </View>
-  )
-) : filteredProducts.length > 0 ? (
-  // Default filtered products display
-  <View style={styles.mainContainer}>
-    <CustomProductCard
-      height={Height(120)}
-      imageSize={Width(130)}
-      navigation={navigation}
-      bgColor="#D4DEF226"
-      numColumns={2}
-      width={Width(140)}
-      horizontal={false}
-      data={formateSubCategoryProducts(filteredProducts)}
-    />
-  </View>
-) : (
-  // Global empty state (no filters matched)
-<EmptyComponent resetFilters={resetFilters}/>
-)}
-
-    </View>
-  ];
+  ], [
+    navigation, 
+    categoryData, 
+    formattedSegments, 
+    selectedSegment, 
+    handleSegmentSelect,
+    sortSheetVisible, 
+    handleSortApply, 
+    showSheet, 
+    handleFilterApply, 
+    filters, 
+    filterOptions, 
+    products, 
+    resetFilters,
+    brandId,
+    brandLoading,
+    formattedBrandProducts,
+    productsLoading,
+    error,
+    handleRefresh,
+    formattedProducts,
+    filteredProducts
+  ]);
 
   if (pageLoading) {
     return <FullScreenLoader />;

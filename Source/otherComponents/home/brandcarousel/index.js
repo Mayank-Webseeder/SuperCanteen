@@ -3,7 +3,8 @@ import {
   View,
   FlatList,
   Dimensions,
-  Text
+  Text,
+  TouchableOpacity
 } from 'react-native';
 import { Height , Width } from '../../../constants';
 import {formatBrandData} from '../../../utils/dataFormatters'
@@ -11,9 +12,10 @@ import { styles } from './styles';
 import { stripHtml } from '../../../utils/validation';
 import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
+import { useNavigation } from '@react-navigation/native';
 
 const Brandcarousel = ({brands}) => {
-  
+  const navigation = useNavigation()
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef();
@@ -23,6 +25,7 @@ const Brandcarousel = ({brands}) => {
   const radius = Width(14);
 
   const formattedBrands = formatBrandData(brands); 
+  const [selectedBrand,setSelectedBrand] = useState('')
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -33,7 +36,9 @@ const Brandcarousel = ({brands}) => {
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
 
  const renderItem = ({ item }) => (
-  <View style={[styles.card, { width, borderRadius: radius, overflow: 'hidden' }]}>
+  <TouchableOpacity onPress={() =>  {
+    navigation.navigate('ProdcutCategory',{brandId: item.id})
+    }} style={[styles.card, { width, borderRadius: radius, overflow: 'hidden' }]}>
     <View style={{ position: 'relative' }}>
       <FastImage
         source={{ uri: item.image }}
@@ -58,7 +63,7 @@ const Brandcarousel = ({brands}) => {
         </Text>
       </LinearGradient>
     </View>
-  </View>
+  </TouchableOpacity>
 );
 
   return (

@@ -17,3 +17,5 @@ export const GETALLPRODUCTS = '/products/allProducts?search='
 export const POPULARPRODUCTS = '/products/allProducts?limit=6&sort=-popularity'
 export const GETPRODUCTBYSEGMENT = '/segment/segmentsBySubCategory/'
 export const GET_PRODUCT_BY_SEGMENT = '/products/getProductBySegment/'
+export const GET_PRODUCT_BY_BRAND = '/products/allProducts?brand='
+export const CART_BASE = 'https://super-canteen-backend.onrender.com/api/cart';

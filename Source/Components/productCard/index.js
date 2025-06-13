@@ -53,8 +53,9 @@ const CustomProductCard = ({
     }
     
     // Fallback to main product image
-    if (product.images?.[0]) {
-      return { uri: `${product.images[0]}` };
+    if (product.images || product.images[0]) {
+     
+      return { uri: `${product.images || product.images[0]}` };
     }
     
     // Final fallback
@@ -124,7 +125,7 @@ const CustomProductCard = ({
                 
                 {/* Price */}
              <View style={styles.priceContainer}>
- <Text style={styles.currentPrice}>₹{item.price}</Text>
+ <Text style={styles.currentPrice}>₹{item.price || item.offerPrice}</Text>
     {item.mrp > item.price && (
         <Text style={styles.originalPrice}>₹{item.mrp}</Text>
     )}

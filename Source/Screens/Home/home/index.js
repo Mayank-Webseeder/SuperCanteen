@@ -181,7 +181,7 @@ const HomeScreen = ({ navigation }) => {
             setSelectedCategoryItems={setSelectedCategoryItems}
             gotoScreen={'ProdcutCategory'}
           /> 
-   <ProductCarousel  horizontal={true} navigation={navigation} products={products} /> 
+       <ProductCarousel  horizontal={true} navigation={navigation} products={products} /> 
               {/* <ClosesCalled
                 navigation={navigation}
                 key={"slider"}

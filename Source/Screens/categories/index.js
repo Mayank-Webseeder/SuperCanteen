@@ -25,7 +25,6 @@ const Categories = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} style={styles.inner}>
       <View>
-      
       <Header navigation={navigation}/>
       <HorizontalLine/>    
         {categoriesLoading &&   <ActivityIndicator size="large" color={COLORS.green} style={{ marginVertical: Height(22) }} />
@@ -47,8 +46,6 @@ const Categories = ({ navigation }) => {
         imageSize={Height(70)}
         selected={selectedCategoryIndex}
         onSelect={setSelectedCategoryIndex}
-       
-      
       />
       </View>
     </ScrollView>

@@ -25,19 +25,19 @@ import { CurruncyRupees } from '../../../assets/Icons/svgIcons/currencyRupees';
 import CustomProductDetailsData from '@components/CustomProductDetailsData';
 import { Height , Width} from '@constants/index';
 import { fetchSimilarProducts } from '../../redux/slices/similarProductSlice';
-
 import { SimilarProductData } from '../../Mock/Data/SimilarProductData';
 import Description from './description';
 import CustomZoomCasual from './zommableImage/customZoomCasual';
 import {formatSimilarProducts} from '../../utils/dataFormatters'
+
+import { addToCart } from '../../redux/slices/cartSlice';
   
   const ProductDetails = ({navigation,route}) => {
+
    const { productId } = route?.params;
-   console.log("product details is=============>",productId)
   const dispatch = useDispatch();
   const { product, loading, error } = useSelector(state => state.productDetail);
   const [isFavourite, setIsFavourite] = useState(false);
-   console.log("product",product)
   const { 
     similarProducts,
     similarLoading,
@@ -146,11 +146,28 @@ import {formatSimilarProducts} from '../../utils/dataFormatters'
      
 <BottomPurchaseBar
   onSharePress={() => console.log('Share Pressed')}
-  onAddToCart={() => navigation.navigate('Main', {
-  screen: 'Orders',
-})}
-  onBuyNow={() => navigation.navigate('ProductCheckoutScreen')}
+  onAddToCart={() => {
+    dispatch(addToCart({
+      productId: formattedProduct?._id,
+      variantId: formattedProduct.variants[0]?._id,
+      quantity: 1,
+      slabId: formattedProduct.priceSlabs?.[0]?._id,
+      price: formattedProduct?.offerPrice
+    }));
+   navigation.navigate('Cart');
+  }}
+  onBuyNow={() => {
+    dispatch(addToCart({
+      productId: formattedProduct._id,
+      variantId: formattedProduct.variants[0]?._id,
+      quantity: 1,
+      slabId: formattedProduct.priceSlabs?.[0]?._id,
+      price: formattedProduct?.offerPrice
+    }));
+    navigation.navigate('ProductCheckoutScreen');
+  }}
 />
+
       </View>
     );
   };
