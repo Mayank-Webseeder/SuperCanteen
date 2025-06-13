@@ -13,7 +13,8 @@ const CustomAuthButton = ({
   width = Width(248),  // default width prop
   height = Height(40),
   marginLeft, // default height prop,
-  loading
+  loading,
+  loadingColor
 }) => {
   return (
     <TouchableOpacity
@@ -32,7 +33,7 @@ const CustomAuthButton = ({
       onPress={onPress}
       activeOpacity={0.8}
     >
-      {loading ?   <ActivityIndicator color={COLORS.white} /> :  <Text style={[styles.buttonText, textStyle]}>{title}</Text> }
+      {loading ?   <ActivityIndicator color={loadingColor ? loadingColor : COLORS.white} /> :  <Text style={[styles.buttonText, textStyle]}>{title}</Text> }
 
     </TouchableOpacity>
   );

@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 10,
-    marginTop: 10,
+    marginTop: 15,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

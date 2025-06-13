@@ -1,219 +1,140 @@
-import { createSlice , createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { FORGOTPASSWORD, LOGINAPI ,  SENDRESETPASSWORDOTP,  SIGNUPAPI } from "../../api";
-import { showMessage } from "react-native-flash-message";
+import { FORGOTPASSWORD, LOGINAPI, SENDRESETPASSWORDOTP, SIGNUPAPI } from "../../api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Optimized API calls with timeouts
+const apiCall = async (url, data) => {
+  try {
+    const response = await axios.post(url, data, {
+      timeout: 10000, // 10 second timeout
+    });
+    return response;
+  } catch (error) {
+    if (error.code === 'ECONNABORTED') {
+      return { error: 'Request timed out. Please try again.' };
+    }
+    return { error: error.response?.data?.message || error.message };
+  }
+};
 
 export const loginUser = createAsyncThunk(
-    'auth/loginUser',
-     async ({identifier,password} , {rejectWithValue}) => {
-        try {
-            const response = await axios.post(LOGINAPI,{
-                identifier,
-                password
-            });
-            showMessage({
-               message: 'SignIn Successful!',
-               type: 'success',
-               color: '#fff',
-               icon: 'success',
-               duration: 3000,
-               animated: true,
-            });
-          return response.data
-        } catch (error) {
-            const message = error?.response?.data?.message || 'Login failed. Please try again!';
-            showMessage({
-                 message: message,
-                 type: "danger",
-                 color: "#fff",
-                 icon: "danger",
-                 duration: 3000,
-                 animated: true,
-            });
-            return rejectWithValue(message)
-        }     
-     }
-)
-
-export const signupUser = createAsyncThunk(
-    'auth/signupUser',
-    async ({username,email,password} , {rejectWithValue}) => {
-        try {
-            const response = await axios.post(SIGNUPAPI,{
-                username,
-                email,
-                password
-            });
-              showMessage({
-                  message: 'Signup Successful!',
-                  type: 'success',
-                  color: '#fff',
-                  icon: 'success',
-                  duration: 3000,
-                  animated: true,
-                });
-            return response.data
-        } catch (error) {
-            const message = error?.response?.data?.message || 'Signup failed. Please try again!';
-          showMessage({
-                 message: message,
-                 type: "danger",
-                 color: "#fff",
-                 icon: "danger",
-                 duration: 3000,
-                 animated: true,
-            });
-            return rejectWithValue(message)
-        }
+  'auth/loginUser',
+  async ({ identifier, password }, { rejectWithValue }) => {
+    const response = await apiCall(LOGINAPI, { identifier, password });
+    
+    if (response.error) {
+      return rejectWithValue(response.error);
     }
-)
-
-
-export const sendResetPasswordOtp  = createAsyncThunk(
-    'auth/email',
-     async ({email} , {rejectWithValue}) => {
-        try {
-            const response = await axios.post(SENDRESETPASSWORDOTP,{
-               email
-            });
-             showMessage({
-              message: response.data?.message || 'OTP sent successfully!',
-              type: 'success',
-              icon: 'success',
-              color: "#fff",
-              duration: 3000,
-      });
-            return response.data
-        } catch (error) {
-            const message = error?.response?.data?.message || 'Failed to send OTP!';
-            showMessage({
-                 message: message,
-                 type: "danger",
-                 color: "#fff",
-                 icon: "danger",
-                 duration: 3000,
-                 animated: true,
-            });
-            return rejectWithValue(message)
-        }
-        
-     }
-)
-
-
-export const resetPassword = createAsyncThunk(
-  'auth/resetPassword',
-  async ({ email, otp , newPassword }, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(FORGOTPASSWORD, {
-        email,
-        otp,
-        newPassword,
-      
-      });
-      showMessage({
-        message: response.data?.message || 'Password reset successfully!',
-        type: 'success',
-        icon: 'success',
-        duration: 3000,
-      });
-      return response.data;
-    } catch (error) {
-      const message = error?.response?.data?.message || 'Failed to reset password';
-      showMessage({
-        message,
-        type: 'danger',
-        icon: 'danger',
-        duration: 3000,
-      });
-      return rejectWithValue(message);
-    }
+    
+    return response.data;
   }
 );
 
+export const signupUser = createAsyncThunk(
+  'auth/signupUser',
+  async ({ username, email, password }, { rejectWithValue }) => {
+    const response = await apiCall(SIGNUPAPI, { username, email, password });
+    
+    if (response.error) {
+      return rejectWithValue(response.error);
+    }
+    
+    return response.data;
+  }
+);
 
+export const sendResetPasswordOtp = createAsyncThunk(
+  'auth/email',
+  async ({ email }, { rejectWithValue }) => {
+    const response = await apiCall(SENDRESETPASSWORDOTP, { email });
+    
+    if (response.error) {
+      return rejectWithValue(response.error);
+    }
+    
+    return response.data;
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ email, otp, newPassword }, { rejectWithValue }) => {
+    const response = await apiCall(FORGOTPASSWORD, { email, otp, newPassword });
+    
+    if (response.error) {
+      return rejectWithValue(response.error);
+    }
+    
+    return response.data;
+  }
+);
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState:{
-        user:null,
-        token:null,
-        loading:false,
-        error:null
-    },
-    reducers:{
+  name: 'auth',
+  initialState: {
+    user: null,
+    token: null,
+    loading: false,
+    error: null
+  },
+  reducers: {
     logout: state => {
       state.user = null;
       state.token = null;
+      AsyncStorage.removeItem('authToken').catch(console.error);
     },
-    },
-      extraReducers: builder => {
-        builder
-        //signIn
-        .addCase(loginUser.pending, state => {
-            state.loading = true,
-            state.error = null
-        })
-        .addCase(loginUser.fulfilled, (state, action )=> {
-            state.loading = false,
-            state.user = {
-              id: action.payload._id,
-             username: action.payload.username,
-            email: action.payload.email,
-            role: action.payload.role,
-            cart: action.payload.cart,
-            addresses: action.payload.addresses,
-                     };
-           state.token = action.payload.token;
-        })
-        .addCase(loginUser.rejected , (state, action) => {
-            state.loading = false,
-            state.error = action.payload
-        })
+  },
+  extraReducers: builder => {
+    const handlePending = (state) => {
+      state.loading = true;
+      state.error = null;
+    };
+    
+    const handleRejected = (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    };
 
-        // Signup
-         .addCase(signupUser.pending, state => {
-            state.loading = true,
-            state.error = null
-        })
-        .addCase(signupUser.fulfilled, (state, action )=> {
-            state.loading = false,
-            state.user = action.payload.user;
-             state.token = null;
-          
-        })
-        .addCase(signupUser.rejected , (state, action) => {
-            state.loading = false,
-            state.error = action.payload
-        })
-
-        // sendResetPasswordOtp
-        .addCase(sendResetPasswordOtp.pending, (state) => {
-              state.loading = true;
-              state.error = null;
-              })
-       .addCase(sendResetPasswordOtp.fulfilled, (state) => {
-         state.loading = false;
-            })
-      .addCase(sendResetPasswordOtp.rejected, (state, action) => {
-         state.loading = false;
-         state.error = action.payload;
-         })
-
-        //resetPassword
-       .addCase(resetPassword.pending, (state) => {
-         state.loading = true;
-         state.error = null;
-         })
-       .addCase(resetPassword.fulfilled, (state) => {
-         state.loading = false;
-         })
-      .addCase(resetPassword.rejected, (state, action) => {
-         state.loading = false;
-         state.error = action.payload;
-        })
-      }
+    builder
+      // Login
+      .addCase(loginUser.pending, handlePending)
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = {
+          id: action.payload._id,
+          username: action.payload.username,
+          email: action.payload.email,
+          role: action.payload.role,
+          cart: action.payload.cart,
+          addresses: action.payload.addresses,
+        };
+        state.token = action.payload.token;
+      })
+      .addCase(loginUser.rejected, handleRejected)
+      
+      // Signup
+      .addCase(signupUser.pending, handlePending)
+      .addCase(signupUser.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(signupUser.rejected, handleRejected)
+      
+      // Send OTP
+      .addCase(sendResetPasswordOtp.pending, handlePending)
+      .addCase(sendResetPasswordOtp.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendResetPasswordOtp.rejected, handleRejected)
+      
+      // Reset Password
+      .addCase(resetPassword.pending, handlePending)
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(resetPassword.rejected, handleRejected);
+  }
 });
 
-export const {logout} = authSlice.actions
-export default authSlice.reducer
+export const { logout } = authSlice.actions;
+export default authSlice.reducer;

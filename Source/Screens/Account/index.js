@@ -10,16 +10,30 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import CustomButton from '../../Components/CustomBotton';
 import { styles } from './styles';
 import { footerItems , iconOptions, settingsOptions } from '../../Mock/Data/settingOptions';
+import { logout } from '../../redux/slices/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const AccountScreen = ({ navigation }) => {
+const dispatch = useDispatch();
+const {user} = useSelector(state => state.auth)
+
+  const onLogoutBtnClick = async () => {
+   try {
+    await dispatch(logout());
+    navigation.navigate('Signin')
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+  }
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.main}>
           <CustomHeader notShowingBackIcon navigation={navigation} label="Your Account" />
 
-          <Text style={styles.greeting}>Hi, Apoorva!</Text>
-          <Text style={styles.phone}>999-999-9999</Text>
+          <Text style={styles.greeting}>Hi, {user?.username}!</Text>
+          {/* <Text style={styles.phone}>999-999-9999</Text> */}
 
           {/* Icon Grid */}
           <View style={styles.containerBox}>
@@ -72,7 +86,7 @@ const AccountScreen = ({ navigation }) => {
         {/* Logout Button */}
         <View style={styles.logoutContainer}>
           <CustomButton
-            onPress={() => {}}
+            onPress={() => onLogoutBtnClick()}
             textColor="#fff"
             backgroundColor="#2E6074E8"
             label="Logout"

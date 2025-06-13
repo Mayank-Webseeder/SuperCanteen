@@ -20,15 +20,14 @@ export const styles = StyleSheet.create({
     heartIconWrapper: {
       flexDirection:"row",
       justifyContent:"flex-end",
-      marginHorizontal:Height(15) 
+      marginHorizontal:Height(15),
+      marginTop:10
     },
      detailsWrapper: {
     paddingHorizontal: Height(4),
     backgroundColor: '#fff',
     borderRadius: Height(10),
-    margin: 10,
-   
-    marginTop:Height(14)
+    marginHorizontal: 10,
   },
   title: {
     fontSize: FontSize(16),
@@ -165,7 +164,7 @@ export const styles = StyleSheet.create({
     },
    
     sectionWrapper: {
-      paddingHorizontal: 16,
+      
       paddingVertical: Height(5),
       paddingTop:Height(10)
     },
@@ -173,7 +172,7 @@ export const styles = StyleSheet.create({
       fontSize: 16,
       fontFamily:'Inter-SemiBold',
       color: '#000',
-      marginBottom: 8,
+      paddingHorizontal:Height(10)
     
     },
   });

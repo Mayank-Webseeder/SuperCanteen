@@ -10,7 +10,9 @@ import CouponView from '../../../../otherComponents/checkOut/couponView';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
 
-const ConfirmOrderScreen = ({ navigation }) => {
+const ConfirmOrderScreen = ({ navigation , route }) => 
+  {
+ const { totalAmount } = route?.params;
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title={'Confirm Order'} />

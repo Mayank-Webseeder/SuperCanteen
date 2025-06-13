@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../../constants";
+import { COLORS, Height } from "../../../constants";
 
 export const styles = StyleSheet.create({
   backdrop: {
@@ -60,7 +60,7 @@ export const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: 0,
+    bottom: Height(25),
     left: 0,
     right: 0,
     flexDirection: 'row',

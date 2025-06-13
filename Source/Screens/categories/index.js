@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
 paddingTop: Height(20), marginHorizontal: Width(12)
   },
   textStyle:{
-    fontSize: FontSize(13), marginBottom: Height(12)
+    fontSize: FontSize(13), marginBottom: Height(12),
+   
   }
 });

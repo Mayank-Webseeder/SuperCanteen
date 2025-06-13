@@ -17,7 +17,7 @@ import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import CustomFilterBtn from '../../../Components/CustomFilterBtn';
 import { formateSubCategoryProducts, formateSubCategorySegments, formatProductBySegment } from '../../../utils/dataFormatters';
 import CustomSearch from '../../../Components/searchInput'
-import { fetchGetSegmentsByCategory } from '../../../redux/slices/segmentSlice';
+import {fetchGetSegmentsByCategory } from '../../../redux/slices/segmentSlice';
 import { fetchProductsBySegment, clearSegmentProducts } from '../../../redux/slices/productBySegmentSlice';
 import EmptyComponent from '@components/emptyComponent';
 import { fetchProductsByBrand  } from '../../../redux/slices/productsByBrandSlice';
@@ -31,7 +31,6 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
-
 
   // Filter and sort states
   const [filters, setFilters] = useState({
@@ -79,27 +78,30 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     let hasNewProducts = false;
     let hasPopularProducts = false;
 
-    products.forEach(product => {
-      if (product.brandName) brands.add(product.brandName);
-      
-      product.variants?.forEach(variant => {
-        if (variant.color && variant.color.trim() !== '') {
-          colors.add(variant.color.trim());
-        }
-        if (variant.size) {
-          variant.size.split(',').forEach(size => {
-            const trimmedSize = size.trim();
-            if (trimmedSize !== '') sizes.add(trimmedSize);
-          });
-        }
+   products.forEach(product => {
+  if (product.brandName) brands.add(product.brandName);
+
+  product.variants?.forEach(variant => {
+    const color = variant.color;
+    if (typeof color === 'string' && color.trim() !== '') {
+      colors.add(color.trim());
+    }
+
+    if (variant.size) {
+      variant.size.split(',').forEach(size => {
+        const trimmedSize = size.trim();
+        if (trimmedSize !== '') sizes.add(trimmedSize);
       });
-      
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      if (new Date(product.createdAt) > oneMonthAgo) hasNewProducts = true;
-      
-      if (product.isBestSeller) hasPopularProducts = true;
-    });
+    }
+  });
+
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  if (new Date(product.createdAt) > oneMonthAgo) hasNewProducts = true;
+
+  if (product.isBestSeller) hasPopularProducts = true;
+});
+
 
     return {
       brands: Array.from(brands).filter(Boolean),
@@ -241,7 +243,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   // Set initial segment when segments load
   useEffect(() => {
     if (!segmentsLoading && segments.length > 0 && selectedSegment === null) {
-      setSelectedSegment(segments[0]._id);
+    
     }
   }, [segmentsLoading, segments, selectedSegment]);
 

@@ -8,6 +8,7 @@ import { validateEmail, validatePassword } from '../../../utils/validation';
 import { styles } from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetPassword } from '../../../redux/slices/authSlice'; 
+import { showMessage } from 'react-native-flash-message';
 
 const ResetPasswordScreen = ({ navigation,route }) => {
    const emailFromParams = route?.params?.email || ''; 
@@ -49,8 +50,24 @@ const ResetPasswordScreen = ({ navigation,route }) => {
         newPassword:formData.password
       }));
      if (resetPassword.fulfilled.match(response)) {
+       showMessage({
+      message: 'Password Reset Successful!',
+      description: 'Your password has been updated successfully',
+      type: 'success',
+      icon: 'success',
+      duration: 3000,
+    });
         navigation.navigate('Signin');
       }
+       else if (resetPassword.rejected.match(response)) {
+    // Show error message
+    showMessage({
+      message: 'Password reset failed',
+      type: 'danger',
+      icon: 'danger',
+      duration: 4000,
+    });
+  }
     }
   
 

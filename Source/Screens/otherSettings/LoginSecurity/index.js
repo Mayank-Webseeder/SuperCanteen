@@ -5,11 +5,14 @@ import CustomHeader from '../../../Components/CustomHeader';
 import { COLORS } from '../../../constants';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import { styles } from './styles';
+import {  useSelector } from 'react-redux';
 
 export default function LoginSecurityScreen({ navigation }) {
+  const {user} = useSelector(state => state.auth)
+
   const fields = [
-    { label: 'Name', value: 'Apoorva Gaur', key: 'name' },
-    { label: 'Email', value: 'abc99@gmail.com', key: 'email' },
+    { label: 'Name', value: user?.username, key: 'name' },
+    { label: 'Email', value: user?.email, key: 'email' },
     { label: 'Contact', value: '+91 999-999-9999', key: 'contact' },
     { label: 'Password', value: '••••••', key: 'password' },
   ];

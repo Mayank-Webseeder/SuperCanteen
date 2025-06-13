@@ -2,10 +2,10 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import CustomAuthButton from '../../Components/CustomAuthButton';
-import { Width } from '../../constants';
+import { COLORS, Width } from '../../constants';
 import { styles } from './styles';
 
-const BottomPurchaseBar = ({ onSharePress, onAddToCart, onBuyNow }) => {
+const BottomPurchaseBar = ({ onSharePress, onAddToCart, onBuyNow,addToCartLoading }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.iconButton} onPress={onSharePress}>
@@ -22,6 +22,8 @@ const BottomPurchaseBar = ({ onSharePress, onAddToCart, onBuyNow }) => {
         borderColor="#2E6074"
         textStyle={styles.addToCartText}
         marginLeft={Width(20)}
+        loading={addToCartLoading}
+        loadingColor={COLORS.green}
       />
 
       <CustomAuthButton

@@ -1,17 +1,45 @@
-import React from 'react';
+import React , {useMemo} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { FontSize } from '../../constants';
 import FastImage from 'react-native-fast-image';
+import { useSelector } from 'react-redux';
 
 const PriceSummaryCard = () => {
+  const { items } = useSelector((state) => state.cart);
+  
+  // Memoized calculations for better performance
+  const { totalMRP, totalPrice, totalDiscount, couponDiscount, shippingFee, totalAmount } = useMemo(() => {
+    // Calculate prices with proper fallbacks
+    let calculatedMRP = 0;
+    let calculatedPrice = 0;
+    
+    items.forEach(item => {
+      const qty = item.qty || 1;
+      calculatedMRP += (item.product?.mrp || item.selectedPrice || 0) * qty;
+      calculatedPrice += (item.selectedPrice || item.price || 0) * qty;
+    });
+    
+    const calculatedDiscount = calculatedMRP - calculatedPrice;
+    const coupon = 0; // Coupon logic can be added later
+    const shipping = 0; // Free shipping
+    const calculatedTotal = calculatedPrice + shipping - coupon;
+    
+    return {
+      totalMRP: calculatedMRP,
+      totalPrice: calculatedPrice,
+      totalDiscount: calculatedDiscount,
+      couponDiscount: coupon,
+      shippingFee: shipping,
+      totalAmount: calculatedTotal
+    };
+  }, [items]);
+
   return (
     <View style={styles.container}>
-      {/* Header with decorative accent */}
       <View style={styles.headerAccent} />
       
       <View style={styles.card}>
-        {/* Title Section */}
         <View style={styles.titleContainer}>
           <FastImage 
             style={styles.moneyIcon} 
@@ -20,13 +48,11 @@ const PriceSummaryCard = () => {
           <Text style={styles.title}>PRICE DETAILS</Text>
         </View>
 
-        {/* Divider */}
         <View style={styles.divider} />
 
-        {/* Price Breakdown */}
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Total MRP</Text>
-          <Text style={styles.priceValue}>₹44,000</Text>
+          <Text style={styles.priceValue}>₹{totalMRP.toFixed(2)}</Text>
         </View>
 
         <View style={styles.priceRow}>
@@ -37,12 +63,12 @@ const PriceSummaryCard = () => {
               <FontAwesome5 name="chevron-right" size={10} color="#2E6074" />
             </TouchableOpacity>
           </View>
-          <Text style={[styles.priceValue, styles.discountValue]}>- ₹2,000</Text>
+          <Text style={[styles.priceValue, styles.discountValue]}>- ₹{totalDiscount.toFixed(2)}</Text>
         </View>
 
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Coupon Discount</Text>
-          <Text style={[styles.priceValue, styles.discountValue]}>- ₹2,000</Text>
+          <Text style={[styles.priceValue, styles.discountValue]}>- ₹{couponDiscount.toFixed(2)}</Text>
         </View>
 
         <View style={styles.priceRow}>
@@ -56,19 +82,20 @@ const PriceSummaryCard = () => {
           <Text style={[styles.priceValue, styles.freeValue]}>FREE</Text>
         </View>
 
-        {/* Total Amount */}
         <View style={styles.totalContainer}>
           <View style={styles.totalDivider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>₹40,000</Text>
+            <Text style={styles.totalValue}>₹{totalAmount.toFixed(2)}</Text>
           </View>
-          <Text style={styles.savingsText}>You save ₹4,000 on this order</Text>
+          {totalDiscount > 0 && (
+            <Text style={styles.savingsText}>You save ₹{totalDiscount.toFixed(2)} on this order</Text>
+          )}
         </View>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

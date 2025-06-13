@@ -1,7 +1,9 @@
 import { IMG_URL } from "../api";
 
   export const formatCategoryData = (categories) => {
+ 
   return categories.map((cat) => ({
+    
      id: cat._id,
      name: cat.name.split(' ')[0],
     image: `${IMG_URL}${cat.image}`,
@@ -10,6 +12,7 @@ import { IMG_URL } from "../api";
 
 export const formatBrandData = (categories) => {
   return categories.map((brand) => ({
+     id:brand._id,
      name: brand.name.split(' '),
     image: `${IMG_URL}${brand.image}`,
     aboutTheBrand: brand.aboutTheBrand,
@@ -132,20 +135,6 @@ export const formatProductDetailData = (product) => {
     slabs: product.slabs,
     createdAt: product.createdAt
   };
-};
-
-export const formatSimilarProducts = (products = []) => {
-  return products.map(product => ({
-    id: product._id,
-    name: product.name,
-    brand: product.brand?.name || '',
-    image: product.images[0] ? `${IMGURL}${product.images[0]}` : null,
-    price: product.offerPrice || product.price,
-    mrp: product.mrp,
-    discount: Math.round(((product.mrp - (product.offerPrice || product.price)) / product.mrp) * 100),
-    rating: product.rating || 0,
-    reviews: product.numReviews || 0
-  }));
 };
 
 
@@ -325,3 +314,52 @@ export const formatProductBySegment = (products = []) => {
     updatedAt: product.updatedAt
   }));
 };
+
+
+export const formatProductsByBrand = (products = []) => {
+  return products.map(product => ({
+    id: product._id,
+    name: product.name,
+    sku: product.sku || '',
+
+    // Image (first one in the array)
+    images: product.images?.[0] ? `${IMGURL}${product.images[0]}` : null,
+
+    // Brand & Category Info
+    brandName: product.brand?.name || '',
+    category: product.category?.name || '',
+    subCategory: product.subCategory?.name || '',
+    subCategoryId: product.subCategory?._id || '', // ✅ Added this line
+    segment: product.segment?.name || '',
+
+    // Pricing & Details
+    offerPrice: product.offerPrice,
+    mrp: product.mrp,
+    rating: product.rating,
+    isBestSeller: product.isBestSeller || false,
+
+    // Slabs
+    slabs: product.slabs?.map(slab => ({
+      minQuantity: slab.minQuantity,
+      maxQuantity: slab.maxQuantity,
+      price: slab.price,
+      expire: slab.expire || null
+    })) || [],
+
+    // Variants
+    variants: product.variants?.map(variant => ({
+      id: variant._id,
+      color: variant.color || '',
+      image: variant.images?.[0]
+        ? `${IMGURL}${variant.images[0].replace(/^\/?/, '')}`
+        : null,
+      stock: variant.countInStock,
+      sku: variant.sku || ''
+    })) || []
+  }));
+};
+
+
+
+
+

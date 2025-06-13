@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,53 +9,20 @@ import {
   Easing,
   TouchableWithoutFeedback,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateCartItem, removeCartItem, fetchCartItems } from '../../redux/slices/cartSlice';
+import { COLORS } from '@constants/index';
+import { stripHtml } from '../../utils/validation';
+import { IMGURL } from '../../utils/dataFormatters';
 
-const cartItems = [
-  {
-    id: 1,
-    name: 'Timex',
-    description: 'Bella Analog Watch for Womens',
-    image: require('../../../assets/Beatuy/B1.png'),
-    price: '₹4,889',
-    originalPrice: '₹6,499',
-    discount: '25% off',
-    seller: 'EliteEdge Pvt Limited',
-    size: 'Onesize',
-    quantity: 1,
-  },
-  {
-    id: 2,
-    name: 'YouBelle',
-    description: 'Casual Wear Pendant for Womens',
-    image: require('../../../assets/MensWatch/m1b.png'),
-    price: '₹4,889',
-    originalPrice: '₹5,999',
-    discount: '18% off',
-    seller: 'EliteEdge Pvt Limited',
-    size: 'Onesize',
-    quantity: 1,
-  },
-  {
-    id: 3,
-    name: 'WomenClub',
-    description: 'Tote Handbag for Womens',
-    image: require('../../../assets/fashion/F1.png'),
-    price: '₹4,889',
-    originalPrice: '₹7,299',
-    discount: '33% off',
-    seller: 'EliteEdge Pvt Limited',
-    size: 'Onesize',
-    quantity: 1,
-  },
-];
-
-// Enhanced Custom Dropdown
 const CustomDropdown = ({
   options,
   selected,
@@ -157,15 +124,23 @@ const CustomDropdown = ({
   );
 };
 
-// Cart Card Component
 const CartCard = ({
   item,
   isSelected,
   onSelect,
   onQuantityChange,
   onSizeChange,
+  onRemoveItem,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  
+  // Generate quantity options based on stock
+  const stock = item.product?.stock || 10;
+  const maxQuantity = Math.min(stock, 10);
+  const quantityOptions = Array.from(
+    { length: maxQuantity },
+    (_, i) => String(i + 1)
+  );
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -183,6 +158,17 @@ const CartCard = ({
     }).start();
   };
 
+  const handleQtyChange = (newQty) => {
+    // Prepare payload with required structure
+    const payload = {
+      product: item.product?._id,
+      qty: parseInt(newQty),
+      selectedPrice: item.selectedPrice,
+      isDigital: item.isDigital || false
+    };
+    onQuantityChange(item._id || item.id, payload);
+  };
+
   return (
     <Animated.View
       style={[
@@ -193,7 +179,7 @@ const CartCard = ({
     >
       <TouchableOpacity
         style={styles.selectButton}
-        onPress={() => onSelect(item.id)}
+        onPress={() => onSelect(item._id || item.id)}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.9}
@@ -209,38 +195,51 @@ const CartCard = ({
         </View>
       </TouchableOpacity>
 
-      <FastImage source={item.image} style={styles.image} />
+      <FastImage 
+        source={{ 
+          uri: `${IMGURL}${item?.product?.images[0]?.url || item?.product?.images[0] || ''}` 
+        }}
+        style={styles.image} 
+        resizeMode="contain"
+      />
       <View style={styles.details}>
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {item.name}
+            {item.product?.name || item.name}
           </Text>
-          <Text style={styles.price}>{item.price}</Text>
+          <Text style={styles.price}>₹{item.selectedPrice || item.price}</Text>
         </View>
         <Text style={styles.subtitle} numberOfLines={2}>
-          {item.description}
+          {stripHtml(item.product?.description || item.description)}
         </Text>
 
-        <View style={styles.priceInfo}>
-          <Text style={styles.originalPrice}>{item.originalPrice}</Text>
-          <Text style={styles.discount}> {item.discount}</Text>
-        </View>
+        {item.product?.mrp && (
+          <View style={styles.priceInfo}>
+            <Text style={styles.originalPrice}>₹{item.product.mrp}</Text>
+            <Text style={styles.discount}>
+              {Math.round(((item.product.mrp - (item.selectedPrice || item.price)) / item.product.mrp) * 100)}% off
+            </Text>
+          </View>
+        )}
 
         <View style={styles.dropdownRow}>
+          {item.variant && (
+            <CustomDropdown
+              options={[item.variant.name]}
+              selected={item.variant.name}
+              onSelect={(val) => onSizeChange(item._id || item.id, val)}
+              dropdownWidth={100}
+              textStyle={styles.dropdownTextSmall}
+              itemStyle={styles.dropdownItemSmall}
+              itemTextStyle={styles.dropdownItemTextSmall}
+              iconColor="#416E81"
+            />
+          )}
+          
           <CustomDropdown
-            options={['Onesize', 'Small', 'Medium', 'Large']}
-            selected={item.size}
-            onSelect={(val) => onSizeChange(item.id, val)}
-            dropdownWidth={100}
-            textStyle={styles.dropdownTextSmall}
-            itemStyle={styles.dropdownItemSmall}
-            itemTextStyle={styles.dropdownItemTextSmall}
-            iconColor="#416E81"
-          />
-          <CustomDropdown
-            options={['1', '2', '3', '4', '5']}
-            selected={`Qty: ${item.quantity}`}
-            onSelect={(val) => onQuantityChange(item.id, val)}
+            options={quantityOptions}
+            selected={`${item.qty || item.quantity}`}
+            onSelect={handleQtyChange}
             dropdownWidth={80}
             textStyle={styles.dropdownTextSmall}
             itemStyle={styles.dropdownItemSmall}
@@ -253,8 +252,7 @@ const CartCard = ({
           <Feather name="truck" size={14} color="#416E81" />
           <Text style={styles.deliveryText}>
             <Text style={{ color: '#000', fontWeight: '600' }}>
-              {' '}
-              Free delivery by 24th May
+              Free delivery
             </Text>
           </Text>
         </View>
@@ -262,18 +260,29 @@ const CartCard = ({
           <Entypo name="cycle" size={14} color="#416E81" />
           <Text style={styles.returnPolicy}> 7 days return policy</Text>
         </View>
-        <Text style={styles.seller}>
-          Seller: <Text style={{ color: '#416E81' }}>{item.seller}</Text>
-        </Text>
+        {item?.product?.isBestSeller &&  <Text style={styles.seller}>
+          isBestSeller <Text style={{ color: '#416E81', fontFamily:"Inter-SemiBold" }}></Text>
+        </Text>}
+       
+        <TouchableOpacity 
+          style={styles.removeButton}
+          onPress={() => onRemoveItem(item._id || item.id)}
+        >
+          <Text style={styles.removeText}>Remove</Text>
+        </TouchableOpacity>
       </View>
     </Animated.View>
   );
 };
 
 const CustomCartCard = () => {
-  const [items, setItems] = useState(cartItems);
+  const dispatch = useDispatch();
+  const { items, loading, error } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
+  useEffect(() => {
+    dispatch(fetchCartItems());
+  }, []);
 
   const handleSelect = (itemId) => {
     setSelectedItems((prev) =>
@@ -287,38 +296,67 @@ const CustomCartCard = () => {
     if (isAllSelected) {
       setSelectedItems([]);
     } else {
-      setSelectedItems(items.map((item) => item.id));
+      setSelectedItems(items.map((item) => item._id || item.id));
     }
     setIsAllSelected(!isAllSelected);
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedItems.length === 0) return;
     
-    setItems((prev) => prev.filter((item) => !selectedItems.includes(item.id)));
-    setSelectedItems([]);
-    setIsAllSelected(false);
+    try {
+      for (const itemId of selectedItems) {
+        await dispatch(removeCartItem(itemId)).unwrap();
+      }
+      setSelectedItems([]);
+      setIsAllSelected(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to remove items');
+    }
   };
 
-  const handleQuantityChange = (itemId, newQty) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: newQty } : item
-      )
-    );
+  const handleQuantityChange = async (itemId, payload) => {
+    console.log("PAYLOAD IS ================>",payload)
+    try {
+      await dispatch(updateCartItem({ 
+        payload
+      })).unwrap();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update quantity');
+    }
   };
 
   const handleSizeChange = (itemId, newSize) => {
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, size: newSize } : item
-      )
-    );
+    console.log(`Size changed for ${itemId} to ${newSize}`);
   };
+
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await dispatch(removeCartItem(itemId)).unwrap();
+      setSelectedItems(selectedItems.filter(id => id !== itemId));
+    } catch (error) {
+      Alert.alert('Error', 'Failed to remove item');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+       <ActivityIndicator size="large" color={COLORS.green}/>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Header with selection controls */}
       <View style={styles.headerContainer}>
         <View style={styles.selectionControls}>
           <TouchableOpacity
@@ -362,17 +400,17 @@ const CustomCartCard = () => {
         </TouchableOpacity>
       </View>
 
-      {/* FlatList */}
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => (item._id || item.id).toString()}
         renderItem={({ item }) => (
           <CartCard
             item={item}
-            isSelected={selectedItems.includes(item.id)}
+            isSelected={selectedItems.includes(item._id || item.id)}
             onSelect={handleSelect}
             onQuantityChange={handleQuantityChange}
             onSizeChange={handleSizeChange}
+            onRemoveItem={handleRemoveItem}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -383,8 +421,6 @@ const CustomCartCard = () => {
           </View>
         }
       />
-
-   
     </View>
   );
 };

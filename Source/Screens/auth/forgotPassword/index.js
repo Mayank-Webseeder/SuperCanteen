@@ -14,6 +14,7 @@ import { validateEmail } from '../../../utils/validation';
 import { styles } from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { sendResetPasswordOtp } from '../../../redux/slices/authSlice';
+import { showMessage } from 'react-native-flash-message';
 
 const ResetPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -35,9 +36,22 @@ const ResetPasswordScreen = ({ navigation }) => {
     try {
       const response = await dispatch(sendResetPasswordOtp({ email })).unwrap();
       if (response) {
+         showMessage({
+          message: 'OTP Sent Successfully!',
+          description: 'Check your email for the verification code',
+          type: 'success',
+          icon: 'success',
+          duration: 3000,
+        });
         setLinkSent(true); // Show OTP sent UI
       }
     } catch (err) {
+       showMessage({
+        message:  'Failed to send OTP',
+        type: 'danger',
+        icon: 'danger',
+        duration: 4000,
+      });
       console.error('OTP error:', err);
     }
   };

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS } from "../../constants";
+import { COLORS, Height } from "../../constants";
 
 export const styles = StyleSheet.create({
   container: {
@@ -107,6 +107,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     resizeMode: 'contain',
     marginRight: 12,
+    marginTop:Height(10)
   },
   details: {
     flex: 1,
@@ -129,6 +130,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     marginBottom: 6,
     lineHeight: 18,
+    fontFamily:'Inter-Regular'
   },
   priceInfo: {
     flexDirection: 'row',
@@ -231,6 +233,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 4,
+    marginBottom:2
   },
   returnInfo: {
     flexDirection: 'row',
@@ -239,6 +242,7 @@ export const styles = StyleSheet.create({
   },
   deliveryText: {
     fontSize: 12,
+    marginHorizontal:7
   },
   returnPolicy: {
     fontSize: 12,
@@ -295,4 +299,28 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
+  loadingContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+errorContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+errorText: {
+  color: 'red',
+  textAlign: 'center',
+},
+removeButton: {
+  marginTop: 8,
+  alignSelf: 'flex-start',
+},
+removeText: {
+  color: '#FF3B30',
+  fontSize: 14,
+},
 });

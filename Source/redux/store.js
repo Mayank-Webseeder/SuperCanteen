@@ -9,7 +9,6 @@ import subCategoryReducer from './slices/subcategorySlice'
 import subCategoryProductReducer from './slices/subCategoryProductSlice'
 import productReducer from './slices/productSlice'
 import productDetailReducer from './slices/productDetailSlice'
-import smilarProductReducer from './slices/similarProductSlice'
 import segmentReducer from './slices/segmentSlice'
 import serachReducer from './slices/searchSlice'
 import productBySegmentReducer from './slices/productBySegmentSlice';
@@ -24,7 +23,6 @@ const rootReducer = combineReducers({
     subCategoryProducts:subCategoryProductReducer,
     product:productReducer,
     productDetail: productDetailReducer,
-    similarProduct:smilarProductReducer,
     segment: segmentReducer,
     search:serachReducer,
     productsBySegment: productBySegmentReducer,
