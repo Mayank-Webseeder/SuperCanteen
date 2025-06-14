@@ -1,17 +1,19 @@
 import { StyleSheet } from "react-native";
-import { COLORS, Width } from "../../../constants";
+import { COLORS, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  headerStyle:{
+    marginHorizontal:10
+  },
   orderHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 16,
-    marginBottom: 8,
     paddingHorizontal:Width(18)
   },
   orderTitle: {
@@ -20,7 +22,8 @@ export const styles = StyleSheet.create({
     color: COLORS.green,
   },
     listContent: {
-    padding: 16,
+    paddingVertical: Height(16),
+    paddingHorizontal:Height(12)
   },
   emptyText: {
     textAlign: 'center',

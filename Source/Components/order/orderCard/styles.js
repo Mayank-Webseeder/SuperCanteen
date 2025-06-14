@@ -7,7 +7,6 @@ export const styles = StyleSheet.create({
     borderColor: '#d1d1d1',
     borderRadius: 10,
     padding: 16,
-    width: 360,
   },
   row: {
     flexDirection: 'row',
@@ -73,7 +72,7 @@ export const styles = StyleSheet.create({
   },
    feedbackContainer: {
     paddingTop: 10,
-    paddingBottom: 10,
+   
   },
   feedbackText: {
     fontSize: 15,

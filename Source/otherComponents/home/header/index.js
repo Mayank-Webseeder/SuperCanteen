@@ -1,72 +1,36 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Pressable } from 'react-native'
 import React from 'react'
 import { styles } from './styles'
-import { LocationIcon } from '../../../../assets/Icons/svgIcons/location_on'
 import CustomSearch from '../../../Components/searchInput'
-import Ionicons from 'react-native-vector-icons/Ionicons'; 
-import { COLORS, Height } from '../../../constants'
 import FastImage from 'react-native-fast-image'
 
 export default function Header({ navigation }) {
-  const address = ''; // future: get from redux / AsyncStorage / API
-
   return (
-    <>
-      <View style={styles.main}>
-        <View style={styles.innerView}>
-          <View style={styles.top}>
-            <Text><LocationIcon /></Text>
-          </View>
-          <Pressable onPress={() => navigation.navigate('Address')}>
-            <Text style={styles.textStyle}>
-              Deliver to {' '}
-              <Text onPress={() => navigation.navigate('CreateAddressScreen')} style={[styles.textStyle,{textDecorationLine:"underline",marginHorizontal:20,color:COLORS.green}]}>
-                {address ? address : 'Select address'}
-              </Text>
-            </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.innerView}>
-          <Pressable onPress={() => navigation.navigate('Account')}>
-            <FastImage
-              style={styles.image}
-              source={require('../../../../assets/Icons/ProfileIcon.png')}
-            />
-          </Pressable>
-        </View>
-      </View>
-
+    <View style={styles.container}>
       {/* Search + Icons */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchView}>
-          <Pressable onPress={() => navigation.navigate('Search')}>
-            <CustomSearch
-              disabledStyle={styles.disabledStyle}
-              WidthSize={'98%'}
-              backgroundColor={'#fff'}
-              disabled
-            />
-          </Pressable>
-        </View>
-        <View style={styles.innerView}>
-          <Pressable onPress={() => navigation.navigate('Wishlist')}>
-            <Ionicons
-              name={'heart-outline'}
-              size={20}
-              color={'#0E2D42'}
-              style={{ right: Height(7) }}
-            />
-          </Pressable>
-          <Pressable onPress={() => navigation.navigate('Cart')}>
-            <FastImage
-              style={styles.cartImg}
-              source={require('../../../../assets/Icons/shopping_cart.png')}
-            />
-          </Pressable>
-        </View>
+        <Pressable 
+          style={styles.searchPressable}
+          onPress={() => navigation.navigate('Search')}
+        >
+          <CustomSearch
+            disabledStyle={styles.disabledStyle}
+            backgroundColor={'#fff'}
+            disabled
+            customStyle={styles.searchInput}
+          />
+        </Pressable>
+        
+        <Pressable 
+          style={styles.cartPressable}
+          onPress={() => navigation.navigate('Cart')}
+        >
+          <FastImage
+            style={styles.cartImg}
+            source={require('../../../../assets/Icons/shopping_cart.png')}
+          />
+        </Pressable>
       </View>
-    </>
+    </View>
   );
 }
-  

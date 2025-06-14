@@ -63,7 +63,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
 
       <View style={styles.sectionWrapper}>
             <Text style={styles.sectionTitle}>Similar Products for You</Text>
-            <CustomSimilarProducts data={ SimilarProductData} />
+            <CustomSimilarProducts flatListContentStyle={styles.flatListContentStyle} data={ SimilarProductData} />
             <View style={styles.blank}/>
               <PriceSummaryCard/>
                  {order.status !== 'cancelled' && <View style={styles.paymentBox}>

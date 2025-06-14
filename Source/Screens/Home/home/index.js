@@ -143,22 +143,25 @@ const HomeScreen = ({ navigation }) => {
   const renderSection = ({ item }) => item;
 
   const sections = [
-    <View key="main-content">
-      <LinearGradient
-        colors={['#A3B9C3', '#FFFFFF']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.gradient}
-      >
-        <Header navigation={navigation} />
-        <GetCategory
-          categories={categories}
-          navigation={navigation}
-          selectedIndex={selectedCategoryIndex}
-          setSelectedIndex={setSelectedCategoryIndex}
-        />
-      </LinearGradient>
-      <HorizontalLine />
+     <View key="main-content" style={styles.mainContainer}>
+    {/* Gradient Header - Only for the top section */}
+    <LinearGradient
+      colors={['#A3B9C3', '#FFFFFF']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 0.7 }} // Adjust this to control gradient length
+      style={styles.gradientHeader}
+    >
+      <Header navigation={navigation} />
+      <GetCategory
+        categories={categories}
+        navigation={navigation}
+        selectedIndex={selectedCategoryIndex}
+        setSelectedIndex={setSelectedCategoryIndex}
+      />
+    </LinearGradient>
+  {/* Main Content Area - White background below gradient */}
+    <View style={styles.mainContent}>
+         <HorizontalLine lineStyle={styles.lineStyle}/>
       {error ? (
         <ErrorView 
           message={error} 
@@ -172,7 +175,8 @@ const HomeScreen = ({ navigation }) => {
         />
       ) : (
         <>
-          <Brandcarousel brands={brands} />
+          <Brandcarousel paginationStyle={styles.paginationStyle} dotStyle={styles.dotStyle} brands={brands} />
+          <HorizontalLine lineStyle={styles.horizontalLine}/>
           <ProductCategories
             navigation={navigation}
             subcategories={filteredSubcategories}
@@ -181,6 +185,7 @@ const HomeScreen = ({ navigation }) => {
             setSelectedCategoryItems={setSelectedCategoryItems}
             gotoScreen={'ProdcutCategory'}
           /> 
+           <HorizontalLine  containerStyle={{marginBottom:2}}/>
        <ProductCarousel  horizontal={true} navigation={navigation} products={products} /> 
               {/* <ClosesCalled
                 navigation={navigation}
@@ -190,8 +195,11 @@ const HomeScreen = ({ navigation }) => {
               /> */}
           {/* <HotDealsSection navigation={navigation} /> */}
           {/* <SponsordSection navigation={navigation} /> */}
-        </>
+       </>
       )}
+    
+      </View>
+    
     </View>
   ];
 
@@ -203,12 +211,12 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container  }>
       <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
-      <FlatList
+       <FlatList
         data={sections}
         renderItem={renderSection}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-      />
+      /> 
     </PullToRefresh>
     </View>
    

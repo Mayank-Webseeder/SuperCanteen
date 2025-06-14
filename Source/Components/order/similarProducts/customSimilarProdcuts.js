@@ -14,7 +14,8 @@ const CustomSimilarProducts = ({
   cardHeight = 280,
   cardWidth = 160,
   data,
-  navigation
+  navigation,
+  flatListContentStyle
 }) => {
   const renderItem = ({ item }) => {
     const fullStars = Math.floor(item.rating || 0);
@@ -96,7 +97,7 @@ const CustomSimilarProducts = ({
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderItem}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.flatListContent}
+      contentContainerStyle={[styles.flatListContent,{...flatListContentStyle}]}
     />
   );
 };

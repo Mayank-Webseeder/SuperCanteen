@@ -33,17 +33,17 @@ const Categories = ({ navigation }) => {
         navigation={navigation}
         data={formattedCategories}
         horizontal={false}
-        numColumns={3}
+        numColumns={4}
         bgColor="#D4DEF226"
-        width={Width(90)}
-        height={Height(105)}
+        width={Width(65)}
+        height={Height(65)}
         borderRadius={Width(5)}
         selectedBorderColor="#008ECC"
         textColor="#333"
         textStyle={styles.textStyle}
         containerStyle={styles.containerStyle}
-        gap={Width(20)}
-        imageSize={Height(70)}
+        gap={Width(19)}
+        imageSize={Height(50)}
         selected={selectedCategoryIndex}
         onSelect={setSelectedCategoryIndex}
       />
@@ -62,10 +62,10 @@ const styles = StyleSheet.create({
     paddingBottom:Height(40)
   },
   containerStyle:{
-paddingTop: Height(20), marginHorizontal: Width(12)
+ paddingTop: Height(20), 
   },
   textStyle:{
-    fontSize: FontSize(13), marginBottom: Height(12),
+    fontSize: FontSize(13), 
    
   }
 });

@@ -30,7 +30,8 @@ const CustomCategoryList = ({
   contentContainerStyle,
   imageStyle,
   colors,
-  gotoScreen
+  gotoScreen,
+  categoryContainerStyle
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -42,7 +43,7 @@ const CustomCategoryList = ({
         data={data}
         keyExtractor={(item) => item.name}
         contentContainerStyle={[
-          { paddingHorizontal: Width(14), gap },
+          { paddingHorizontal: Width(14), gap,paddingBottom:0 },
           contentContainerStyle,
         ]}
         renderItem={({ item }) => {
@@ -76,6 +77,7 @@ const CustomCategoryList = ({
                 {
                   marginRight: gap,
                 },
+                categoryContainerStyle
               ]}
             >
              

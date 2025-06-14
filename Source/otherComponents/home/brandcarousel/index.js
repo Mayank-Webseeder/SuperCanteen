@@ -14,13 +14,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 
-const Brandcarousel = ({brands}) => {
+const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
   const navigation = useNavigation()
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef();
 
-  const width = SCREEN_WIDTH - Width(40);
+  const width = SCREEN_WIDTH - Width(30);
   const height = Height(150);
   const radius = Width(14);
 
@@ -83,8 +83,7 @@ const Brandcarousel = ({brands}) => {
         viewabilityConfig={viewConfigRef.current}
         contentContainerStyle={styles.contentContainerStyle}
       />
-
-{brands.length > 1 &&   <View style={styles.pagination}>
+{brands.length > 1 &&   <View style={[styles.pagination,paginationStyle]}>
         {(formattedBrands || []).map((_, index) => (
           <View
             key={index}
@@ -93,6 +92,7 @@ const Brandcarousel = ({brands}) => {
               {
                 backgroundColor: index === currentIndex ? '#D9D9D9' : '#fff',
               },
+              dotStyle
             ]}
           />
         ))}

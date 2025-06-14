@@ -51,7 +51,7 @@ const PaymentMethodScreen = ({ navigation }) => {
       Alert.alert('Select Payment Method', 'Please select a payment method to continue');
       return;
     }
-    navigation.navigate('Cart');
+    navigation.navigate('OrderConfirm');
   };
 
   return (

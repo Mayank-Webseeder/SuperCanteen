@@ -47,7 +47,7 @@ const ProductCarousel = ({ products, navigation, horizontal = horizontal ? horiz
       <Animated.View
         style={{
           transform: [{ scale }],
-          marginHorizontal: horizontal ? Width(8) : Width(3),
+          marginHorizontal: horizontal ? Width(4) : Width(3),
           marginBottom: Height(12),
           width: isGrid ? gridItemWidth : CARD_WIDTH,
         }}

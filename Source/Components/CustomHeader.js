@@ -20,14 +20,14 @@ const CustomHeader = ({  label , showRightIcons,containerStyle,notShowingBackIco
       </View>
 
       {/* Right Icons */}
-     {showRightIcons &&  <View style={styles.rightIcons}>
+     {/* {showRightIcons &&  <View style={styles.rightIcons}>
         <TouchableOpacity onPress={() => navigation.navigate('Wishlist')} style={styles.icon}>
          <EvilIcons name="heart" size={26} color="#000000" /> 
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Cart')} >
           <EvilIcons name="cart" size={26} color="#000000"/>
         </TouchableOpacity>
-      </View>}
+      </View>} */}
 
     </View>
   );

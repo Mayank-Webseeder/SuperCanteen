@@ -9,7 +9,8 @@ export const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Height(15),
+    paddingVertical: Height(15),
+    paddingHorizontal:Height(10),
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     backgroundColor: '#fff',

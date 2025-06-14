@@ -54,8 +54,12 @@ const Orders = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerStyle}>
+            <CustomCommonHeader notShowingBackIcon navigation={navigation} title={'Your Orders'} />
+      </View>
+     
       <View style={{marginHorizontal: 16}}>
-              <CustomCommonHeader notShowingBackIcon navigation={navigation} title={'Your Orders'} />
+             
 
         <CustomSearchInput showCrossIcon={true} />
       </View>

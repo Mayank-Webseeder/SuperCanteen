@@ -5,7 +5,7 @@ import CustomCategoryList from '../../../Components/CustomCategoryList';
 import { styles } from './styles';
 import { formatCategoryData } from '../../../utils/dataFormatters';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { COLORS } from '@constants/index';
+import { COLORS, Height } from '@constants/index';
 
 const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }) => {
   // Handle loading and empty states
@@ -44,21 +44,23 @@ const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }
       </View>
 
       <CustomCategoryList
-        data={formattedCategories.slice(0, 5)}
+        data={formattedCategories.slice(0, 7)}
         horizontal
         selected={selectedIndex}
         onSelect={setSelectedIndex}
         bgColor="#D4E7F2"
-        width={52}
-        height={52}
+        width={49}
+        height={49}
         borderRadius={32}
         selectedBorderColor={COLORS.green}
         textColor="#333"
         textStyle={styles.textStyle}
-        imageSize={38}
+        imageSize={36}
         showsHorizontalScrollIndicator={false}
         imageStyle={styles.imageStyle}
         colors={['#30A46C', '#5BD18B']}
+        contentContainerStyle={styles.contentContainerStyle}
+        categoryContainerStyle={{marginRight:Height(6)}}
       />
     </View>
   );

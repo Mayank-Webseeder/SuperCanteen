@@ -1,36 +1,36 @@
 import { StyleSheet } from "react-native";
-import { FontSize, Height, Width } from "../../../constants";
+import { Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
-  main:{
-    flexDirection: 'row', alignItems: 'center', columnGap: Width(10),justifyContent:"space-between",paddingHorizontal:Width(10) ,
-    marginTop:Height(20)
+  container: {
+    paddingTop: Height(15),
   },
-  innerView:{
-    flexDirection:"row",
-    alignItems:"center"
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 13,
+    paddingVertical: 5,
+    justifyContent: 'space-between',
   },
-   top:{
-    marginTop:Height(2)
+  searchPressable: {
+    flex: 1,
+    marginRight: 10,
   },
-  textStyle:{
-    fontSize: FontSize(13.5) , marginHorizontal:10,fontFamily:'Inter-SemiBold',
-    
+  cartPressable: {
+    padding: 5,
   },
-  image:{
-     height: Height(24), width: Width(28),resizeMode:"cover" 
+  searchInput: {
+    height: Height(35),  // Reduced height
+    borderRadius: 8,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
   },
-  searchContainer:{
-    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 13, paddingVertical: 8, justifyContent: 'space-between',marginTop:Height(7) 
+  cartImg: {
+    width: Width(20), 
+    height: Height(20),
+    tintColor: '#333',   // Optional: ensure consistent color
   },
-  searchView:{
-    flex: 1, marginRight: 12
-  },
-  cartImg:{
-    width: Width(17), height: Height(17),right:Height(2)
-  },
-  disabledStyle:{
-    opacity:1
+  disabledStyle: {
+    opacity: 1
   }
-
-})
+});

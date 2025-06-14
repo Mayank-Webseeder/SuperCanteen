@@ -20,17 +20,19 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
   },
   headerTextContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: FontSize(14),
+    fontSize: FontSize(13.5),
    fontFamily:"Inter-Medium",
     color: '#333',
+    paddingTop:4,
+    paddingBottom:5
   },
 
   viewAllButton: {
@@ -41,11 +43,14 @@ export const styles = StyleSheet.create({
     color: COLORS.green,
     fontFamily:"Inter-Medium",
     marginRight: 4,
-    fontSize: 14,
+  fontSize: FontSize(13.5),
   },
    noDataText: {
     textAlign: 'center',
     color: COLORS.gray,
     marginVertical: 10,
   },
+  contentContainerStyle:{
+     gap:0,
+  }
 })

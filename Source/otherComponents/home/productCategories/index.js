@@ -73,9 +73,9 @@ export default function ProductCategories({
             borderRadius={Width(5)}
             selectedBorderColor="#008ECC"
             textColor="#333"
-            textStyle={{ fontSize: FontSize(13), marginBottom: Height(12) }}
+            textStyle={{ fontSize: FontSize(13), marginBottom: Height(6) }}
             containerStyle={{ paddingTop: Height(8), marginHorizontal: containerStyle ? containerStyle :  Width(12) }}
-            gap={Width(20)}
+            gap={Width(13)}
             imageSize={Height(70)}
             selected={selectedCategoryItems[selectedCategoryId] || ''}
             onSelect={(name) =>

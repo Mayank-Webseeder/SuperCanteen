@@ -29,19 +29,19 @@ export default function Description({ productData }) {
       {/* Rating */}
       <View style={styles.ratingContainer}>
         <View style={styles.starContainer}>
-          {/* Full stars */}
+        
           {Array.from({ length: fullStars }).map((_, i) => (
             <AntDesign key={`full-${i}`} name="star" size={20} color="#2E6074E8" />
           ))}
 
-          {/* Half star */}
+         
           {halfStar && (
             <AntDesign name="staro" size={20} color="#2E6074E8">
-              {/* you can swap for a half-star icon if you have one */}
+            
             </AntDesign>
           )}
 
-          {/* Empty stars */}
+        
           {Array.from({ length: emptyStars }).map((_, i) => (
             <AntDesign key={`empty-${i}`} name="staro" size={20} color="#D9D9D9" />
           ))}
@@ -53,7 +53,8 @@ export default function Description({ productData }) {
             {reviews === 1 ? 'review' : 'reviews'}
           </Text>
         ) : (
-          <Text style={styles.noRatingText}>No ratings yet</Text>
+          <></>
+          // <Text style={styles.noRatingText}>No ratings yet</Text>
         )}
       </View>
 
@@ -71,12 +72,12 @@ export default function Description({ productData }) {
       </View>
 
       {/* Delivery */}
-    {productData?.shippingInfo &&   <Text style={styles.subText}>
+    {/* {productData?.shippingInfo &&   <Text style={styles.subText}>
         {productData?.shippingInfo?.shippingRate === 0
           ? 'FREE'
           : `₹${productData?.shippingInfo?.shippingRate}`}{' '}
         delivery by {deliveryDate}
-      </Text>}
+      </Text>} */}
 
       {/* Seller */}
       {productData?.seller && (

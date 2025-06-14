@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Height } from "../../constants";
+import {  Height } from "../../constants";
 
 export const styles = StyleSheet.create({
   scrollContainer: {
@@ -15,8 +15,8 @@ export const styles = StyleSheet.create({
     marginHorizontal: 10 
   },
   greeting: {
-    fontSize: 15,
-    fontFamily:'Inter-Medium'
+    fontSize: 18,
+    fontFamily:'Inter-SemiBold'
 
   },
   phone: {
@@ -32,12 +32,13 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 10,
-    marginTop: 15,
+    marginTop: 20,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    
   },
   row: {
     flexDirection: 'row',
@@ -85,26 +86,64 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#EFEFEF',
   },
-  footerLinks: {
-    paddingTop: Height(20),
-    paddingHorizontal:Height(5)
-  },
-  footerText: {
-    fontSize: 13,
-    color: '#555',
-    marginBottom: 10,
-    fontFamily:'Inter-Regular'
-  },
-  logoutContainer: {
-    paddingHorizontal: 20,
-   paddingBottom: 30,
-    alignContent:"center",
-    justifyContent:"center",
-    alignItems:"center",
-  },
+ 
+
   logoutText: {
     color: 'red',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  footerContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+    paddingHorizontal: 5,
+  },
+  footerGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#F9FBFD',
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#F0F4F8',
+  },
+  footerItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconContainer: {
+    backgroundColor: '#E8F4FF',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  footerLabel: {
+    fontSize: 12,
+    color: '#2E6074',
+    fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+    letterSpacing: 0.2,
+    lineHeight:Height(19)
+  },
+  versionContainer: {
+    marginTop: 25,
+    alignItems: 'center',
+  },
+  versionText: {
+    fontSize: 12,
+    color: '#999',
+    fontFamily: 'Inter-Regular',
+  },
+  
+  logoutContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+
+    alignContent: "center",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
