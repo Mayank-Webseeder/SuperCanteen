@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
   },
   searchPressable: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 4,
   },
   cartPressable: {
     padding: 5,
@@ -32,5 +32,24 @@ export const styles = StyleSheet.create({
   },
   disabledStyle: {
     opacity: 1
-  }
+  },
+  badgeContainer: {
+  position: 'absolute',
+  top: -5,
+  right: -5,
+  backgroundColor: '#FF3B30', // red color
+  borderRadius: 10,
+  minWidth: 18,
+  height: 18,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 3,
+  zIndex: 10,
+},
+badgeText: {
+  color: '#fff',
+  fontSize: 11,
+  fontWeight: 'bold',
+},
+
 });

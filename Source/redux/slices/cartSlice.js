@@ -40,26 +40,31 @@ export const addToCart = createAsyncThunk(
 export const updateCartItem = createAsyncThunk(
   'cart/updateCartItem',
   async ({ itemId, payload }, { getState }) => {
-    
     const { auth } = getState();
     if (!auth.token) throw new Error("User not authenticated");
 
-    const response = await axios.put(
-      `${CART_BASE}/updateCartItemById/${itemId}`,
-      payload, // Use the payload directly
-      {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }
-    );
+    try {
+      const url = `${CART_BASE}/updateCartItemById/${itemId}`;
+      console.log("Calling URL:", url);
 
-    console.log("RESPONSE IS==============>",response)
-
-    return {
-      updatedItemId: itemId,
-      updatedItem: response.data.data
-    };
+      const response = await axios.patch( 
+        url,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${auth.token}` }
+        }
+      );
+      return {
+        updatedItemId: itemId,
+        updatedItem: response.data.data
+      };
+    } catch (error) {
+      console.log("UPDATE CART ITEM ERROR:", error.response?.data || error.message);
+      throw error;
+    }
   }
 );
+
 
 export const removeCartItem = createAsyncThunk(
   'cart/removeCartItem',

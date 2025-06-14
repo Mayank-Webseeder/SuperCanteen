@@ -52,7 +52,7 @@ const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }
         width={49}
         height={49}
         borderRadius={32}
-        selectedBorderColor={COLORS.green}
+        // selectedBorderColor={COLORS.green}
         textColor="#333"
         textStyle={styles.textStyle}
         imageSize={36}
@@ -61,6 +61,7 @@ const GetCategory = ({ selectedIndex, setSelectedIndex, categories, navigation }
         colors={['#30A46C', '#5BD18B']}
         contentContainerStyle={styles.contentContainerStyle}
         categoryContainerStyle={{marginRight:Height(6)}}
+        imageContainerStyle={{backgroundColor:"transperent"}}
       />
     </View>
   );

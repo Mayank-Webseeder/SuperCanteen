@@ -220,6 +220,33 @@ export const styles = StyleSheet.create({
   dropdownCheckIcon: {
     marginLeft: 10,
   },
+  stepperContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#f5f7fa',
+  borderRadius: 6,
+  borderWidth: 1,
+  borderColor: '#e1e5e9',
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  width: 100,
+  justifyContent: 'space-between',
+},
+stepperButton: {
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+},
+stepperText: {
+  fontSize: 16,
+  color: '#416E81',
+  fontWeight: 'bold',
+},
+qtyText: {
+  fontSize: 14,
+  fontWeight: '500',
+  color: '#333',
+},
+
   shadowIOS: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

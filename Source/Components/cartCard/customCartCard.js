@@ -131,16 +131,9 @@ const CartCard = ({
   onQuantityChange,
   onSizeChange,
   onRemoveItem,
+  isLoading
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  
-  // Generate quantity options based on stock
-  const stock = item.product?.stock || 10;
-  const maxQuantity = Math.min(stock, 10);
-  const quantityOptions = Array.from(
-    { length: maxQuantity },
-    (_, i) => String(i + 1)
-  );
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -159,12 +152,11 @@ const CartCard = ({
   };
 
   const handleQtyChange = (newQty) => {
-    // Prepare payload with required structure
     const payload = {
       product: item.product?._id,
       qty: parseInt(newQty),
       selectedPrice: item.selectedPrice,
-      isDigital: item.isDigital || false
+      isDigital: item.isDigital || false,
     };
     onQuantityChange(item._id || item.id, payload);
   };
@@ -195,11 +187,11 @@ const CartCard = ({
         </View>
       </TouchableOpacity>
 
-      <FastImage 
-        source={{ 
-          uri: `${IMGURL}${item?.product?.images[0]?.url || item?.product?.images[0] || ''}` 
+      <FastImage
+        source={{
+          uri: `${IMGURL}${item?.product?.images[0]?.url || item?.product?.images[0] || ''}`,
         }}
-        style={styles.image} 
+        style={styles.image}
         resizeMode="contain"
       />
       <View style={styles.details}>
@@ -209,6 +201,7 @@ const CartCard = ({
           </Text>
           <Text style={styles.price}>₹{item.selectedPrice || item.price}</Text>
         </View>
+
         <Text style={styles.subtitle} numberOfLines={2}>
           {stripHtml(item.product?.description || item.description)}
         </Text>
@@ -217,35 +210,49 @@ const CartCard = ({
           <View style={styles.priceInfo}>
             <Text style={styles.originalPrice}>₹{item.product.mrp}</Text>
             <Text style={styles.discount}>
-              {Math.round(((item.product.mrp - (item.selectedPrice || item.price)) / item.product.mrp) * 100)}% off
+              {Math.round(
+                ((item.product.mrp - (item.selectedPrice || item.price)) /
+                  item.product.mrp) *
+                  100
+              )}
+              % off
             </Text>
           </View>
         )}
 
         <View style={styles.dropdownRow}>
           {item.variant && (
-            <CustomDropdown
-              options={[item.variant.name]}
-              selected={item.variant.name}
-              onSelect={(val) => onSizeChange(item._id || item.id, val)}
-              dropdownWidth={100}
-              textStyle={styles.dropdownTextSmall}
-              itemStyle={styles.dropdownItemSmall}
-              itemTextStyle={styles.dropdownItemTextSmall}
-              iconColor="#416E81"
-            />
+            <Text style={styles.dropdownTextSmall}>{item.variant.name}</Text>
           )}
-          
-          <CustomDropdown
-            options={quantityOptions}
-            selected={`${item.qty || item.quantity}`}
-            onSelect={handleQtyChange}
-            dropdownWidth={80}
-            textStyle={styles.dropdownTextSmall}
-            itemStyle={styles.dropdownItemSmall}
-            itemTextStyle={styles.dropdownItemTextSmall}
-            iconColor="#416E81"
-          />
+
+          {/* ✅ Quantity Stepper */}
+
+          {isLoading ? (
+  <ActivityIndicator size="small" color="#416E81" style={{ marginVertical: 8 }} />
+) : (
+          <View style={styles.stepperContainer}>
+            <TouchableOpacity
+              onPress={() =>
+                item.qty > 1 && handleQtyChange(item.qty - 1)
+              }
+              style={styles.stepperButton}
+            >
+              <Text style={styles.stepperText}>−</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.qtyText}>{item.qty}</Text>
+
+            <TouchableOpacity
+              onPress={() =>
+                item.qty < item.product.countInStock &&
+                handleQtyChange(item.qty + 1)
+              }
+              style={styles.stepperButton}
+            >
+              <Text style={styles.stepperText}>+</Text>
+            </TouchableOpacity>
+          </View>
+)}
         </View>
 
         <View style={styles.deliveryInfo}>
@@ -260,11 +267,15 @@ const CartCard = ({
           <Entypo name="cycle" size={14} color="#416E81" />
           <Text style={styles.returnPolicy}> 7 days return policy</Text>
         </View>
-        {item?.product?.isBestSeller &&  <Text style={styles.seller}>
-          isBestSeller <Text style={{ color: '#416E81', fontFamily:"Inter-SemiBold" }}></Text>
-        </Text>}
-       
-        <TouchableOpacity 
+
+        {item?.product?.isBestSeller && (
+          <Text style={styles.seller}>
+            isBestSeller{' '}
+            <Text style={{ color: '#416E81', fontFamily: 'Inter-SemiBold' }} />
+          </Text>
+        )}
+
+        <TouchableOpacity
           style={styles.removeButton}
           onPress={() => onRemoveItem(item._id || item.id)}
         >
@@ -280,6 +291,8 @@ const CustomCartCard = () => {
   const { items, loading, error } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
+  
   useEffect(() => {
     dispatch(fetchCartItems());
   }, []);
@@ -311,20 +324,21 @@ const CustomCartCard = () => {
       setSelectedItems([]);
       setIsAllSelected(false);
     } catch (error) {
-      Alert.alert('Error', 'Failed to remove items');
+      // Alert.alert('Error', 'Failed to remove items');
     }
   };
 
   const handleQuantityChange = async (itemId, payload) => {
-    console.log("PAYLOAD IS ================>",payload)
-    try {
-      await dispatch(updateCartItem({ 
-        payload
-      })).unwrap();
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update quantity');
-    }
-  };
+  setUpdatingItemId(itemId); // Start loader for this item
+  try {
+    await dispatch(updateCartItem({ itemId, payload })).unwrap();
+  } catch (error) {
+    Alert.alert('Error', 'Failed to update quantity');
+  } finally {
+    setUpdatingItemId(null); // Reset loader
+  }
+};
+
 
   const handleSizeChange = (itemId, newSize) => {
     console.log(`Size changed for ${itemId} to ${newSize}`);
@@ -411,6 +425,7 @@ const CustomCartCard = () => {
             onQuantityChange={handleQuantityChange}
             onSizeChange={handleSizeChange}
             onRemoveItem={handleRemoveItem}
+              isLoading={updatingItemId === (item._id || item.id)}
           />
         )}
         contentContainerStyle={styles.listContent}

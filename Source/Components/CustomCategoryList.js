@@ -31,7 +31,8 @@ const CustomCategoryList = ({
   imageStyle,
   colors,
   gotoScreen,
-  categoryContainerStyle
+  categoryContainerStyle,
+  imageContainerStyle
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -96,7 +97,7 @@ const CustomCategoryList = ({
                   },
                 ]}
               >
-                <View style={styles.imageContainer}>
+                <View style={[styles.imageContainer,{...imageContainerStyle}]}>
                   <FastImage
                     source={
                       typeof item.image === 'string'

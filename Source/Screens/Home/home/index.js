@@ -23,6 +23,7 @@ import PullToRefresh from '.././../../Components/Common/pullToRefresh';
 import ErrorView from '../../../Components/Common/errorView';
 import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
 import ClosestProductsData from '../../../Mock/Data/closestProductData';
+import FastImage from 'react-native-fast-image';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -151,6 +152,8 @@ const HomeScreen = ({ navigation }) => {
       end={{ x: 0.5, y: 0.7 }} // Adjust this to control gradient length
       style={styles.gradientHeader}
     >
+   
+   
       <Header navigation={navigation} />
       <GetCategory
         categories={categories}
