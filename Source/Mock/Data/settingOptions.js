@@ -11,10 +11,11 @@ export const iconOptions = [
 
 export const settingsOptions = [
   { name: 'Personal Information', screen: 'LoginSecurity' },
+  { name: 'Notifications', screen: 'NotificationScreen' },
   { name: 'Manage Address', screen: 'AddressListScreen' },
   { name: 'Payment Methods', screen: 'PaymentScreen' },
-  { name: 'Language', screen: 'Language' },
-  { name: 'Notifications', screen: 'NotificationScreen' },
+  { name: 'Contact Support', screen: 'ContactSupport' },
+  { name: 'Rate Us', screen: '' }, // Add screen name later if needed
 ];
 
 export const footerItems = ['FAQ', 'ABOUT US', 'TERMS OF USE', 'PRIVACY POLICY'];

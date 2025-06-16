@@ -23,6 +23,15 @@ export const styles = StyleSheet.create({
   searchContainer: {
     flex: 1,
   },
+   disabledStyle: {
+    opacity: 1
+  },
+   searchInput: {
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
+  },
   scrollContainer: {
     paddingBottom: Height(20),
     paddingTop: Height(10),

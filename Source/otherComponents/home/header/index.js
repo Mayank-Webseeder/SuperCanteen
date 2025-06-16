@@ -20,10 +20,10 @@ export default function Header({ navigation }) {
             disabledStyle={styles.disabledStyle}
             backgroundColor={'#fff'}
             disabled
-            customStyle={styles.searchInput}
+            containerStyle={styles.searchInput}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
           />
         </Pressable>
-
         <Pressable 
           style={styles.cartPressable}
           onPress={() => navigation.navigate('Cart')}

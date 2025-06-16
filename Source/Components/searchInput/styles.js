@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     height:Height(38)
   },
   disabledInput: {
-    opacity: 0.6,
+    opacity: 1,
   },
   input: {
     flex: 1,

@@ -103,7 +103,9 @@ const SearchScreen = ({ navigation }) => {
             onCrossPress={clearSearch}
             placeholder="Search in SuperCanteen store"
             autoFocus={true}
-            containerStyle={{PaddingLeft:20}}
+            containerStyle={styles.searchInput}
+             backgroundColor={'#fff'}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
           />
         </View>
       </View>

@@ -16,7 +16,7 @@ import OrderListItem from '../../../otherComponents/orders/OrderListItem';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 import FastImage from 'react-native-fast-image';
 
-export default function HelpScreen({ navigation }) {
+export default function HelpSupport({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
    const [selectedStatuses, setSelectedStatuses] = useState([]);
     const [selectedTime, setSelectedTime] = useState('');

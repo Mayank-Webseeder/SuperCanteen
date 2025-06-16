@@ -16,12 +16,17 @@ export const styles = StyleSheet.create({
       loadingContainer:{
             marginTop:Height(4)
       },
+      image:{
+        height:32,
+        width:32,
+        resizeMode:"contain"
+      },
    categoriesHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 3,
   },
   headerTextContainer: {
     flexDirection: 'row',

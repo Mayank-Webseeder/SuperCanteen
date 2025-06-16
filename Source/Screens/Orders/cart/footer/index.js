@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo , } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useSelector } from 'react-redux';
 
 const Footer = ({ navigation, agreeTerms, disabled }) => {
   const cartState = useSelector((state) => state.cart);
   const items = Array.isArray(cartState?.items) ? cartState.items : [];
+   const { user } = useSelector(state => state.auth);
 
   // Calculate total amount with proper duplicate handling
   const totalAmount = useMemo(() => {
@@ -30,8 +31,17 @@ const Footer = ({ navigation, agreeTerms, disabled }) => {
       Alert.alert('Empty Cart', 'Your cart is empty. Add items to proceed');
       return;
     }
+
+      if (!user || !user.username) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
+      });
+    } else {
+navigation.navigate('ProductCheckoutScreen', { totalAmount });
+    }
     
-    navigation.navigate('ProductCheckoutScreen', { totalAmount });
+    
   };
 
   // Calculate item count considering variants as unique items

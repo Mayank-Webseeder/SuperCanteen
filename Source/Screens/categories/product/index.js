@@ -18,6 +18,7 @@ import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import CustomSearch from '../../../Components/searchInput';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 
+
 const ProductsScreen = ({ navigation, route }) => {
   const { selectedCategory, categoryData } = route?.params || {};
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
@@ -141,23 +142,24 @@ const ProductsScreen = ({ navigation, route }) => {
                 <View style={styles.searchView}>
                   <Pressable onPress={() => navigation.navigate('Search')}>
                     <CustomSearch
-                      disabledStyle={styles.disabledStyle}
-                      WidthSize={'98%'}
-                      backgroundColor={'#fff'}
-                      disabled
-                    />
+            disabledStyle={styles.disabledStyle}
+            backgroundColor={'#fff'}
+            disabled
+            containerStyle={styles.searchInput}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+          />
                   </Pressable>
                 </View>
               </View>
 
               {/* Brand carousel or banner */}
               {brands.length > 0 ? (
-                <Brandcarousel brands={brands} />
+                <Brandcarousel carouselContainerStyle={styles.carouselContainerStyle} brands={brands}  imageStyle={styles.imageStyle} contentContainerStyle={styles.mainViewcontainerStyle}  cardStyle={styles.cardStyle}  paginationStyle={styles.paginationStyle} dotStyle={styles.dotStyle}/>
               ) : (
                 <View style={styles.sectionSpacing}>
                   <CustomCasual
                     containerStyle={styles.CasualStyle}
-                    cardStyle={styles.cardStyle}
+                    cardStyle={{marginTop:15}}
                     data={Sliders}
                     borderWidth={0}
                     cardRadius={Height(15)}
@@ -166,7 +168,7 @@ const ProductsScreen = ({ navigation, route }) => {
                 </View>
               )}
 
-              <HorizontalLine />
+              <HorizontalLine lineStyle={styles.lineStyle} />
 
               {/* Subcategories */}
               {filteredSubCategories.length > 0 ? (

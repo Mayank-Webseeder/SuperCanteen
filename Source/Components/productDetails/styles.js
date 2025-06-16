@@ -17,6 +17,16 @@ export const styles = StyleSheet.create({
     mainContainer:{
       paddingHorizontal:Width(10)
     },
+     disabledStyle: {
+    opacity: 1
+  },
+    searchInput: {
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
+    marginHorizontal:7
+  },
     heartIconWrapper: {
       flexDirection:"row",
       justifyContent:"flex-end",
@@ -33,7 +43,7 @@ export const styles = StyleSheet.create({
     fontSize: FontSize(16),
    fontFamily:'Inter-SemiBold',
     color: '#2E6074E8',
-    marginBottom: 12,
+    marginBottom: 7,
     lineHeight: 24,
   },
   ratingContainer: {

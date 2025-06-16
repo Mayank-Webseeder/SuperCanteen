@@ -9,6 +9,15 @@ export const styles = StyleSheet.create({
   headerStyle:{
     marginHorizontal:10
   },
+   disabledStyle: {
+    opacity: 1
+  },
+   searchInput: {
+    height: Height(35),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
+  },
   orderHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

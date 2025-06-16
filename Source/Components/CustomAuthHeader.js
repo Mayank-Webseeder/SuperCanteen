@@ -4,17 +4,17 @@ import Icon from 'react-native-vector-icons/AntDesign'; // Make sure to install 
 import { useNavigation } from '@react-navigation/native';
 import { FontSize, Height } from '../constants';
 
-const CustomAuthHeader = ({ title = 'Title', onBackPress }) => {
+const CustomAuthHeader = ({ title = 'Title', onBackPress , notShowBackArrow }) => {
   const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      {!notShowBackArrow && <TouchableOpacity
         style={styles.backButton}
         onPress={onBackPress || (() => navigation.goBack())}
       >
         <Icon name="left" size={20} color="#000"  style={{left:8}}/>
-      </TouchableOpacity>
+      </TouchableOpacity> }
 
       <Text style={styles.title}>{title}</Text>
 

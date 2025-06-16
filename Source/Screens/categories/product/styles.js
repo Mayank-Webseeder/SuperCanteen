@@ -24,9 +24,11 @@ export const styles = StyleSheet.create({
   },
    searchView:{
     flex: 1, marginRight: 12,
-    marginBottom:Height(20),
-    marginTop:Height(3),
+    marginBottom:Height(2),
     left:Height(8)
+  },
+  lineStyle:{
+    marginTop:15
   },
   searchContainer: {
     marginTop: Height(5),
@@ -38,10 +40,7 @@ export const styles = StyleSheet.create({
   CasualStyle:{
     marginTop:0
   },
-  cardStyle:{
-   borderColor:COLORS.border,
-   borderWidth:1
-  },
+  
   searchResultsContainer: {
     padding: 10,
     minHeight: Height(200),
@@ -89,9 +88,6 @@ export const styles = StyleSheet.create({
                width:Width(55)
   },
   
-  imageStyle:{
-    height:20,width:20,top:20,marginHorizontal:6
-  },
    main: {
     backgroundColor: COLORS.white,
     paddingTop: Height(10),
@@ -172,6 +168,36 @@ export const styles = StyleSheet.create({
   },
    disabledStyle:{
     opacity:1
-  }
+  },
+    searchInput: {
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
+    marginBottom:Height(10)
+  },
+   cardStyle:{
+    borderWidth:0,
+    padding:0,
+
+  },
+    dotStyle:{
+    height:Width(7),
+    width:Width(7)
+  },
+  imageStyle:{
+     height:Height(150),
+    width:"100%",
+    resizeMode:"cover",
+    borderRadius:0,
+  
+  },
+  carouselContainerStyle:{
+marginTop:5
+  },
+  mainViewcontainerStyle:{
+    paddingHorizontal:16,
+   
+  },
   
 });

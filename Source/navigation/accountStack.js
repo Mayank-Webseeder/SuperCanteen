@@ -4,7 +4,7 @@ import AccountScreen from '@screens/Account';
 import AddressListScreen from '../Components/address/addressList';
 import LoginSecurityScreen from '@screens/otherSettings/loginSecurity';
 import EditFieldScreen from '@screens/otherSettings/loginSecurity/EditFieldScreen';
-import LanguageScreen from '@screens/otherSettings/languages';
+import HelpSupport from '@screens/otherSettings/helpSupport';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,7 +15,8 @@ export default function AccountStack() {
     <Stack.Screen name="AddressListScreen" component={AddressListScreen} />
     <Stack.Screen name="LoginSecurity" component={LoginSecurityScreen} />
     <Stack.Screen name="EditField" component={EditFieldScreen} />
-    <Stack.Screen name="Language" component={LanguageScreen} />
+    <Stack.Screen name="HelpSupport" component={HelpSupport} />
+ 
   </Stack.Navigator>
   )
 }

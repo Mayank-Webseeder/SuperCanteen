@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity,
   BackHandler,
-  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomTextInput from '../../../Components/inputField/customTextInput';
@@ -19,6 +18,7 @@ import { CheckBoxIcon } from '../../../../assets/Icons/svgIcons/checkBoxIcon';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
+import { mergeGuestCart } from '../../../redux/slices/cartSlice';
 
 const SigninScreen = () => {
   const navigation = useNavigation();
@@ -76,6 +76,9 @@ const SigninScreen = () => {
     return !emailError && !passwordError;
   }, [formData.email, formData.password]);
 
+
+  
+
   const onpressSignIn = useCallback(async () => {
     if (!validateForm()) return;
 
@@ -87,6 +90,12 @@ const SigninScreen = () => {
     );
     
     if (loginUser.fulfilled.match(resultAction)) {
+
+         try {
+      await dispatch(mergeGuestCart()).unwrap();
+    } catch (error) {
+      console.log('Cart merge failed (non-critical)', error);
+    }
 
        showMessage({
         message: 'Sign In Successful!',
@@ -104,7 +113,17 @@ const SigninScreen = () => {
           .catch(e => console.error('Remove error', e));
       }
       
-      navigation.navigate('Main');
+    navigation.reset({
+  index: 0,
+  routes: [
+    {
+      name: 'App',
+      state: {
+        routes: [{ name: 'Main' }]
+      },
+    },
+  ],
+});
      } else if (loginUser.rejected.match(resultAction)) {
       // Show error message
       showMessage({
@@ -130,7 +149,7 @@ const SigninScreen = () => {
 
   return (
     <View style={styles.container}>
-      <CustomAuthHeader title="Sign In" />
+      <CustomAuthHeader notShowBackArrow title="Sign In" />
       
       <View style={styles.inputView}>
         <CustomTextInput

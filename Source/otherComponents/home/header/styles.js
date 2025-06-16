@@ -20,8 +20,8 @@ export const styles = StyleSheet.create({
     padding: 5,
   },
   searchInput: {
-    height: Height(35),  // Reduced height
-    borderRadius: 8,     // Tighter radius
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
     paddingHorizontal: 12,
     fontSize: 14,        // Smaller font
   },

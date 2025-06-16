@@ -27,6 +27,7 @@ import CustomZoomCasual from './zommableImage/customZoomCasual';
 import { fetchProductsBySubcategory } from '../../redux/slices/subCategoryProductSlice';
 import { formateSubCategoryProducts } from '../../utils/dataFormatters';
 import { addToCart } from '../../redux/slices/cartSlice';
+import CustomSearch from '../../Components/searchInput';
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -41,11 +42,12 @@ const ProductDetails = ({ navigation, route }) => {
   );
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
+     const { user } = useSelector(state => state.auth);
  
 
 
   const OnAddToCart = () =>{
-    setAddtoCartLoading(true)
+    // setAddtoCartLoading(true)
          dispatch(addToCart({
             productId:productId,
             quantity: 1,
@@ -53,13 +55,16 @@ const ProductDetails = ({ navigation, route }) => {
             isDigital: productData.isDigital
           }))
             .then(() => {
-              setAddtoCartLoading(false)
+              // setAddtoCartLoading(false)
               navigation.navigate('Cart');
             })
             .catch((error) => {
               console.log("❌ Buy now failed", error);
             })
   }
+
+
+  
  
 
   const handleRefresh = useCallback(async () => {
@@ -127,7 +132,13 @@ const ProductDetails = ({ navigation, route }) => {
       >
         <View style={styles.mainContainer}>
           <CustomHeader navigation={navigation} showRightIcons={true} />
-          <CustomSearchInput />
+              <CustomSearch
+            disabledStyle={styles.disabledStyle}
+            backgroundColor={'#fff'}
+            disabled
+            containerStyle={styles.searchInput}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+          />
         </View>
         <View>
           <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
@@ -196,7 +207,17 @@ const ProductDetails = ({ navigation, route }) => {
         addToCartLoading={addToCartLoading}
         onSharePress={() => console.log('Share Pressed')}
         onAddToCart={() => OnAddToCart()}
-        onBuyNow={() => navigation.navigate('ProductCheckoutScreen')}
+        onBuyNow={() =>{
+            if (!user || !user.username) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
+      });
+    } else {
+ navigation.navigate('ProductCheckoutScreen')}}
+    }
+          
+         
       />
     </View>
   );

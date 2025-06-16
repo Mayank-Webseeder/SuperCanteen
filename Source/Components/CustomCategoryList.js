@@ -9,6 +9,7 @@ import {
 import { COLORS, FontSize, Height, Width } from '../constants';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialIcons'; // added icon lib
 
 const CustomCategoryList = ({
   data = [],
@@ -32,8 +33,11 @@ const CustomCategoryList = ({
   colors,
   gotoScreen,
   categoryContainerStyle,
-  imageContainerStyle
+  imageContainerStyle,
 }) => {
+  const filteredData = data.filter((item) => !item.isAllIcon);
+  const allIconItem = data.find((item) => item.isAllIcon);
+
   return (
     <View style={[containerStyle]}>
       <FlatList
@@ -41,63 +45,61 @@ const CustomCategoryList = ({
         numColumns={numColumns}
         horizontal={horizontal}
         showsHorizontalScrollIndicator={false}
-        data={data}
-        keyExtractor={(item) => item.name}
+        data={filteredData}
+        keyExtractor={(item) => item._id || item.name}
         contentContainerStyle={[
-          { paddingHorizontal: Width(14), gap,paddingBottom:0 },
+          { paddingHorizontal: Width(14), gap, paddingBottom: 0, paddingRight: Width(60) },
           contentContainerStyle,
         ]}
         renderItem={({ item }) => {
           const isSelected = selected === item.id;
+
           return (
             <TouchableOpacity
               activeOpacity={0.8}
-  onPress={() => {
-  onSelect(item?.id); // Keep your selection logic if needed
-  
-  if (!navigation) return; // Early exit if no navigation
-  
-  // Determine navigation parameters based on gotoScreen
-  const navigateConfig = gotoScreen === 'ProductDetails' 
-    ? { 
-        name: 'ProductDetails',
-        params: { productId: item._id } 
-      }
-    : {
-        name: gotoScreen || 'Products',
-        params: { 
-          selectedCategory: item.id, 
-          categoryData: item 
-        }
-      };
+              onPress={() => {
+                onSelect(item?.id);
+                if (!navigation) return;
 
-  navigation.navigate(navigateConfig.name, navigateConfig.params);
-}}
+                const navigateConfig =
+                  gotoScreen === 'ProductDetails'
+                    ? {
+                        name: 'ProductDetails',
+                        params: { productId: item._id },
+                      }
+                    : {
+                        name: gotoScreen || 'Products',
+                        params: {
+                          selectedCategory: item.id,
+                          categoryData: item,
+                        },
+                      };
+
+                navigation.navigate(navigateConfig.name, navigateConfig.params);
+              }}
               style={[
                 styles.categoryContainer,
-                {
-                  marginRight: gap,
-                },
-                categoryContainerStyle
+                { marginRight: gap },
+                categoryContainerStyle,
               ]}
             >
-             
               <LinearGradient
-               colors={isSelected ? (colors || ['#FFFFFF', '#FFFFFF']) : [ '#FFFFFF', '#FFFFFF']}
+                colors={
+                  isSelected ? colors || ['#FFFFFF', '#FFFFFF'] : ['#FFFFFF', '#FFFFFF']
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[
                   styles.shadowBox,
                   {
-                    width: item.name === 'All' ? Width(50) : width,
-                    height: item.name === 'All' ? Height(60) : height,
-                    borderRadius: borderRadius,
+                    width,
+                    height,
+                    borderRadius,
                     borderWidth: 0,
-                  
                   },
                 ]}
               >
-                <View style={[styles.imageContainer,{...imageContainerStyle}]}>
+                <View style={[styles.imageContainer, imageContainerStyle]}>
                   <FastImage
                     source={
                       typeof item.image === 'string'
@@ -132,11 +134,24 @@ const CustomCategoryList = ({
               >
                 {item.name}
               </Text>
-              
             </TouchableOpacity>
           );
         }}
       />
+
+      {/* Sticky AllIcons Icon */}
+      {allIconItem && (
+        <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => onSelect(allIconItem._id)}
+    style={styles.allIconCircleContainer}
+  >
+    <View style={styles.allIconCircle}>
+      <Icon name="category" size={Width(18)} color="#FFFFFF" />
+    </View>
+  </TouchableOpacity>
+)
+      }
     </View>
   );
 };
@@ -164,7 +179,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   imageContainer: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: 'transparent',
     borderRadius: Width(12),
     padding: Width(6),
   },
@@ -175,4 +190,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+allIconCircleContainer: {
+  position: 'absolute',
+  right: -Width(20), // half outside
+  top: Height(-5),
+  width: Width(49),
+  height: Width(50),
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+allIconCircle: {
+  width: 49,
+  height: 49,
+  borderRadius: 32,
+  backgroundColor: '#4D8F9C', // lighter than #3C7B89
+  alignItems: 'center',
+  justifyContent: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 6,
+},
 });

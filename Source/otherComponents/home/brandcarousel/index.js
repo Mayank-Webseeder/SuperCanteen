@@ -14,7 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 
-const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
+const Brandcarousel = ({brands,paginationStyle,dotStyle,cardStyle,imageStyle,contentContainerStyle,carouselContainerStyle}) => {
   const navigation = useNavigation()
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,7 +38,7 @@ const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
  const renderItem = ({ item }) => (
   <TouchableOpacity onPress={() =>  {
     navigation.navigate('ProdcutCategory',{brandId: item.id})
-    }} style={[styles.card, { width, borderRadius: radius, overflow: 'hidden' }]}>
+    }} style={[styles.card, { width, borderRadius: radius, overflow: 'hidden' },cardStyle]}>
     <View style={{ position: 'relative' }}>
       <FastImage
         source={{ uri: item.image }}
@@ -47,6 +47,7 @@ const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
           width: '100%',
           height,
           borderRadius: 12,
+          ...imageStyle
         }}
       />
 
@@ -68,7 +69,7 @@ const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
 
   return (
     formattedBrands.length > 0 &&  
-    <View style={styles.container}>
+    <View style={[styles.container,{...carouselContainerStyle}]}>
       <FlatList
         ref={flatListRef}
         data={formattedBrands}
@@ -81,7 +82,7 @@ const Brandcarousel = ({brands,paginationStyle,dotStyle}) => {
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewConfigRef.current}
-        contentContainerStyle={styles.contentContainerStyle}
+        contentContainerStyle={[styles.contentContainerStyle,{...contentContainerStyle}]}
       />
 {brands.length > 1 &&   <View style={[styles.pagination,paginationStyle]}>
         {(formattedBrands || []).map((_, index) => (

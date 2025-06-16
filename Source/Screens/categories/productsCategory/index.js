@@ -291,6 +291,8 @@ const ProductCategoryScreen = ({ navigation, route }) => {
               WidthSize={'98%'}
               backgroundColor={'#fff'}
               disabled
+              containerStyle={styles.searchInput}
+              inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
             />
           </Pressable>
         </View>
@@ -302,7 +304,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
           <CustomCategoryList
             width={53}
             height={53}
-            gap={15}
+            gap={10}
             horizontal={true}
             borderRadius={32}
             data={formattedSegments}

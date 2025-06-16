@@ -22,6 +22,9 @@ import { updateCartItem, removeCartItem, fetchCartItems } from '../../redux/slic
 import { COLORS } from '@constants/index';
 import { stripHtml } from '../../utils/validation';
 import { IMGURL } from '../../utils/dataFormatters';
+import axios from 'axios';
+import { BASE_URL, PRODUCTBYID } from '../../api';
+import { fetchProductById } from '../../redux/slices/productDetailSlice';
 
 const CustomDropdown = ({
   options,
@@ -131,9 +134,31 @@ const CartCard = ({
   onQuantityChange,
   onSizeChange,
   onRemoveItem,
-  isLoading
+  isLoading,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const dispatch = useDispatch();
+
+  const {
+    product: productDetail,
+    loading: productLoading,
+    error: productError,
+  } = useSelector((state) => state.productDetail);
+
+  // Extract product data from different possible structures
+  const productData =
+    productDetail?.product || productDetail?.data || productDetail;
+
+  // Determine which product to display
+  const displayProduct =
+    typeof item.product === 'object' ? item.product : productData;
+
+  // Fetch product details if we only have the product ID
+  useEffect(() => {
+    if (item.product && typeof item.product === 'string') {
+      dispatch(fetchProductById(item.product));
+    }
+  }, [item.product, dispatch]);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -153,13 +178,29 @@ const CartCard = ({
 
   const handleQtyChange = (newQty) => {
     const payload = {
-      product: item.product?._id,
+      product: item.product?._id || item.product,
       qty: parseInt(newQty),
       selectedPrice: item.selectedPrice,
       isDigital: item.isDigital || false,
     };
     onQuantityChange(item._id || item.id, payload);
   };
+
+  if (productLoading && !displayProduct) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="small" color={COLORS.green} />
+      </View>
+    );
+  }
+
+  if (!displayProduct) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Product not available</Text>
+      </View>
+    );
+  }
 
   return (
     <Animated.View
@@ -189,31 +230,30 @@ const CartCard = ({
 
       <FastImage
         source={{
-          uri: `${IMGURL}${item?.product?.images[0]?.url || item?.product?.images[0] || ''}`,
+          uri: `${IMGURL}${displayProduct?.images?.[0]?.url || displayProduct?.images?.[0] || ''}`,
         }}
         style={styles.image}
         resizeMode="contain"
       />
+
       <View style={styles.details}>
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {item.product?.name || item.name}
+            {displayProduct?.name}
           </Text>
-          <Text style={styles.price}>₹{item.selectedPrice || item.price}</Text>
+          <Text style={styles.price}>₹{item.selectedPrice}</Text>
         </View>
 
         <Text style={styles.subtitle} numberOfLines={2}>
-          {stripHtml(item.product?.description || item.description)}
+          {stripHtml(displayProduct?.description || '')}
         </Text>
 
-        {item.product?.mrp && (
+        {displayProduct?.mrp && (
           <View style={styles.priceInfo}>
-            <Text style={styles.originalPrice}>₹{item.product.mrp}</Text>
+            <Text style={styles.originalPrice}>₹{displayProduct.mrp}</Text>
             <Text style={styles.discount}>
               {Math.round(
-                ((item.product.mrp - (item.selectedPrice || item.price)) /
-                  item.product.mrp) *
-                  100
+                ((displayProduct.mrp - item.selectedPrice) / displayProduct.mrp) * 100
               )}
               % off
             </Text>
@@ -225,34 +265,27 @@ const CartCard = ({
             <Text style={styles.dropdownTextSmall}>{item.variant.name}</Text>
           )}
 
-          {/* ✅ Quantity Stepper */}
-
           {isLoading ? (
-  <ActivityIndicator size="small" color="#416E81" style={{ marginVertical: 8 }} />
-) : (
-          <View style={styles.stepperContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                item.qty > 1 && handleQtyChange(item.qty - 1)
-              }
-              style={styles.stepperButton}
-            >
-              <Text style={styles.stepperText}>−</Text>
-            </TouchableOpacity>
+            <ActivityIndicator size="small" color="#416E81" style={{ marginVertical: 8 }} />
+          ) : (
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                onPress={() => item.qty > 1 && handleQtyChange(item.qty - 1)}
+                style={styles.stepperButton}
+              >
+                <Text style={styles.stepperText}>−</Text>
+              </TouchableOpacity>
 
-            <Text style={styles.qtyText}>{item.qty}</Text>
+              <Text style={styles.qtyText}>{item.qty}</Text>
 
-            <TouchableOpacity
-              onPress={() =>
-                item.qty < item.product.countInStock &&
-                handleQtyChange(item.qty + 1)
-              }
-              style={styles.stepperButton}
-            >
-              <Text style={styles.stepperText}>+</Text>
-            </TouchableOpacity>
-          </View>
-)}
+              <TouchableOpacity
+                onPress={() => handleQtyChange(item.qty + 1)}
+                style={styles.stepperButton}
+              >
+                <Text style={styles.stepperText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <View style={styles.deliveryInfo}>
@@ -263,12 +296,13 @@ const CartCard = ({
             </Text>
           </Text>
         </View>
+
         <View style={styles.returnInfo}>
           <Entypo name="cycle" size={14} color="#416E81" />
-          <Text style={styles.returnPolicy}> 7 days return policy</Text>
+          <Text style={styles.returnPolicy}>7 days return policy</Text>
         </View>
 
-        {item?.product?.isBestSeller && (
+        {displayProduct?.isBestSeller && (
           <Text style={styles.seller}>
             isBestSeller{' '}
             <Text style={{ color: '#416E81', fontFamily: 'Inter-SemiBold' }} />
@@ -286,12 +320,14 @@ const CartCard = ({
   );
 };
 
+
 const CustomCartCard = () => {
+  
   const dispatch = useDispatch();
   const { items, loading, error } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const [updatingItemId, setUpdatingItemId] = useState(null);
+  const [updatingItemId, setUpdatingItemId] = useState(null)
   
   useEffect(() => {
     dispatch(fetchCartItems());
@@ -349,7 +385,7 @@ const CustomCartCard = () => {
       await dispatch(removeCartItem(itemId)).unwrap();
       setSelectedItems(selectedItems.filter(id => id !== itemId));
     } catch (error) {
-      Alert.alert('Error', 'Failed to remove item');
+      // Alert.alert('Error', 'Failed to remove item');
     }
   };
 
@@ -370,6 +406,7 @@ const CustomCartCard = () => {
   }
 
   return (
+  
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={styles.selectionControls}>

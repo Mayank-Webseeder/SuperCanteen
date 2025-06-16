@@ -14,6 +14,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
 import { dummyOrders } from '../../../Mock/Data/OrdersData';
 import { styles } from './styles';
+import CustomSearch from '../../../Components/searchInput';
 
 const Orders = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -60,8 +61,14 @@ const Orders = () => {
      
       <View style={{marginHorizontal: 16}}>
              
-
-        <CustomSearchInput showCrossIcon={true} />
+    <CustomSearch
+            disabledStyle={styles.disabledStyle}
+            backgroundColor={'#fff'}
+            disabled
+            containerStyle={styles.searchInput}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+          />
+     
       </View>
 
       <View style={styles.orderHeaderRow}>
