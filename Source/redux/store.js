@@ -14,6 +14,7 @@ import serachReducer from './slices/searchSlice'
 import productBySegmentReducer from './slices/productBySegmentSlice';
 import productByBrandReducer from './slices/productsByBrandSlice'
 import cartReducer from './slices/cartSlice'
+import cartProductReducer from './slices/cartProductsSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
     search:serachReducer,
     productsBySegment: productBySegmentReducer,
     productsByBrand : productByBrandReducer,
-    cart:cartReducer
+    cart:cartReducer,
+    cartProducts:cartProductReducer
 });
 
 const persistConfig = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -22,11 +22,9 @@ import { updateCartItem, removeCartItem, fetchCartItems } from '../../redux/slic
 import { COLORS } from '@constants/index';
 import { stripHtml } from '../../utils/validation';
 import { IMGURL } from '../../utils/dataFormatters';
-import axios from 'axios';
-import { BASE_URL, PRODUCTBYID } from '../../api';
-import { fetchProductById } from '../../redux/slices/productDetailSlice';
+import { fetchCartProductById } from '../../redux/slices/cartProductsSlice';
 
-const CustomDropdown = ({
+const CustomDropdown = React.memo(({
   options,
   selected,
   onSelect,
@@ -125,9 +123,9 @@ const CustomDropdown = ({
       </Modal>
     </View>
   );
-};
+});
 
-const CartCard = ({
+const CartCard = React.memo(({
   item,
   isSelected,
   onSelect,
@@ -138,27 +136,18 @@ const CartCard = ({
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const dispatch = useDispatch();
-
-  const {
-    product: productDetail,
-    loading: productLoading,
-    error: productError,
-  } = useSelector((state) => state.productDetail);
-
-  // Extract product data from different possible structures
-  const productData =
-    productDetail?.product || productDetail?.data || productDetail;
-
-  // Determine which product to display
-  const displayProduct =
-    typeof item.product === 'object' ? item.product : productData;
-
-  // Fetch product details if we only have the product ID
+  
+  const productId = item.product?._id ? item.product._id : item.product;
+  const { products, loading, errors } = useSelector((state) => state.cartProducts);
+  const product = products[productId];
+  const isLoadingProduct = loading[productId] || false;
+  const errorProduct = errors[productId];
+  
   useEffect(() => {
-    if (item.product && typeof item.product === 'string') {
-      dispatch(fetchProductById(item.product));
+    if (productId && !product && !isLoadingProduct && !errorProduct) {
+      dispatch(fetchCartProductById(productId));
     }
-  }, [item.product, dispatch]);
+  }, [productId, product, isLoadingProduct, errorProduct, dispatch]);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -178,7 +167,7 @@ const CartCard = ({
 
   const handleQtyChange = (newQty) => {
     const payload = {
-      product: item.product?._id || item.product,
+      product: productId,
       qty: parseInt(newQty),
       selectedPrice: item.selectedPrice,
       isDigital: item.isDigital || false,
@@ -186,7 +175,47 @@ const CartCard = ({
     onQuantityChange(item._id || item.id, payload);
   };
 
-  if (productLoading && !displayProduct) {
+  const getDisplayPrice = useCallback(() => {
+    if (!product) return item.selectedPrice;
+    
+    if (product.variants) {
+      const variant = product.variants.find(
+        v => v.price === item.selectedPrice
+      );
+      if (variant) return variant.price;
+    }
+    
+    return product.offerPrice || item.selectedPrice;
+  }, [product, item.selectedPrice]);
+
+  const handleRemove = () => {
+    Alert.alert(
+      'Remove Item',
+      'Are you sure you want to remove this item from your cart?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', onPress: () => onRemoveItem(item._id || item.id) }
+      ]
+    );
+  };
+
+  if (errorProduct || (!product && !isLoadingProduct)) {
+    return (
+      <Animated.View style={[styles.card, { opacity: 0.7 }]}>
+        <View style={styles.productUnavailable}>
+          <Text style={styles.unavailableText}>Product unavailable</Text>
+          <TouchableOpacity 
+            onPress={handleRemove}
+            style={styles.removeUnavailable}
+          >
+            <Text style={styles.removeUnavailableText}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    );
+  }
+
+  if (isLoadingProduct || !product) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="small" color={COLORS.green} />
@@ -194,13 +223,8 @@ const CartCard = ({
     );
   }
 
-  if (!displayProduct) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Product not available</Text>
-      </View>
-    );
-  }
+  const price = getDisplayPrice();
+  const discount = product?.mrp ? Math.round(((product.mrp - price) / product.mrp) * 100) : 0;
 
   return (
     <Animated.View
@@ -230,7 +254,8 @@ const CartCard = ({
 
       <FastImage
         source={{
-          uri: `${IMGURL}${displayProduct?.images?.[0]?.url || displayProduct?.images?.[0] || ''}`,
+          uri: `${IMGURL}${product?.images?.[0]?.url || product?.images?.[0] || ''}`,
+          priority: FastImage.priority.normal,
         }}
         style={styles.image}
         resizeMode="contain"
@@ -239,24 +264,19 @@ const CartCard = ({
       <View style={styles.details}>
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {displayProduct?.name}
+            {product?.name}
           </Text>
-          <Text style={styles.price}>₹{item.selectedPrice}</Text>
+          <Text style={styles.price}>₹{price}</Text>
         </View>
 
         <Text style={styles.subtitle} numberOfLines={2}>
-          {stripHtml(displayProduct?.description || '')}
+          {stripHtml(product?.description || '')}
         </Text>
 
-        {displayProduct?.mrp && (
+        {product?.mrp && (
           <View style={styles.priceInfo}>
-            <Text style={styles.originalPrice}>₹{displayProduct.mrp}</Text>
-            <Text style={styles.discount}>
-              {Math.round(
-                ((displayProduct.mrp - item.selectedPrice) / displayProduct.mrp) * 100
-              )}
-              % off
-            </Text>
+            <Text style={styles.originalPrice}>₹{product.mrp}</Text>
+            <Text style={styles.discount}>{discount}% off</Text>
           </View>
         )}
 
@@ -265,27 +285,33 @@ const CartCard = ({
             <Text style={styles.dropdownTextSmall}>{item.variant.name}</Text>
           )}
 
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#416E81" style={{ marginVertical: 8 }} />
-          ) : (
-            <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                onPress={() => item.qty > 1 && handleQtyChange(item.qty - 1)}
-                style={styles.stepperButton}
-              >
+          <View style={styles.stepperContainer}>
+            <TouchableOpacity
+              onPress={() => item.qty > 1 && handleQtyChange(item.qty - 1)}
+              style={styles.stepperButton}
+              disabled={item.qty <= 1 || isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#416E81" />
+              ) : (
                 <Text style={styles.stepperText}>−</Text>
-              </TouchableOpacity>
+              )}
+            </TouchableOpacity>
 
-              <Text style={styles.qtyText}>{item.qty}</Text>
+            <Text style={styles.qtyText}>{item.qty}</Text>
 
-              <TouchableOpacity
-                onPress={() => handleQtyChange(item.qty + 1)}
-                style={styles.stepperButton}
-              >
+            <TouchableOpacity
+              onPress={() => handleQtyChange(item.qty + 1)}
+              style={styles.stepperButton}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#416E81" />
+              ) : (
                 <Text style={styles.stepperText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.deliveryInfo}>
@@ -302,7 +328,7 @@ const CartCard = ({
           <Text style={styles.returnPolicy}>7 days return policy</Text>
         </View>
 
-        {displayProduct?.isBestSeller && (
+        {product?.isBestSeller && (
           <Text style={styles.seller}>
             isBestSeller{' '}
             <Text style={{ color: '#416E81', fontFamily: 'Inter-SemiBold' }} />
@@ -311,88 +337,117 @@ const CartCard = ({
 
         <TouchableOpacity
           style={styles.removeButton}
-          onPress={() => onRemoveItem(item._id || item.id)}
+          onPress={handleRemove}
         >
           <Text style={styles.removeText}>Remove</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>
   );
-};
-
+});
 
 const CustomCartCard = () => {
-  
   const dispatch = useDispatch();
   const { items, loading, error } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const [updatingItemId, setUpdatingItemId] = useState(null)
-  
+  const [updatingItems, setUpdatingItems] = useState({});
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, []);
 
-  const handleSelect = (itemId) => {
+  const handleSelect = useCallback((itemId) => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
         ? prev.filter((id) => id !== itemId)
         : [...prev, itemId]
     );
-  };
+  }, []);
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (isAllSelected) {
       setSelectedItems([]);
     } else {
       setSelectedItems(items.map((item) => item._id || item.id));
     }
     setIsAllSelected(!isAllSelected);
-  };
+  }, [isAllSelected, items]);
 
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = useCallback(async () => {
     if (selectedItems.length === 0) return;
     
+    Alert.alert(
+      'Remove Items',
+      `Are you sure you want to remove ${selectedItems.length} item(s) from your cart?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Remove', 
+          onPress: async () => {
+            try {
+              const updates = {};
+              selectedItems.forEach(id => updates[id] = true);
+              setUpdatingItems(updates);
+              
+              await Promise.all(
+                selectedItems.map(itemId => 
+                  dispatch(removeCartItem(itemId)).unwrap()
+                )
+              );
+              
+              setSelectedItems([]);
+              setIsAllSelected(false);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to remove some items');
+            } finally {
+              setUpdatingItems({});
+            }
+          }
+        }
+      ]
+    );
+  }, [selectedItems, dispatch]);
+
+  const handleQuantityChange = useCallback(async (itemId, payload) => {
+    setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
     try {
-      for (const itemId of selectedItems) {
-        await dispatch(removeCartItem(itemId)).unwrap();
-      }
-      setSelectedItems([]);
-      setIsAllSelected(false);
+      await dispatch(updateCartItem({ itemId, payload })).unwrap();
     } catch (error) {
-      // Alert.alert('Error', 'Failed to remove items');
+      Alert.alert('Error', 'Failed to update quantity');
+    } finally {
+      setUpdatingItems(prev => {
+        const newState = { ...prev };
+        delete newState[itemId];
+        return newState;
+      });
     }
-  };
+  }, [dispatch]);
 
-  const handleQuantityChange = async (itemId, payload) => {
-  setUpdatingItemId(itemId); // Start loader for this item
-  try {
-    await dispatch(updateCartItem({ itemId, payload })).unwrap();
-  } catch (error) {
-    Alert.alert('Error', 'Failed to update quantity');
-  } finally {
-    setUpdatingItemId(null); // Reset loader
-  }
-};
-
-
-  const handleSizeChange = (itemId, newSize) => {
+    const handleSizeChange = (itemId, newSize) => {
     console.log(`Size changed for ${itemId} to ${newSize}`);
   };
 
-  const handleRemoveItem = async (itemId) => {
+  const handleRemoveItem = useCallback(async (itemId) => {
+    setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
     try {
       await dispatch(removeCartItem(itemId)).unwrap();
-      setSelectedItems(selectedItems.filter(id => id !== itemId));
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
     } catch (error) {
-      // Alert.alert('Error', 'Failed to remove item');
+      Alert.alert('Error', 'Failed to remove item');
+    } finally {
+      setUpdatingItems(prev => {
+        const newState = { ...prev };
+        delete newState[itemId];
+        return newState;
+      });
     }
-  };
+  }, [dispatch]);
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-       <ActivityIndicator size="large" color={COLORS.green}/>
+        <ActivityIndicator size="large" color={COLORS.green}/>
       </View>
     );
   }
@@ -401,12 +456,17 @@ const CustomCartCard = () => {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => dispatch(fetchCartItems())}
+        >
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
-  
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={styles.selectionControls}>
@@ -441,13 +501,19 @@ const CustomCartCard = () => {
           disabled={selectedItems.length === 0}
           activeOpacity={0.6}
         >
-          <Icon name="delete" size={16} color={selectedItems.length > 0 ? '#FF3B30' : '#999'} />
-          <Text style={[
-            styles.deleteText,
-            selectedItems.length > 0 && styles.deleteTextActive
-          ]}>
-            Delete
-          </Text>
+          {selectedItems.some(id => updatingItems[id]) ? (
+            <ActivityIndicator size="small" color="#FF3B30" />
+          ) : (
+            <>
+              <Icon name="delete" size={16} color={selectedItems.length > 0 ? '#FF3B30' : '#999'} />
+              <Text style={[
+                styles.deleteText,
+                selectedItems.length > 0 && styles.deleteTextActive
+              ]}>
+                Delete
+              </Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -462,7 +528,7 @@ const CustomCartCard = () => {
             onQuantityChange={handleQuantityChange}
             onSizeChange={handleSizeChange}
             onRemoveItem={handleRemoveItem}
-              isLoading={updatingItemId === (item._id || item.id)}
+            isLoading={updatingItems[item._id || item.id]}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -470,6 +536,12 @@ const CustomCartCard = () => {
           <View style={styles.emptyCart}>
             <Feather name="shopping-cart" size={40} color="#ccc" />
             <Text style={styles.emptyCartText}>Your cart is empty</Text>
+            <TouchableOpacity
+              style={styles.continueShopping}
+              onPress={() => navigation.navigate('Home')}
+            >
+              <Text style={styles.continueShoppingText}>Continue Shopping</Text>
+            </TouchableOpacity>
           </View>
         }
       />

@@ -101,7 +101,7 @@ export const formatProductDetailData = (product) => {
     id: product._id,
     name: product.name,
     images: Array.isArray(product.images)
-      ? product.images.map(img => `${IMG_URL}${img}`)
+      ? product.images.map(img => `${IMGURL}${img}`)
       : [],
     brand: product.brand ? {
       id: product.brand._id,

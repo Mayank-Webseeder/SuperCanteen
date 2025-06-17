@@ -1,10 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
   TouchableOpacity
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -25,7 +24,6 @@ const CustomZoomCasual = ({
   containerStyle
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loadingFirstImage, setLoadingFirstImage] = useState(true);
   const [zoomVisible, setZoomVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const flatListRef = useRef();
@@ -34,60 +32,13 @@ const CustomZoomCasual = ({
   const height = cardHeight || Height(150);
   const radius = cardRadius || Width(14);
 
-  // Enhanced URL normalization
   const normalizeUri = (uri) => {
     if (!uri) return null;
-    
-    // Handle cases where URLs might have double slashes or malformed paths
-    let normalized = uri;
-    
-    // Fix double slashes after domain
-    normalized = normalized.replace(/(https?:\/\/[^/]+)\/(\/+)/, '$1/');
-    
-    // Remove any remaining double slashes in path
-    normalized = normalized.replace(/([^:]\/)\/+/g, '$1');
-    
+    let normalized = uri
+      .replace(/(https?:\/\/[^/]+)\/(\/+)/, '$1/')
+      .replace(/([^:]\/)\/+/g, '$1');
     return normalized;
   };
-
-  // Preload first image specifically
-  useEffect(() => {
-    if (data.length > 0) {
-      const firstImage = data[0];
-      let firstImageUri = '';
-      
-      if (typeof firstImage === 'string') {
-        firstImageUri = firstImage;
-      } else if (firstImage?.image) {
-        firstImageUri = typeof firstImage.image === 'string' 
-          ? firstImage.image 
-          : firstImage.image.uri;
-      }
-      
-      if (firstImageUri) {
-        const normalizedUri = normalizeUri(firstImageUri);
-        
-        setLoadingFirstImage(true);
-        
-        // Preload only the first image with high priority
-        FastImage.preload([{
-          uri: normalizedUri,
-          priority: FastImage.priority.high
-        }]);
-        
-        // Set a timeout to ensure first image has time to load
-        const timer = setTimeout(() => {
-          setLoadingFirstImage(false);
-        }, 300);
-        
-        return () => clearTimeout(timer);
-      } else {
-        setLoadingFirstImage(false);
-      }
-    } else {
-      setLoadingFirstImage(false);
-    }
-  }, [data]);
 
   const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -118,30 +69,12 @@ const CustomZoomCasual = ({
         : { uri: normalizeUri(item.image.uri) };
     }
     if (item?.uri) return { uri: normalizeUri(item.uri) };
-    if (typeof item === 'number') return item; // Local require() images
+    if (typeof item === 'number') return item;
     return null;
   };
 
   const renderItem = ({ item, index }) => {
     const source = getImageSource(item);
-
-    // Special handling for first image loading
-    if (index === 0 && loadingFirstImage) {
-      return (
-        <View style={[
-          styles.card,
-          { 
-            width, 
-            height,
-            borderRadius: radius,
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
-        ]}>
-          <ActivityIndicator size="small" color="#2E6074" />
-        </View>
-      );
-    }
 
     return (
       <TouchableOpacity 
@@ -179,9 +112,7 @@ const CustomZoomCasual = ({
               borderRadius: radius,
               justifyContent: 'center',
               alignItems: 'center'
-            }}>
-              {/* Placeholder content */}
-            </View>
+            }} />
           )}
         </View>
       </TouchableOpacity>
@@ -203,11 +134,8 @@ const CustomZoomCasual = ({
         renderItem={renderItem}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewConfigRef.current}
-        initialNumToRender={3}
-        maxToRenderPerBatch={5}
         windowSize={5}
-        removeClippedSubviews={false} // Critical for first image rendering
-        extraData={loadingFirstImage} // Re-render when loading state changes
+        removeClippedSubviews={false}
       />
       
       {data.length > 1 && (
@@ -227,11 +155,11 @@ const CustomZoomCasual = ({
         </View>
       )}
       
- <ImageZoomViewer
-  visible={zoomVisible}
-  imageUrls={[{ url: selectedImage }]} // KEEP THIS SAME
-  onClose={() => setZoomVisible(false)}
-/>
+      <ImageZoomViewer
+        visible={zoomVisible}
+        imageUrls={[{ url: selectedImage }]}
+        onClose={() => setZoomVisible(false)}
+      />
     </View>
   );
 };

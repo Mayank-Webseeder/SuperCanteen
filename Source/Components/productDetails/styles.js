@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
       justifyContent:"center"
     },
     mainContainer:{
-      paddingHorizontal:Width(10)
+      paddingHorizontal:Width(6)
     },
      disabledStyle: {
     opacity: 1
@@ -174,7 +174,7 @@ export const styles = StyleSheet.create({
     },
    
     sectionWrapper: {
-      
+     paddingHorizontal:10, 
       paddingVertical: Height(5),
       paddingTop:Height(10)
     },

@@ -62,41 +62,42 @@ export const addToCart = createAsyncThunk(
       isDigital: item.isDigital || false,
     };
 
-    if (!auth.token) {
-      const guestCart = await loadGuestCart();
+     console.log("iiiiiiiiiiiiiii",item)
 
-      const existingItemIndex = guestCart.findIndex(
-        i => i.product === cartItem.product && i.selectedPrice === cartItem.selectedPrice
-      );
+   if (!auth.token) {
+  const guestCart = await loadGuestCart();
+  const existingItemIndex = guestCart.findIndex(
+    i => i.product === cartItem.product && i.selectedPrice === cartItem.selectedPrice
+  );
 
-      let returnedItem;
+  if (existingItemIndex >= 0) {
+    guestCart[existingItemIndex].qty += cartItem.qty; // ✅ fix here
+  } else {
+    guestCart.push({
+      ...cartItem,
+      id: generateTempId()
+    });
+  }
 
-      if (existingItemIndex >= 0) {
-        // Update quantity
-        guestCart[existingItemIndex].qty += cartItem.qty;
-        returnedItem = guestCart[existingItemIndex];
-      } else {
-        // Add new item with unique ID
-        const newItem = {
-          ...cartItem,
-          id: generateTempId()
-        };
-        guestCart.push(newItem);
-        returnedItem = newItem;
-      }
+  await saveGuestCart(guestCart);
+  return guestCart;
+}
 
-      await saveGuestCart(guestCart);
-      return returnedItem; // ✅ return only updated/added item
-    }
 
     // Authenticated user flow
-    const response = await axios.post(`${CART_BASE}/addToCart`, cartItem, {
+    await axios.post(`${CART_BASE}/addToCart`, cartItem, {
       headers: { Authorization: `Bearer ${auth.token}` }
     });
+    
+    // Fetch updated cart after modification
+    const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+
+    console.log("cartItem is",cartItem)
     return response.data.data;
   }
 );
-
 
 export const updateCartItem = createAsyncThunk(
   'cart/updateCartItem',
@@ -110,28 +111,26 @@ export const updateCartItem = createAsyncThunk(
       if (itemIndex >= 0) {
         guestCart[itemIndex] = { 
           ...guestCart[itemIndex], 
-          ...payload,
-          id: guestCart[itemIndex].id // Preserve existing ID
+          ...payload
         };
         await saveGuestCart(guestCart);
-        return {
-          updatedItemId: itemId,
-          updatedItem: guestCart[itemIndex]
-        };
+        return guestCart;
       }
       throw new Error('Item not found in guest cart');
     }
 
     // Authenticated user flow
-    const response = await axios.patch(
+    await axios.patch(
       `${CART_BASE}/updateCartItemById/${itemId}`,
       payload,
       { headers: { Authorization: `Bearer ${auth.token}` }}
     );
-    return {
-      updatedItemId: itemId,
-      updatedItem: response.data.data
-    };
+    
+    // Fetch updated cart after modification
+    const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+    return response.data.data;
   }
 );
 
@@ -150,6 +149,8 @@ export const removeCartItem = createAsyncThunk(
     await axios.delete(`${CART_BASE}/deleteCartItemById/${itemId}`, {
       headers: { Authorization: `Bearer ${auth.token}` }
     });
+    
+    // Fetch updated cart after modification
     const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
       headers: { Authorization: `Bearer ${auth.token}` }
     });
@@ -181,8 +182,12 @@ export const mergeGuestCart = createAsyncThunk(
       });
       
       await clearGuestCart();
-      const response = await dispatch(fetchCartItems());
-      return response.payload;
+      
+      // Fetch updated cart after merge
+      const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
+      return response.data.data;
     } catch (error) {
       console.error('Error merging cart:', error);
       throw error;
@@ -196,7 +201,8 @@ const cartSlice = createSlice({
     items: [],
     loading: false,
     error: null,
-    lastUpdated: null
+    lastUpdated: null,
+    initialized: false
   },
   reducers: {
     clearCart: (state) => {
@@ -205,6 +211,11 @@ const cartSlice = createSlice({
     },
     loadGuestCart: (state, action) => {
       state.items = action.payload;
+    },
+     setGuestCart: (state, action) => {
+      state.items = action.payload;
+      state.isGuest = true;
+      state.initialized = true; // Mark as initialized
     }
   },
   extraReducers: (builder) => {
@@ -217,6 +228,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
+         state.initialized = true
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false;
@@ -225,40 +237,17 @@ const cartSlice = createSlice({
       .addCase(addToCart.pending, (state) => {
         state.loading = true;
       })
-     .addCase(addToCart.fulfilled, (state, action) => {
-  state.loading = false;
+      .addCase(addToCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload || [];
+        state.lastUpdated = Date.now();
 
-  const addedItem = action.payload;
-
-  // If returned payload is an array, it's replacing the entire guest cart (BUGGY!)
-  // But we are fixing that by checking if it's a single item object
-  if (Array.isArray(addedItem)) {
-    // Fallback (shouldn't happen): replace the cart (only used during login merge)
-    state.items = addedItem;
-  } else if (addedItem?.product && addedItem?.selectedPrice) {
-    // Guest cart: update only one item in-place
-    const existingIndex = state.items.findIndex(
-      i => i.product === addedItem.product && i.selectedPrice === addedItem.selectedPrice
-    );
-
-    if (existingIndex >= 0) {
-      // Update quantity of existing item
-      state.items[existingIndex].qty += addedItem.qty;
-    } else {
-      // Add new item
-      state.items.push(addedItem);
-    }
-  } else {
-    // Logged-in flow: replace full cart from server
-    state.items = addedItem;
-  }
-
-  state.lastUpdated = Date.now();
-})
-
+         console.log("Dddddddddddddddddd",action.payload)
+      })
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+         console.log("REheeeeeeeeeeeeeeeeeeee",action.error)
       })
       .addCase(updateCartItem.pending, (state) => {
         state.loading = true;
@@ -266,15 +255,7 @@ const cartSlice = createSlice({
       })
       .addCase(updateCartItem.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.items.findIndex(
-          item => (item._id || item.id) === action.payload.updatedItemId
-        );
-        if (index !== -1) {
-          state.items[index] = {
-            ...state.items[index],
-            ...action.payload.updatedItem
-          };
-        }
+        state.items = action.payload || [];
         state.lastUpdated = Date.now();
       })
       .addCase(updateCartItem.rejected, (state, action) => {
@@ -288,6 +269,7 @@ const cartSlice = createSlice({
       .addCase(mergeGuestCart.fulfilled, (state, action) => {
         state.items = action.payload || state.items;
         state.lastUpdated = Date.now();
+        state.initialized = true
       });
   }
 });

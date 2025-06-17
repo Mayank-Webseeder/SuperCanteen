@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Height, Width } from "../../../constants";
+import { COLORS, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   container: {
@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
   position: 'absolute',
   top: -5,
   right: -5,
-  backgroundColor: '#FF3B30', // red color
+  backgroundColor: COLORS.error, // red color
   borderRadius: 10,
   minWidth: 18,
   height: 18,

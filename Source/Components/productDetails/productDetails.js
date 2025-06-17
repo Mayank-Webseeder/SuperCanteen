@@ -28,6 +28,7 @@ import { fetchProductsBySubcategory } from '../../redux/slices/subCategoryProduc
 import { formateSubCategoryProducts } from '../../utils/dataFormatters';
 import { addToCart } from '../../redux/slices/cartSlice';
 import CustomSearch from '../../Components/searchInput';
+import { AddToCartAnimation } from '../../otherComponents/addToCartAnimation'
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -36,6 +37,9 @@ const ProductDetails = ({ navigation, route }) => {
   const [isFavourite, setIsFavourite] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [addToCartLoading,setAddtoCartLoading] = useState(false)
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0); 
+  const [selectedImageUrl,setSlectedImageUrl] = useState("")
   const productData = product?.product;
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
@@ -45,9 +49,13 @@ const ProductDetails = ({ navigation, route }) => {
      const { user } = useSelector(state => state.auth);
  
 
+  
 
   const OnAddToCart = () =>{
-    // setAddtoCartLoading(true)
+  setAddtoCartLoading(true);
+  setAnimationKey(prev => prev + 1);
+  setShowAnimation(true);
+
          dispatch(addToCart({
             productId:productId,
             quantity: 1,
@@ -56,16 +64,22 @@ const ProductDetails = ({ navigation, route }) => {
           }))
             .then(() => {
               // setAddtoCartLoading(false)
-              navigation.navigate('Cart');
+              // navigation.navigate('Cart');
             })
             .catch((error) => {
               console.log("❌ Buy now failed", error);
+               setAddtoCartLoading(false);
+             setShowAnimation(false);
+
             })
   }
 
-
   
- 
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+     setAddtoCartLoading(false);
+   
+  };
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -117,6 +131,13 @@ const ProductDetails = ({ navigation, route }) => {
 
   return (
     <View style={styles.wrapper}>
+       <AddToCartAnimation
+        key={animationKey} // Important for resetting the animation
+        visible={showAnimation}
+        imageUrl={formattedProduct?.images[0]}
+        onComplete={handleAnimationComplete}
+      />
+
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -131,7 +152,7 @@ const ProductDetails = ({ navigation, route }) => {
         }
       >
         <View style={styles.mainContainer}>
-          <CustomHeader navigation={navigation} showRightIcons={true} />
+          <CustomHeader navigation={navigation} showCartIcon={true} />
               <CustomSearch
             disabledStyle={styles.disabledStyle}
             backgroundColor={'#fff'}

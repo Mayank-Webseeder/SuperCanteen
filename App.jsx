@@ -7,7 +7,7 @@ import { store, persistor } from './Source/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import CustomFlashMessage from './Source/Components/flashMessage';
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeGuestCart } from './Source/redux/slices/cartSlice'; // Import the action instead
+import { loadGuestCart, fetchCartItems } from './Source/redux/slices/cartSlice'; // Add fetchCartItems
 
 const AppWrapper = () => {
   return (
@@ -24,16 +24,23 @@ const AppWrapper = () => {
 const App = () => {
   const dispatch = useDispatch();
   const { token } = useSelector(state => state.auth);
+  const { initialized } = useSelector(state => state.cart); // Add cart initialized state
 
+  // Initialize cart on app start and when token changes
   useEffect(() => {
     const initializeCart = async () => {
-      if (!token) {
-        await dispatch(initializeGuestCart()); // Use the proper action
+      if (token) {
+        await dispatch(fetchCartItems()); // Load authenticated cart
+      } else {
+        await dispatch(loadGuestCart()); // Load guest cart
       }
     };
     
-    initializeCart();
-  }, [token, dispatch]);
+    // Only initialize if not already initialized
+    if (!initialized) {
+      initializeCart();
+    }
+  }, [token, dispatch, initialized]); // Add initialized dependency
 
   return (
     <NavigationContainer>

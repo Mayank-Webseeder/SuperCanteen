@@ -36,7 +36,8 @@ export const COLORS = {
   modalOverlay:'rgba(0, 0, 0, 0.5)',
   modalTitle:'#1A1A1A',
   lightGray:"#F0F0F0",
-  border:"#E0E0E0"
+  border:"#E0E0E0",
+  error: '#FF3B30'
 };
 
 // FONT FAMILY

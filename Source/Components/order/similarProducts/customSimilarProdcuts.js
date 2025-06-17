@@ -15,7 +15,8 @@ const CustomSimilarProducts = ({
   cardWidth = 160,
   data,
   navigation,
-  flatListContentStyle
+  flatListContentStyle,
+  onAddToCart
 }) => {
   const renderItem = ({ item }) => {
     const fullStars = Math.floor(item.rating || 0);
@@ -81,7 +82,7 @@ const CustomSimilarProducts = ({
             )}
             
             {/* Add to Cart Button */}
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity   onPress={() => onAddToCart(item)}   style={styles.addButton}>
               <Text style={styles.addButtonText}>ADD</Text>
             </TouchableOpacity>
           </View>

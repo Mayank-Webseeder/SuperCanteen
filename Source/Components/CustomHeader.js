@@ -1,11 +1,42 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { Width } from '../constants';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { COLORS, Width } from '../constants';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
-const CustomHeader = ({  label , showRightIcons,containerStyle,notShowingBackIcon }) => {
-  const navigation = useNavigation()
+
+const CustomHeader = ({  label , showCartIcon,containerStyle,notShowingBackIcon }) => {
+  const navigation = useNavigation();
+  const { items = [] } = useSelector((state) => state.cart);
+  const itemCount = items?.length || 0;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const prevCountRef = useRef(itemCount);
+
+  // Animation when cart count changes
+  useEffect(() => {
+    if (itemCount > prevCountRef.current) {
+      // Only animate when count increases
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.3,
+          duration: 150,
+          easing: Easing.easeOutQuad,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          easing: Easing.easeInQuad,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+    prevCountRef.current = itemCount;
+  }, [itemCount]);
+
+
   return (
     <View style={[styles.container,containerStyle]}>
       {/* Left Arrow */}
@@ -18,15 +49,22 @@ const CustomHeader = ({  label , showRightIcons,containerStyle,notShowingBackIco
         <Text style={styles.label}>{label}</Text>
       </View>
 
-      {/* Right Icons */}
-     {/* {showRightIcons &&  <View style={styles.rightIcons}>
-        <TouchableOpacity onPress={() => navigation.navigate('Wishlist')} style={styles.icon}>
-         <EvilIcons name="heart" size={26} color="#000000" /> 
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Cart')} >
-          <EvilIcons name="cart" size={26} color="#000000"/>
-        </TouchableOpacity>
-      </View>} */}
+       {showCartIcon &&  (
+        <View style={styles.rightIcons}>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Cart')} 
+            style={styles.cartIconContainer}
+          >
+            <Ionicons name="cart-outline" size={24} color="#1C1B1F" style={styles.icon} />
+            {itemCount > 0 && (
+              <Animated.View style={[styles.badge, { transform: [{ scale: scaleAnim }] }]}>
+                <Text style={styles.badgeText}>{itemCount > 9 ? '9+' : itemCount}</Text>
+              </Animated.View>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
 
     </View>
   );
@@ -63,6 +101,32 @@ const styles = StyleSheet.create({
   icon: {
     marginHorizontal: Width(4),
   },
+    icon: {
+    marginHorizontal: Width(4),
+  },
+  cartIconContainer: {
+    position: 'relative',
+    padding: 8,
+  },
+  badge: {
+  position: 'absolute',
+  top: 6,
+  right: 3,
+  backgroundColor: COLORS.error, // red color
+  borderRadius: 10,
+  minWidth: 18,
+  height: 18,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingHorizontal: 3,
+  zIndex: 10,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
 });
 
 export default CustomHeader;

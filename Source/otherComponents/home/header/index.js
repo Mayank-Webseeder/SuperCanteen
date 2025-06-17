@@ -1,13 +1,16 @@
 import { View, Pressable, Text } from 'react-native';
-import React from 'react';
+import React , {useState,useEffect} from 'react';
 import { styles } from './styles';
 import CustomSearch from '../../../Components/searchInput';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
 
+// Header.js
 export default function Header({ navigation }) {
-  const { items = [], loading } = useSelector((state) => state.cart);
- const itemCount = items?.length
+const { items, initialized } = useSelector((state) => state.cart);
+  const itemCount = items?.length;
+
+
 
   return (
     <View style={styles.container}>
@@ -21,10 +24,10 @@ export default function Header({ navigation }) {
             backgroundColor={'#fff'}
             disabled
             containerStyle={styles.searchInput}
-            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+            inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
           />
         </Pressable>
-        <Pressable 
+         <Pressable 
           style={styles.cartPressable}
           onPress={() => navigation.navigate('Cart')}
         >
@@ -33,7 +36,7 @@ export default function Header({ navigation }) {
               style={styles.cartImg}
               source={require('../../../../assets/Icons/shopping_cart.png')}
             />
-            {!loading && itemCount > 0 && (
+            {initialized && itemCount > 0 && ( // Only show when initialized
               <View style={styles.badgeContainer}>
                 <Text style={styles.badgeText}>
                   {itemCount > 99 ? '99+' : itemCount}
