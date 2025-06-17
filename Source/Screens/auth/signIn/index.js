@@ -149,7 +149,7 @@ const SigninScreen = () => {
 
   return (
     <View style={styles.container}>
-      <CustomAuthHeader notShowBackArrow title="Sign In" />
+      <CustomAuthHeader   onBackPress={() => navigation.replace('App')}  title="Sign In" />
       
       <View style={styles.inputView}>
         <CustomTextInput

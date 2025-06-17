@@ -1,11 +1,18 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
+import Entypo from 'react-native-vector-icons/Entypo';
 
-const SuperCanteenRewards = () => {
+const SuperCanteenRewards = ({ navigation }) => {
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+         <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
+      </TouchableOpacity>
+
+      {/* Rewards Content */}
       <View style={styles.iconBox}>
         <Ionicons name="gift-outline" size={60} color="#2E6074" />
       </View>

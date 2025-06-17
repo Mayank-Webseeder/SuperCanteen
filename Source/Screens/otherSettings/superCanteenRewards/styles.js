@@ -8,6 +8,14 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 30,
   },
+  backButton: {
+  position: 'absolute',
+  top: 20,
+  left: 10,
+  zIndex: 10,
+  padding: 8,
+  borderRadius: 20,
+},
   iconBox: {
     backgroundColor: '#E8F4FF',
     padding: 20,

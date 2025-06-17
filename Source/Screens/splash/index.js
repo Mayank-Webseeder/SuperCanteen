@@ -13,7 +13,7 @@ const SplashScreen = ({navigation}) => {
     }).start();
 
     setTimeout(() => {
-  navigation.navigate('Main');
+  navigation.navigate('App');
     }, 2000);
   }, [logoScaleAnimation, navigation]);
 

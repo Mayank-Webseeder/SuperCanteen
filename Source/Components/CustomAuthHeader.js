@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign'; // Make sure to install this
 import { useNavigation } from '@react-navigation/native';
 import { FontSize, Height } from '../constants';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 const CustomAuthHeader = ({ title = 'Title', onBackPress , notShowBackArrow }) => {
   const navigation = useNavigation();
@@ -13,7 +14,7 @@ const CustomAuthHeader = ({ title = 'Title', onBackPress , notShowBackArrow }) =
         style={styles.backButton}
         onPress={onBackPress || (() => navigation.goBack())}
       >
-        <Icon name="left" size={20} color="#000"  style={{left:8}}/>
+       <Entypo name={ 'chevron-small-left'} size={27} color="#333" style={{left:8}} />
       </TouchableOpacity> }
 
       <Text style={styles.title}>{title}</Text>

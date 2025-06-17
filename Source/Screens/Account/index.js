@@ -121,15 +121,23 @@ const AccountScreen = ({ navigation }) => {
         name === 'Personal Information' &&
         (!user || !user.username)
       ) {
+
         navigation.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'Auth',
-              state: { routes: [{ name: 'Signin' }] },
-            },
-          ],
-        });
+  index: 0,
+  routes: [
+    {
+      name: 'Auth',
+      state: {
+        routes: [
+          { name: 'Signin' }
+        ]
+      }
+    }
+  ]
+});
+
+
+      
       } else {
         navigation.navigate(screen);
       }
@@ -170,7 +178,7 @@ const AccountScreen = ({ navigation }) => {
         <View style={styles.footerIconCircle}>{item.icon}</View>
         <Text
           style={styles.footerText}
-          numberOfLines={1}
+          // numberOfLines={1}
           ellipsizeMode="tail"
           
         >

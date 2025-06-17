@@ -169,7 +169,7 @@ footerText: {
   fontFamily: 'Inter-Medium',
   color: '#2E6074',
   textAlign: 'center',
-  maxWidth: 70, 
+  maxWidth: 100, 
   lineHeight:Height(18)
 },
 
