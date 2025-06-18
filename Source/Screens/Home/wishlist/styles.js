@@ -6,9 +6,22 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  main: {
-    marginHorizontal: Width(10),
-    marginBottom: Height(4)
+    disabledStyle: {
+    opacity: 1
+  },
+   searchContainer: {
+   
+    paddingHorizontal: 13,
+    paddingVertical: 5,
+    justifyContent: 'space-between',
+    
+  },
+   searchInput: {
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,
+    flex:1        // Smaller font
   },
   categoryContainer: {
     paddingVertical: 10,

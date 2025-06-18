@@ -17,6 +17,9 @@ export const GETPRODUCTBYSEGMENT = '/segment/segmentsBySubCategory/'
 export const GET_PRODUCT_BY_SEGMENT = '/products/getProductBySegment/'
 export const GET_PRODUCT_BY_BRAND = '/products/allProducts?brand='
 export const CART_BASE = 'https://super-canteen-backend.onrender.com/api/cart';
+export const ADD_TO_WISHLIST = '/wishlist/addToWishlist';
+export const REMOVE_FROM_WISHLIST = '/wishlist/removeProductFromWishlist';
+export const GET_WHISHLIST_BY_USERID = '/wishlist/getWishlistByUserId'
 
 
 

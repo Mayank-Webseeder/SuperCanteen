@@ -16,7 +16,6 @@ import FullScreenLoader from '../../../Components/Common/fullScreenLoader';
 import PullToRefresh from '../../../Components/Common/pullToRefresh';
 import ErrorView from '../../../Components/Common/errorView';
 import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
-import FastImage from 'react-native-fast-image';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';

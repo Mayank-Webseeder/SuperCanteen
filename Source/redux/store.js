@@ -15,6 +15,7 @@ import productBySegmentReducer from './slices/productBySegmentSlice';
 import productByBrandReducer from './slices/productsByBrandSlice'
 import cartReducer from './slices/cartSlice'
 import cartProductReducer from './slices/cartProductsSlice'
+import wishlistReducer from './slices/wishlistSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
@@ -29,7 +30,8 @@ const rootReducer = combineReducers({
     productsBySegment: productBySegmentReducer,
     productsByBrand : productByBrandReducer,
     cart:cartReducer,
-    cartProducts:cartProductReducer
+    cartProducts:cartProductReducer,
+    wishlist:wishlistReducer
 });
 
 const persistConfig = {

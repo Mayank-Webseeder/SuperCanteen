@@ -17,7 +17,7 @@ const CustomZoomCasual = ({
   cardWidth,
   cardHeight,
   cardRadius,
-  paddingHorizontal = Width(20),
+  paddingHorizontal = Width(12),
   borderWidth,
   resizeMode,
   cardStyle,
@@ -28,7 +28,7 @@ const CustomZoomCasual = ({
   const [selectedImage, setSelectedImage] = useState('');
   const flatListRef = useRef();
 
-  const width = cardWidth || SCREEN_WIDTH - Width(40);
+  const width = cardWidth || SCREEN_WIDTH - Width(25);
   const height = cardHeight || Height(150);
   const radius = cardRadius || Width(14);
 
@@ -166,7 +166,7 @@ const CustomZoomCasual = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: Height(12),
+    marginTop: Height(8),
     position: 'relative'
   },
   card: {
@@ -177,7 +177,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     backgroundColor: '#FFF',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    marginBottom:Height(12)
   },
   pagination: {
     flexDirection: 'row',

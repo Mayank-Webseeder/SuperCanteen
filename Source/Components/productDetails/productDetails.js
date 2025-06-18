@@ -13,10 +13,8 @@ import { formatProductDetailData } from '../../utils/dataFormatters';
 import { styles } from './styles';
 import CustomHeader from '../CustomHeader';
 import HorizontalLine from '../../otherComponents/home/horizontalLine';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import BottomPurchaseBar from '../../otherComponents/bottomPurchase';
 import CustomSimilarProducts from '../order/similarProducts/customSimilarProdcuts';
-import CustomSearchInput from '@components/searchInput';
 import AddressRow from '@components/CustomAddressRow';
 import { PolicyIcon } from '../../../assets/Icons/svgIcons/policyIcon';
 import { CurruncyRupees } from '../../../assets/Icons/svgIcons/currencyRupees';
@@ -34,37 +32,34 @@ const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
   const dispatch = useDispatch();
   const { product, loading, error } = useSelector(state => state.productDetail);
-  const [isFavourite, setIsFavourite] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [addToCartLoading,setAddtoCartLoading] = useState(false)
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationKey, setAnimationKey] = useState(0); 
-  const [selectedImageUrl,setSlectedImageUrl] = useState("")
+  const [animationImage, setAnimationImage] = useState(null);
   const productData = product?.product;
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
   );
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
-     const { user } = useSelector(state => state.auth);
+  const { user } = useSelector(state => state.auth);
  
-
-  
-
-  const OnAddToCart = () =>{
+ const OnAddToCart = (item) =>{
+  const selectedItem = item ? item : productData;
+  const selectedProductId = item ? item.id : productId;
+  const image = item ? selectedItem?.images?.[0] : formattedProduct?.images[0]
+  setAnimationImage(image);
   setAddtoCartLoading(true);
   setAnimationKey(prev => prev + 1);
   setShowAnimation(true);
-
          dispatch(addToCart({
-            productId:productId,
+            productId:selectedProductId,
             quantity: 1,
-            price: productData.offerPrice || productData.price,
-            isDigital: productData.isDigital
+            price: selectedItem.offerPrice || selectedItem.price,
+            isDigital: selectedItem.isDigital
           }))
             .then(() => {
-              // setAddtoCartLoading(false)
-              // navigation.navigate('Cart');
             })
             .catch((error) => {
               console.log("❌ Buy now failed", error);
@@ -134,7 +129,7 @@ const ProductDetails = ({ navigation, route }) => {
        <AddToCartAnimation
         key={animationKey} // Important for resetting the animation
         visible={showAnimation}
-        imageUrl={formattedProduct?.images[0]}
+        imageUrl={animationImage}
         onComplete={handleAnimationComplete}
       />
 
@@ -164,19 +159,11 @@ const ProductDetails = ({ navigation, route }) => {
         <View>
           <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
           <CustomZoomCasual
-            cardWidth={Width(300)}
             cardHeight={Height(200)}
             onImagePress={(uri) => console.log('Image pressed:', uri)}
             data={formattedProduct?.images}
           />
         </View>
-        <TouchableOpacity onPress={() => setIsFavourite(!isFavourite)} style={styles.heartIconWrapper}>
-          <Ionicons
-            name={isFavourite ? 'heart' : 'heart-outline'}
-            size={24}
-            color={isFavourite ? '#416F81' : '#0E2D42'}
-          />
-        </TouchableOpacity>
         <Description productData={formattedProduct} />
         <AddressRow
           navigation={navigation}
@@ -202,7 +189,7 @@ const ProductDetails = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.borderStyle} />
-        <CustomProductDetailsData productData={formattedProduct} />
+        <CustomProductDetailsData  productData={formattedProduct} />
 
         {/* Similar Products Section - Fixed filtering */}
         {similarLoading ? (
@@ -215,12 +202,11 @@ const ProductDetails = ({ navigation, route }) => {
             <CustomSimilarProducts
               data={similarProductsData}
               navigation={navigation}
-              
+               onAddToCart={OnAddToCart}
             />
           </View>
         ) : (
           <></>
-          // <Text style={styles.noProductsText}>No similar products found</Text>
         )}
       </ScrollView>
 
@@ -235,10 +221,8 @@ const ProductDetails = ({ navigation, route }) => {
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
- navigation.navigate('ProductCheckoutScreen')}}
+       navigation.navigate('ProductCheckoutScreen')}}
     }
-          
-         
       />
     </View>
   );

@@ -7,11 +7,11 @@ import {
   FlatList,
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
-import CustomSearchInput from '../../../Components/searchInput';
 import { WishlistProducts } from '../../../Mock/Data/WishlistProduct';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
+import CustomSearch from '../../../Components/searchInput';
 
 const categories = ['All', 'Watches', 'Shoes', 'Bags', 'Sunglasses', 'Smartwatch'];
 
@@ -105,13 +105,18 @@ const WishlistScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Wishlist" />
-      <View style={styles.main}>
-        <CustomSearchInput 
-          showCrossIcon={true} 
-          onChangeText={handleSearchChange}
-          value={searchQuery}
-          onCrossPress={clearSearch}
-        />
+    <View style={styles.searchContainer}>
+        <CustomSearch
+            showCrossIcon={!!searchQuery}
+            onChangeText={handleSearchChange}
+            value={searchQuery}
+            onCrossPress={clearSearch}
+            placeholder="Search in SuperCanteen store"
+            autoFocus={true}
+            containerStyle={styles.searchInput}
+             backgroundColor={'#fff'}
+            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+          />
       </View>
 
       {/* Horizontal Category Row */}

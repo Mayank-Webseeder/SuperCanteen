@@ -27,12 +27,6 @@ export const styles = StyleSheet.create({
     fontSize: 14,        // Smaller font
     marginHorizontal:7
   },
-    heartIconWrapper: {
-      flexDirection:"row",
-      justifyContent:"flex-end",
-      marginHorizontal:Height(15),
-      marginTop:10
-    },
      detailsWrapper: {
     paddingHorizontal: Height(4),
     backgroundColor: '#fff',

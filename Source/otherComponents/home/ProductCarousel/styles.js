@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: COLORS.green,
+     backgroundColor: COLORS.green,
     width: Width(28),
     height: Width(28),
     borderRadius: Width(14),
@@ -85,6 +85,15 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Width(5),
     paddingBottom: Height(5),
+  },
+  iconStyle:{
+     width: 40,
+          height: 40,
+          position: 'absolute',
+          top: -10,
+          left: -10,
+          zIndex: 100,
+          display: 'flex',
   },
   productName: {
     fontSize: 14,
@@ -122,6 +131,34 @@ export const styles = StyleSheet.create({
   },
   gridMrpPrice: {
     fontSize: 10,
+  },
+  // Add to your existing styles
+addToCartButton: {
+  backgroundColor: COLORS.primary,
+  paddingVertical: Height(6),
+  paddingHorizontal: Width(10),
+  borderRadius: 4,
+  marginTop: Height(5),
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+gridAddToCartButton: {
+  paddingVertical: Height(4),
+  paddingHorizontal: Width(5),
+  marginTop: Height(3),
+},
+addToCartText: {
+  color: COLORS.white,
+  fontSize: 12,
+  fontWeight: 'bold',
+},
+ lottieAnimation: {
+    width: 50,
+    height: 50,
+    position: 'absolute',
+    top: -15,
+    left: -15,
+    backgroundColor: 'transparent',
   },
 });
 

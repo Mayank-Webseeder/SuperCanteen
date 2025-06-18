@@ -33,8 +33,8 @@ export const styles = StyleSheet.create({
   },
   selectionText: {
     fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
+    color: COLORS.black,
+    fontFamily:"Inter-SemiBold"
   },
   deleteButton: {
     flexDirection: 'row',
@@ -45,14 +45,6 @@ export const styles = StyleSheet.create({
   },
   deleteButtonDisabled: {
     opacity: 0.5,
-  },
-  deleteText: {
-    marginLeft: 5,
-    fontSize: 14,
-    color: '#999',
-  },
-  deleteTextActive: {
-    color: '#FF3B30',
   },
   listContent: {
      paddingTop: 10,
@@ -277,8 +269,8 @@ qtyText: {
   },
   seller: {
     fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    color: COLORS.green,
+    marginTop: 6,
   },
   footer: {
     position: 'absolute',
@@ -343,11 +335,12 @@ errorText: {
   textAlign: 'center',
 },
 removeButton: {
-  marginTop: 8,
-  alignSelf: 'flex-start',
+  marginTop: 0,
+  alignSelf: 'flex-end',
+  padding:10,
 },
 removeText: {
   color: '#FF3B30',
   fontSize: 14,
-},
+}
 });

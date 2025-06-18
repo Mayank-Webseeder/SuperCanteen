@@ -5,7 +5,7 @@ import { Height, Width } from '../../constants';
 import CustomSearch from '../searchInput';
 import CustomCategoryList from '../CustomCategoryList';
 import HeaderRow from '../../otherComponents/home/headerRow';
-import { BackArrow } from '../../../assets/Icons/svgIcons/arrow_back';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { styles } from './styles';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -93,7 +93,7 @@ const SearchScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconStyle}>
-          <BackArrow />
+           <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
         </TouchableOpacity>
         <View style={styles.searchContainer}>
           <CustomSearch

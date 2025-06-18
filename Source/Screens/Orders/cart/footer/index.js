@@ -1,8 +1,8 @@
 import React, { useMemo , } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 
-const Footer = ({ navigation, agreeTerms, disabled }) => {
+const Footer = ({ navigation, agreeTerms }) => {
   const cartState = useSelector((state) => state.cart);
   const items = Array.isArray(cartState?.items) ? cartState.items : [];
    const { user } = useSelector(state => state.auth);
@@ -21,27 +21,21 @@ const Footer = ({ navigation, agreeTerms, disabled }) => {
     }, 0);
   }, [items]);
 
-  const handleCheckout = () => {
+  const  handleCheckout = () => {
     if (!agreeTerms) {
-      Alert.alert('Agreement Required', 'Please agree to the terms and conditions to proceed');
       return;
     }
-    
     if (items.length === 0) {
-      Alert.alert('Empty Cart', 'Your cart is empty. Add items to proceed');
       return;
     }
-
       if (!user || !user.username) {
       navigation.reset({
         index: 0,
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-navigation.navigate('ProductCheckoutScreen', { totalAmount });
+      navigation.navigate('ProductCheckoutScreen', { totalAmount });
     }
-    
-    
   };
 
   // Calculate item count considering variants as unique items
@@ -59,9 +53,9 @@ navigation.navigate('ProductCheckoutScreen', { totalAmount });
         </View>
       </View>
       <TouchableOpacity
-        style={[styles.checkoutButton, (disabled || items.length === 0) && styles.disabledButton]}
+        style={[styles.checkoutButton, (!agreeTerms || items.length === 0) && styles.disabledButton]}
         onPress={handleCheckout}
-        disabled={disabled || items.length === 0}
+        disabled={!agreeTerms || items.length === 0}
       >
         <Text style={styles.checkoutText}>
           {items.length > 0 ? 'Proceed to Checkout' : 'Cart Empty'}

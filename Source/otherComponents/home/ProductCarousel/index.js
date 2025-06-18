@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Dimensions,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Animated,
   FlatList,
-  StyleSheet
 } from 'react-native';
 import { Height, Width } from '@constants';
 import { COLORS } from '@constants/index';
@@ -15,17 +14,67 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import HeaderRow from '../headerRow';
 import { styles } from './styles';
-const IMG_URL = 'https://super-canteen-backend.onrender.com';
+import { IMGURL } from '../../../utils/dataFormatters';
+import LottieView from 'lottie-react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishlist, removeFromWishlist } from '../../../redux/slices/wishlistSlice';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.45;
 const CARD_HEIGHT = Height(190);
 
-const ProductCarousel = ({ products, navigation, horizontal = horizontal ? horizontal : false, title = 'The Swipe & Shop Spectacular' }) => {
-  const scrollX = React.useRef(new Animated.Value(0)).current;
+const ProductCarousel = ({
+  products,
+  navigation,
+  horizontal = false,
+  title = 'The Swipe & Shop Spectacular',
+}) => {
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector(state => state.wishlist.items);
+  const userId = useSelector(state => state.auth.user?._id);
+  const token = useSelector(state => state.auth.token);
 
-  // Calculate grid item width for perfect alignment
-  const gridItemWidth = (width - Width(40)) / 3; // 10px padding on each side + 10px gap between items
+  const [lottieState, setLottieState] = useState({});
+  const [wishlistState, setWishlistState] = useState({});
+
+  const isInWishlist = (productId) =>
+    wishlistItems?.some((item) => item._id === productId) || wishlistState[productId];
+
+  const handleWishlistToggle = (productId) => {
+  if (!token) {
+        navigation.reset({
+  index: 0,
+  routes: [
+    {
+      name: 'Auth',
+      state: {
+        routes: [
+          { name: 'Signin' }
+        ]
+      }
+    }
+  ]
+})
+    return;
+  }
+
+    if (isInWishlist(productId)) {
+      dispatch(removeFromWishlist({ userId, productId, token }));
+      setWishlistState((prev) => ({ ...prev, [productId]: false }));
+         setLottieState((prev) => ({ ...prev, [productId]: false }));
+    } else {
+      dispatch(addToWishlist({ productId, token }));
+      setWishlistState((prev) => ({ ...prev, [productId]: true }));
+       setLottieState((prev) => ({ ...prev, [productId]: true }));
+    }
+
+    setTimeout(() => {
+      setLottieState((prev) => ({ ...prev, [productId]: false }));
+    }, 1500);
+  };
+
+  const gridItemWidth = (width - Width(40)) / 3;
 
   const renderItem = ({ item, index }) => {
     const discountPercentage = Math.round(((item.mrp - item.offerPrice) / item.mrp) * 100);
@@ -60,16 +109,16 @@ const ProductCarousel = ({ products, navigation, horizontal = horizontal ? horiz
             {
               height: isGrid ? Height(180) : CARD_HEIGHT,
               padding: isGrid ? Width(5) : Width(8),
-              marginTop: isGrid ?  Height(10) : "",
-              marginHorizontal: isGrid ? 2 : "",
-               left: !isGrid ? Height(5) : ""
+              marginTop: isGrid ? Height(10) : '',
+              marginHorizontal: isGrid ? 2 : '',
+              left: !isGrid ? Height(5) : '',
             },
           ]}
         >
-          {/* Product Image with Badges */}
+          {/* Image Section */}
           <View style={[styles.imageContainer, { height: isGrid ? '50%' : '58%' }]}>
             <Image
-              source={{ uri: `${IMG_URL}${item.images[0]}` }}
+              source={{ uri: `${IMGURL}${item.images[0]}` }}
               style={styles.productImage}
               resizeMode={isGrid ? 'contain' : 'cover'}
             />
@@ -88,30 +137,52 @@ const ProductCarousel = ({ products, navigation, horizontal = horizontal ? horiz
               </LinearGradient>
             )}
 
-            {/* Wishlist Button */}
+            {/* Wishlist Toggle Button */}
             <TouchableOpacity
               style={[styles.wishlistButton, isGrid && styles.gridWishlistButton]}
-              onPress={() => console.log('Add to wishlist')}
+              onPress={() => handleWishlistToggle(item._id)}
             >
-              <MaterialIcons 
-                name="favorite-border" 
-                size={isGrid ? 16 : 20} 
-                color={COLORS.white} 
-              />
+              <View style={{ width: 40, height: 40,alignItems:"center",justifyContent:"center" }}>
+                {lottieState[item._id] ? (
+                  <LottieView
+                    source={require('../../../../assets/lottie/animation.json')}
+                    autoPlay
+                    loop={false}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      position: 'absolute',
+                      zIndex: 1,
+                    }}
+                  />
+                ) : isInWishlist(item._id) ? (
+                  <MaterialIcons
+                    name="favorite"
+                    size={isGrid ? 16 : 20}
+                    color={'#A94442'}
+                  />
+                ) : (
+                  <MaterialIcons
+                    name="favorite-border"
+                    size={isGrid ? 16 : 20}
+                    color={COLORS.white}
+                    
+                  />
+                )}
+              </View>
             </TouchableOpacity>
           </View>
 
           {/* Product Info */}
           <View style={styles.productInfo}>
-            <Text 
-              numberOfLines={2} 
+            <Text
+              numberOfLines={2}
               style={[styles.productName, isGrid && styles.gridProductName]}
               ellipsizeMode="tail"
             >
               {item.name}
             </Text>
 
-            {/* Price */}
             <View style={styles.priceContainer}>
               <Text style={[styles.offerPrice, isGrid && styles.gridOfferPrice]}>
                 ₹{item.offerPrice}
@@ -157,12 +228,14 @@ const ProductCarousel = ({ products, navigation, horizontal = horizontal ? horiz
           keyExtractor={(item) => item._id}
           numColumns={3}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.gridContentContainer,{marginTop: horizontal ? Height(10) : ""}]}
+          contentContainerStyle={[
+            styles.gridContentContainer,
+            { marginTop: horizontal ? Height(10) : '' },
+          ]}
         />
       )}
     </View>
   );
 };
-
 
 export default ProductCarousel;

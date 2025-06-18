@@ -11,7 +11,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
 
 const CustomSimilarProducts = ({
-  cardHeight = 280,
   cardWidth = 160,
   data,
   navigation,
@@ -82,9 +81,9 @@ const CustomSimilarProducts = ({
             )}
             
             {/* Add to Cart Button */}
-            <TouchableOpacity   onPress={() => onAddToCart(item)}   style={styles.addButton}>
-              <Text style={styles.addButtonText}>ADD</Text>
-            </TouchableOpacity>
+         <TouchableOpacity onPress={() => onAddToCart(item)} style={styles.addButton}>
+            <Text style={styles.addButtonText}>ADD</Text>
+         </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>

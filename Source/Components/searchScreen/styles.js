@@ -17,11 +17,11 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   iconStyle: {
-    padding: Height(5),
-    marginRight: Width(10),
+    paddingVertical: Height(5),
+   marginRight:Height(7)
   },
   searchContainer: {
-    flex: 1,
+    flex: 0.97
   },
    disabledStyle: {
     opacity: 1

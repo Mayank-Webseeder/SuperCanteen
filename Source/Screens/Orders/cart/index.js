@@ -78,7 +78,7 @@ export default function CartScreen({ navigation }) {
         )}
       
         {/* Cart Items */}
-        <CustomCartCard />
+        <CustomCartCard navigation={navigation} />
 
         {/* Show price summary only if there are items */}
         {items.length > 0 && (
@@ -113,7 +113,7 @@ export default function CartScreen({ navigation }) {
       />
 
       {/* Footer */}
-      <Footer navigation={navigation} agreeTerms={agreeTerms} disabled={items.length === 0} />
+      <Footer navigation={navigation} agreeTerms={agreeTerms}  />
     </View>
   );
 }
