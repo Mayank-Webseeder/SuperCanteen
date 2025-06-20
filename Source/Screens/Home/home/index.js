@@ -1,32 +1,29 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, FlatList, Text, Pressable } from 'react-native';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { View, FlatList, RefreshControl } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
 import { Height, Width } from '@constants';
-import ClosesCalled from '../../../Components/home/closesCalled/closesCalled';
-import ProductCategories from '../../../otherComponents/home/productCategories';
-import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import Header from '../../../otherComponents/home/header';
-import HotDealsSection from '../../../otherComponents/home/hotDeals';
-import SponsordSection from '../../../otherComponents/home/sponsord';
+import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
+import ProductCategories from '../../../otherComponents/home/productCategories';
 import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
 import FullScreenLoader from '../../../Components/Common/fullScreenLoader';
-import PullToRefresh from '../../../Components/Common/pullToRefresh';
 import ErrorView from '../../../Components/Common/errorView';
 import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import { styles } from './styles';
+import { COLORS } from '@constants/index';
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [selectedCategoryItems, setSelectedCategoryItems] = useState([]);
-  const [pageLoading, setPageLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -48,15 +45,30 @@ const HomeScreen = ({ navigation }) => {
     error: productsError,
   } = useSelector((state) => state.product);
 
+  // Handle errors
   useEffect(() => {
     const apiError = categoriesError || subCategoriesError || productsError;
     if (apiError) {
       setError(apiError);
-      setPageLoading(false);
     }
   }, [categoriesError, subCategoriesError, productsError]);
 
-  const handleRefresh = async () => {
+  // Fetch initial data
+  const fetchInitialData = useCallback(async () => {
+    setError(null);
+    try {
+      await Promise.all([
+        dispatch(getCategories()),
+        dispatch(getSubCategories())
+      ]);
+      setInitialLoadComplete(true);
+    } catch (err) {
+      setError('Failed to load initial data');
+    }
+  }, [dispatch]);
+
+  // Handle refresh
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
@@ -70,42 +82,28 @@ const HomeScreen = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [dispatch, selectedCategoryIndex]);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setError(null);
-      try {
-        await Promise.all([
-          dispatch(getCategories()),
-          dispatch(getSubCategories())
-        ]);
-      } catch (err) {
-        setError('Failed to load initial data');
-        setPageLoading(false);
-      }
-    };
-    fetchInitialData();
-  }, []);
-
+  // Set initial category
   useEffect(() => {
     if (!categoriesLoading && categories?.length > 0 && selectedCategoryIndex === null) {
       setSelectedCategoryIndex(categories[0]._id);
     }
   }, [categoriesLoading, categories]);
 
+  // Fetch products when category changes
   useEffect(() => {
     if (selectedCategoryIndex) {
       dispatch(getProductsByCategory(selectedCategoryIndex));
     }
   }, [selectedCategoryIndex]);
 
+  // Initial data load
   useEffect(() => {
-    if (!categoriesLoading && !subCategoriesLoading && !productsLoading) {
-      setPageLoading(false);
-    }
-  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
+    fetchInitialData();
+  }, [fetchInitialData]);
 
+  // Memoized filtered data
   const filteredSubcategories = useMemo(() => {
     return subCategories?.filter(item => item.category?._id === selectedCategoryIndex) || [];
   }, [subCategories, selectedCategoryIndex]);
@@ -120,12 +118,16 @@ const HomeScreen = ({ navigation }) => {
     return Object.values(brandMap);
   }, [products]);
 
-  const contentLoading = subCategoriesLoading || productsLoading;
+  // Loading states
+  const contentLoading = useMemo(() => {
+    return (subCategoriesLoading || productsLoading) && initialLoadComplete;
+  }, [subCategoriesLoading, productsLoading, initialLoadComplete]);
 
-  if (pageLoading) {
+  if (!initialLoadComplete) {
     return <FullScreenLoader />;
   }
 
+  // Header component
   const stickyHeader = (
     <View style={{ backgroundColor: '#A3B9C3' }}>
       <LinearGradient
@@ -139,24 +141,40 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
-  const mainContent = (
-    <>
-     <GetCategory
+  // Main content
+  const renderMainContent = () => {
+    if (error) {
+      return (
+        <ErrorView 
+          message={error} 
+          onRetry={handleRefresh} 
+          containerStyle={{ marginVertical: Height(20) }} 
+        />
+      );
+    }
+
+    if (contentLoading) {
+      return <ContentSkeletonLoader type="home" itemCount={3} />;
+    }
+
+    return (
+      <>
+        <GetCategory
           categories={categories}
           navigation={navigation}
           selectedIndex={selectedCategoryIndex}
           setSelectedIndex={setSelectedCategoryIndex}
         />
-    <View style={styles.mainContent}>
-    
-      {error ? (
-        <ErrorView message={error} onRetry={handleRefresh} containerStyle={{ marginVertical: Height(20) }} />
-      ) : contentLoading ? (
-        <ContentSkeletonLoader type="home" itemCount={3} />
-      ) : (
-        <>
-        { brands.length > 0 && <HorizontalLine lineStyle={styles.lineStyle} /> }
-          <Brandcarousel imageStyle={styles.imageStyle} contentContainerStyle={styles.contentContainerStyle}  cardStyle={styles.cardStyle}  paginationStyle={styles.paginationStyle} dotStyle={styles.dotStyle} brands={brands} />
+        <View style={styles.mainContent}>
+          {brands.length > 0 && <HorizontalLine lineStyle={styles.lineStyle} />}
+          <Brandcarousel 
+            imageStyle={styles.imageStyle} 
+            contentContainerStyle={styles.contentContainerStyle}  
+            cardStyle={styles.cardStyle}  
+            paginationStyle={styles.paginationStyle} 
+            dotStyle={styles.dotStyle} 
+            brands={brands} 
+          />
           <HorizontalLine lineStyle={styles.horizontalLine} />
           <ProductCategories
             navigation={navigation}
@@ -168,26 +186,30 @@ const HomeScreen = ({ navigation }) => {
           />
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel horizontal={true} navigation={navigation} products={products} />
-        </>
-      )}
-    </View>
-    </>
-  );
-
-
-  const sections = [stickyHeader, mainContent];
+        </View>
+      </>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <PullToRefresh refreshing={refreshing} onRefresh={handleRefresh}>
-        <FlatList
-          data={sections}
-          renderItem={({ item }) => item}
-          keyExtractor={(_, index) => index.toString()}
-          stickyHeaderIndices={[0]}
-          showsVerticalScrollIndicator={false}
-        />
-      </PullToRefresh>
+      <FlatList
+        data={[stickyHeader, renderMainContent()]}
+        renderItem={({ item }) => item}
+        keyExtractor={(_, index) => index.toString()}
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[COLORS.green, COLORS.green]} 
+            tintColor="#FFFFFF" // iOS only
+            title="Refreshing..." // iOS only
+            titleColor="#FFFFFF" // iOS only
+          />
+        }
+      />
     </View>
   );
 };

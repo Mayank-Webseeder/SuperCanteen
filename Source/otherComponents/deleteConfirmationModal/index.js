@@ -76,42 +76,61 @@ const DeleteConfirmationModal = ({
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.modalMessage}>
-            Are you sure you want to remove{' '}
-            <Text style={{ fontWeight: '600', color: '#FF3B30' }}>{selectedCount}</Text>{' '}
-            item{selectedCount > 1 ? 's' : ''} from your cart?
-          </Text>
+          {selectedCount > 0 ? (
+            <>
+              <Text style={styles.modalMessage}>
+                Are you sure you want to remove{' '}
+                <Text style={{ fontWeight: '600', color: '#FF3B30' }}>
+                  {selectedCount}
+                </Text>{' '}
+                item{selectedCount > 1 ? 's' : ''} from your cart?
+              </Text>
 
-          <View style={styles.divider} />
+              <View style={styles.divider} />
 
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.buttonText, styles.cancelText]}>CANCEL</Text>
-            </TouchableOpacity>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.cancelButton]}
+                  onPress={onClose}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.buttonText, styles.cancelText]}>CANCEL</Text>
+                </TouchableOpacity>
 
-            <View style={styles.verticalDivider} />
+                <View style={styles.verticalDivider} />
 
-            <TouchableOpacity
-              style={[styles.actionButton, styles.removeButton]}
-              onPress={() => {
-                onConfirm();
-                onClose();
-              }}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.buttonText, styles.removeText]}>REMOVE</Text>
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.removeButton]}
+                  onPress={onConfirm}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.buttonText, styles.removeText]}>REMOVE</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text style={styles.modalMessage}>
+                No items selected for removal
+              </Text>
+              
+              <View style={styles.divider} />
+              
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.cancelButton, {flex: 1}]}
+                  onPress={onClose}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.buttonText, styles.cancelText]}>OK</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </Animated.View>
     </Modal>
   );
 };
-
-
 
 export default DeleteConfirmationModal;

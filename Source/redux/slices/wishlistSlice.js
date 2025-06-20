@@ -1,54 +1,72 @@
+// wishlistSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { postData, deleteData, getData } from '../../utils/apiClient'; 
-import { 
-  ADD_TO_WISHLIST, 
-  REMOVE_FROM_WISHLIST 
-} from '../../api';
+import { postData, deleteData, getData } from '../../utils/apiClient';
+import {
+  ADD_TO_WISHLIST,
+  REMOVE_FROM_WISHLIST,
+  GET_WHISHLIST_BY_USERID
+} from '../../api'
+import { createSelector } from '@reduxjs/toolkit';
 
-// Fetch wishlist
+const selectWishlist = (state) => state.wishlist;
+const selectAllCategories = (state) => state.category.categories || [];
+
+
+// Helper to extract unique category IDs
+const extractCategoryIds = (products) => {
+  const categorySet = new Set();
+  products.forEach(item => {
+    if (item.product?.category) {
+      categorySet.add(item.product.category);
+    }
+  });
+  return Array.from(categorySet);
+};
+
 export const fetchWishlistItems = createAsyncThunk(
   'wishlist/fetchWishlistItems',
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await getData(
-        `${GET_WHISHLIST_BY_USERID}/${userId}`
-);
-
-      return response.data.wishlist.products;
+      const response = await getData(`${GET_WHISHLIST_BY_USERID}/${userId}`);
+      const products = response.data.products || [];
+      return {
+        items: products.map(item => ({
+          ...item.product,
+          wishlistId: item.product._id,
+          addedAt: item.addedAt
+        })),
+        categories: extractCategoryIds(products)
+      };
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch wishlist');
     }
   }
 );
-// Add to wishlist
+
 export const addToWishlist = createAsyncThunk(
   'wishlist/addToWishlist',
-  async ({ productId, token }, { rejectWithValue }) => {
+  async ({ productId, userId }, { rejectWithValue }) => {
     try {
-      const response = await postData(
-        ADD_TO_WISHLIST,
-        { productId },
-        token
-      );
-
-      return response.wishlist.products;
+      const response = await postData(ADD_TO_WISHLIST, { productId, userId });
+      return {
+        ...response.data.product,
+        wishlistId: response.data.product._id,
+        addedAt: response.data.addedAt
+      };
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Failed to add to wishlist');
+      return rejectWithValue(err.response?.data?.message || 'Failed to add to wishlist');
     }
   }
 );
 
-// Remove from wishlist
 export const removeFromWishlist = createAsyncThunk(
   'wishlist/removeFromWishlist',
-  async ({ userId, productId, token }, { rejectWithValue }) => {
+  async ({ wishlistId, userId }, { rejectWithValue }) => {
     try {
-      const url = `${REMOVE_FROM_WISHLIST}/${userId}/product/${productId}`;
-      const response = await deleteData(url, token);
-      
-      return response.wishlist.products;
+      await deleteData(`${REMOVE_FROM_WISHLIST}/${userId}/product/${wishlistId}`);
+      return wishlistId;
     } catch (err) {
-      return rejectWithValue(err.response?.data || 'Failed to remove from wishlist');
+      return rejectWithValue(err.response?.data?.message || 'Failed to remove item');
     }
   }
 );
@@ -57,58 +75,95 @@ const wishlistSlice = createSlice({
   name: 'wishlist',
   initialState: {
     items: [],
+    categories: [], // This will store category IDs
     loading: false,
     error: null,
+    lastAdded: null,
+    initialized: false,
   },
   reducers: {
     clearWishlist: (state) => {
       state.items = [];
+      state.categories = [];
+      state.lastAdded = null;
+    },
+    resetWishlistError: (state) => {
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(addToWishlist.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(addToWishlist.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-      })
-      .addCase(addToWishlist.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      .addCase(removeFromWishlist.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(removeFromWishlist.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-      })
-      .addCase(removeFromWishlist.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
       .addCase(fetchWishlistItems.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchWishlistItems.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        state.items = action.payload.items;
+        state.categories = action.payload.categories;
+         state.initialized = true;
       })
       .addCase(fetchWishlistItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
-  },
+      })
+      .addCase(addToWishlist.fulfilled, (state, action) => {
+        if (!state.items.some(item => item._id === action.payload._id)) {
+          state.items.unshift(action.payload);
+          state.lastAdded = action.payload._id;
+          // Add category ID if not already present
+          if (action.payload.category && !state.categories.includes(action.payload.category)) {
+            state.categories.push(action.payload.category);
+          }
+        }
+      })
+      .addCase(removeFromWishlist.fulfilled, (state, action) => {
+        const removedItem = state.items.find(item => item.wishlistId === action.payload);
+        state.items = state.items.filter(item => item.wishlistId !== action.payload);
+        // Remove category if no more items exist in that category
+        if (removedItem?.category && 
+            !state.items.some(item => item.category === removedItem.category)) {
+          state.categories = state.categories.filter(catId => catId !== removedItem.category);
+        }
+
+        console.log("FULLFIELD DATA IS",action.payload)
+      })
+      .addCase(removeFromWishlist.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        console.log("REJECTD DATA IS",action.payload)
+      })
+  }
 });
 
-export const { clearWishlist } = wishlistSlice.actions;
+// Selector to combine wishlist items with category names
+export const selectWishlistWithCategories = createSelector(
+  [selectWishlist, selectAllCategories],
+  (wishlist, allCategories) => {
+    const { items, categories: categoryIds } = wishlist;
+    
+    // Map category IDs to their full category objects
+    const categoriesWithNames = categoryIds.map(catId => {
+      // Find the full category object from allCategories
+      const foundCategory = allCategories.find(c => c._id === catId);
+      
+      // If found, return it with the name
+      if (foundCategory) {
+        return foundCategory;
+      }
+      
+      // If not found, return minimal object with ID and placeholder name
+      return { 
+        _id: catId, 
+        name: `Category ${catId.slice(-4)}` 
+      };
+    });
+
+    return {
+      ...wishlist,
+      categories: categoriesWithNames
+    };
+  }
+);
+export const { clearWishlist, resetWishlistError } = wishlistSlice.actions;
 export default wishlistSlice.reducer;
-
-

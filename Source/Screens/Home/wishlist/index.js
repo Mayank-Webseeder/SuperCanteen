@@ -1,40 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Text,
   View,
   ScrollView,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
-import { WishlistProducts } from '../../../Mock/Data/WishlistProduct';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
 import CustomSearch from '../../../Components/searchInput';
-
-const categories = ['All', 'Watches', 'Shoes', 'Bags', 'Sunglasses', 'Smartwatch'];
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  fetchWishlistItems, 
+  removeFromWishlist,
+  selectWishlistWithCategories
+} from '../../../redux/slices/wishlistSlice';
+import { getCategories } from '../../../redux/slices/categorySlice';
+import { IMGURL } from '../../../utils/dataFormatters';
+import { COLORS } from '@constants/index';
+import { addToCart } from '../../../redux/slices/cartSlice';
+import { showMessage } from 'react-native-flash-message';
 
 const WishlistScreen = ({navigation}) => {
+  const dispatch = useDispatch();
   const [activeCategory, setActiveCategory] = useState('All');
-  const [wishlistItems, setWishlistItems] = useState(WishlistProducts);
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useSelector(state => state.auth);
+  const [cartLoadingId, setCartLoadingId] = useState(null);
+  const userId = user?.id;
+  
+  const {
+    items: wishlistItems,
+    categories: reduxCategories,
+    loading,
+    error
+  } = useSelector(selectWishlistWithCategories);
 
-  // Filter items based on active category FIRST
+  useEffect(() => {
+    dispatch(getCategories()).then(() => {
+      dispatch(fetchWishlistItems(userId));
+    });
+  }, [dispatch, userId]);
+
+  const categories = ['All', ...reduxCategories.map(cat => cat.name)];
+
   const filteredItems = activeCategory === 'All' 
     ? wishlistItems 
-    : wishlistItems.filter(item => item.category === activeCategory);
+    : wishlistItems.filter(item => {
+        const itemCategory = reduxCategories.find(cat => cat._id === item.category);
+        return itemCategory?.name === activeCategory;
+      });
 
-  // Then filter based on search query
   const filteredWishListData = searchQuery 
     ? filteredItems.filter(item => 
-        item?.title?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+        item?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase())))
     : filteredItems;
 
   const noDataFound = searchQuery && filteredWishListData.length === 0;
 
-  // Handle category change
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
   };
@@ -47,81 +76,138 @@ const WishlistScreen = ({navigation}) => {
     setSearchQuery('');
   };
 
-  // Handle item removal
-  const handleRemoveItem = (itemId) => {
-    setWishlistItems(prevItems => prevItems.filter(item => item.id !== itemId));
+  const handleRemoveItem = (wishlistId) => {
+    dispatch(removeFromWishlist({ wishlistId, userId }));
   };
 
-  // Render each wishlist item
+  const onAddToCart = (item) => {
+  setCartLoadingId(item._id); // Show loader for specific item
+
+  dispatch(addToCart({
+    productId: item._id,
+    quantity: item.minOrderQuantity || 1,
+    price: item.offerPrice || item.price,
+    isDigital: item.isDigital
+  }))
+    .then((res) => {
+      setCartLoadingId(null);
+      showMessage({
+        message: 'Item added to cart',
+        description: `Successfully moved item to your cart.`,
+        type: 'success',
+        icon: 'success',
+        duration: 3000,
+      });
+    })
+    .catch((error) => {
+      setCartLoadingId(null);
+      showMessage({
+        message: 'Failed to add item',
+        description: error?.message || 'Something went wrong while adding to cart',
+        type: 'danger',
+        icon: 'danger',
+        duration: 3000,
+      });
+    });
+};
+
+
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      {/* Close Button */}
       <TouchableOpacity 
         style={styles.closeBtn} 
-        onPress={() => handleRemoveItem(item.id)}
+        onPress={() => handleRemoveItem(item.wishlistId)}
       >
-        <Ionicons name="close" size={16} color="#777" />
+        <MaterialCommunityIcons name="heart" size={20} color='#A94442' />
       </TouchableOpacity>
 
-      {/* Product Image */}
-      <FastImage source={item.image} style={styles.image} />
+      <FastImage 
+        source={{ uri: `${IMGURL}${item.images[0]}`}} 
+        style={styles.image}
+        resizeMode="contain"
+      />
 
-      {/* Product Info */}
       <View style={styles.content}>
-        <Text style={styles.brand}>{item.brand}</Text>
-        <Text style={styles.title}>{item.title}</Text>
-
-        {/* Rating */}
+        <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
+        
+        <View style={styles.priceContainer}>
+          <Text style={styles.price}>₹{item.offerPrice}</Text>
+          {item.mrp > item.offerPrice && (
+            <Text style={styles.originalPrice}>₹{item.mrp}</Text>
+          )}
+        </View>
+        
         <View style={styles.ratingRow}>
           <View style={styles.stars}>
             {Array.from({ length: 5 }).map((_, i) => (
               <Ionicons
                 key={i}
-                name={
-                  i < Math.floor(item.rating)
-                    ? 'star'
-                    : i < item.rating
-                    ? 'star-half'
-                    : 'star-outline'
-                }
+                name={i < Math.floor(item.rating || 0) ? 'star' : 'star-outline'}
                 size={14}
-                color={'#2E6074'}
+                color={'#FFC107'}
               />
             ))}
           </View>
-          <Text style={styles.reviewText}>
-            {item.rating} | {item.reviews}
-          </Text>
+          <Text style={styles.reviewText}>({item.numReviews || '0'})</Text>
         </View>
 
-        {/* CTA Button */}
-        <TouchableOpacity style={styles.cartButton}>
-          <Text style={styles.cartButtonText}>Move to Cart</Text>
-        </TouchableOpacity>
+     <TouchableOpacity
+  onPress={() => onAddToCart(item)}
+  style={styles.cartButton}
+  disabled={cartLoadingId === item._id}
+>
+  {cartLoadingId === item._id ? (
+    <ActivityIndicator size="small" color="#fff" />
+  ) : (
+    <Text style={styles.cartButtonText}>Move to Cart</Text>
+  )}
+</TouchableOpacity>
+
       </View>
     </View>
   );
 
+  if (loading && wishlistItems.length === 0) {
+    return (
+      <View style={styles.container}>
+        <CustomCommonHeader navigation={navigation} title="My Wishlist" />
+        <View style={[styles.emptyContainer, {justifyContent: 'center'}]}>
+          <ActivityIndicator size="large" color={COLORS.green} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <CustomCommonHeader navigation={navigation} title="Wishlist" />
-    <View style={styles.searchContainer}>
+      <CustomCommonHeader navigation={navigation} title="My Wishlist" />
+      
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Saved Items</Text>
+        <Text style={styles.itemCount}>{filteredWishListData.length} items</Text>
+      </View>
+      
+      <View style={styles.searchContainer}>
         <CustomSearch
-            showCrossIcon={!!searchQuery}
-            onChangeText={handleSearchChange}
-            value={searchQuery}
-            onCrossPress={clearSearch}
-            placeholder="Search in SuperCanteen store"
-            autoFocus={true}
-            containerStyle={styles.searchInput}
-             backgroundColor={'#fff'}
-            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
-          />
+          showCrossIcon={!!searchQuery}
+          onChangeText={handleSearchChange}
+          value={searchQuery}
+          onCrossPress={clearSearch}
+          placeholder="Search in your wishlist"
+          autoFocus={true}
+          containerStyle={styles.searchInput}
+          backgroundColor={'#f5f5f5'}
+          inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
+        /> 
       </View>
 
-      {/* Horizontal Category Row */}
+      {/* Category Filter */}
       <View style={styles.categoryContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScroll}
+        >
           {categories.map((cat, index) => (
             <TouchableOpacity 
               key={index} 
@@ -142,22 +228,34 @@ const WishlistScreen = ({navigation}) => {
         </ScrollView>
       </View>
 
+      {/* Content Area */}
       {noDataFound ? (
         <View style={styles.noDataContainer}>
-          <Text style={styles.noDataText}>No data found</Text>
+          <MaterialIcons name="search-off" size={80} color="#ccc" style={styles.emptyIcon} />
+          <Text style={styles.noDataTitle}>No items found</Text>
+          <Text style={styles.noDataText}>Try adjusting your search or filters</Text>
         </View>
       ) : filteredWishListData.length > 0 ? (
         <FlatList
           data={filteredWishListData}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.wishlistId}
           numColumns={2}
           contentContainerStyle={styles.listContainer}
-          columnWrapperStyle={{ justifyContent: 'flex-start', gap: 18 }}
+          columnWrapperStyle={styles.columnWrapper}
+          showsVerticalScrollIndicator={false}
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Your wishlist is empty</Text>
+          <Ionicons name="heart-outline" size={80} color="#ccc" style={styles.emptyIcon} />
+          <Text style={styles.emptyTitle}>Your wishlist is empty</Text>
+          <Text style={styles.emptyText}>Start adding items you love!</Text>
+          <TouchableOpacity 
+            style={styles.browseButton}
+            onPress={() => navigation.navigate('Main')}
+          >
+            <Text style={styles.browseButtonText}>Browse Products</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -165,4 +263,3 @@ const WishlistScreen = ({navigation}) => {
 };
 
 export default WishlistScreen;
-

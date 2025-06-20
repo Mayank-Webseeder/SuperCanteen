@@ -362,7 +362,7 @@ const CustomCartCard = () => {
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [updatingItems, setUpdatingItems] = useState({});
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+ const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
@@ -387,6 +387,7 @@ const handleSelectAll = useCallback(() => {
     // Deselect all
     setSelectedItems([]);
     setIsAllSelected(false);
+     setShowConfirmation(false); 
   } else {
     // Select all
     const allItemIds = items.map((item) => item._id || item.id);
@@ -396,15 +397,12 @@ const handleSelectAll = useCallback(() => {
 }, [isAllSelected, items]);
 
 
-  const confirmAction = useCallback(() => {
-   
-      setSelectedItems([]);
-      setIsAllSelected(false);
-    
-      handleDeleteSelected();
-    
-    setShowConfirmation(false);
-  }, [ handleDeleteSelected]);
+ const confirmAction = useCallback(() => {
+  if (selectedItems.length > 0) { // Check if items are selected
+    handleDeleteSelected();
+  }
+  setShowConfirmation(false);
+}, [handleDeleteSelected, selectedItems]);
 
   const handleDeleteSelected = useCallback(async () => {
     if (selectedItems.length === 0) return;
@@ -429,10 +427,11 @@ const handleSelectAll = useCallback(() => {
     }
   }, [selectedItems, dispatch]);
 
-  const showDeleteConfirmation = useCallback(() => {
-    if (selectedItems.length === 0) return;
+ const showDeleteConfirmation = useCallback(() => {
+  if (selectedItems.length > 0) { // Only show if items are selected
     setShowConfirmation(true);
-  }, [selectedItems.length]);
+  }
+}, [selectedItems.length]);
 
   const handleQuantityChange = useCallback(
     async (itemId, payload) => {
@@ -591,7 +590,7 @@ const handleSelectAll = useCallback(() => {
       <DeleteConfirmationModal
         visible={showConfirmation}
         onClose={() => setShowConfirmation(false)}
-        onConfirm={handleDeleteSelected}
+        onConfirm={confirmAction}
         selectedCount={selectedCount}
         slideAnim={slideAnim}
       />

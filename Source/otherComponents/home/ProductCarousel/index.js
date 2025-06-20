@@ -32,7 +32,7 @@ const ProductCarousel = ({
   const scrollX = useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
   const wishlistItems = useSelector(state => state.wishlist.items);
-  const userId = useSelector(state => state.auth.user?._id);
+  const userId = useSelector(state => state.auth.user?.id);
   const token = useSelector(state => state.auth.token);
 
   const [lottieState, setLottieState] = useState({});
@@ -41,38 +41,47 @@ const ProductCarousel = ({
   const isInWishlist = (productId) =>
     wishlistItems?.some((item) => item._id === productId) || wishlistState[productId];
 
-  const handleWishlistToggle = (productId) => {
+
+ const handleWishlistToggle = (productId) => {
   if (!token) {
-        navigation.reset({
-  index: 0,
-  routes: [
-    {
-      name: 'Auth',
-      state: {
-        routes: [
-          { name: 'Signin' }
-        ]
-      }
-    }
-  ]
-})
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'Auth',
+          state: {
+            routes: [{ name: 'Signin' }]
+          }
+        }
+      ]
+    });
     return;
   }
 
-    if (isInWishlist(productId)) {
-      dispatch(removeFromWishlist({ userId, productId, token }));
-      setWishlistState((prev) => ({ ...prev, [productId]: false }));
-         setLottieState((prev) => ({ ...prev, [productId]: false }));
-    } else {
-      dispatch(addToWishlist({ productId, token }));
-      setWishlistState((prev) => ({ ...prev, [productId]: true }));
-       setLottieState((prev) => ({ ...prev, [productId]: true }));
+  const wishlistItem = wishlistItems.find(item => item._id === productId);
+  const wishlistId = wishlistItem?.wishlistId;
+
+  if (isInWishlist(productId)) {
+    if (!wishlistId) {
+      console.warn('❌ Wishlist ID not found for product:', productId);
+      return;
     }
 
-    setTimeout(() => {
-      setLottieState((prev) => ({ ...prev, [productId]: false }));
-    }, 1500);
-  };
+    dispatch(removeFromWishlist({ wishlistId, userId }));
+    setWishlistState(prev => ({ ...prev, [productId]: false }));
+    setLottieState(prev => ({ ...prev, [productId]: false }));
+    console.log("✅ Removed from wishlist:", wishlistId);
+  } else {
+    dispatch(addToWishlist({ productId, token }));
+    setWishlistState(prev => ({ ...prev, [productId]: true }));
+    setLottieState(prev => ({ ...prev, [productId]: true }));
+    console.log("✅ Added to wishlist:", productId);
+  }
+
+  setTimeout(() => {
+    setLottieState(prev => ({ ...prev, [productId]: false }));
+  }, 1500);
+};
 
   const gridItemWidth = (width - Width(40)) / 3;
 

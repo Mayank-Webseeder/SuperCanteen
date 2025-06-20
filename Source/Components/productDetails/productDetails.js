@@ -27,6 +27,8 @@ import { formateSubCategoryProducts } from '../../utils/dataFormatters';
 import { addToCart } from '../../redux/slices/cartSlice';
 import CustomSearch from '../../Components/searchInput';
 import { AddToCartAnimation } from '../../otherComponents/addToCartAnimation'
+import VariantSelector from './variantSelector';
+import { IMGURL } from '../../utils/dataFormatters';
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -37,6 +39,7 @@ const ProductDetails = ({ navigation, route }) => {
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationKey, setAnimationKey] = useState(0); 
   const [animationImage, setAnimationImage] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const productData = product?.product;
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
@@ -44,6 +47,17 @@ const ProductDetails = ({ navigation, route }) => {
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
+   const imagesToShow = selectedVariant?.images?.length > 0
+  ? selectedVariant.images.map(img => `${IMGURL}${img}`)
+  : productData?.images?.map(img => `${IMGURL}${img}`) || [];
+
+
+ 
+
+     const handleVariantChange = (variant) => {
+    setSelectedVariant(variant);
+  };
+ 
  
  const OnAddToCart = (item) =>{
   const selectedItem = item ? item : productData;
@@ -158,13 +172,22 @@ const ProductDetails = ({ navigation, route }) => {
         </View>
         <View>
           <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
-          <CustomZoomCasual
-            cardHeight={Height(200)}
-            onImagePress={(uri) => console.log('Image pressed:', uri)}
-            data={formattedProduct?.images}
-          />
+         <CustomZoomCasual
+  cardHeight={Height(200)}
+  onImagePress={(uri) => console.log('Image pressed:', uri)}
+  data={imagesToShow}  
+
+/>
+
+         
         </View>
-        <Description productData={formattedProduct} />
+        <Description productData={formattedProduct}  selectedVariant={selectedVariant}/>
+           {formattedProduct?.variants?.length > 0 && (
+            <VariantSelector 
+              product={formattedProduct} 
+              onVariantChange={handleVariantChange}
+            />
+          )}
         <AddressRow
           navigation={navigation}
           address={formattedProduct.shippingAddress}

@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootStack from './Source/navigation/rootStack';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store, persistor } from './Source/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import CustomFlashMessage from './Source/Components/flashMessage';
-import { useDispatch, useSelector } from 'react-redux';
-import { loadGuestCart, fetchCartItems } from './Source/redux/slices/cartSlice'; // Add fetchCartItems
+import { loadGuestCart, fetchCartItems } from './Source/redux/slices/cartSlice'; 
+import { fetchWishlistItems } from './Source/redux/slices/wishlistSlice';
 
 const AppWrapper = () => {
   return (
@@ -23,29 +23,34 @@ const AppWrapper = () => {
 
 const App = () => {
   const dispatch = useDispatch();
-  const { token } = useSelector(state => state.auth);
-  const { initialized } = useSelector(state => state.cart); // Add cart initialized state
+  const { token, user } = useSelector(state => state.auth);
+  const { initialized } = useSelector(state => state.cart);
 
-  // Initialize cart on app start and when token changes
+  // Initialize cart on app start
   useEffect(() => {
-    const initializeCart = async () => {
+    const initializeCart = () => {
       if (token) {
-        await dispatch(fetchCartItems()); // Load authenticated cart
+        dispatch(fetchCartItems());
       } else {
-        await dispatch(loadGuestCart()); // Load guest cart
+        dispatch(loadGuestCart());
       }
     };
-    
-    // Only initialize if not already initialized
     if (!initialized) {
       initializeCart();
     }
-  }, [token, dispatch, initialized]); // Add initialized dependency
+  }, [token, dispatch, initialized]);
+
+  // Initialize wishlist on login
+  useEffect(() => {
+    if (token && user?.id) {
+      dispatch(fetchWishlistItems(user.id));
+    }
+  }, [token, user?.id, dispatch]);
 
   return (
     <NavigationContainer>
       <RootStack />
-      <CustomFlashMessage/>
+      <CustomFlashMessage />
     </NavigationContainer>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   FlatList,
@@ -9,6 +9,7 @@ import {
 import FastImage from 'react-native-fast-image';
 import ImageZoomViewer from './ImageZoomViewer';
 import { Height, Width } from '@constants/index';
+import { IMGURL } from '../../../utils/dataFormatters';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -21,13 +22,14 @@ const CustomZoomCasual = ({
   borderWidth,
   resizeMode,
   cardStyle,
-  containerStyle
+  containerStyle,
+  onImagePress,
+  selectedVariant
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const flatListRef = useRef();
-
   const width = cardWidth || SCREEN_WIDTH - Width(25);
   const height = cardHeight || Height(150);
   const radius = cardRadius || Width(14);
@@ -58,6 +60,7 @@ const CustomZoomCasual = ({
     if (uri) {
       setSelectedImage(normalizeUri(uri));
       setZoomVisible(true);
+      if (onImagePress) onImagePress(uri);
     }
   };
 
@@ -88,6 +91,7 @@ const CustomZoomCasual = ({
             borderRadius: radius, 
             borderWidth: borderWidth ?? 1,
             borderColor: '#E3E3E3',
+            marginBottom: data.length > 1 ? Height(25) : Height(12),
             ...cardStyle 
           }
         ]}>
@@ -178,7 +182,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#FFF',
     overflow: 'hidden',
-    marginBottom:Height(12)
+    marginBottom: Height(12)
   },
   pagination: {
     flexDirection: 'row',

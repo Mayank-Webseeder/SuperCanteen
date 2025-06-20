@@ -1,0 +1,178 @@
+import { COLORS, Height } from "@constants/index";
+import { StyleSheet } from "react-native";
+
+export const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    marginVertical: 16,
+    marginTop: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+    marginHorizontal:Height(12),
+    paddingVertical:4,
+    paddingBottom:15,
+    marginBottom:Height(22)
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily:"Inter-Medium",
+    color: '#333',
+    marginTop:5
+  },
+  selectedColorText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  selectedSizeText: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily:"Inter-SemiBold",
+  
+  },
+  colorsContainer: {
+    paddingBottom: 8,
+  },
+  colorOption: {
+    alignItems: 'center',
+    marginRight:Height(8)
+    
+  },
+  colorImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 35,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#EEE',
+    marginBottom: 2,
+    position: 'relative',
+   
+  },
+  colorImage: {
+    width: '100%',
+    height: '100%',
+   
+  },
+  selectedColor: {
+    borderWidth: 2,
+    borderColor: COLORS.green,
+    shadowColor: COLORS.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  checkBadge: {
+    position: 'absolute',
+    bottom: 6,
+    right: 6,
+    backgroundColor: COLORS.green,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  colorName: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+  },
+  selectedColorName: {
+    color: COLORS.green,
+    fontFamily:"Inter-Medium",
+  },
+  sizesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    // marginTop: 4,
+  },
+  sizeOption: {
+    width: 50,
+    height: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    marginBottom: 12,
+    backgroundColor: '#FFF',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  selectedSize: {
+    borderColor: COLORS.green,
+    backgroundColor: ' #88BACD',
+  },
+  sizeText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
+  selectedSizeText: {
+    color: COLORS.green,
+    fontWeight: '700',
+  },
+  sizeDisabled: {
+    opacity: 0.6,
+  },
+  sizeDisabledText: {
+    color: '#999',
+  },
+  sizeOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  price: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginRight: 10,
+  },
+  originalPrice: {
+    fontSize: 14,
+    color: '#999',
+    textDecorationLine: 'line-through',
+    marginRight: 10,
+  },
+  discount: {
+    fontSize: 14,
+    fontFamily:"Inter-Medium",
+    color: '#4CAF50',
+  },
+  stockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stockText: {
+    fontSize: 14,
+    marginLeft: 6,
+  },
+});

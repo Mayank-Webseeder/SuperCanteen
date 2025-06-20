@@ -1,145 +1,226 @@
+// styles.js
 import { StyleSheet } from "react-native";
 import { FontSize, Height, Width } from "../../../constants";
 import { COLORS } from "../../../constants";
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
-    disabledStyle: {
-    opacity: 1
-  },
-   searchContainer: {
-   
-    paddingHorizontal: 13,
-    paddingVertical: 5,
+  header: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    
+    alignItems: 'center',
+    marginBottom: Height(12),
+    paddingHorizontal: Width(14),
   },
-   searchInput: {
-    height: Height(34),  // Reduced height
+  headerTitle: {
+    fontSize: FontSize(20),
+    fontFamily: 'Inter-Bold',
+    color: COLORS.black,
+  },
+  itemCount: {
+    fontSize: FontSize(14),
+    color: COLORS.gray,
+    fontFamily: 'Inter-Regular',
+  },
+  searchContainer: {
+    marginBottom: Height(12),
+     paddingHorizontal: Width(6),
+  },
+  searchInput: {
+     height: Height(34),  // Reduced height
     borderRadius: 5,     // Tighter radius
     paddingHorizontal: 12,
-    fontSize: 14,
-    flex:1        // Smaller font
+    fontSize: 14,        // Smaller font
+    marginHorizontal:7
   },
   categoryContainer: {
-    paddingVertical: 10,
-    paddingLeft: 12,
+    paddingBottom: Height(8),
+  },
+  categoryScroll: {
+    paddingHorizontal: Width(10),
   },
   categoryItem: {
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    marginRight: 10,
-    backgroundColor: '#f5f5f5',
+    borderRadius: 24,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    marginRight: 8,
+    backgroundColor: '#f8f8f8',
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   activeCategoryItem: {
-    backgroundColor: '#2E6074',
+    backgroundColor:COLORS.green,
+    borderColor:COLORS.green,
   },
   categoryText: {
     fontSize: FontSize(13),
-    color: '#333',
-    fontFamily: 'Inter-SemiBold'
+    color: COLORS.gray,
+    fontFamily: 'Inter-Medium'
   },
   activeCategoryText: {
-    color: '#fff',
+    color: COLORS.white,
+    fontFamily: 'Inter-SemiBold'
   },
   listContainer: {
-    paddingHorizontal: 15,
-    paddingBottom: 20,
+    paddingBottom: Height(20),
+     paddingHorizontal:Height(8),
+    paddingVertical:8,
+     
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: Height(8),
+ 
   },
   card: {
-    width: Width(145),
-    marginLeft: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
+    width: Width(152),
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
     overflow: 'hidden',
-    marginBottom: 16,
     position: 'relative',
-    padding: 8,
-    paddingBottom: Height(10),
-    marginTop:Height(10)
+    padding: Height(12),
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    marginBottom: Height(4),
+      marginHorizontal:8
+
   },
   closeBtn: {
     position: 'absolute',
-    right: 6,
-    top: 6,
-    zIndex: 1,
+    right: 12,
+    top: 12,
+    zIndex: 10,
     padding: 4,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderRadius: 20,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
     width: '100%',
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 8,
+    height: Height(140),
+    marginBottom: Height(8),
   },
   content: {
     flex: 1,
     justifyContent: 'space-between',
   },
-  brand: {
-    fontSize: 13,
-    fontFamily: 'Inter-Bold',
-    color: '#000',
-  },
   title: {
-    fontSize: 12,
-    color: '#555',
+    fontSize: FontSize(13),
+    color: COLORS.black,
+    fontFamily: 'Inter-SemiBold',
+    marginBottom: Height(4),
+    lineHeight: Height(18),
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Height(6),
+  },
+  price: {
+    fontSize: FontSize(15),
+    fontFamily: 'Inter-Bold',
+    color: COLORS.black,
+    marginRight: Width(6),
+  },
+  originalPrice: {
+    fontSize: FontSize(12),
+    color: COLORS.gray,
     fontFamily: 'Inter-Regular',
-    marginBottom: 6,
-    lineHeight: Height(16),
-    marginTop: Height(1)
+    textDecorationLine: 'line-through',
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: Height(8),
   },
   stars: {
     flexDirection: 'row',
-    marginRight: 4,
+    marginRight: Width(4),
   },
   reviewText: {
-    fontSize: 11,
-    color: '#666',
+    fontSize: FontSize(11),
+    color: COLORS.gray,
+    fontFamily: 'Inter-Regular',
   },
   cartButton: {
-    borderWidth: 1,
-    borderColor: '#2E6074',
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginTop: 4,
-    height: Height(20),
-    width: Width(82),
-    marginHorizontal: 50
+    backgroundColor:COLORS.green,
+    paddingVertical: Height(8),
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cartButtonText: {
-    color: '#2E6074',
+    color: COLORS.white,
     fontFamily: 'Inter-SemiBold',
-    fontSize: FontSize(10),
-    textAlign: "center"
+    fontSize: FontSize(12),
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: Height(80),
+  },
+  emptyImage: {
+    width: Width(180),
+    height: Height(180),
+    resizeMode: 'contain',
+    marginBottom: Height(20),
+  },
+  emptyTitle: {
+    fontSize: FontSize(18),
+    color: COLORS.black,
+    fontFamily: 'Inter-Bold',
+    marginBottom: Height(4),
   },
   emptyText: {
-    fontSize: FontSize(16),
-    color: '#666',
-    fontFamily: 'Inter-SemiBold',
+    fontSize: FontSize(14),
+    color: COLORS.gray,
+    fontFamily: 'Inter-Regular',
+    marginBottom: Height(20),
+    textAlign: 'center',
   },
-   noDataContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingVertical: Height(100)
-    },
-    noDataText: {
-      fontSize: FontSize(16),
-      color: COLORS.gray
-    }
+  browseButton: {
+    backgroundColor:COLORS.green,
+    paddingVertical: Height(12),
+    paddingHorizontal: Width(32),
+    borderRadius: 24,
+  },
+  browseButtonText: {
+    color: COLORS.white,
+    fontFamily: 'Inter-SemiBold',
+    fontSize: FontSize(14),
+  },
+  noDataContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: Height(80),
+  },
+  noDataTitle: {
+    fontSize: FontSize(18),
+    color: COLORS.black,
+    fontFamily: 'Inter-Bold',
+    marginBottom: Height(4),
+  },
+  noDataText: {
+    fontSize: FontSize(14),
+    color: COLORS.gray,
+    fontFamily: 'Inter-Regular',
+    textAlign: 'center',
+    paddingHorizontal: Width(40),
+  },
+    emptyIcon: {
+    marginBottom: 20,
+    color: '#2E6074', // Or any color that matches your theme
+  },
+
 });

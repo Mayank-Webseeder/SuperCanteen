@@ -5,7 +5,6 @@ import {
   View,
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
-import CustomSearchInput from '../../../Components/searchInput';
 import CustomBtn from '../../../Components/CustomFilterBtn';
 import {useNavigation} from '@react-navigation/native';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';

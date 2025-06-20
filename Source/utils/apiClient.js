@@ -22,3 +22,9 @@ export const postData = async (endpoint, body) => {
   const response = await apiClient.post(endpoint, body);
   return response.data;
 };
+
+export const deleteData = async (endpoint) => {
+  const response = await apiClient.delete(endpoint);
+  return response.data;
+};
+
