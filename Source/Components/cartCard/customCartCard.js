@@ -365,6 +365,7 @@ const CustomCartCard = () => {
  const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
 
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);

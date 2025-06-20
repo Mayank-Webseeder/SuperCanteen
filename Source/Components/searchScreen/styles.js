@@ -94,7 +94,7 @@ export const styles = StyleSheet.create({
     marginTop: Height(4)
   },
   textStyle: {
-    fontSize: 14,
+    fontSize: 12,
     textAlign: 'center',
     marginTop: Height(5),
     fontFamily: "Inter-Medium"

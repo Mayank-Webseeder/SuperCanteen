@@ -8,7 +8,8 @@ export const styles = StyleSheet.create({
       },
       textStyle:{
             fontSize: FontSize(10.5), fontFamily: 'Inter-Medium',
-            width:Width(55)
+            width:Width(55),
+          
       },
       imageStyle:{
             borderRadius:32

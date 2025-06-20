@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,10 @@ import {
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
+import LottieView from 'lottie-react-native';
 import { styles } from './styles';
+import { addToWishlist, removeFromWishlist } from '../../../redux/slices/wishlistSlice';
 
 const CustomSimilarProducts = ({
   cardWidth = 160,
@@ -17,6 +20,47 @@ const CustomSimilarProducts = ({
   flatListContentStyle,
   onAddToCart
 }) => {
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector(state => state.wishlist.items);
+  const token = useSelector(state => state.auth.token);
+  const userId = useSelector(state => state.auth.user?.id);
+
+  const [lottieState, setLottieState] = useState({});
+  const [wishlistState, setWishlistState] = useState({});
+
+  const isInWishlist = (productId) =>
+    wishlistItems?.some(item => item._id === productId) || wishlistState[productId];
+
+  const handleWishlistToggle = (productId) => {
+    if (!token) {
+      navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'Auth', state: { routes: [{ name: 'Signin' }] } }
+        ]
+      });
+      return;
+    }
+
+    const wishlistItem = wishlistItems.find(item => item._id === productId);
+    const wishlistId = wishlistItem?.wishlistId;
+
+    if (isInWishlist(productId)) {
+      if (!wishlistId) return;
+      dispatch(removeFromWishlist({ wishlistId, userId }));
+      setWishlistState(prev => ({ ...prev, [productId]: false }));
+      setLottieState(prev => ({ ...prev, [productId]: false }));
+    } else {
+      dispatch(addToWishlist({ productId, token }));
+      setWishlistState(prev => ({ ...prev, [productId]: true }));
+      setLottieState(prev => ({ ...prev, [productId]: true }));
+    }
+
+    setTimeout(() => {
+      setLottieState(prev => ({ ...prev, [productId]: false }));
+    }, 1500);
+  };
+
   const renderItem = ({ item }) => {
     const fullStars = Math.floor(item.rating || 0);
     const stars = [...Array(5)].map((_, i) => (
@@ -42,12 +86,23 @@ const CustomSimilarProducts = ({
               style={styles.image}
               resizeMode="cover"
             />
-            
+
             {/* Wishlist Button */}
-            <TouchableOpacity style={styles.wishlistButton}>
-              <Ionicons name="heart-outline" size={18} color="#000" />
+            <TouchableOpacity style={styles.wishlistButton} onPress={() => handleWishlistToggle(item.id)}>
+              {lottieState[item.id] ? (
+                <LottieView
+                  source={require('../../../../assets/lottie/animation.json')}
+                  autoPlay
+                  loop={false}
+                  style={{ width: 32, height: 32 }}
+                />
+              ) : isInWishlist(item.id) ? (
+                <Ionicons name="heart" size={18} color="#A94442" />
+              ) : (
+                <Ionicons name="heart-outline" size={18} color="#000" />
+              )}
             </TouchableOpacity>
-            
+
             {/* Discount Badge */}
             {item.discount && (
               <View style={styles.discountBadge}>
@@ -55,12 +110,12 @@ const CustomSimilarProducts = ({
               </View>
             )}
           </View>
-          
+
           {/* Product Details */}
           <View style={styles.detailsContainer}>
             <Text style={styles.brand}>{item.brand || 'Brand'}</Text>
             <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
-            
+
             {/* Price Section */}
             <View style={styles.priceContainer}>
               <Text style={styles.price}>₹{item.price}</Text>
@@ -68,7 +123,7 @@ const CustomSimilarProducts = ({
                 <Text style={styles.originalPrice}>₹{item.mrp}</Text>
               )}
             </View>
-            
+
             {/* Rating Section */}
             {item.rating > 0 && (
               <View style={styles.ratingContainer}>
@@ -79,11 +134,11 @@ const CustomSimilarProducts = ({
                 <Text style={styles.reviews}>({item.reviews || 0})</Text>
               </View>
             )}
-            
+
             {/* Add to Cart Button */}
-         <TouchableOpacity onPress={() => onAddToCart(item)} style={styles.addButton}>
-            <Text style={styles.addButtonText}>ADD</Text>
-         </TouchableOpacity>
+            <TouchableOpacity onPress={() => onAddToCart(item)} style={styles.addButton}>
+              <Text style={styles.addButtonText}>ADD</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </TouchableOpacity>
@@ -97,10 +152,9 @@ const CustomSimilarProducts = ({
       keyExtractor={(item) => item.id.toString()}
       renderItem={renderItem}
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[styles.flatListContent,{...flatListContentStyle}]}
+      contentContainerStyle={[styles.flatListContent, { ...flatListContentStyle }]}
     />
   );
 };
-
 
 export default CustomSimilarProducts;

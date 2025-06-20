@@ -207,16 +207,16 @@ const SearchScreen = ({ navigation }) => {
               <CustomCategoryList
                 data={formattedCategories}
                 horizontal={false}
-                numColumns={3}
+                numColumns={4}
                 bgColor="#D4DEF226"
-                width={Width(95)}
-                height={Height(105)}
+                width={Width(65)}
+                      height={Height(65)}
                 borderRadius={Width(5)}
                 textColor="#333"
                 textStyle={styles.textStyle}
                 containerStyle={styles.containerView}
-                gap={Width(20)}
-                imageSize={Height(65)}
+                gap={Width(19)}
+                       imageSize={Height(50)}
                 navigation={navigation}
               />
             </View>

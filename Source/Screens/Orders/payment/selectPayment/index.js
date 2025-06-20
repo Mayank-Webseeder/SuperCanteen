@@ -10,7 +10,6 @@ import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { Height } from "@constants";
-import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
 
@@ -58,9 +57,6 @@ const PaymentMethodScreen = ({ navigation }) => {
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Select Payment Method" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Bank Offers Section */}
-     <BankOfferView navigation={navigation} cardStyle={{marginTop:Height(8)}}/>
-
         {/* Payment Options */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { Height, Width } from '@constants';
+import { Height } from '@constants';
 import Header from '../../../otherComponents/home/header';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
@@ -23,7 +23,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedCategoryItems, setSelectedCategoryItems] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [initialCategoriesLoaded, setInitialCategoriesLoaded] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -57,11 +57,12 @@ const HomeScreen = ({ navigation }) => {
   const fetchInitialData = useCallback(async () => {
     setError(null);
     try {
-      await Promise.all([
-        dispatch(getCategories()),
-        dispatch(getSubCategories())
-      ]);
-      setInitialLoadComplete(true);
+      // First load categories only
+      await dispatch(getCategories());
+      setInitialCategoriesLoaded(true);
+      
+      // Then load other data in background
+      dispatch(getSubCategories());
     } catch (err) {
       setError('Failed to load initial data');
     }
@@ -84,19 +85,19 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [dispatch, selectedCategoryIndex]);
 
-  // Set initial category
+  // Set initial category as soon as categories are available
   useEffect(() => {
-    if (!categoriesLoading && categories?.length > 0 && selectedCategoryIndex === null) {
+    if (categories?.length > 0 && selectedCategoryIndex === null) {
       setSelectedCategoryIndex(categories[0]._id);
     }
-  }, [categoriesLoading, categories]);
+  }, [categories]);
 
   // Fetch products when category changes
   useEffect(() => {
-    if (selectedCategoryIndex) {
+    if (selectedCategoryIndex && initialCategoriesLoaded) {
       dispatch(getProductsByCategory(selectedCategoryIndex));
     }
-  }, [selectedCategoryIndex]);
+  }, [selectedCategoryIndex, dispatch, initialCategoriesLoaded]);
 
   // Initial data load
   useEffect(() => {
@@ -119,13 +120,9 @@ const HomeScreen = ({ navigation }) => {
   }, [products]);
 
   // Loading states
-  const contentLoading = useMemo(() => {
-    return (subCategoriesLoading || productsLoading) && initialLoadComplete;
-  }, [subCategoriesLoading, productsLoading, initialLoadComplete]);
-
-  if (!initialLoadComplete) {
-    return <FullScreenLoader />;
-  }
+  const showSkeleton = useMemo(() => {
+    return (subCategoriesLoading || productsLoading) && initialCategoriesLoaded;
+  }, [subCategoriesLoading, productsLoading, initialCategoriesLoaded]);
 
   // Header component
   const stickyHeader = (
@@ -153,7 +150,7 @@ const HomeScreen = ({ navigation }) => {
       );
     }
 
-    if (contentLoading) {
+    if (showSkeleton) {
       return <ContentSkeletonLoader type="home" itemCount={3} />;
     }
 
@@ -191,6 +188,11 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
+  // Only show full screen loader if we don't have categories yet
+  if (categoriesLoading && !categories?.length) {
+    return <FullScreenLoader />;
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -204,9 +206,9 @@ const HomeScreen = ({ navigation }) => {
             refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[COLORS.green, COLORS.green]} 
-            tintColor="#FFFFFF" // iOS only
-            title="Refreshing..." // iOS only
-            titleColor="#FFFFFF" // iOS only
+            tintColor="#FFFFFF"
+            title="Refreshing..."
+            titleColor="#FFFFFF"
           />
         }
       />

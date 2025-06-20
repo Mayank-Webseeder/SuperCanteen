@@ -63,6 +63,11 @@ const ProductDetails = ({ navigation, route }) => {
   const selectedItem = item ? item : productData;
   const selectedProductId = item ? item.id : productId;
   const image = item ? selectedItem?.images?.[0] : formattedProduct?.images[0]
+  const basePrice = selectedItem.offerPrice || selectedItem.price;
+const variantPrice = selectedVariant
+  ? basePrice + (selectedVariant.additionalPrice)
+  : basePrice;
+  
   setAnimationImage(image);
   setAddtoCartLoading(true);
   setAnimationKey(prev => prev + 1);
@@ -70,7 +75,7 @@ const ProductDetails = ({ navigation, route }) => {
          dispatch(addToCart({
             productId:selectedProductId,
             quantity: 1,
-            price: selectedItem.offerPrice || selectedItem.price,
+            price: variantPrice,
             isDigital: selectedItem.isDigital
           }))
             .then(() => {

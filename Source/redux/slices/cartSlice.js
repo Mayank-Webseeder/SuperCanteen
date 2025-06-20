@@ -203,6 +203,9 @@ const cartSlice = createSlice({
     initialized: false
   },
   reducers: {
+    markCartInitialized: (state) => {
+      state.initialized = true;
+    },
     clearCart: (state) => {
       state.items = [];
       state.lastUpdated = Date.now();
@@ -211,10 +214,10 @@ const cartSlice = createSlice({
       state.items = action.payload;
     },
      setGuestCart: (state, action) => {
-      state.items = action.payload;
-      state.isGuest = true;
-      state.initialized = true; // Mark as initialized
-    }
+       state.items = action.payload;
+    state.initialized = true; // Mark as initialized
+
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -239,13 +242,10 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
-
-         console.log("Dddddddddddddddddd",action.payload)
       })
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-         console.log("REheeeeeeeeeeeeeeeeeeee",action.error)
       })
       .addCase(updateCartItem.pending, (state) => {
         state.loading = true;
@@ -272,5 +272,5 @@ const cartSlice = createSlice({
   }
 });
 
-export const { clearCart } = cartSlice.actions;
+export const { clearCart , markCartInitialized  } = cartSlice.actions;
 export default cartSlice.reducer;

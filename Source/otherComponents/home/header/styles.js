@@ -3,7 +3,7 @@ import { COLORS, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   container: {
-    paddingTop: Height(15),
+    paddingTop: Height(17),
   },
   searchContainer: {
     flexDirection: 'row',

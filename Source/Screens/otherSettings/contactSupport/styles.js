@@ -7,7 +7,8 @@ export const styles = StyleSheet.create({
     padding: 16,
   },
   containerStyle:{
-     marginTop:Height(6)
+     marginTop:Height(6),
+     left:Height(7)
   },
   helpTitle: {
     fontSize: 20,

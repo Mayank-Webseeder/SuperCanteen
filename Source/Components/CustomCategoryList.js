@@ -15,12 +15,10 @@ const CustomCategoryList = ({
   data = [],
   selected,
   onSelect = () => {},
-  bgColor = '#F1FFF0',
   width = Width(90),
   height = Height(110),
   imageSize = Width(50),
   borderRadius = Width(20),
-  selectedBorderColor = '#30A46C',
   textColor = COLORS.text,
   containerStyle,
   textStyle,
@@ -127,6 +125,7 @@ const CustomCategoryList = ({
                     color: isSelected ? COLORS.green : textColor,
                     marginTop: Height(8),
                     fontWeight: isSelected ? '600' : '500',
+                    
                   },
                 ]}
                 numberOfLines={1}
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
 allIconCircleContainer: {
   position: 'absolute',
   right: -Width(20), // half outside
-  top: Height(-5),
+  top: Height(-2),
   width: Width(49),
   height: Width(50),
   alignItems: 'center',

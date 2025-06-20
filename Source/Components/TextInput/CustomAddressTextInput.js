@@ -1,31 +1,38 @@
+import { COLORS, Height } from '@constants/index';
 import React from 'react';
-import { TextInput, StyleSheet, View } from 'react-native';
+import { TextInput, StyleSheet, View, Text } from 'react-native'; // ✅ FIXED
 
-const CustomAddressTextInput = ({ value, onChangeText, placeholder }) => {
+const CustomAddressTextInput = ({ value, onChangeText, placeholder, keyboardType, error, inputStyle }) => {
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.input}
+        style={[styles.input, inputStyle]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        underlineColorAndroid="transparent" // For Android to remove default underline
+        placeholderTextColor={COLORS.darkGray}
+        underlineColorAndroid="transparent"
+        keyboardType={keyboardType}
       />
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    // optional wrapper styles
-  },
+  container: {},
   input: {
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0', // or any color you want
-    paddingVertical: 8,         // optional for spacing
-    paddingHorizontal: 4,    
-    width:"100%"  ,
- 
+    borderBottomColor: '#E0E0E0',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    width: '100%',
+  },
+  errorText: {
+    marginTop: Height(6),
+    color: 'red',
+    fontSize: 13,
+    lineHeight: Height(16),
   },
 });
 

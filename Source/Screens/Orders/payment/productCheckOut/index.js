@@ -4,7 +4,6 @@ import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomAuthButton from '../../../../Components/CustomAuthButton';
 import {  Width } from "@constants";
 import PriceSummaryCard from '@components/Common/PriceSummaryCard';
-import BankOfferView from '../../../../otherComponents/checkOut/bankOffer';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
 import CouponView from '../../../../otherComponents/checkOut/couponView';
 import { styles } from './styles';
@@ -38,9 +37,6 @@ const ConfirmOrderScreen = ({ navigation , route }) =>
         {/* Price Summary */}
           <PriceSummaryCard />
 
-        {/* Bank Offers */}
-      <BankOfferView  navigation={navigation} />
-      
       </ScrollView>
 
       {/* Footer */}

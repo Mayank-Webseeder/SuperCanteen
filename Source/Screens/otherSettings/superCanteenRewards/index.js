@@ -9,7 +9,7 @@ const SuperCanteenRewards = ({ navigation }) => {
     <View style={styles.container}>
       {/* Back Button */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-         <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
+         <Entypo name="chevron-small-left" size={28} color="#1C1B1F" />
       </TouchableOpacity>
 
       {/* Rewards Content */}

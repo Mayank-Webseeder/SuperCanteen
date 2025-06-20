@@ -18,14 +18,12 @@ import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import CustomSearch from '../../../Components/searchInput';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 
-
 const ProductsScreen = ({ navigation, route }) => {
   const { selectedCategory, categoryData } = route?.params || {};
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(null);
-  const [selectedCategoryItems, setSelectedCategoryItems] = useState({});
-  const [pageLoading, setPageLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+  const [initialLoad, setInitialLoad] = useState(true);
   const dispatch = useDispatch();
   
   const {
@@ -45,10 +43,11 @@ const ProductsScreen = ({ navigation, route }) => {
     return subCategories?.filter(item => item?.category?._id === selectedCategory) || [];
   }, [subCategories, selectedCategory]);
 
-  // Extract unique brands from products
+  // Extract unique brands from products - now reacts instantly to category changes
   const brands = useMemo(() => {
+    if (!products || products.length === 0) return [];
     const brandMap = {};
-    products?.forEach(product => {
+    products.forEach(product => {
       if (product.brand && !brandMap[product.brand._id]) {
         brandMap[product.brand._id] = product.brand;
       }
@@ -56,17 +55,21 @@ const ProductsScreen = ({ navigation, route }) => {
     return Object.values(brandMap);
   }, [products]);
 
+  // Load products when category changes
   useEffect(() => {
     if (selectedCategory) {
-      dispatch(getProductsByCategory(selectedCategory));
+      setInitialLoad(true);
+      dispatch(getProductsByCategory(selectedCategory))
+        .unwrap()
+        .then(() => setInitialLoad(false))
+        .catch(() => setInitialLoad(false));
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, dispatch]);
 
   useEffect(() => {
     const apiError = subCategoriesError || productsError;
     if (apiError) {
       setError(apiError);
-      setPageLoading(false);
     }
   }, [subCategoriesError, productsError]);
 
@@ -74,10 +77,11 @@ const ProductsScreen = ({ navigation, route }) => {
     setRefreshing(true);
     setError(null);
     try {
-      await dispatch(getSubCategories());
-      if (selectedSubCategoryId) {
-        await dispatch(fetchProductsBySubcategory(selectedSubCategoryId));
-      }
+      await Promise.all([
+        dispatch(getSubCategories()),
+        dispatch(getProductsByCategory(selectedCategory)),
+        selectedSubCategoryId && dispatch(fetchProductsBySubcategory(selectedSubCategoryId))
+      ]);
     } catch (err) {
       setError('Failed to refresh data');
     } finally {
@@ -85,38 +89,26 @@ const ProductsScreen = ({ navigation, route }) => {
     }
   };
 
+  // Load subcategories
   useEffect(() => {
-    const fetchData = async () => {
-      setError(null);
-      try {
-        await dispatch(getSubCategories());
-      } catch (err) {
-        setError('Failed to load data');
-      }
-    };
-
     if (selectedCategory) {
-      fetchData();
+      dispatch(getSubCategories());
     }
   }, [selectedCategory]);
 
+  // Set initial subcategory
   useEffect(() => {
     if (!subCategoriesLoading && filteredSubCategories.length > 0 && !selectedSubCategoryId) {
       setSelectedSubCategoryId(filteredSubCategories[0]._id);
     }
   }, [subCategoriesLoading, filteredSubCategories]);
 
+  // Load products for subcategory
   useEffect(() => {
-    if (selectedSubCategoryId) {
+    if (selectedSubCategoryId && !initialLoad) {
       dispatch(fetchProductsBySubcategory(selectedSubCategoryId));
     }
-  }, [selectedSubCategoryId]);
-
-  useEffect(() => {
-    if (!subCategoriesLoading && !productsLoading) {
-      setPageLoading(false);
-    }
-  }, [subCategoriesLoading, productsLoading]);
+  }, [selectedSubCategoryId, initialLoad]);
 
   const Sliders = [
     {
@@ -125,7 +117,7 @@ const ProductsScreen = ({ navigation, route }) => {
     }
   ];
 
-  if (pageLoading) {
+  if (initialLoad && (!products || products.length === 0)) {
     return <FullScreenLoader />;
   }
 
@@ -136,25 +128,34 @@ const ProductsScreen = ({ navigation, route }) => {
           data={[1]} // dummy item to render layout
           renderItem={() => (
             <View>
-              {/* Header */}
+              {/* Header - unchanged */}
               <View style={styles.headerView}>
-                <CustomHeader  navigation={navigation} label={categoryData?.name} />
+                <CustomHeader navigation={navigation} label={categoryData?.name} />
                 <View style={styles.searchView}>
                   <Pressable onPress={() => navigation.navigate('Search')}>
                     <CustomSearch
-            disabledStyle={styles.disabledStyle}
-            backgroundColor={'#fff'}
-            disabled
-            containerStyle={styles.searchInput}
-            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
-          />
+                      disabledStyle={styles.disabledStyle}
+                      backgroundColor={'#fff'}
+                      disabled
+                      containerStyle={styles.searchInput}
+                      inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
+                    />
                   </Pressable>
                 </View>
               </View>
 
-              {/* Brand carousel or banner */}
+              {/* Brand carousel or banner - now updates instantly */}
               {brands.length > 0 ? (
-                <Brandcarousel carouselContainerStyle={styles.carouselContainerStyle} brands={brands}  imageStyle={styles.imageStyle} contentContainerStyle={styles.mainViewcontainerStyle}  cardStyle={styles.cardStyle}  paginationStyle={styles.paginationStyle} dotStyle={styles.dotStyle}/>
+                <Brandcarousel 
+                  carouselContainerStyle={styles.carouselContainerStyle} 
+                  brands={brands}  
+                  imageStyle={styles.imageStyle} 
+                  contentContainerStyle={styles.mainViewcontainerStyle}  
+                  cardStyle={styles.cardStyle}  
+                  paginationStyle={styles.paginationStyle} 
+                  dotStyle={styles.dotStyle}
+                  key={`brands-${selectedCategory}`} // Force re-render on category change
+                />
               ) : (
                 <View style={styles.sectionSpacing}>
                   <CustomCasual
@@ -170,7 +171,7 @@ const ProductsScreen = ({ navigation, route }) => {
 
               <HorizontalLine lineStyle={styles.lineStyle} />
 
-              {/* Subcategories */}
+              {/* Subcategories - unchanged */}
               {filteredSubCategories.length > 0 ? (
                 <View style={styles.productContainer}>
                   <ProductCategories
@@ -187,14 +188,14 @@ const ProductsScreen = ({ navigation, route }) => {
                 </Text>
               )}
 
-              {/* Products */}
+              {/* Products - unchanged */}
               {error ? (
                 <ErrorView
                   message={error}
                   onRetry={handleRefresh}
                   containerStyle={{ marginVertical: Height(20) }}
                 />
-              ) : productsLoading ? (
+              ) : (productsLoading && !initialLoad) ? (
                 <ContentSkeletonLoader type="list" itemCount={4} />
               ) : products.length > 0 ? (
                 <>

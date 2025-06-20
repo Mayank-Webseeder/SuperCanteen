@@ -52,7 +52,6 @@ appVersion: {
   },
   gradientHeader: {
     overflow: 'hidden',
-    paddingBottom:5
   },
   categories:{
   marginHorizontal:Height(5),

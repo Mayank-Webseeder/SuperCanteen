@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { FontSize, Width } from '../constants';
+import { COLORS, FontSize, Width } from '../constants';
 
 const AddressRow = ({ navigation, address }) => {
   // Format address for display
@@ -64,9 +64,9 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   changeText: {
-    color: '#2E60749E',
+    color: COLORS.green,
     fontFamily: 'Inter-SemiBold',
-    fontSize: FontSize(12),
+    fontSize: FontSize(13),
     textDecorationLine: "underline"
   },
 });

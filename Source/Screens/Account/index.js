@@ -38,30 +38,21 @@ const AccountScreen = ({ navigation }) => {
   const footerItems = [
     {
       label: 'ABOUT US',
-      icon: <MaterialCommunityIcons name="help-circle-outline" size={22} color="#2E6074" />,
-      action: () => navigation.navigate('FAQ'),
+  icon: <MaterialCommunityIcons name="help-circle-outline" size={22} color="#2E6074" />,
+     action: () => navigation.navigate('AboutUs'),
+
     },
     {
       label: 'PRIVACY POLICY',
       icon: <Ionicons name="information-circle-outline" size={22} color="#2E6074" />,
-      action: () => navigation.navigate('AboutUs'),
+      action: () => navigation.navigate('PrivacyPolicy'),
     },
     {
       label: 'FAQ',
   icon: <MaterialCommunityIcons name="shield-lock-outline" size={22} color="#2E6074" />,
-      action: () => navigation.navigate('PrivacyPolicy'),
+      action: () => navigation.navigate('FAQ'),
     },
   ];
-
-  const handleProtectedNavigation = (screenName) => {
-  if (user && user.username) {
-    navigation.navigate(screenName);
-  } else {
-    navigation.navigate('Auth', {
-      screen: 'Signin'
-    });
-  }
-};
 
 
   return (

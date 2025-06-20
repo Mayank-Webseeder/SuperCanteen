@@ -16,7 +16,7 @@ export default function AccountStack() {
     <Stack.Screen name="LoginSecurity" component={LoginSecurityScreen} />
     <Stack.Screen name="EditField" component={EditFieldScreen} />
     <Stack.Screen name="HelpSupport" component={HelpSupport} />
- 
+   
   </Stack.Navigator>
   )
 }

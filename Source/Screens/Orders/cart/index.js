@@ -8,11 +8,9 @@ import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomCartCard from '../../../Components/cartCard/customCartCard';
 import CustomBtn from '../../../Components/CustomFilterBtn';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
-import { Height } from '../../../constants';
 import AddressView from '../../../otherComponents/checkOut/addressView';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 import PriceSummaryCard from '@components/Common/PriceSummaryCard';
-import BankOfferView from '../../../otherComponents/checkOut/bankOffer';
 import CouponView from '../../../otherComponents/checkOut/couponView';
 import { styles } from './styles';
 import Footer from './footer';
@@ -90,9 +88,6 @@ export default function CartScreen({ navigation }) {
               {/* Coupon */}
               <View style={styles.blankView} />
               <CouponView navigation={navigation} />
-
-              {/* Bank Offers */}
-              <BankOfferView navigation={navigation} cardStyle={{ marginTop: Height(3) }} />
             </View> 
 
             {/* Custom Checkbox for Terms */}

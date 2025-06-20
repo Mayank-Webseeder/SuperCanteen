@@ -31,14 +31,11 @@ const SigninScreen = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress', 
-      () => {
-        BackHandler.exitApp();
-        return true;
-      }
-    );
+ useEffect(() => {
+  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+    navigation.replace('App'); 
+    return true; 
+  });
 
     const loadCredentials = async () => {
       try {
@@ -56,7 +53,7 @@ const SigninScreen = () => {
     loadCredentials();
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));

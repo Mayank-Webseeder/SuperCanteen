@@ -81,7 +81,7 @@ export const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: COLORS.white,
-    padding: 16,
+    padding:16,
     borderTopWidth: 1,
     borderTopColor: '#E8E8E8',
     shadowColor: '#000',
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   paymentButton: {
-    paddingBottom: Height(8),
+    paddingBottom: Height(6),
     alignItems: 'center',
     marginBottom: 8,
     paddingTop:Height(5)

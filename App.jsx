@@ -6,8 +6,9 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store, persistor } from './Source/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import CustomFlashMessage from './Source/Components/flashMessage';
-import { loadGuestCart, fetchCartItems } from './Source/redux/slices/cartSlice'; 
+import { fetchCartItems, markCartInitialized } from './Source/redux/slices/cartSlice';
 import { fetchWishlistItems } from './Source/redux/slices/wishlistSlice';
+import { loadGuestCart } from './Source/redux/slices/cartSlice';
 
 const AppWrapper = () => {
   return (
@@ -28,13 +29,30 @@ const App = () => {
 
   // Initialize cart on app start
   useEffect(() => {
-    const initializeCart = () => {
+    const initializeCart = async () => {
       if (token) {
-        dispatch(fetchCartItems());
+        // For authenticated users
+        try {
+          await dispatch(fetchCartItems());
+        } catch (error) {
+          console.error('Error fetching cart items:', error);
+          dispatch(markCartInitialized());
+        }
       } else {
-        dispatch(loadGuestCart());
+        // For guest users
+        try {
+          const guestCart = await loadGuestCart();
+          dispatch({ 
+            type: 'cart/setGuestCart', 
+            payload: guestCart 
+          });
+        } catch (error) {
+          console.error('Error loading guest cart:', error);
+          dispatch(markCartInitialized());
+        }
       }
     };
+    
     if (!initialized) {
       initializeCart();
     }
@@ -42,9 +60,17 @@ const App = () => {
 
   // Initialize wishlist on login
   useEffect(() => {
-    if (token && user?.id) {
-      dispatch(fetchWishlistItems(user.id));
-    }
+    const initializeWishlist = async () => {
+      if (token && user?.id) {
+        try {
+          await dispatch(fetchWishlistItems(user.id));
+        } catch (error) {
+          console.error('Error fetching wishlist items:', error);
+        }
+      }
+    };
+    
+    initializeWishlist();
   }, [token, user?.id, dispatch]);
 
   return (

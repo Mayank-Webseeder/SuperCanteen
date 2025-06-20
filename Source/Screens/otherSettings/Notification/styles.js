@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { COLORS } from '../../../constants';
+import { COLORS, Height } from '../../../constants';
 
 export const styles = StyleSheet.create({
   container: {
@@ -7,7 +7,8 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop:Height(4)
   },
   notificationCard: {
     flexDirection: 'row',
@@ -15,7 +16,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 14,
-    marginBottom: 12,
+    marginBottom: Height(13),
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowOffset: { width: 0, height: 1 },

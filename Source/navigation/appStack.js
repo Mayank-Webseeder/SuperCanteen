@@ -21,20 +21,19 @@ import PaymentScreen from '../Screens/otherSettings/paymentMethods';
 import NotificationScreen from '../Screens/otherSettings/notification';
 import OffersScreen from '../Screens/otherSettings/offers';
 import HelpScreen from '../Screens/otherSettings/helpSupport';
-import SplashScreen from '@screens/splash';
 import ContactSupport from '@screens/otherSettings/contactSupport';
 import SuperCanteenRewards from '@screens/otherSettings/superCanteenRewards';
-
+import AboutUsScreen from '@screens/otherSettings/aboutUs';
+import PrivacyPolicyScreen from '@screens/otherSettings/privacyPolicy';
+import FAQScreen from '@screens/otherSettings/faq';
 
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-   
-      <Stack.Screen name="Main" component={BottomTabs} />
-      
+    <Stack.Navigator  screenOptions={{ headerShown: false }}>   
       {/* Public screens */}
+       <Stack.Screen name="Main" component={BottomTabs} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="ProductDetails" component={ProductDetails} />
       <Stack.Screen name="ProdcutCategory" component={ProdcutCategory} />
@@ -42,9 +41,12 @@ const AppStack = () => {
       <Stack.Screen name="Help" component={HelpScreen} />
       <Stack.Screen name="Offers" component={OffersScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
-        <Stack.Screen name="ContactSupport" component={ContactSupport} />
+      <Stack.Screen name="ContactSupport" component={ContactSupport} />
       <Stack.Screen name="SuperCanteenRewards" component={SuperCanteenRewards} />
-      
+      <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="FAQ" component={FAQScreen} />
+ 
       {/* Protected screens */}
       <Stack.Screen name="Wishlist" component={WishlistScreen} />
       <Stack.Screen name="OrderDetailScreen" component={OrderDetailScreen} />
@@ -57,6 +59,7 @@ const AppStack = () => {
       <Stack.Screen name="Coupons" component={CouponScreen} />
       <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
+     
     </Stack.Navigator>
   );
 };
