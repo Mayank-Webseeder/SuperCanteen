@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
   container: {
     //position: 'relative',
     // marginVertical: 16,
+    marginTop:10
   },
   headerAccent: {
     //position: 'absolute',

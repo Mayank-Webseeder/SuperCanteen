@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   starContainer: {
     flexDirection: 'row',
@@ -63,6 +63,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    justifyContent:"space-between"
+  },
+   stockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   price: {
     fontSize: 22,
@@ -141,6 +146,7 @@ export const styles = StyleSheet.create({
       color: 'gray',
       fontSize: 14,
       marginVertical: Height(4),
+     
     },
     label: {
       color: '#000',

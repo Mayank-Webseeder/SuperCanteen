@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  Easing
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import { COLORS } from '@constants/index';
 import { styles } from './styles';
 import { IMGURL } from '../../../utils/dataFormatters';
 
-const VariantSelector = ({ product, onVariantChange }) => {
+const VariantSelector = ({ product, onVariantChange , selectionError,setSelectionError }) => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -22,124 +14,207 @@ const VariantSelector = ({ product, onVariantChange }) => {
   const scaleAnim = useState(new Animated.Value(1))[0];
   const fadeAnim = useState(new Animated.Value(0))[0];
 
+  // Initialize with product variants
   useEffect(() => {
     if (product?.variants?.length > 0) {
-      const colors = {};
+      const colors = {
+        'default-default': {
+          name: 'Default',
+          code: 'default',
+          image: getImageUrl(product.images?.[0]),
+          isDefault: true,
+          hasSizes: false
+        }
+      };
+      
       product.variants.forEach(variant => {
         const key = `${variant.color.name}-${variant.color.code}`;
         if (!colors[key]) {
           colors[key] = {
             name: variant.color.name,
             code: variant.color.code,
-            image: variant.images?.[0] || null,
+            image: getImageUrl(variant.images?.[0] || product.images?.[0]),
+            isDefault: false,
+            hasSizes: variant.size !== undefined
           };
+        } else {
+          colors[key].hasSizes = colors[key].hasSizes || variant.size !== undefined;
         }
       });
+      
       setColorOptions(Object.values(colors));
-
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
-        easing: Easing.out(Easing.ease),
         useNativeDriver: true
       }).start();
     }
   }, [product]);
 
+  const getImageUrl = (img) => {
+    if (!img) return null;
+    if (typeof img === 'string') return img.startsWith('http') ? img : `${IMGURL}${img}`;
+    if (img.url) return img.url.startsWith('http') ? img.url : `${IMGURL}${img.url}`;
+    return null;
+  };
+
   const updateAvailableSizes = (color) => {
+    setSelectionError(null); // Clear error when updating sizes
+    
+    if (!color) {
+      setAvailableSizes([]);
+      return;
+    }
+
+    const colorOption = colorOptions.find(c => c.code === color.code);
+    if (!colorOption?.hasSizes) {
+      setAvailableSizes([]);
+      trySelectVariant(color, null);
+      return;
+    }
+
     const sizes = product.variants
-      .filter(v => v.color.name === color.name && v.color.code === color.code && v.size)
+      .filter(v => 
+        v.color.name === color.name && 
+        v.color.code === color.code && 
+        v.size
+      )
       .map(v => v.size);
     setAvailableSizes([...new Set(sizes)]);
   };
 
-  const trySelectVariant = (color, size) => {
-    console.log("Trying to select variant with:", { color, size });
+ const trySelectVariant = (color, size) => {
+  setSelectionError(null);
 
-    const variant = product.variants.find(v =>
+  let variant = null;
+
+  // Default color logic
+  if (!color || color.isDefault) {
+    variant = product.variants.find(v =>
+      (!v.color || v.color.name === 'Default' || v.color.code === 'default') &&
+      (!v.size || v.size === size)
+    );
+  } else {
+    // Check if size is required but not selected
+    const requiresSize = product.variants.some(v =>
       v.color.name === color.name &&
       v.color.code === color.code &&
-      (v.size === size || !v.size || size === null)
+      v.size !== undefined
     );
 
-    if (variant) {
-      console.log("Variant selected:", variant);
-      setSelectedVariant(variant);
-      if (typeof onVariantChange === 'function') {
-        onVariantChange(variant);
-      }
-    } else {
-      console.log("No matching variant found for:", { color, size });
+    if (requiresSize && !size) {
+      setSelectionError('Please select a size for this color');
+      setSelectedVariant(null);
+      return;
     }
-  };
 
-  const handleColorSelect = (color) => {
-    // console.log("Color selected:", color);
-
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 3,
-        tension: 300,
-        useNativeDriver: true
-      })
-    ]).start();
-
-    setSelectedColor(color);
-    setSelectedSize(null);
-    updateAvailableSizes(color);
-
-    const hasSizes = product.variants.some(v =>
+    // Try to find matching variant
+    variant = product.variants.find(v =>
       v.color.name === color.name &&
       v.color.code === color.code &&
-      v.size
+      (v.size === size || (!v.size && !size))
     );
+  }
 
-    // if (!hasSizes) {
-      trySelectVariant(color, null);
-    // }
-  };
+  setSelectedVariant(variant);
+  onVariantChange?.(variant);
+};
+
+const handleColorSelect = (color) => {
+  setSelectionError(null); // Clear previous error
+
+  Animated.sequence([
+    Animated.timing(scaleAnim, {
+      toValue: 0.95,
+      duration: 100,
+      useNativeDriver: true
+    }),
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 3,
+      tension: 300,
+      useNativeDriver: true
+    })
+  ]).start();
+
+  if (color.isDefault) {
+    setSelectedColor(null);
+    setSelectedSize(null);
+    setAvailableSizes([]);
+    trySelectVariant(null, null);
+    return;
+  }
+
+  setSelectedColor(color);
+  setSelectedSize(null);
+  updateAvailableSizes(color);
+
+  // 🟡 NEW: check if this color requires sizes
+  const hasSizes = product.variants.some(
+    (v) =>
+      v.color.name === color.name &&
+      v.color.code === color.code &&
+      v.size !== undefined
+  );
+
+  if (hasSizes) {
+    setSelectionError('Please select a size for this color'); // ❗ Show immediate error
+  } else {
+    trySelectVariant(color, null); // No size needed
+  }
+};
+
 
   const handleSizeSelect = (size) => {
-    console.log("Size selected:", size);
+    setSelectionError(null); // Clear error on size selection
     setSelectedSize(size);
-    if (selectedColor) {
-      trySelectVariant(selectedColor, size);
-    }
+    trySelectVariant(selectedColor, size);
   };
 
+
   const renderColorOption = (colorOption, index) => {
-    const isSelected = selectedColor?.code === colorOption.code;
+    const isSelected = colorOption.isDefault 
+      ? !selectedColor 
+      : selectedColor?.code === colorOption.code;
+    
+    const imageSource = colorOption.image ? { uri: colorOption.image } : null;
+
     return (
       <TouchableOpacity
         key={index}
         onPress={() => handleColorSelect(colorOption)}
         style={styles.colorOption}
+        activeOpacity={0.7}
       >
         <Animated.View style={[
           styles.colorImageContainer,
           isSelected && styles.selectedColor,
+          colorOption.isDefault && styles.defaultOption,
           { transform: [{ scale: isSelected ? scaleAnim : 1 }] }
         ]}>
-          {colorOption.image && (
+          {imageSource ? (
             <FastImage 
-              source={{ uri: `${IMGURL}${colorOption.image}` }} 
+              source={imageSource}
               style={styles.colorImage}
-              resizeMode="cover"
+              resizeMode={FastImage.resizeMode.cover}
             />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="image-outline" size={24} color="#CCC" />
+            </View>
           )}
+          
           {isSelected && (
-            <View style={styles.checkBadge}>
-              <Ionicons name="checkmark" size={14} color="#FFF" />
+            <View style={colorOption.isDefault ? styles.defaultBadge : styles.checkBadge}>
+              <Ionicons 
+                name={colorOption.isDefault ? "close" : "checkmark"} 
+                size={14} 
+                color="#FFF" 
+              />
             </View>
           )}
         </Animated.View>
-        <Text style={[styles.colorName, isSelected && styles.selectedColorName]} numberOfLines={1}>
+        <Text style={[styles.colorName, isSelected && styles.selectedColorName]}>
           {colorOption.name}
         </Text>
       </TouchableOpacity>
@@ -154,14 +229,24 @@ const VariantSelector = ({ product, onVariantChange }) => {
       v.color.code === selectedColor?.code &&
       v.countInStock > 0
     );
+    
     return (
       <TouchableOpacity
         key={index}
         onPress={() => isAvailable && handleSizeSelect(size)}
-        style={[styles.sizeOption, isSelected && styles.selectedSize, !isAvailable && styles.sizeDisabled]}
+        style={[
+          styles.sizeOption,
+          isSelected && styles.selectedSize,
+          !isAvailable && styles.sizeDisabled,
+        ]}
         disabled={!isAvailable}
+        activeOpacity={0.7}
       >
-        <Text style={[styles.sizeText, isSelected && styles.selectedSizeText, !isAvailable && styles.sizeDisabledText]}>
+        <Text style={[
+          styles.sizeText,
+          isSelected && styles.selectedSizeText,
+          !isAvailable && styles.sizeDisabledText
+        ]}>
           {size}
         </Text>
         {!isAvailable && <View style={styles.sizeOverlay} />}
@@ -172,12 +257,15 @@ const VariantSelector = ({ product, onVariantChange }) => {
   if (!product?.variants?.length) return null;
 
   return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+   <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Select Color</Text>
-        {selectedColor && <Text style={styles.selectedColorText}>{selectedColor.name}</Text>}
+        <Text style={styles.sectionTitle}>Similar products</Text>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.colorsContainer}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.colorsContainer}
+      >
         {colorOptions.map(renderColorOption)}
       </ScrollView>
 
@@ -185,42 +273,22 @@ const VariantSelector = ({ product, onVariantChange }) => {
         <>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Select Size</Text>
-            {selectedSize && <Text style={styles.selectedSizeText}>Size: {selectedSize}</Text>}
           </View>
-          <View style={styles.sizesContainer}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.sizesContainer}
+          >
             {availableSizes.map(renderSizeOption)}
-          </View>
+          </ScrollView>
+                {selectionError && (
+ 
+    <Text style={styles.errorText}>{selectionError}</Text>
+ 
+)}
         </>
       )}
 
-      <View style={styles.infoContainer}>
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>
-            ₹{selectedVariant ? product.offerPrice + selectedVariant.additionalPrice : product.offerPrice}
-          </Text>
-          {product.mrp > product.offerPrice && (
-            <Text style={styles.originalPrice}>
-              ₹{product.mrp + (selectedVariant?.additionalPrice || 0)}
-            </Text>
-          )}
-          <Text style={styles.discount}>
-            {Math.round(((product.mrp - product.offerPrice) / product.mrp) * 100)}% OFF
-          </Text>
-        </View>
-
-        {selectedVariant && (
-          <View style={styles.stockContainer}>
-            <Ionicons 
-              name={selectedVariant.countInStock > 0 ? 'checkmark-circle' : 'close-circle'}
-              size={16} 
-              color={selectedVariant.countInStock > 0 ? COLORS.green : COLORS.error} 
-            />
-            <Text style={[styles.stockText, { color: selectedVariant.countInStock > 0 ? COLORS.green : COLORS.error }]}>
-              {selectedVariant.countInStock > 0 ? `${selectedVariant.countInStock} in stock` : 'Out of stock'}
-            </Text>
-          </View>
-        )}
-      </View>
     </Animated.View>
   );
 };

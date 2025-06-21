@@ -50,6 +50,9 @@ appVersion: {
   horizontalLine:{
     marginTop:Height(15)
   },
+  mainStyle:{
+    marginHorizontal:4
+  },
   gradientHeader: {
     overflow: 'hidden',
   },

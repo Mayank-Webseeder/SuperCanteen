@@ -210,7 +210,7 @@ const SearchScreen = ({ navigation }) => {
                 numColumns={4}
                 bgColor="#D4DEF226"
                 width={Width(65)}
-                      height={Height(65)}
+                height={Height(65)}
                 borderRadius={Width(5)}
                 textColor="#333"
                 textStyle={styles.textStyle}

@@ -70,119 +70,166 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
 
+ 
   // Filter options extraction with memoization
-  const filterOptions = useMemo(() => {
-    const brands = new Set();
-    const colors = new Set();
-    const sizes = new Set();
-    let hasNewProducts = false;
-    let hasPopularProducts = false;
+const filterOptions = useMemo(() => {
+  const brands = new Set();
+  const colors = new Set();
+  const sizes = new Set();
+  let hasNewProducts = false;
+  let hasPopularProducts = false;
 
-   products.forEach(product => {
-  if (product.brandName) brands.add(product.brandName);
-
-  product.variants?.forEach(variant => {
-    const color = variant.color;
-    if (typeof color === 'string' && color.trim() !== '') {
-      colors.add(color.trim());
+  products.forEach(product => {
+    // ✅ Add brand safely
+    if (product.brand?.name) {
+      brands.add(product.brand.name);
     }
 
-    if (variant.size) {
-      variant.size.split(',').forEach(size => {
-        const trimmedSize = size.trim();
-        if (trimmedSize !== '') sizes.add(trimmedSize);
-      });
+    // ✅ Loop through variants
+    product.variants?.forEach(variant => {
+      // ✅ Add color safely
+      const color = typeof variant.color === 'string' ? variant.color.trim() : '';
+      if (color) {
+        colors.add(color);
+      }
+
+      // ✅ Add sizes safely
+      if (typeof variant.size === 'string') {
+        variant.size.split(',').forEach(size => {
+          const trimmedSize = size.trim();
+          if (trimmedSize) {
+            sizes.add(trimmedSize);
+          }
+        });
+      }
+    });
+
+    // ✅ Check if new product
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    if (new Date(product.createdAt) > oneMonthAgo) {
+      hasNewProducts = true;
+    }
+
+    // ✅ Check if popular
+    if (product.isBestSeller) {
+      hasPopularProducts = true;
     }
   });
 
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  if (new Date(product.createdAt) > oneMonthAgo) hasNewProducts = true;
+  return {
+    brands: Array.from(brands),
+    colors: Array.from(colors),
+    sizes: Array.from(sizes),
+    hasNewProducts,
+    hasPopularProducts,
+  };
+}, [products]);
 
-  if (product.isBestSeller) hasPopularProducts = true;
-});
-
-
-    return {
-      brands: Array.from(brands).filter(Boolean),
-      colors: Array.from(colors).filter(Boolean),
-      sizes: Array.from(sizes).filter(Boolean),
-      hasNewProducts,
-      hasPopularProducts
-    };
-  }, [products]);
 
   // Apply filters and sorting with memoization
-  const filteredProducts = useMemo(() => {
-    if (products.length === 0) return [];
+const filteredProducts = useMemo(() => {
+  if (products.length === 0) return [];
 
-    let result = [...products];
+  let result = [...products];
 
-    // Apply filters
-    if (filters.colors.length > 0) {
-      result = result.filter(product => 
-        product.variants?.some(variant => 
-          variant.color && filters.colors.includes(variant.color.trim())
-        )
-      );
-    }
+  // 🔽 1. Sort FIRST
+  switch (sortOption) {
+    case 'Price: Low to High':
+      result.sort((a, b) => (a.offerPrice || a.mrp) - (b.offerPrice || b.mrp));
+      break;
+    case 'Price: High to Low':
+      result.sort((a, b) => (b.offerPrice || b.mrp) - (a.offerPrice || a.mrp));
+      break;
+    case 'Discount':
+      result.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
+      break;
+    case 'Rating: High to Low':
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case 'Rating: Low to High':
+      result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+      break;
+    case 'Best Seller':
+      result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+      break;
+    case 'Popular':
+    default:
+      result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+      break;
+  }
 
-    if (filters.sizes.length > 0) {
-      result = result.filter(product => 
-        product.variants?.some(variant => {
-          if (!variant.size) return false;
-          const sizes = variant.size.split(',').map(s => s.trim());
-          return sizes.some(size => filters.sizes.includes(size));
-        })
-      );
-    }
+  // 🔽 2. Apply filters AFTER sorting
+ if (filters.colors.length > 0) {
+  result = result.filter(product =>
+    product.variants?.some(variant => {
+      const color = typeof variant.color === 'string' ? variant.color.trim() : '';
+      return color && filters.colors.includes(color);
+    })
+  );
+}
 
-    if (filters.brands.length > 0) {
-      result = result.filter(product => 
-        product.brandName && filters.brands.includes(product.brandName)
-      );
-    }
 
-    if (filters.isNew) {
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      result = result.filter(product => 
-        new Date(product.createdAt) > oneMonthAgo
-      );
-    }
+  if (filters.sizes.length > 0) {
+  result = result.filter(product =>
+    product.variants?.some(variant => {
+      if (typeof variant.size !== 'string') return false;
+      const sizes = variant.size.split(',').map(s => s.trim());
+      return sizes.some(size => filters.sizes.includes(size));
+    })
+  );
+}
 
-    if (filters.isPopular) {
-      result = result.filter(product => product.isBestSeller);
-    }
 
-    // Apply sorting
-    switch (sortOption) {
-      case 'Price: Low to High':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'Price: High to Low':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'Discount':
-        result.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
-        break;
-      case 'Rating: High to Low':
-        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'Rating: Low to High':
-        result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-        break;
-      case 'Best Seller':
-        result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
-        break;
-      case 'Popular':
-      default:
-        result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
-        break;
-    }
+ if (filters.brands.length > 0) {
+  result = result.filter(product =>
+    product.brand?.name && filters.brands.includes(product.brand.name)
+  );
+}
 
-    return result;
-  }, [products, filters, sortOption]);
+
+  if (filters.isNew) {
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    result = result.filter(product => new Date(product.createdAt) > oneMonthAgo);
+  }
+
+  if (filters.isPopular) {
+    result = result.filter(product => product.isBestSeller);
+  }
+
+  return result;
+}, [products, filters, sortOption]);
+
+  // Dynamic Sort Options Based on Available Product Data
+const availableSortOptions = useMemo(() => {
+  if (products.length === 0) return ['Popular'];
+
+  const hasOfferPrice = products.some(p => p.offerPrice || p.mrp);
+  const hasDiscount = products.some(p => (p.discountPercent || 0) > 0);
+  const hasRating = products.some(p => (p.rating || 0) > 0);
+  const hasBestSeller = products.some(p => p.isBestSeller === true);
+
+  const options = ['Popular'];
+
+  if (hasOfferPrice) {
+    options.push('Price: Low to High', 'Price: High to Low');
+  }
+
+  if (hasDiscount) {
+    options.push('Discount');
+  }
+
+  if (hasBestSeller) {
+    options.push('Best Seller');
+  }
+
+  if (hasRating) {
+    options.push('Rating: High to Low', 'Rating: Low to High');
+  }
+
+  return options;
+}, [products]);
 
   // Reset all filters
   const resetFilters = useCallback(() => {
@@ -276,6 +323,17 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     setShowSheet(false);
   }, []);
 
+  const getActiveFilterCount = (filters) => {
+  let count = 0;
+  count += filters.colors.length;
+  count += filters.sizes.length;
+  count += filters.brands.length;
+  if (filters.isNew) count++;
+  if (filters.isPopular) count++;
+  return count;
+};
+
+
   // Render sections
   const renderSection = useCallback(({ item }) => item, []);
   
@@ -283,7 +341,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     <View key="product-category-content">
       {/* Header */}
       <View style={styles.headerView}>
-        <CustomHeader navigation={navigation} label={categoryData?.name || 'Products'} />
+        <CustomHeader showCartIcon navigation={navigation} label={categoryData?.name || 'Products'} />
         <View style={styles.searchView}>
           <Pressable onPress={() => navigation.navigate('Search')}>
             <CustomSearch
@@ -320,41 +378,48 @@ const ProductCategoryScreen = ({ navigation, route }) => {
       )}
 
       {/* Filter Buttons */}
-      <View style={styles.bottomSheetContainer}>
-        <SortBottomSheet 
-          visible={sortSheetVisible} 
-          onClose={() => setSortSheetVisible(false)}
-          onApply={handleSortApply}
-          selectedOption={sortOption}
-        />
-        <CustomBottomSheet 
-          visible={showSheet} 
-          onClose={() => setShowSheet(false)}
-          onApply={handleFilterApply}
-          initialFilters={filters}
-          filterOptions={filterOptions}
-          products={products}
-          onReset={resetFilters}
-        />
-        <CustomFilterBtn
-          title="Filter"
-          width={80}
-          height={30}
-          onPress={() => setShowSheet(true)}
-          icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
-        />
-        <CustomFilterBtn
-          title="Sort"
-          width={80}
-          height={30}
-          onPress={() => setSortSheetVisible(true)}
-          icon={
-            <View style={{ transform: [{ rotate: '270deg' }] }}>
-              <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
-            </View>
-          }
-        />
+   <View style={styles.bottomSheetContainer}>
+  <SortBottomSheet 
+    visible={sortSheetVisible} 
+    onClose={() => setSortSheetVisible(false)}
+    onApply={handleSortApply}
+    selectedOption={sortOption}
+    options={availableSortOptions}
+  />
+
+  <CustomBottomSheet 
+    visible={showSheet} 
+    onClose={() => setShowSheet(false)}
+    onApply={handleFilterApply}
+    initialFilters={filters}
+    filterOptions={filterOptions}
+    products={products}
+    onReset={resetFilters}
+  />
+
+  {/* ✅ Updated Filter Button with Active Count */}
+  <CustomFilterBtn
+   title={'Filter'}
+    // title={`Filter${getActiveFilterCount(filters) > 0 ? ` (${getActiveFilterCount(filters)})` : ''}`}
+    width={80}
+    height={30}
+    onPress={() => setShowSheet(true)}
+    icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
+  />
+
+  <CustomFilterBtn
+    title="Sort"
+    width={80}
+    height={30}
+    onPress={() => setSortSheetVisible(true)}
+    icon={
+      <View style={{ transform: [{ rotate: '270deg' }] }}>
+        <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
       </View>
+    }
+  />
+</View>
+
 
       <HorizontalLine />
 

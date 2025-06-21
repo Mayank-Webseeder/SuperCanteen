@@ -1,42 +1,38 @@
-import { COLORS, Height } from "@constants/index";
+import { COLORS, FontSize, Height } from "@constants/index";
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     backgroundColor: '#FFF',
-    borderRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius:12,
     marginVertical: 16,
     marginTop: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 3,
-    marginHorizontal:Height(12),
+    elevation: 2,
     paddingVertical:4,
-    paddingBottom:15,
-    marginBottom:Height(22)
+    paddingBottom:12,
+    marginBottom:Height(18)
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: Height(6),
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: FontSize(14),
     fontFamily:"Inter-Medium",
     color: '#333',
     marginTop:5
   },
-  selectedColorText: {
-    fontSize: 14,
-    color: '#666',
-  },
   selectedSizeText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.green,
     fontFamily:"Inter-SemiBold",
   
   },
@@ -114,16 +110,12 @@ export const styles = StyleSheet.create({
   },
   selectedSize: {
     borderColor: COLORS.green,
-    backgroundColor: ' #88BACD',
+    backgroundColor: '#D6E4EA',
   },
   sizeText: {
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
-  },
-  selectedSizeText: {
-    color: COLORS.green,
-    fontWeight: '700',
   },
   sizeDisabled: {
     opacity: 0.6,
@@ -137,42 +129,32 @@ export const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: 'rgba(255,255,255,0.7)',
   },
-  infoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  price: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginRight: 10,
-  },
-  originalPrice: {
-    fontSize: 14,
-    color: '#999',
-    textDecorationLine: 'line-through',
-    marginRight: 10,
-  },
-  discount: {
-    fontSize: 14,
-    fontFamily:"Inter-Medium",
-    color: '#4CAF50',
-  },
-  stockContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  stockText: {
-    fontSize: 14,
-    marginLeft: 6,
-  },
+  defaultOption: {
+  backgroundColor: '#F5F5F5',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+defaultBadge: {
+  position: 'absolute',
+  bottom: 6,
+  right: 6,
+  backgroundColor: COLORS.gray,
+  width: 22,
+  height: 22,
+  borderRadius: 11,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+imagePlaceholder: {
+  width: '100%',
+  height: '100%',
+  backgroundColor: '#F5F5F5',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: 35,
+},
+errorText: {
+  color: COLORS.error,
+  fontSize: 14
+}
 });

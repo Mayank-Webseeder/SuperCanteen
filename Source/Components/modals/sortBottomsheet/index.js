@@ -17,7 +17,7 @@ import { styles } from './styles';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = Height(650);
 
-const sortOptions = [
+const defaultSortOptions = [
   'Popular',
   'Price: Low to High',
   'Price: High to Low',
@@ -27,7 +27,7 @@ const sortOptions = [
   'Rating: Low to High',
 ];
 
-const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelectedOption }) => {
+const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelectedOption, options }) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const [selectedOption, setSelectedOption] = useState(propSelectedOption);
   const insets = useSafeAreaInsets();
@@ -112,7 +112,7 @@ const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelect
             contentContainerStyle={styles.optionsContainer}
             showsVerticalScrollIndicator={false}
           >
-            {sortOptions.map((option) => (
+         {(options || defaultSortOptions).map((option) => (
               <TouchableOpacity
                 key={option}
                 style={[

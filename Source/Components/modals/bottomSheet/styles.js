@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS, Height, Width } from "../../../constants";
+import { COLORS, FontSize, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
   backdrop: {
@@ -81,38 +81,28 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-  optionItem: {
-    width: '50%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#f9f9f9',
-  },
   colorItem:{
  width: '50%',
    flexDirection: 'row',
     alignItems: 'center',
     padding: 8,
   },
-  optionItemSelected: {
-    borderColor: '#376275',
-    backgroundColor: '#f0f8ff',
-  },
   colorCircleStyle: {
-    width: Height(40),
-    height:  Width(30),
-    marginRight: 8
+    width: Height(23),
+    height:  Width(23),
+    marginRight: 8,
+    borderRadius:4
   },
   optionText: {
     fontSize: 14,
     color: '#333',
-    flex: 1,
+    // flex: 1,
+  },
+  checkboxTouchable:{
+    flexDirection:"row"
   },
   checkIcon: {
-    marginLeft: 'auto',
+    marginLeft:8
   },
   sizeOption: {
     width: '22%',
@@ -140,12 +130,13 @@ export const styles = StyleSheet.create({
 checkboxContainer: {
   flexDirection: 'row',
   alignItems: 'center',
-  marginTop: 15,
+  marginTop: 0,
 },
 checkboxLabel: {
   marginLeft: 10,
-  fontSize: 16,
+  fontSize: FontSize(13),
   color: '#333',
+  width:Width(160)
 },
 rightPaneContainer: {
   padding: 15,
@@ -162,9 +153,7 @@ optionsGrid: {
   justifyContent: 'flex-start',
 },
 optionItem: {
-  width: '30%',
-  flexDirection: 'row',
-  alignItems: 'center',
+  flexDirection:"row",
   padding: 8,
   marginBottom: 10,
   borderRadius: 5,
@@ -174,6 +163,7 @@ optionItem: {
 optionItemSelected: {
   borderColor: '#376275',
   backgroundColor: '#f0f8ff',
+ 
 },
 colorCircle: {
   width: 20,
@@ -183,9 +173,6 @@ colorCircle: {
 },
 optionText: {
   fontSize: 14,
-},
-checkIcon: {
-  marginLeft: 'auto',
 },
 sizeOption: {
   width: 60,

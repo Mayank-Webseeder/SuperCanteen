@@ -143,6 +143,9 @@ const CartCard = React.memo(
     isLoading,
     isDeleteLoading,
   }) => {
+
+    console.log("ITEM IS ===========================>",item)
+
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
 
@@ -275,7 +278,7 @@ const CartCard = React.memo(
             <Text style={styles.title} numberOfLines={1}>
               {product?.name}
             </Text>
-            <Text style={styles.price}>₹{price}</Text>
+            <Text style={styles.price}>₹{item.selectedPrice}</Text>
           </View>
 
           <Text style={styles.subtitle} numberOfLines={2}>
@@ -399,6 +402,7 @@ const handleSelectAll = useCallback(() => {
 
 
  const confirmAction = useCallback(() => {
+  console.log("dddddddddddddddddddd",selectedItems.length)
   if (selectedItems.length > 0) { // Check if items are selected
     handleDeleteSelected();
   }

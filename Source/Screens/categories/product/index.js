@@ -130,7 +130,7 @@ const ProductsScreen = ({ navigation, route }) => {
             <View>
               {/* Header - unchanged */}
               <View style={styles.headerView}>
-                <CustomHeader navigation={navigation} label={categoryData?.name} />
+                <CustomHeader showCartIcon  navigation={navigation} label={categoryData?.name} />
                 <View style={styles.searchView}>
                   <Pressable onPress={() => navigation.navigate('Search')}>
                     <CustomSearch

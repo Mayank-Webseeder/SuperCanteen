@@ -91,7 +91,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   containerView: {
-    marginTop: Height(4)
+    marginTop: Height(4),
+    
   },
   textStyle: {
     fontSize: 12,

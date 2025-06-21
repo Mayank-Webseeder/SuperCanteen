@@ -16,7 +16,8 @@ export default function ProductCategories({
   selectedCategoryItems = {},
   setSelectedCategoryItems = () => {},  // default no-op function for safety
   containerStyle,
-  gotoScreen
+  gotoScreen,
+  mainStyle
 }) {
   const { categories } = useSelector((state) => state.category);
   const { loading: subCategoriesLoading, error: subCategoriesError } = useSelector((state) => state.subCategory);
@@ -41,7 +42,7 @@ export default function ProductCategories({
 
 
   return (
-    <View style={{ marginTop: Height(2) }}>
+    <View style={{ marginTop: Height(2),...mainStyle}}>
       {subCategoriesError ? (
         <ErrorView 
           message={subCategoriesError}

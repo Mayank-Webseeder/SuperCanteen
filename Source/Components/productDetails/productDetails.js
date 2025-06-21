@@ -19,7 +19,7 @@ import AddressRow from '@components/CustomAddressRow';
 import { PolicyIcon } from '../../../assets/Icons/svgIcons/policyIcon';
 import { CurruncyRupees } from '../../../assets/Icons/svgIcons/currencyRupees';
 import CustomProductDetailsData from '@components/CustomProductDetailsData';
-import { Height, Width } from '@constants/index';
+import { Height } from '@constants/index';
 import Description from './description';
 import CustomZoomCasual from './zommableImage/customZoomCasual';
 import { fetchProductsBySubcategory } from '../../redux/slices/subCategoryProductSlice';
@@ -39,7 +39,9 @@ const ProductDetails = ({ navigation, route }) => {
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationKey, setAnimationKey] = useState(0); 
   const [animationImage, setAnimationImage] = useState(null);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariant, setSelectedVariant] = useState(null)
+   const [selectionError, setSelectionError] = useState(null);
+
   const productData = product?.product;
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
@@ -47,19 +49,22 @@ const ProductDetails = ({ navigation, route }) => {
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
-   const imagesToShow = selectedVariant?.images?.length > 0
-  ? selectedVariant.images.map(img => `${IMGURL}${img}`)
-  : productData?.images?.map(img => `${IMGURL}${img}`) || [];
+  const imagesToShow = selectedVariant?.images?.length > 0 
+  ? selectedVariant.images.map(img => img?.url ? `${IMGURL}${img.url}` : `${IMGURL}${img}`)
+  : productData?.images?.length > 0 
+    ? productData.images.map(img => img?.url ? `${IMGURL}${img.url}` : `${IMGURL}${img}`) 
+    : [];
 
+const handleVariantChange = (variant) => {
+  setSelectedVariant(variant); 
+};
 
- 
-
-     const handleVariantChange = (variant) => {
-    setSelectedVariant(variant);
-  };
- 
- 
  const OnAddToCart = (item) =>{
+   if (!selectedVariant) {
+    setSelectionError("Please select a size for this color");
+    return;
+  }
+
   const selectedItem = item ? item : productData;
   const selectedProductId = item ? item.id : productId;
   const image = item ? selectedItem?.images?.[0] : formattedProduct?.images[0]
@@ -67,7 +72,6 @@ const ProductDetails = ({ navigation, route }) => {
 const variantPrice = selectedVariant
   ? basePrice + (selectedVariant.additionalPrice)
   : basePrice;
-  
   setAnimationImage(image);
   setAddtoCartLoading(true);
   setAnimationKey(prev => prev + 1);
@@ -151,7 +155,6 @@ const variantPrice = selectedVariant
         imageUrl={animationImage}
         onComplete={handleAnimationComplete}
       />
-
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -183,14 +186,14 @@ const variantPrice = selectedVariant
   data={imagesToShow}  
 
 />
-
-         
         </View>
         <Description productData={formattedProduct}  selectedVariant={selectedVariant}/>
            {formattedProduct?.variants?.length > 0 && (
             <VariantSelector 
               product={formattedProduct} 
-              onVariantChange={handleVariantChange}
+             onVariantChange={handleVariantChange}
+             selectionError={selectionError} 
+             setSelectionError={setSelectionError}
             />
           )}
         <AddressRow
@@ -226,7 +229,7 @@ const variantPrice = selectedVariant
           <Text style={styles.errorText}>Failed to load similar products</Text>
         ) : similarProductsData.length > 0 ? (
           <View style={styles.sectionWrapper}>
-            <Text style={styles.sectionTitle}>Similar Products for You</Text>
+            <Text style={styles.sectionTitle}>You might also like</Text>
             <CustomSimilarProducts
               data={similarProductsData}
               navigation={navigation}
@@ -239,19 +242,23 @@ const variantPrice = selectedVariant
       </ScrollView>
 
       <BottomPurchaseBar
-        addToCartLoading={addToCartLoading}
-        onSharePress={() => console.log('Share Pressed')}
-        onAddToCart={() => OnAddToCart()}
-        onBuyNow={() =>{
-            if (!user || !user.username) {
+  addToCartLoading={addToCartLoading}
+  onSharePress={() => console.log('Share Pressed')}
+  onAddToCart={() => OnAddToCart()}
+  onBuyNow={() => {
+    if (!user || !user.username) {
       navigation.reset({
         index: 0,
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-       navigation.navigate('ProductCheckoutScreen')}}
+      navigation.navigate('ProductCheckoutScreen');
     }
-      />
+  }}
+  selectedVariant={selectedVariant}
+  selectionError={selectionError}
+/>
+
     </View>
   );
 };

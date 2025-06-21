@@ -132,14 +132,14 @@ export const styles = StyleSheet.create({
   },
   secondaryButton: {
     borderWidth: 1,
-    borderColor: '#008ECC',
+    borderColor: COLORS.green,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 4,
     minWidth: 120,
   },
   secondaryButtonText: {
-    color: '#008ECC',
+    color: COLORS.green,
     fontFamily: 'Inter-SemiBold',
     textAlign: 'center',
   },

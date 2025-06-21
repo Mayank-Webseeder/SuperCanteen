@@ -136,25 +136,27 @@ export const removeCartItem = createAsyncThunk(
   'cart/removeCartItem',
   async (itemId, { getState }) => {
     const { auth } = getState();
-    
+
     if (!auth.token) {
       const guestCart = await loadGuestCart();
-      const updatedCart = guestCart.filter(item => item.id !== itemId);
+      const updatedCart = guestCart.filter(item =>
+        item.id !== itemId && item._id !== itemId
+      );
       await saveGuestCart(updatedCart);
-      return updatedCart;
+      return { updatedCart, itemId, isGuest: true };
     }
 
     await axios.delete(`${CART_BASE}/deleteCartItemById/${itemId}`, {
       headers: { Authorization: `Bearer ${auth.token}` }
     });
-    
-    // Fetch updated cart after modification
+
     const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
       headers: { Authorization: `Bearer ${auth.token}` }
     });
-    return response.data.data;
+    return { updatedCart: response.data.data, itemId, isGuest: false };
   }
 );
+
 
 export const mergeGuestCart = createAsyncThunk(
   'cart/mergeGuestCart',
@@ -242,6 +244,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
+        console.log("FULLFIELD DATA IS==================>",action.payload)
       })
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
@@ -260,10 +263,22 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(removeCartItem.fulfilled, (state, action) => {
-        state.items = action.payload || [];
-        state.lastUpdated = Date.now();
-      })
+     .addCase(removeCartItem.fulfilled, (state, action) => {
+  const { updatedCart, itemId, isGuest } = action.payload;
+
+  if (isGuest) {
+    // Handle guest cart removal
+    state.items = state.items.filter(
+      item => item.id !== itemId && item._id !== itemId
+    );
+  } else {
+    // Handle server cart update
+    state.items = updatedCart || [];
+  }
+
+  state.lastUpdated = Date.now();
+})
+
       .addCase(mergeGuestCart.fulfilled, (state, action) => {
         state.items = action.payload || state.items;
         state.lastUpdated = Date.now();

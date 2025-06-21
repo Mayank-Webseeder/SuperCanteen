@@ -180,6 +180,7 @@ const HomeScreen = ({ navigation }) => {
             selectedCategoryItems={selectedCategoryItems}
             setSelectedCategoryItems={setSelectedCategoryItems}
             gotoScreen={'ProdcutCategory'}
+            mainStyle={styles.mainStyle}
           />
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel horizontal={true} navigation={navigation} products={products} />

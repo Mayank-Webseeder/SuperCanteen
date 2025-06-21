@@ -1,3 +1,4 @@
+import { COLORS } from "@constants/index";
 import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
@@ -44,7 +45,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: COLORS.green,
     borderRadius: 20,
     padding: 6,
   },

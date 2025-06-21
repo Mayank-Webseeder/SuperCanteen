@@ -36,6 +36,7 @@ const CustomBottomSheet = ({
   const [isNew, setIsNew] = useState(initialFilters.isNew || false);
   const [isPopular, setIsPopular] = useState(initialFilters.isPopular || false);
 
+
   useEffect(() => {
     if (visible) {
       Animated.timing(slideAnim, {
@@ -287,19 +288,20 @@ const CustomBottomSheet = ({
             </View>
           </View>
 
-          <BottomActionButtons
-            onCancel={onClose}
-            onReset={handleReset}
-            onApply={() => {
-              onApply({
-                colors: selectedColors,
-                sizes: selectedSizes,
-                brands: selectedBrands,
-                isNew,
-                isPopular
-              });
-            }}
-          />
+        <BottomActionButtons
+  onCancel={onClose}
+  onReset={handleReset}
+  onApply={() => {
+    onApply({
+      colors: selectedColors,
+      sizes: selectedSizes,
+      brands: selectedBrands,
+      isNew,
+      isPopular
+    });
+  }}
+/>
+
         </Animated.View>
       </View>
     </Modal>
