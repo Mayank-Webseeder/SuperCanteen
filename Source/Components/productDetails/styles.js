@@ -37,13 +37,13 @@ export const styles = StyleSheet.create({
     fontSize: FontSize(16),
    fontFamily:'Inter-SemiBold',
     color: '#2E6074E8',
-    marginBottom: 7,
+    marginBottom: 5,
     lineHeight: 24,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 5,
   },
   starContainer: {
     flexDirection: 'row',
@@ -63,14 +63,15 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
-    justifyContent:"space-between"
+    justifyContent:"space-between",
+    marginTop:3
   },
    stockContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   price: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     color: '#2E6074',
     marginRight: 8,

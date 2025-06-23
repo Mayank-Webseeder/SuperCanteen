@@ -7,28 +7,31 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius:12,
-    marginVertical: 16,
-    marginTop: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 2,
+    elevation: 1,
     paddingVertical:4,
-    paddingBottom:12,
-    marginBottom:Height(18)
+    paddingBottom:7,
+    marginBottom:Height(15),
+    borderTopColor:'#F3F4F5',
+    borderTopWidth:1,
+    
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Height(6),
+    marginBottom: Height(4),
+   
   },
   sectionTitle: {
     fontSize: FontSize(14),
     fontFamily:"Inter-Medium",
     color: '#333',
-    marginTop:5
+    marginTop:3,
+    marginBottom:1
   },
   selectedSizeText: {
     fontSize: 14,
@@ -45,12 +48,12 @@ export const styles = StyleSheet.create({
     
   },
   colorImageContainer: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 35,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#EEE',
+    borderColor:'#F3F4F5',
     marginBottom: 2,
     position: 'relative',
    
@@ -81,7 +84,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   colorName: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#666',
     textAlign: 'center',
   },

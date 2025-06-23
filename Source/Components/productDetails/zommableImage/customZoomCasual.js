@@ -91,7 +91,7 @@ const CustomZoomCasual = ({
             borderRadius: radius, 
             borderWidth: borderWidth ?? 1,
             borderColor: '#E3E3E3',
-            marginBottom: data.length > 1 ? Height(25) : Height(12),
+            marginBottom: data.length > 1 ? Height(25) : Height(10),
             ...cardStyle 
           }
         ]}>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#FFF',
     overflow: 'hidden',
-    marginBottom: Height(12)
+    marginBottom: Height(10)
   },
   pagination: {
     flexDirection: 'row',

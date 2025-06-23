@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   header: {
     paddingTop: Height(12),
     paddingHorizontal: Width(16),
-    paddingBottom: Height(8),
+    paddingBottom: Height(3),
   },
   headerTitle: {
     fontSize: FontSize(15),
@@ -98,10 +98,11 @@ const styles = StyleSheet.create({
   listContent: {
     paddingLeft: Width(20),
     paddingRight: Width(20),
+    paddingTop:4,
   },
   textStyle: {
     fontSize: 12,
-    marginTop: Height(4),
+    marginTop: Height(8),
   },
   imageStyle: {
     borderRadius: Width(18),

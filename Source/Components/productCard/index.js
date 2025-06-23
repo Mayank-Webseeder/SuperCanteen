@@ -81,10 +81,26 @@ const CustomProductCard = ({
   };
 
   const getDisplayImage = (product) => {
-    if (product.images && product.images.length > 0) {
-      return { uri: product.images[0] };
+    const { images } = product;
+
+  if (!images) return { uri: '' };
+
+  if (typeof images === 'string') {
+    // Already a full image path
+    return { uri: images };
+  }
+
+  if (Array.isArray(images)) {
+    const firstImage = images[0];
+    if (typeof firstImage === 'string') {
+      return { uri: firstImage };
     }
-    return null;
+    if (typeof firstImage === 'object' && firstImage?.url) {
+      return { uri: firstImage.url };
+    }
+  }
+
+  return { uri: '' };
   };
 
   return (

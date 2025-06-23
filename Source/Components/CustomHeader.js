@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Heart Icon
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; // Heart Icon
 import { COLORS, Width } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -69,7 +69,7 @@ const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon 
 })}
             style={styles.iconContainer}
           >
-            <MaterialIcons name="favorite-border" size={24} color="#1C1B1F" />
+            <FontAwesome name="heart-o" size={20} color="#1C1B1F" />
           </TouchableOpacity>
 
           {/* Cart Icon */}
@@ -77,7 +77,7 @@ const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon 
             onPress={() => navigation.navigate('Cart')}
             style={styles.cartIconContainer}
           >
-            <Ionicons name="cart-outline" size={24} color="#1C1B1F" />
+            <Ionicons name="cart-outline" size={23} color="#1C1B1F" />
             {itemCount > 0 && (
               <Animated.View style={[styles.badge, { transform: [{ scale: scaleAnim }] }]}>
                 <Text style={styles.badgeText}>{itemCount > 9 ? '9+' : itemCount}</Text>

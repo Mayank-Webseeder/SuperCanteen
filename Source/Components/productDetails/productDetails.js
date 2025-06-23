@@ -40,59 +40,112 @@ const ProductDetails = ({ navigation, route }) => {
   const [animationKey, setAnimationKey] = useState(0); 
   const [animationImage, setAnimationImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null)
-   const [selectionError, setSelectionError] = useState(null);
+  const [selectionError, setSelectionError] = useState(null);
 
   const productData = product?.product;
+  // console.log("PRODUCTDATA IS==================>",productData)
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
   );
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
-  const imagesToShow = selectedVariant?.images?.length > 0 
-  ? selectedVariant.images.map(img => img?.url ? `${IMGURL}${img.url}` : `${IMGURL}${img}`)
-  : productData?.images?.length > 0 
-    ? productData.images.map(img => img?.url ? `${IMGURL}${img.url}` : `${IMGURL}${img}`) 
+const getImageUrls = (images) =>
+  images?.length > 0
+    ? images.map(img =>
+        img?.url
+          ? img.url.startsWith('http') ? img.url : `${IMGURL}${img.url}`
+          : typeof img === 'string' && img.startsWith('http')
+          ? img
+          : `${IMGURL}${img}`
+      )
     : [];
 
+
+const imagesToShow =
+  selectedVariant && getImageUrls(selectedVariant.images).length > 0
+    ? getImageUrls(selectedVariant.images)
+    : getImageUrls(productData?.images);
 const handleVariantChange = (variant) => {
   setSelectedVariant(variant); 
 };
+const OnAddToCart = (item) => {
+  
+  const selectedItem = item || productData;
+  const selectedProductId = selectedItem?.id || productId;
 
- const OnAddToCart = (item) =>{
-   if (!selectedVariant) {
+  const basePrice = selectedItem.offerPrice || selectedItem.price;
+
+  // 🔁 If item is coming from similar products and has variantDetails inside it (fake variant)
+  const isFromSimilarProducts = !!item;
+
+  const hasSizeVariants =
+  selectedItem?.variants?.some(variant =>
+    variant?.name?.toLowerCase()?.includes('size')
+  );
+
+  const finalVariant = isFromSimilarProducts
+    ? selectedItem?.variantDetails || {}
+    : selectedVariant || {
+        additionalPrice: 0,
+        images: selectedItem.images,
+        sku: selectedItem.sku || '',
+      };
+
+      console.log("SELECTED ITEM IS",selectedItem)
+
+  // 🛑 Don't check for selectedVariant if it's coming from similarProducts (no real variant selection)
+  if (!isFromSimilarProducts &&   hasSizeVariants && selectedItem?.variants?.length > 0 && !selectedVariant) {
     setSelectionError("Please select a size for this color");
     return;
   }
 
-  const selectedItem = item ? item : productData;
-  const selectedProductId = item ? item.id : productId;
-  const image = item ? selectedItem?.images?.[0] : formattedProduct?.images[0]
-  const basePrice = selectedItem.offerPrice || selectedItem.price;
-const variantPrice = selectedVariant
-  ? basePrice + (selectedVariant.additionalPrice)
-  : basePrice;
-  setAnimationImage(image);
+  const variantPrice = basePrice + (finalVariant?.additionalPrice || 0);
+
+  const variantImage = finalVariant?.images?.[0];
+const productImage =
+  Array.isArray(selectedItem?.images) && selectedItem.images.length > 0
+    ? selectedItem.images[0]
+    : selectedItem?.image || null;
+
+    
+
+  const imageUrl =
+  typeof variantImage === 'object' && variantImage?.url
+    ? `${IMGURL}${variantImage.url}`
+    : typeof variantImage === 'string'
+    ? `${IMGURL}${variantImage}`
+    : typeof productImage === 'object' && productImage?.url
+    ? `${IMGURL}${productImage.url}`
+    : typeof productImage === 'string'
+    ?  productImage
+    : null;
+
+  setAnimationImage(imageUrl);
   setAddtoCartLoading(true);
   setAnimationKey(prev => prev + 1);
   setShowAnimation(true);
-         dispatch(addToCart({
-            productId:selectedProductId,
-            quantity: 1,
-            price: variantPrice,
-            isDigital: selectedItem.isDigital
-          }))
-            .then(() => {
-            })
-            .catch((error) => {
-              console.log("❌ Buy now failed", error);
-               setAddtoCartLoading(false);
-             setShowAnimation(false);
 
-            })
-  }
+  const cartPayload = {
+    productId: selectedProductId,
+    quantity: 1,
+    price: variantPrice,
+    ...(selectedItem?.isDigital !== undefined && { isDigital: selectedItem?.isDigital }),
+    ...(finalVariant?._id && { variantId: finalVariant?._id }), // Only include if _id exists
+    ...(finalVariant && Object.keys(finalVariant).length > 0 && { variantDetails: finalVariant }),
+  };
 
-  
+  dispatch(addToCart(cartPayload))
+    .then(() => {
+      console.log("🛒 Added to cart:", cartPayload);
+    })
+    .catch((error) => {
+      console.log("❌ Add to cart failed", error);
+      setAddtoCartLoading(false);
+      setShowAnimation(false);
+    });
+};
+
   const handleAnimationComplete = () => {
     setShowAnimation(false);
      setAddtoCartLoading(false);
@@ -240,7 +293,6 @@ const variantPrice = selectedVariant
           <></>
         )}
       </ScrollView>
-
       <BottomPurchaseBar
   addToCartLoading={addToCartLoading}
   onSharePress={() => console.log('Share Pressed')}
@@ -258,7 +310,6 @@ const variantPrice = selectedVariant
   selectedVariant={selectedVariant}
   selectionError={selectionError}
 />
-
     </View>
   );
 };

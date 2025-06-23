@@ -21,6 +21,7 @@ import {
   updateCartItem,
   removeCartItem,
   fetchCartItems,
+  removeMultipleGuestCartItems
 } from '../../redux/slices/cartSlice';
 import { COLORS } from '@constants/index';
 import { stripHtml } from '../../utils/validation';
@@ -144,7 +145,6 @@ const CartCard = React.memo(
     isDeleteLoading,
   }) => {
 
-    console.log("ITEM IS ===========================>",item)
 
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
@@ -156,6 +156,8 @@ const CartCard = React.memo(
     const product = products[productId];
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
+     const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
+
 
     useEffect(() => {
       if (productId && !product && !isLoadingProduct && !errorProduct) {
@@ -264,14 +266,30 @@ const CartCard = React.memo(
           </View>
         </TouchableOpacity>
 
-        <FastImage
-          source={{
-            uri: `${IMGURL}${product?.images?.[0]?.url || product?.images?.[0] || ''}`,
-            priority: FastImage.priority.normal,
-          }}
-          style={styles.image}
-          resizeMode="contain"
-        />
+  
+
+<FastImage
+  source={{
+    uri: `${IMGURL}${
+      matchedVariant?.images?.[0]?.url ||
+      matchedVariant?.images?.[0] ||
+      product?.images?.[0]?.url ||
+      product?.images?.[0] ||
+      ''
+    }`,
+    priority: FastImage.priority.normal,
+  }}
+  style={styles.image}
+  resizeMode="contain"
+/>
+
+{/* {item?.variantDetails?.size && (
+  <Text style={styles.variantSizeText}>Size: {item.variantDetails.size}</Text>
+)}
+{item?.variantDetails?.color?.name && (
+  <Text style={styles.variantColorText}>Color: {item.variantDetails.color.name}</Text>
+)} */}
+
 
         <View style={styles.details}>
           <View style={styles.titleRow}>
@@ -364,11 +382,9 @@ const CustomCartCard = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [updatingItems, setUpdatingItems] = useState({});
-  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+ const [deletingItemId, setDeletingItemId] = useState(null);
  const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
-
-
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
@@ -402,7 +418,7 @@ const handleSelectAll = useCallback(() => {
 
 
  const confirmAction = useCallback(() => {
-  console.log("dddddddddddddddddddd",selectedItems.length)
+
   if (selectedItems.length > 0) { // Check if items are selected
     handleDeleteSelected();
   }
@@ -417,11 +433,7 @@ const handleSelectAll = useCallback(() => {
       selectedItems.forEach((id) => (updates[id] = true));
       setUpdatingItems(updates);
 
-      await Promise.all(
-        selectedItems.map((itemId) =>
-          dispatch(removeCartItem(itemId)).unwrap()
-        )
-      );
+      await dispatch(removeMultipleGuestCartItems(selectedItems)).unwrap();
 
       setSelectedItems([]);
       setIsAllSelected(false);
@@ -462,7 +474,7 @@ const handleSelectAll = useCallback(() => {
 
   const handleRemoveItem = useCallback(
     async (itemId) => {
-      setIsDeleteLoading(true);
+     setDeletingItemId(itemId);
       setUpdatingItems((prev) => ({ ...prev, [itemId]: true }));
       try {
         await dispatch(removeCartItem(itemId)).unwrap();
@@ -470,7 +482,7 @@ const handleSelectAll = useCallback(() => {
       } catch (error) {
         console.error('Failed to remove item:', error);
       } finally {
-        setIsDeleteLoading(false);
+       setDeletingItemId(null);
         setUpdatingItems((prev) => {
           const newState = { ...prev };
           delete newState[itemId];
@@ -580,7 +592,7 @@ const handleSelectAll = useCallback(() => {
             onSizeChange={handleSizeChange}
             onRemoveItem={handleRemoveItem}
             isLoading={updatingItems[item._id || item.id]}
-            isDeleteLoading={isDeleteLoading}
+          isDeleteLoading={deletingItemId === (item._id || item.id)} 
           />
         )}
         contentContainerStyle={styles.listContent}

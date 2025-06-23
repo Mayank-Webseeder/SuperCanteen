@@ -45,7 +45,7 @@ appVersion: {
     flex: 1,
   },
   lineStyle:{
-   marginTop:Height(12)
+   marginTop:Height(4)
   },
   horizontalLine:{
     marginTop:Height(15)

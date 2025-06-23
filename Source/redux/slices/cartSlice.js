@@ -60,7 +60,9 @@ export const addToCart = createAsyncThunk(
       qty: item.quantity,
       selectedPrice: item.price,
       isDigital: item.isDigital || false,
+      variantId: item.variantId || null,
     };
+    console.log("CART ITEM IS",cartItem)
 
    if (!auth.token) {
   const guestCart = await loadGuestCart();
@@ -71,10 +73,12 @@ export const addToCart = createAsyncThunk(
   if (existingItemIndex >= 0) {
     guestCart[existingItemIndex].qty += cartItem.qty; // ✅ fix here
   } else {
-    guestCart.push({
-      ...cartItem,
-      id: generateTempId()
-    });
+    console.log("VARIANT DETAILS RECEIVED:", item?.variantDetails);
+   guestCart.push({
+  ...cartItem,
+  id: generateTempId(),
+  variantDetails: item?.variantDetails || null, // ✅ now this will exist
+});
   }
 
   await saveGuestCart(guestCart);
@@ -158,6 +162,40 @@ export const removeCartItem = createAsyncThunk(
 );
 
 
+export const removeMultipleGuestCartItems = createAsyncThunk(
+  'cart/removeMultipleGuestCartItems',
+  async (itemIds, { getState }) => {
+    const { auth } = getState();
+
+    if (!auth.token) {
+      const guestCart = await loadGuestCart();
+
+      const updatedCart = guestCart.filter(
+        item => !itemIds.includes(item.id || item._id)
+      );
+
+      await saveGuestCart(updatedCart);
+      return { updatedCart, removedIds: itemIds, isGuest: true };
+    }
+
+    // For logged-in users, fallback to individual removal (optional optimization)
+    await Promise.all(
+      itemIds.map(itemId =>
+        axios.delete(`${CART_BASE}/deleteCartItemById/${itemId}`, {
+          headers: { Authorization: `Bearer ${auth.token}` }
+        })
+      )
+    );
+
+    const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    });
+
+    return { updatedCart: response.data.data, removedIds: itemIds, isGuest: false };
+  }
+);
+
+
 export const mergeGuestCart = createAsyncThunk(
   'cart/mergeGuestCart',
   async (_, { getState, dispatch }) => {
@@ -173,7 +211,8 @@ export const mergeGuestCart = createAsyncThunk(
           product: item.product,
           qty: item.qty,
           selectedPrice: item.selectedPrice,
-          isDigital: item.isDigital || false
+          isDigital: item.isDigital || false,
+          variantId: item.variantId || null
         }))
       };
       
@@ -244,7 +283,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
-        console.log("FULLFIELD DATA IS==================>",action.payload)
+    
       })
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
@@ -283,8 +322,21 @@ const cartSlice = createSlice({
         state.items = action.payload || state.items;
         state.lastUpdated = Date.now();
         state.initialized = true
-      });
+      })
+      .addCase(removeMultipleGuestCartItems.fulfilled, (state, action) => {
+  const { updatedCart, removedIds, isGuest } = action.payload;
+
+  if (isGuest) {
+    state.items = state.items.filter(
+      item => !removedIds.includes(item.id || item._id)
+    );
+  } else {
+    state.items = updatedCart || [];
   }
+
+  state.lastUpdated = Date.now();
+})
+}
 });
 
 export const { clearCart , markCartInitialized  } = cartSlice.actions;

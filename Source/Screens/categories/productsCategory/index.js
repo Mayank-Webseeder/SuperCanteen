@@ -32,6 +32,8 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
 
+
+
   // Filter and sort states
   const [filters, setFilters] = useState({
     colors: [],
@@ -69,6 +71,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const formattedSegments = useMemo(() => formateSubCategorySegments(segments), [segments]);
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
+
 
  
   // Filter options extraction with memoization

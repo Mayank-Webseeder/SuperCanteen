@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
@@ -10,11 +8,14 @@ import CustomAddressTextInput from '../../../Components/TextInput/customAddressT
 import CustomBottomDrop from '../../../Components/TextInput/customBottomDrop';
 import CustomButton from '../../../Components/CustomBotton';
 import { styles } from './styles';
-
-const STORAGE_KEY = '@address_data';
+import { useDispatch, useSelector } from 'react-redux';
+import { addAddress, updateAddress } from '../../../redux/slices/addressSlice';
 
 const CreateAddressScreen = ({ navigation, route }) => {
   const { addressToEdit } = route.params || {};
+  const { user } = useSelector(state => state.auth);
+  const {loading} = useSelector(state => state.address)
+  const dispatch = useDispatch();
 
   const [errors, updateFormErrors] = useState({});
 
@@ -43,7 +44,10 @@ const CreateAddressScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if (addressToEdit) {
-      setFormData(addressToEdit);
+      setFormData({
+        ...addressToEdit,
+        contact: addressToEdit.contact || addressToEdit.phone || '', // handle legacy data
+      });
     }
   }, [addressToEdit]);
 
@@ -80,48 +84,56 @@ const CreateAddressScreen = ({ navigation, route }) => {
   const saveAddressData = useCallback(async () => {
     if (!validateForm()) return;
 
+    const mappedAddress = {
+  name: formData.name,
+  contactNo: formData.contact,
+  address: formData.address,
+  city: formData.city,
+  state: formData.state,
+  postalCode: formData.pincode,
+  country: formData.country,
+  addressType: formData.addressType,
+};
+
     try {
-      const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-      const addresses = savedData ? JSON.parse(savedData) : [];
-      let updatedAddresses;
-
       if (addressToEdit) {
-        updatedAddresses = addresses.map(addr =>
-          addr.id === addressToEdit.id ? formData : addr
-        );
+        // 🔄 Update
+        await dispatch(updateAddress({
+          userId: user.id,
+          addressId: addressToEdit._id,
+          updatedAddress: mappedAddress
+        })).unwrap();
+
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Address updated successfully!',
+        });
       } else {
-        const newAddress = {
-          ...formData,
-          id: Date.now().toString(),
-        };
-        updatedAddresses = [...addresses, newAddress];
+        // ➕ Add
+        await dispatch(addAddress({
+          userId: user.id,
+          address: mappedAddress
+        })).unwrap();
+
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Address saved successfully!',
+        });
       }
-
-      if (formData.isDefault) {
-        updatedAddresses = updatedAddresses.map(addr => ({
-          ...addr,
-          isDefault: addr.id === formData.id,
-        }));
-      }
-
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedAddresses));
-
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: addressToEdit ? 'Address updated successfully!' : 'Address saved successfully!',
-      });
 
       navigation.goBack();
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: 'Failed to save the address.',
+        text2: error?.message || 'Failed to save the address.',
       });
-      console.error('Save error:', error);
+      console.error('Address save error:', error);
     }
-  }, [formData, validateForm, navigation]);
+  }, [formData, validateForm, dispatch, user.id, addressToEdit, navigation]);
+
   return (
     <View style={styles.container}>
       <CustomCommonHeader
@@ -265,8 +277,9 @@ const CreateAddressScreen = ({ navigation, route }) => {
 
         <CustomButton
           label={addressToEdit ? 'Update Address' : 'Save Address'}
-          onPress={() => saveAddressData()}
+          onPress={saveAddressData}
           style={styles.saveButton}
+          loading={loading}
         />
       </ScrollView>
     </View>

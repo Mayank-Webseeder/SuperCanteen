@@ -153,12 +153,12 @@ const CustomCategoryList = ({
               <Text
                 style={[
                   styles.categoryText,
-                  textStyle,
                   {
                     color: isSelected ? COLORS.green : textColor,
                     marginTop: Height(8),
                     fontWeight: isSelected ? '600' : '500',
                   },
+                    textStyle,
                 ]}
                 numberOfLines={1}
                 ellipsizeMode="tail"

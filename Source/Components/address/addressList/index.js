@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,116 +6,113 @@ import {
   FlatList,
   Animated,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Toast from 'react-native-toast-message';
+import { useDispatch, useSelector } from 'react-redux';
+
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import ConfirmationModal from '../../../otherComponents/confirmationModal';
-import Toast from 'react-native-toast-message';
 import { styles } from './styles';
 
-const STORAGE_KEY = '@address_data';
+import { deleteAddress } from '../../../redux/slices/addressSlice';
 
-const AddressListScreen = ({navigation}) => {
-  const [addresses, setAddresses] = useState([]);
+const AddressListScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const { user } = useSelector(state => state.auth);
+  const { loading } = useSelector(state => state.address);
+
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
+  const [addresses, setAddresses] = useState([]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      loadAddresses();
+      if (user?.addresses) {
+        setAddresses(user.addresses);
+      }
+
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
       }).start();
     });
-    return unsubscribe;
-  }, [navigation]);
 
-  const loadAddresses = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem(STORAGE_KEY);
-      const loadedAddresses = savedData ? JSON.parse(savedData) : [];
-      setAddresses(loadedAddresses);
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load addresses.',
-      });
-      console.error('Address load error:', error);
-    }
-  };
+    return unsubscribe;
+  }, [navigation, user]);
 
   const showDeleteConfirmation = (id) => {
     setAddressToDelete(id);
     setDeleteModalVisible(true);
   };
 
-  const deleteAddress = async () => {
+  const handleDelete = async () => {
     try {
-      const updatedAddresses = addresses.filter(addr => addr.id !== addressToDelete);
-      await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updatedAddresses),
-      );
-      setAddresses(updatedAddresses);
-      setDeleteModalVisible(false);
+      const res = await dispatch(
+        deleteAddress({
+          userId: user.id,
+          addressId: addressToDelete,
+        })
+      ).unwrap();
+
       Toast.show({
         type: 'success',
-        text1: 'Success',
+        text1: 'Deleted!',
         text2: 'Address deleted successfully.',
       });
-    } catch (error) {
+
+      // Filter out deleted address from local state
+      const updated = addresses.filter(addr => addr._id !== addressToDelete);
+      setAddresses(updated);
+    } catch (err) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to delete address.',
+        text1: 'Delete Failed',
+        text2: err?.message || 'Something went wrong.',
       });
-      console.error('Delete error:', error);
+      console.log('Delete address error:', err);
+    } finally {
+      setDeleteModalVisible(false);
     }
   };
 
-  const renderAddressItem = ({item}) => (
-    <Animated.View style={[styles.card, {opacity: fadeAnim}]}>
+  const renderAddressItem = ({ item }) => (
+    <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
       <View style={styles.cardHeader}>
         <View style={styles.addressTypeBadge}>
-          <Icon 
-            name={item.addressType === 'Office' ? 'business' : 'home'} 
-            size={16} 
-            color="#fff" 
+          <Icon
+            name={item.addressType === 'Office' ? 'business' : 'home'}
+            size={16}
+            color="#fff"
           />
           <Text style={styles.addressTypeText}>{item.addressType}</Text>
-          {item.isDefault && (
-            <View style={styles.defaultBadge}>
-              <Text style={styles.defaultBadgeText}>Default</Text>
-            </View>
-          )}
         </View>
-        
+
         <View style={styles.actionsContainer}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('CreateAddressScreen', {addressToEdit: item})}
-            style={styles.editButton}>
+            onPress={() => navigation.navigate('CreateAddressScreen', { addressToEdit: item })}
+            style={styles.editButton}
+          >
             <Icon name="edit" size={20} color="#2E6074" />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => showDeleteConfirmation(item.id)}
-            style={styles.deleteButton}>
+            onPress={() => showDeleteConfirmation(item._id)}
+            style={styles.deleteButton}
+          >
             <Icon name="delete" size={20} color="#e74c3c" />
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <View style={styles.cardBody}>
         <Text style={styles.nameText}>{item.name}</Text>
-        <Text style={styles.contactText}>{item.contact}</Text>
-        
+        <Text style={styles.contactText}>{item.contactNo}</Text>
+
         <View style={styles.addressDetails}>
           <Icon name="location-on" size={18} color="#2E6074" style={styles.locationIcon} />
           <Text style={styles.addressText}>
-            {[item.flatDetails, item.landmark, item.city, `${item.state} - ${item.pincode}`, item.country]
+            {[item.address, item.city, `${item.state} - ${item.postalCode}`, item.country]
               .filter(Boolean)
               .join(', ')}
           </Text>
@@ -135,12 +132,12 @@ const AddressListScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="My Addresses" />
-      
+
       {addresses.length > 0 ? (
         <FlatList
           data={addresses}
           renderItem={renderAddressItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />
@@ -150,7 +147,8 @@ const AddressListScreen = ({navigation}) => {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('CreateAddressScreen')}>
+        onPress={() => navigation.navigate('CreateAddressScreen')}
+      >
         <Icon name="add" size={24} color="#fff" />
         <Text style={styles.addButtonText}>Add New Address</Text>
       </TouchableOpacity>
@@ -160,15 +158,14 @@ const AddressListScreen = ({navigation}) => {
         title="Delete Address"
         message="Are you sure you want to delete this address?"
         onCancel={() => setDeleteModalVisible(false)}
-        onConfirm={deleteAddress}
+        onConfirm={handleDelete}
         cancelText="Cancel"
         confirmText="Delete"
         confirmColor="#e74c3c"
+        loading={loading}
       />
     </View>
   );
 };
-
-
 
 export default AddressListScreen;

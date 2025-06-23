@@ -109,7 +109,7 @@ const AccountScreen = ({ navigation }) => {
     key={name}
     onPress={() => {
       if (
-        name === 'Personal Information' &&
+        name === 'Personal Information' || name === 'Manage Address' &&
         (!user || !user.username)
       ) {
 

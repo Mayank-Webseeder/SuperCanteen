@@ -27,7 +27,7 @@ export default function Description({ productData, selectedVariant }) {
   const finalMrp = baseMrp + additionalPrice;
 
   // Stock info
-  const stock = selectedVariant?.countInStock ?? productData?.countInStock ?? 0;
+  const stock = selectedVariant?.countInStock ?? productData?.stock ?? 0;
 
   return (
     <View style={styles.detailsWrapper}>

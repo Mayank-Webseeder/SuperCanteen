@@ -17,6 +17,8 @@ import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import { styles } from './styles';
 import { COLORS } from '@constants/index';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
@@ -26,6 +28,15 @@ const HomeScreen = ({ navigation }) => {
   const [initialCategoriesLoaded, setInitialCategoriesLoaded] = useState(false);
 
   const dispatch = useDispatch();
+
+  useFocusEffect(
+  useCallback(() => {
+    if (categories?.length > 0) {
+      setSelectedCategoryIndex(categories[0]._id);
+      setSelectedCategoryItems([]);
+    }
+  }, [categories])
+);
 
   const {
     categories,

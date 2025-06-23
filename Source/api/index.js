@@ -20,6 +20,9 @@ export const CART_BASE = 'https://super-canteen-backend.onrender.com/api/cart';
 export const ADD_TO_WISHLIST = '/wishlist/addToWishlist';
 export const REMOVE_FROM_WISHLIST = '/wishlist/removeProductFromWishlist';
 export const GET_WHISHLIST_BY_USERID = '/wishlist/getWishlistByUserId'
+export const ADD_MULTIPLE_ADDRESS = '/users/add-Addresses';
+export const DELETE_ADDRESS_BY_USERID = '/users/delete-AddressByUserId';
+export const UPDATE_ADDRESS_BY_USERID = '/users/update-AddressByUserId';
 
 
 

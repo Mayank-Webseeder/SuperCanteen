@@ -28,3 +28,9 @@ export const deleteData = async (endpoint) => {
   return response.data;
 };
 
+// utils/apiClient.js
+export const putData = async (endpoint, body) => {
+  const response = await apiClient.put(endpoint, body);
+  return response.data;
+};
+
