@@ -20,6 +20,15 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
    
   },
+  footerButton:{
+   flexDirection:"row",
+   marginLeft:Height(30)
+  },
+   resetText:{
+    color:COLORS.green,
+    fontSize:14,
+    fontFamily:"Inter-SemiBold"
+  },
   panelContainer:{
    padding:15
   },
@@ -104,16 +113,6 @@ export const styles = StyleSheet.create({
   checkIcon: {
     marginLeft:8
   },
-  sizeOption: {
-    width: '22%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#f9f9f9',
-  },
   sizeOptionSelected: {
     borderColor: '#376275',
     backgroundColor: '#f0f8ff',
@@ -159,6 +158,7 @@ optionItem: {
   borderRadius: 5,
   borderWidth: 1,
   borderColor: '#ddd',
+  marginHorizontal:6
 },
 optionItemSelected: {
   borderColor: '#376275',
@@ -189,10 +189,18 @@ sizeOptionSelected: {
   backgroundColor: '#f0f8ff',
 },
 sizeText: {
-  fontSize: 16,
+  fontSize: 14,
 },
 sizeTextSelected: {
   color: '#376275',
   fontWeight: 'bold',
+},
+emptyText: {
+  fontSize: 14,
+  color: '#888',
+  textAlign: 'center',
+  marginTop: 20,
+  fontFamily:"Inter-Regular",
+  lineHeight:Height(18)
 },
 });

@@ -46,7 +46,6 @@ export default function CartScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CustomCommonHeader title={'Your Cart'} navigation={navigation} />
-
       <ScrollView 
         contentContainerStyle={styles.contentContainerStyle} 
         showsVerticalScrollIndicator={false}
@@ -86,11 +85,12 @@ export default function CartScreen({ navigation }) {
               <PriceSummaryCard />
 
               {/* Coupon */}
-              <View style={styles.blankView} />
-              <CouponView navigation={navigation} />
+              {/* 
+              <CouponView navigation={navigation} /> */}
             </View> 
 
             {/* Custom Checkbox for Terms */}
+            <View style={styles.blankView} />
             <AgreeTerms setAgreeTerms={setAgreeTerms} agreeTerms={agreeTerms} />
           </>
         )}

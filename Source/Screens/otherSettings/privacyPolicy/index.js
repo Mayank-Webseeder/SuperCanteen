@@ -27,7 +27,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
         {/* Policy Sections */}
         <View style={styles.policySection}>
           <View style={styles.policyItem}>
-            <Icon name="security" size={22} color={COLORS.green} style={styles.policyIcon} />
+            <Icon name="security" size={20} color={COLORS.green} style={styles.policyIcon} />
             <View style={styles.policyTextContainer}>
               <Text style={styles.policyTitle}>Information We Collect</Text>
               <Text style={styles.policyText}>
@@ -38,7 +38,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.policyItem}>
-            <Icon name="how-to-reg" size={22} color={COLORS.green} style={styles.policyIcon} />
+            <Icon name="how-to-reg" size={20} color={COLORS.green} style={styles.policyIcon} />
             <View style={styles.policyTextContainer}>
               <Text style={styles.policyTitle}>How We Use Your Data</Text>
               <Text style={styles.policyText}>
@@ -49,7 +49,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.policyItem}>
-            <Icon name="share" size={22} color={COLORS.green} style={styles.policyIcon} />
+            <Icon name="share" size={20} color={COLORS.green} style={styles.policyIcon} />
             <View style={styles.policyTextContainer}>
               <Text style={styles.policyTitle}>Data Sharing</Text>
               <Text style={styles.policyText}>
@@ -60,7 +60,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.policyItem}>
-            <Icon name="lock" size={22} color={COLORS.green} style={styles.policyIcon} />
+            <Icon name="lock" size={20} color={COLORS.green} style={styles.policyIcon} />
             <View style={styles.policyTextContainer}>
               <Text style={styles.policyTitle}>Security Measures</Text>
               <Text style={styles.policyText}>
@@ -70,7 +70,7 @@ const PrivacyPolicyScreen = ({ navigation }) => {
           </View>
 
           <View style={[styles.policyItem,{borderBottomWidth:0}]}>
-            <Icon name="edit" size={22} color={COLORS.green} style={styles.policyIcon} />
+            <Icon name="edit" size={20} color={COLORS.green} style={styles.policyIcon} />
             <View style={styles.policyTextContainer}>
               <Text style={styles.policyTitle}>Your Rights</Text>
               <Text style={styles.policyText}>

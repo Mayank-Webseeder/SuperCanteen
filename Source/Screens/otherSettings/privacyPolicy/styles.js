@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal:24
   },
   sectionTitle: {
-    fontSize: FontSize(17),
+    fontSize: FontSize(15),
     fontWeight: '700',
     color: COLORS.text,
     marginBottom: Height(5),
@@ -55,14 +55,14 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   policyTitle: {
-    fontSize: Height(14),
+    fontSize: Height(13),
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: Height(4),
     fontFamily: 'Inter-SemiBold',
   },
   policyText: {
-    fontSize: FontSize(13),
+    fontSize: FontSize(12.6),
     lineHeight: 22,
     color: COLORS.muted,
     fontFamily: 'Inter-Regular',

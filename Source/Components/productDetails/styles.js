@@ -128,15 +128,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
   },
-  offersButtonText: {
-    fontSize: 14,
-    color: '#2E6074',
-    fontFamily:'Inter-Bold',
-    marginRight: 4,
-    textDecorationLine:"underline"
-  },
- 
-   
     ratingRow: {
       flexDirection: 'row',
       alignItems: 'center',

@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
   },
   searchPressable: {
     flex: 1,
-    marginRight: 4,
+    marginRight: 2,
   },
   cartPressable: {
     padding: 5,
@@ -24,6 +24,7 @@ export const styles = StyleSheet.create({
     borderRadius: 5,     // Tighter radius
     paddingHorizontal: 12,
     fontSize: 14,        // Smaller font
+    marginLeft:2
   },
   cartImg: {
     width: Width(20), 

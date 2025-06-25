@@ -23,6 +23,8 @@ export const GET_WHISHLIST_BY_USERID = '/wishlist/getWishlistByUserId'
 export const ADD_MULTIPLE_ADDRESS = '/users/add-Addresses';
 export const DELETE_ADDRESS_BY_USERID = '/users/delete-AddressByUserId';
 export const UPDATE_ADDRESS_BY_USERID = '/users/update-AddressByUserId';
+export const GET_ALL_COUPONS = '/coupon/get-allCoupon'
+export const GET_COUPON_BY_ID = '/coupon/get-couponById'
 
 
 

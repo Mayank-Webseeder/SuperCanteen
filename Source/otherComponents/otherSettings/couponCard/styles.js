@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     marginHorizontal: Height(6),
     elevation: 2,
-    marginTop: Height(15),
+    marginTop: Height(8),
     overflow: 'hidden',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
@@ -73,10 +73,23 @@ export const styles = StyleSheet.create({
     marginVertical: 2,
   },
   applyText: {
-    color: '#2E6074',
+    color: COLORS.white,
     fontFamily: 'Inter-SemiBold',
     fontSize: FontSize(13),
     textAlign: "center",
     marginVertical: Height(10),
   },
+  appliedCard: {
+  backgroundColor: '#E8F5E9',
+  borderColor: '#4CAF50'
+},
+appliedButton: {
+  backgroundColor: '#4CAF50',
+  marginTop:Height(7)
+},
+applyButton: {
+  backgroundColor: '#FF7A7A',
+    marginTop:Height(7)
+}
+
 });

@@ -30,7 +30,7 @@ export const deleteData = async (endpoint) => {
 
 // utils/apiClient.js
 export const putData = async (endpoint, body) => {
-  const response = await apiClient.put(endpoint, body);
+  const response = await apiClient.patch(endpoint, body);
   return response.data;
 };
 

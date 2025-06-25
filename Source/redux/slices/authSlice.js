@@ -79,11 +79,11 @@ const authSlice = createSlice({
     error: null
   },
   reducers: {
-    logout: state => {
-      state.user = null;
-      state.token = null;
-      AsyncStorage.removeItem('authToken').catch(console.error);
-    },
+    logout: (state) => {
+  state.user = null;
+  state.token = null;
+  AsyncStorage.multiRemove(['authUser', 'authToken']);
+},
   },
   extraReducers: builder => {
     const handlePending = (state) => {
@@ -99,18 +99,22 @@ const authSlice = createSlice({
     builder
       // Login
       .addCase(loginUser.pending, handlePending)
-      .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = {
-          id: action.payload._id,
-          username: action.payload.username,
-          email: action.payload.email,
-          role: action.payload.role,
-          cart: action.payload.cart,
-          addresses: action.payload.addresses,
-        };
-        state.token = action.payload.token;
-      })
+     .addCase(loginUser.fulfilled, (state, action) => {
+  state.loading = false;
+  state.user = {
+    id: action.payload._id,
+    username: action.payload.username,
+    email: action.payload.email,
+    role: action.payload.role,
+    cart: action.payload.cart,
+    addresses: action.payload.addresses,
+  };
+  state.token = action.payload.token;
+
+  // Save to AsyncStorage
+  AsyncStorage.setItem('authUser', JSON.stringify(state.user));
+  AsyncStorage.setItem('authToken', action.payload.token);
+})
       .addCase(loginUser.rejected, handleRejected)
       
       // Signup

@@ -9,6 +9,9 @@ import CustomFlashMessage from './Source/Components/flashMessage';
 import { fetchCartItems, markCartInitialized } from './Source/redux/slices/cartSlice';
 import { fetchWishlistItems } from './Source/redux/slices/wishlistSlice';
 import { loadGuestCart } from './Source/redux/slices/cartSlice';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@components/toastConfig';
+
 
 const AppWrapper = () => {
   return (
@@ -27,7 +30,7 @@ const App = () => {
   const { token, user } = useSelector(state => state.auth);
   const { initialized } = useSelector(state => state.cart);
 
-  // Initialize cart on app start
+
   useEffect(() => {
     const initializeCart = async () => {
       if (token) {
@@ -77,6 +80,7 @@ const App = () => {
     <NavigationContainer>
       <RootStack />
       <CustomFlashMessage />
+        <Toast config={toastConfig}/>
     </NavigationContainer>
   );
 };

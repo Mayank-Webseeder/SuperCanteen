@@ -26,6 +26,7 @@ import SuperCanteenRewards from '@screens/otherSettings/superCanteenRewards';
 import AboutUsScreen from '@screens/otherSettings/aboutUs';
 import PrivacyPolicyScreen from '@screens/otherSettings/privacyPolicy';
 import FAQScreen from '@screens/otherSettings/faq';
+import CouponProductsScreen from '@screens/otherSettings/Coupons/CouponProducts';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,8 @@ const AppStack = () => {
       <Stack.Screen name="AboutUs" component={AboutUsScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="FAQ" component={FAQScreen} />
+      <Stack.Screen name="CouponProduct" component={CouponProductsScreen} />
+      
  
       {/* Protected screens */}
       <Stack.Screen name="Wishlist" component={WishlistScreen} />

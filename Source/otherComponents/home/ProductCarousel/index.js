@@ -34,7 +34,7 @@ const ProductCarousel = ({
   const wishlistItems = useSelector(state => state.wishlist.items);
   const userId = useSelector(state => state.auth.user?.id);
   const token = useSelector(state => state.auth.token);
-
+  const { user } = useSelector(state => state.auth);
   const [lottieState, setLottieState] = useState({});
   const [wishlistState, setWishlistState] = useState({});
 
@@ -43,7 +43,7 @@ const ProductCarousel = ({
 
 
  const handleWishlistToggle = (productId) => {
-  if (!token) {
+  if (!user || !user.username) {
     navigation.reset({
       index: 0,
       routes: [

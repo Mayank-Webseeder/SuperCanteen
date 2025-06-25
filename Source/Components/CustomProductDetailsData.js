@@ -7,12 +7,9 @@ import {
   TouchableOpacity,
   ScrollView
 } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { Verified } from '../../assets/Icons/svgIcons/verified';
-import { Width, Height } from '../constants';
+import { Height } from '../constants';
 import { stripHtml } from '../utils/dataFormatters';
 import Collapsible from 'react-native-collapsible';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import moment from 'moment';
 import { COLORS } from '../constants';
 
@@ -97,47 +94,6 @@ const CustomProductDetailsData = ({ productData }) => {
         </View>
       ) : null}
 
-      {/* Ratings & Reviews */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ratings & Reviews</Text>
-        {reviews > 0 ? (
-          <View style={styles.ratingCard}>
-            <View style={styles.ratingHeader}>
-              <Text style={styles.ratingNumber}>
-                {rating.toFixed(1)}
-              </Text>
-              <Text style={styles.ratingOutOf}>/5</Text>
-              <FontAwesome
-                name="star"
-                size={18}
-                color="#0B450C"
-                style={styles.starIcon}
-              />
-            </View>
-            <View style={styles.ratingDetails}>
-              <Text style={styles.grayText}>
-                {reviews} {reviews === 1 ? 'Rating' : 'Reviews'}
-              </Text>
-              <Verified />
-            </View>
-            <TouchableOpacity style={styles.viewMoreButton}>
-              <Text style={styles.viewMoreText}>View All Reviews</Text>
-              <AntDesign name="right" size={14} color="#2E6074" />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.noReviewsContainer}>
-            <FontAwesome name="star-o" size={24} color="#999" />
-            <Text style={styles.noReviewsText}>No reviews yet</Text>
-            <TouchableOpacity style={styles.addReviewButton}>
-              <Text style={styles.addReviewText}>
-                Be the first to review
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
     
     
     </ScrollView>
@@ -210,86 +166,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     textDecorationLine: 'underline',
-  },
-  ratingCard: {
-    backgroundColor: '#F9FBFC',
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E8F1F5',
-  },
-  ratingHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  ratingNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#0B450C',
-  },
-  ratingOutOf: {
-    fontSize: 18,
-    color: '#416F81',
-    marginHorizontal: 4,
-  },
-  starIcon: { marginLeft: 5 },
-  ratingDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  grayText: {
-    color: '#416F81',
-    fontSize: 14,
-    marginRight: 8,
-    fontFamily: 'Inter-Regular',
-  },
-  viewMoreButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    backgroundColor: '#E8F1F5',
-    borderRadius: 8,
-  },
-  viewMoreText: {
-    color: '#2E6074',
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    marginRight: 5,
-  },
-  noReviewsContainer: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#F9FBFC',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E8F1F5',
-  },
-  noReviewsText: {
-    color: '#999',
-    fontSize: 14,
-    marginVertical: 10,
-    fontFamily: 'Inter-Regular',
-  },
-  addReviewButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#2E6074',
-  },
-  addReviewText: {
-    color: '#2E6074',
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 8,
   },
   price: {
     fontSize: 20,

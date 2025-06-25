@@ -17,26 +17,15 @@ import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import { styles } from './styles';
 import { COLORS } from '@constants/index';
-import { useFocusEffect } from '@react-navigation/native';
-
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [selectedCategoryItems, setSelectedCategoryItems] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [initialCategoriesLoaded, setInitialCategoriesLoaded] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const dispatch = useDispatch();
-
-  useFocusEffect(
-  useCallback(() => {
-    if (categories?.length > 0) {
-      setSelectedCategoryIndex(categories[0]._id);
-      setSelectedCategoryItems([]);
-    }
-  }, [categories])
-);
 
   const {
     categories,
@@ -68,12 +57,11 @@ const HomeScreen = ({ navigation }) => {
   const fetchInitialData = useCallback(async () => {
     setError(null);
     try {
-      // First load categories only
-      await dispatch(getCategories());
-      setInitialCategoriesLoaded(true);
-      
-      // Then load other data in background
-      dispatch(getSubCategories());
+      await Promise.all([
+        dispatch(getCategories()),
+        dispatch(getSubCategories())
+      ]);
+      setInitialLoadComplete(true);
     } catch (err) {
       setError('Failed to load initial data');
     }
@@ -96,19 +84,19 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [dispatch, selectedCategoryIndex]);
 
-  // Set initial category as soon as categories are available
+  // Set initial category when categories are loaded
   useEffect(() => {
     if (categories?.length > 0 && selectedCategoryIndex === null) {
       setSelectedCategoryIndex(categories[0]._id);
     }
-  }, [categories]);
+  }, [categories, selectedCategoryIndex]);
 
   // Fetch products when category changes
   useEffect(() => {
-    if (selectedCategoryIndex && initialCategoriesLoaded) {
+    if (selectedCategoryIndex && initialLoadComplete) {
       dispatch(getProductsByCategory(selectedCategoryIndex));
     }
-  }, [selectedCategoryIndex, dispatch, initialCategoriesLoaded]);
+  }, [selectedCategoryIndex, dispatch, initialLoadComplete]);
 
   // Initial data load
   useEffect(() => {
@@ -117,12 +105,14 @@ const HomeScreen = ({ navigation }) => {
 
   // Memoized filtered data
   const filteredSubcategories = useMemo(() => {
-    return subCategories?.filter(item => item.category?._id === selectedCategoryIndex) || [];
+    if (!subCategories || !selectedCategoryIndex) return [];
+    return subCategories.filter(item => item.category?._id === selectedCategoryIndex);
   }, [subCategories, selectedCategoryIndex]);
 
   const brands = useMemo(() => {
+    if (!products) return [];
     const brandMap = {};
-    products?.forEach(product => {
+    products.forEach(product => {
       if (product.brand && !brandMap[product.brand._id]) {
         brandMap[product.brand._id] = product.brand;
       }
@@ -131,9 +121,9 @@ const HomeScreen = ({ navigation }) => {
   }, [products]);
 
   // Loading states
-  const showSkeleton = useMemo(() => {
-    return (subCategoriesLoading || productsLoading) && initialCategoriesLoaded;
-  }, [subCategoriesLoading, productsLoading, initialCategoriesLoaded]);
+  const isLoading = useMemo(() => {
+    return categoriesLoading || subCategoriesLoading || productsLoading;
+  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
 
   // Header component
   const stickyHeader = (
@@ -149,6 +139,34 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
+  // Skeleton loader for different sections
+  const renderSkeleton = () => (
+    <>
+      {/* Categories Skeleton */}
+      <View style={styles.skeletonCategoryContainer}>
+        {[...Array(5)].map((_, i) => (
+          <View key={i} style={styles.skeletonCategory} />
+        ))}
+      </View>
+      
+      {/* Brands Skeleton */}
+      <HorizontalLine lineStyle={styles.lineStyle} />
+      <View style={styles.skeletonBrandContainer}>
+        {[...Array(3)].map((_, i) => (
+          <View key={i} style={styles.skeletonBrand} />
+        ))}
+      </View>
+      
+      {/* Products Skeleton */}
+      <HorizontalLine lineStyle={styles.horizontalLine} />
+      <View style={styles.skeletonProductContainer}>
+        {[...Array(4)].map((_, i) => (
+          <View key={i} style={styles.skeletonProduct} />
+        ))}
+      </View>
+    </>
+  );
+
   // Main content
   const renderMainContent = () => {
     if (error) {
@@ -161,8 +179,18 @@ const HomeScreen = ({ navigation }) => {
       );
     }
 
-    if (showSkeleton) {
-      return <ContentSkeletonLoader type="home" itemCount={3} />;
+    if (!initialLoadComplete || isLoading) {
+      return renderSkeleton();
+    }
+
+    if (categories?.length === 0) {
+      return (
+        <ErrorView 
+          message="No categories available" 
+          onRetry={handleRefresh} 
+          containerStyle={{ marginVertical: Height(20) }} 
+        />
+      );
     }
 
     return (
@@ -175,35 +203,34 @@ const HomeScreen = ({ navigation }) => {
         />
         <View style={styles.mainContent}>
           {brands.length > 0 && <HorizontalLine lineStyle={styles.lineStyle} />}
-          <Brandcarousel 
-            imageStyle={styles.imageStyle} 
-            contentContainerStyle={styles.contentContainerStyle}  
-            cardStyle={styles.cardStyle}  
-            paginationStyle={styles.paginationStyle} 
-            dotStyle={styles.dotStyle} 
-            brands={brands} 
-          />
+          {brands.length > 0 && (
+            <Brandcarousel 
+              imageStyle={styles.imageStyle} 
+              contentContainerStyle={styles.contentContainerStyle}  
+              cardStyle={styles.cardStyle}  
+              paginationStyle={styles.paginationStyle} 
+              dotStyle={styles.dotStyle} 
+              brands={brands} 
+            />
+          )}
           <HorizontalLine lineStyle={styles.horizontalLine} />
-          <ProductCategories
-            navigation={navigation}
-            subcategories={filteredSubcategories}
-            selectedCategoryId={selectedCategoryIndex}
-            selectedCategoryItems={selectedCategoryItems}
-            setSelectedCategoryItems={setSelectedCategoryItems}
-            gotoScreen={'ProdcutCategory'}
-            mainStyle={styles.mainStyle}
-          />
+          {filteredSubcategories.length > 0 && (
+            <ProductCategories
+              navigation={navigation}
+              subcategories={filteredSubcategories}
+              selectedCategoryId={selectedCategoryIndex}
+              selectedCategoryItems={selectedCategoryItems}
+              setSelectedCategoryItems={setSelectedCategoryItems}
+              gotoScreen={'ProdcutCategory'}
+              mainStyle={styles.mainStyle}
+            />
+          )}
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel horizontal={true} navigation={navigation} products={products} />
         </View>
       </>
     );
   };
-
-  // Only show full screen loader if we don't have categories yet
-  if (categoriesLoading && !categories?.length) {
-    return <FullScreenLoader />;
-  }
 
   return (
     <View style={styles.container}>

@@ -19,19 +19,15 @@ import { deleteAddress } from '../../../redux/slices/addressSlice';
 const AddressListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
-  const { loading } = useSelector(state => state.address);
-
+ const { addresses, loading } = useSelector(state => state.address);
+ 
+ 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [addresses, setAddresses] = useState([]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      if (user?.addresses) {
-        setAddresses(user.addresses);
-      }
-
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 500,
@@ -40,7 +36,7 @@ const AddressListScreen = ({ navigation }) => {
     });
 
     return unsubscribe;
-  }, [navigation, user]);
+  }, [navigation]);
 
   const showDeleteConfirmation = (id) => {
     setAddressToDelete(id);
@@ -48,24 +44,23 @@ const AddressListScreen = ({ navigation }) => {
   };
 
   const handleDelete = async () => {
+    console.log("USER ID IS",user.id)
     try {
-      const res = await dispatch(
+      await dispatch(
         deleteAddress({
-          userId: user.id,
+          userId: user.id, // ✅ make sure to use _id from auth
           addressId: addressToDelete,
         })
       ).unwrap();
-
       Toast.show({
         type: 'success',
         text1: 'Deleted!',
         text2: 'Address deleted successfully.',
       });
 
-      // Filter out deleted address from local state
-      const updated = addresses.filter(addr => addr._id !== addressToDelete);
-      setAddresses(updated);
+      // Optionally: Trigger a refetch or reload user profile here if needed
     } catch (err) {
+      console.log("ERROR IS",err)
       Toast.show({
         type: 'error',
         text1: 'Delete Failed',
@@ -91,7 +86,11 @@ const AddressListScreen = ({ navigation }) => {
 
         <View style={styles.actionsContainer}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('CreateAddressScreen', { addressToEdit: item })}
+            onPress={() =>
+              navigation.navigate('CreateAddressScreen', {
+                addressToEdit: item,
+              })
+            }
             style={styles.editButton}
           >
             <Icon name="edit" size={20} color="#2E6074" />
@@ -110,7 +109,12 @@ const AddressListScreen = ({ navigation }) => {
         <Text style={styles.contactText}>{item.contactNo}</Text>
 
         <View style={styles.addressDetails}>
-          <Icon name="location-on" size={18} color="#2E6074" style={styles.locationIcon} />
+          <Icon
+            name="location-on"
+            size={18}
+            color="#2E6074"
+            style={styles.locationIcon}
+          />
           <Text style={styles.addressText}>
             {[item.address, item.city, `${item.state} - ${item.postalCode}`, item.country]
               .filter(Boolean)
@@ -125,14 +129,15 @@ const AddressListScreen = ({ navigation }) => {
     <View style={styles.emptyContainer}>
       <Icon name="location-off" size={50} color="#bdc3c7" />
       <Text style={styles.emptyTitle}>No Addresses Saved</Text>
-      <Text style={styles.emptySubtitle}>Add your first address to get started</Text>
+      <Text style={styles.emptySubtitle}>
+        Add your first address to get started
+      </Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="My Addresses" />
-
       {addresses.length > 0 ? (
         <FlatList
           data={addresses}

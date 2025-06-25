@@ -31,7 +31,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
-
+   console.log("Dddddddddddddd",selectedSegment)
 
 
   // Filter and sort states
@@ -64,6 +64,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   } = useSelector((state) => state.productsByBrand);
 
   const { segmentProducts } = useSelector(state => state.productsBySegment);
+
   
   // Memoized data transformations
   const products = useMemo(() => productsBySubcategory[selectedCategory] || [], [productsBySubcategory, selectedCategory]);
@@ -72,8 +73,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
 
-
- 
+  
   // Filter options extraction with memoization
 const filterOptions = useMemo(() => {
   const brands = new Set();
@@ -248,6 +248,7 @@ const availableSortOptions = useMemo(() => {
 
   // Handle segment selection
   const handleSegmentSelect = useCallback((segmentId) => {
+ 
     setSelectedSegment(segmentId);
     dispatch(clearSegmentProducts());
     dispatch(fetchProductsBySegment(segmentId));

@@ -34,6 +34,7 @@ const subCategoryProductSlice = createSlice({
       .addCase(fetchProductsBySubcategory.fulfilled, (state, action) => {
         state.loading = false;
         state.productsBySubcategory[action.payload.subcategoryId] = action.payload.data;
+        // console.log("FETCH PRODUCTSBY SUBCATEGORY",action.payload)
       })
       .addCase(fetchProductsBySubcategory.rejected, (state, action) => {
         state.loading = false;

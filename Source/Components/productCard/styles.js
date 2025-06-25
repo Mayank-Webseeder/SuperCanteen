@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 0,
   },
   card: {
     width: '48%',

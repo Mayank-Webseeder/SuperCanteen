@@ -1,3 +1,5 @@
+import Toast from 'react-native-toast-message';
+
 // Add this helper function to convert color names to hex codes
 export const getColorHex = (colorName) => {
   const colorMap = {
@@ -17,3 +19,17 @@ export const getColorHex = (colorName) => {
   // Default color if no match found
   return '#CCCCCC';
 };
+
+export const showWishlistToast = (message, type = 'success') => {
+  Toast.show({
+    type: 'wishlistToast',
+    text1: message,
+    position: 'bottom',
+    visibilityTime: 2000,
+    autoHide: true,
+    bottomOffset: 70,
+  });
+};
+
+
+

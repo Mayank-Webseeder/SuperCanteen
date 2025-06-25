@@ -6,12 +6,9 @@ import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
 
 // Header.js
-export default function Header({ navigation }) {
+export default function Header({ navigation ,containerStyle}) {
 const { items, initialized } = useSelector((state) => state.cart);
   const itemCount = items?.length;
-
-
-
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -23,7 +20,7 @@ const { items, initialized } = useSelector((state) => state.cart);
             disabledStyle={styles.disabledStyle}
             backgroundColor={'#fff'}
             disabled
-            containerStyle={styles.searchInput}
+            containerStyle={[styles.searchInput,containerStyle]}
             inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
           />
         </Pressable>

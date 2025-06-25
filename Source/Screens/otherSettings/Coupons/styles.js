@@ -14,12 +14,23 @@ export const styles = StyleSheet.create({
      paddingTop:Height(15),
      paddingHorizontal:Height(10),
      fontFamily:"Inter-SemiBold",
-     fontSize:FontSize(16)
+     fontSize:FontSize(16),
+     marginBottom:Height(1)
   },
   listContent: {
     paddingBottom: 20,
     marginHorizontal:Width(10)
-  }
+  },
+  loaderContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center'
+},
+errorText: {
+  color: 'red',
+  textAlign: 'center',
+  marginTop: 20
+}
  
 
 });

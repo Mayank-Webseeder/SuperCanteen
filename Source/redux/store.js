@@ -17,6 +17,7 @@ import cartReducer from './slices/cartSlice'
 import cartProductReducer from './slices/cartProductsSlice'
 import wishlistReducer from './slices/wishlistSlice'
 import addressReducer from './slices/addressSlice';
+import couponSlice from './slices/couponSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
@@ -34,12 +35,13 @@ const rootReducer = combineReducers({
     cartProducts:cartProductReducer,
     wishlist:wishlistReducer,
     address: addressReducer,
+    coupon:couponSlice
 });
 
 const persistConfig = {
     key:'root',
     storage:AsyncStorage,
-    whitelist: ['auth']
+    whitelist: ['auth','coupon']
 }
 
 const persistedReducer  = persistReducer(persistConfig,rootReducer)

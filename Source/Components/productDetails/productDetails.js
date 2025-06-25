@@ -3,13 +3,13 @@ import {
   View,
   ScrollView,
   Text,
-  TouchableOpacity,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
+  Pressable
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProductById } from '../../redux/slices/productDetailSlice';
-import { formatProductDetailData } from '../../utils/dataFormatters';
+import { formatProductDetailData, stripHtml } from '../../utils/dataFormatters';
 import { styles } from './styles';
 import CustomHeader from '../CustomHeader';
 import HorizontalLine from '../../otherComponents/home/horizontalLine';
@@ -29,6 +29,8 @@ import CustomSearch from '../../Components/searchInput';
 import { AddToCartAnimation } from '../../otherComponents/addToCartAnimation'
 import VariantSelector from './variantSelector';
 import { IMGURL } from '../../utils/dataFormatters';
+import CouponSection from './couponSection';
+import Share from 'react-native-share';
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -41,9 +43,9 @@ const ProductDetails = ({ navigation, route }) => {
   const [animationImage, setAnimationImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [selectionError, setSelectionError] = useState(null);
+  
 
   const productData = product?.product;
-  // console.log("PRODUCTDATA IS==================>",productData)
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
   );
@@ -69,6 +71,21 @@ const imagesToShow =
 const handleVariantChange = (variant) => {
   setSelectedVariant(variant); 
 };
+
+const shareWithImage = async () => {
+  console.log("ON SHARE ")
+  const shareOptions = {
+    title:productData?.name,
+    message:stripHtml(productData?.description),
+    urls: [imagesToShow].flat(),
+  };
+  try {
+    await Share.open(shareOptions);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const OnAddToCart = (item) => {
   
   const selectedItem = item || productData;
@@ -91,8 +108,6 @@ const OnAddToCart = (item) => {
         images: selectedItem.images,
         sku: selectedItem.sku || '',
       };
-
-      console.log("SELECTED ITEM IS",selectedItem)
 
   // 🛑 Don't check for selectedVariant if it's coming from similarProducts (no real variant selection)
   if (!isFromSimilarProducts &&   hasSizeVariants && selectedItem?.variants?.length > 0 && !selectedVariant) {
@@ -223,13 +238,19 @@ const productImage =
       >
         <View style={styles.mainContainer}>
           <CustomHeader navigation={navigation} showCartIcon={true} />
-              <CustomSearch
+            <Pressable 
+                    style={styles.searchPressable}
+                    onPress={() => navigation.navigate('Search')}
+                  >
+                    <CustomSearch
             disabledStyle={styles.disabledStyle}
             backgroundColor={'#fff'}
             disabled
             containerStyle={styles.searchInput}
             inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
           />
+                  </Pressable>
+            
         </View>
         <View>
           <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
@@ -249,6 +270,17 @@ const productImage =
              setSelectionError={setSelectionError}
             />
           )}
+             { productData?.coupons.length > 0 &&
+           <>
+             <View style={styles.borderStyle}/>
+                       <CouponSection
+                         productId={productData?._id} 
+                         data={productData?.coupons} 
+    price={productData?.offerPrice || productData?.price}
+                       
+                       />
+           </>
+                       }
         <AddressRow
           navigation={navigation}
           address={formattedProduct.shippingAddress}
@@ -265,16 +297,8 @@ const productImage =
           <CurruncyRupees />
           <Text style={styles.infoText}>Cash on Delivery & UPI Available</Text>
         </View>
-
-        <View style={styles.borderStyle} />
-        <View style={styles.infoRow}>
-          <TouchableOpacity onPress={() => navigation.navigate('Offers')}>
-            <Text style={styles.offersButtonText}>All Offers & Coupons</Text>
-          </TouchableOpacity>
-        </View>
         <View style={styles.borderStyle} />
         <CustomProductDetailsData  productData={formattedProduct} />
-
         {/* Similar Products Section - Fixed filtering */}
         {similarLoading ? (
           <ActivityIndicator size="small" color="#416F81" style={{ marginVertical: 20 }} />
@@ -295,7 +319,7 @@ const productImage =
       </ScrollView>
       <BottomPurchaseBar
   addToCartLoading={addToCartLoading}
-  onSharePress={() => console.log('Share Pressed')}
+  onSharePress={shareWithImage} 
   onAddToCart={() => OnAddToCart()}
   onBuyNow={() => {
     if (!user || !user.username) {

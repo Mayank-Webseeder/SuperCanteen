@@ -6,6 +6,16 @@ export const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: COLORS.modalOverlay,
   },
+   footerButton:{
+    flexDirection:"row",
+    marginLeft:Height(30)
+  },
+  footerButtonText:{
+    color:COLORS.green,
+    fontFamily:"Inter-SemiBold",
+    fontSize:14,
+   
+  },
   backdropTouchable: {
     flex: 1,
   },
@@ -30,6 +40,11 @@ export const styles = StyleSheet.create({
     borderRadius: 3,
     alignSelf: 'center',
     marginBottom: 16,
+  },
+  resetText:{
+    color:COLORS.green,
+    fontSize:14,
+    fontFamily:"Inter-SemiBold"
   },
   header: {
     fontSize: 20,

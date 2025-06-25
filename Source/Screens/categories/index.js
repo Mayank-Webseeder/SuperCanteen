@@ -25,7 +25,7 @@ const Categories = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.contentContainerStyle} showsVerticalScrollIndicator={false} style={styles.inner}>
       <View>
-      <Header navigation={navigation}/>
+      <Header containerStyle={styles.input} navigation={navigation}/>
       <HorizontalLine/>    
         {categoriesLoading &&   <ActivityIndicator size="large" color={COLORS.green} style={{ marginVertical: Height(22) }} />
         }
@@ -60,6 +60,9 @@ const styles = StyleSheet.create({
   },
   contentContainerStyle:{
     paddingBottom:Height(40)
+  },
+  input:{
+     marginLeft:6
   },
   containerStyle:{
  paddingTop: Height(20), 

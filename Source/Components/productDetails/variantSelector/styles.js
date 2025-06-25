@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
     elevation: 1,
     paddingVertical:4,
     paddingBottom:7,
-    marginBottom:Height(15),
+    marginBottom:Height(10),
     borderTopColor:'#F3F4F5',
     borderTopWidth:1,
     

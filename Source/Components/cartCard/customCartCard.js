@@ -384,7 +384,10 @@ const CustomCartCard = () => {
   const [updatingItems, setUpdatingItems] = useState({});
  const [deletingItemId, setDeletingItemId] = useState(null);
  const [showConfirmation, setShowConfirmation] = useState(false);
-  const slideAnim = useRef(new Animated.Value(300)).current;
+const slideAnim = useRef(new Animated.Value(300)).current;
+
+console.log("CART IS",items)
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);

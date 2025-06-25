@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Height } from '../../../constants';
+import { COLORS, Height } from '../../../constants';
 import { styles } from './styles';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = Height(650);
@@ -76,6 +77,22 @@ const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelect
     onClose();
   };
 
+   const handleReset = () => {
+   setSelectedOption([])
+   
+  };
+
+   const ResetButton = () => (
+       <TouchableOpacity
+        onPress={() => handleReset()}
+        style={{flexDirection:"row"}} 
+      >
+           <Icon name="restore" size={18} color={COLORS.green} style={{ marginRight: 6,marginTop:2 }} />
+        <Text style={styles.resetText}>Reset</Text>
+      </TouchableOpacity>
+    )
+  
+
   return (
     <Modal animationType={'fade'} transparent visible={visible} onRequestClose={onClose}>
       <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]}>
@@ -105,8 +122,10 @@ const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelect
         }
       ]}>
         <View style={styles.dragHandle} />
-        <Text style={styles.header}>Sort By</Text>
-
+      <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.header}>Sort By</Text>
+          <ResetButton/>
+      </View>
         <View style={styles.contentContainer}>
           <ScrollView 
             contentContainerStyle={styles.optionsContainer}

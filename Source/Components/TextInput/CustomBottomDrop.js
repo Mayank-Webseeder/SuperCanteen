@@ -15,7 +15,7 @@ import { COLORS, Height } from '@constants/index';
 
 const screenWidth = Dimensions.get('window').width;
 
-const CustomBottomDrop = ({ value, onChangeText, placeholder, dropdownData = [], error }) => {
+const CustomBottomDrop = ({ value, onChangeText, placeholder, dropdownData = [], error,keyboardType }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleSelect = (item) => {
@@ -33,6 +33,7 @@ const CustomBottomDrop = ({ value, onChangeText, placeholder, dropdownData = [],
           placeholder={placeholder}
           underlineColorAndroid="transparent"
           placeholderTextColor={COLORS.darkGray}
+          keyboardType={keyboardType}
         />
         <TouchableOpacity onPress={() => setShowDropdown(true)}>
           <Icon name="arrow-drop-down" size={24} color="#000" />

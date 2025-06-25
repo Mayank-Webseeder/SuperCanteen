@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const AccountScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { user } = useSelector(state => state.auth);
+ const { token ,user} = useSelector(state => state.auth);
 
   const onLogoutBtnClick = async () => {
     try {
@@ -71,29 +71,30 @@ const AccountScreen = ({ navigation }) => {
   <View style={styles.row}>
     {iconOptions.map(({ label, icon, screen }) => (
       <View key={label} style={styles.iconColumn}>
-        <TouchableOpacity
-          style={styles.box}
-          onPress={() => {
-            if (
-              (screen === 'Orders' || screen === 'Wishlist') &&
-              (!user || !user.username)
-            ) {
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: 'Auth',
-                    state: { routes: [{ name: 'Signin' }] },
-                  },
-                ],
-              });
-            } else {
-              navigation.navigate(screen);
-            }
-          }}
-        >
-          {icon}
-        </TouchableOpacity>
+     <TouchableOpacity
+  style={styles.box}
+  onPress={() => {
+    if (
+      (screen === 'Orders' || screen === 'Wishlist') &&
+      !token
+    ) {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Auth',
+            state: { routes: [{ name: 'Signin' }] },
+          },
+        ],
+      });
+    } else {
+      navigation.navigate(screen);
+    }
+  }}
+>
+  {icon}
+</TouchableOpacity>
+
         <Text style={styles.label}>{label}</Text>
       </View>
     ))}
@@ -105,40 +106,36 @@ const AccountScreen = ({ navigation }) => {
           <View style={[styles.containerBox, styles.sectionBox]}>
             <Text style={styles.sectionHeader}>Account Settings</Text>
         {settingsOptions.map(({ name, screen }) => (
-  <TouchableOpacity
-    key={name}
-    onPress={() => {
-      if (
-        name === 'Personal Information' || name === 'Manage Address' &&
-        (!user || !user.username)
-      ) {
-
-        navigation.reset({
-  index: 0,
-  routes: [
-    {
-      name: 'Auth',
-      state: {
+<TouchableOpacity
+  key={name}
+  onPress={() => {
+    if (
+      (name === 'Personal Information' || name === 'Manage Address') &&
+      !token
+    ) {
+      navigation.reset({
+        index: 0,
         routes: [
-          { name: 'Signin' }
-        ]
-      }
+          {
+            name: 'Auth',
+            state: {
+              routes: [{ name: 'Signin' }],
+            },
+          },
+        ],
+      });
+    } else {
+      navigation.navigate(screen);
     }
-  ]
-});
+  }}
+>
+  <View style={styles.settingsRow}>
+    <Text style={styles.label}>{name}</Text>
+    <Ionicons name="chevron-forward" size={18} color="#2E6074E8" />
+  </View>
+</TouchableOpacity>
 
 
-      
-      } else {
-        navigation.navigate(screen);
-      }
-    }}
-  >
-    <View style={styles.settingsRow}>
-      <Text style={styles.label}>{name}</Text>
-      <Ionicons name="chevron-forward" size={18} color="#2E6074E8" />
-    </View>
-  </TouchableOpacity>
 ))}
 
           </View>

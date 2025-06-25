@@ -16,6 +16,7 @@ const CreateAddressScreen = ({ navigation, route }) => {
   const { user } = useSelector(state => state.auth);
   const {loading} = useSelector(state => state.address)
   const dispatch = useDispatch();
+  console.log("ADDRESS TO EDIT IS",addressToEdit)
 
   const [errors, updateFormErrors] = useState({});
 
@@ -46,7 +47,8 @@ const CreateAddressScreen = ({ navigation, route }) => {
     if (addressToEdit) {
       setFormData({
         ...addressToEdit,
-        contact: addressToEdit.contact || addressToEdit.phone || '', // handle legacy data
+        contact: addressToEdit.contactNo , 
+        pincode: addressToEdit.postalCode
       });
     }
   }, [addressToEdit]);
@@ -216,6 +218,7 @@ const CreateAddressScreen = ({ navigation, route }) => {
                 placeholder="Pincode*"
                 dropdownData={pincodes}
                 error={errors.pincode}
+                keyboardType="numeric"
               />
             </View>
             <View style={styles.halfInput}>

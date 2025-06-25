@@ -1,0 +1,167 @@
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  Modal
+} from 'react-native';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { styles } from './styles';
+import { useSelector , useDispatch } from 'react-redux';
+import moment from 'moment';
+import { applyCoupon , removeCoupon } from '../../../redux/slices/couponSlice';
+
+const CouponSection = ({ data = [], price = 0, productId }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const dispatch = useDispatch();
+  const { appliedCoupons } = useSelector((state) => state.coupon);
+  
+  // Handle both single product and cart-wide coupons
+  const appliedCoupon = productId 
+    ? appliedCoupons[productId] 
+    : appliedCoupons.cartWide;
+
+  const calculateDiscount = (coupon) => {
+    if (!coupon) return { discountAmount: 0, totalAfter: price };
+    const discountAmount = (price * coupon.percentage) / 100;
+    const totalAfter = price - discountAmount;
+    return { discountAmount, totalAfter };
+  };
+
+  const formatDate = (dateStr) => moment(dateStr).format('DD MMM YYYY');
+
+  const handleApplyCoupon = () => {
+    if (selectedCoupon) {
+      dispatch(applyCoupon({
+        productId, // null for cart-wide
+        coupon: selectedCoupon
+      }));
+      setModalVisible(false);
+    }
+  };
+
+  const handleRemove = () => {
+    dispatch(removeCoupon({ productId }));
+  };
+
+  // Filter out already applied coupons
+  const availableCoupons = data.filter(coupon => 
+    !appliedCoupon || appliedCoupon._id !== coupon._id
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Available Coupons</Text>
+
+      {/* Applied Coupon Banner */}
+      {appliedCoupon && (
+        <View style={styles.appliedContainer}>
+          <View style={styles.appliedHeader}>
+            <View style={styles.appliedBadge}>
+              <AntDesign name="checkcircle" size={16} color="#4CAF50" />
+              <Text style={styles.appliedText}>APPLIED</Text>
+            </View>
+            <TouchableOpacity onPress={handleRemove}>
+              <MaterialIcons name="cancel" size={20} color="#f44336" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.couponName}>{appliedCoupon.name}</Text>
+          
+          <View style={styles.priceContainer}>
+            <Text style={styles.originalPrice}>₹{price.toFixed(2)}</Text>
+            <Text style={styles.discountedPrice}>
+              ₹{calculateDiscount(appliedCoupon).totalAfter.toFixed(2)}
+            </Text>
+          </View>
+          
+          <View style={styles.savingsContainer}>
+            <Text style={styles.savingsText}>
+              YOU SAVE ₹{calculateDiscount(appliedCoupon).discountAmount.toFixed(2)}!
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Available Coupons */}
+      {availableCoupons.map((coupon) => (
+        <TouchableOpacity 
+          key={coupon._id} 
+          style={styles.couponCard}
+          onPress={() => {
+            setSelectedCoupon(coupon);
+            setModalVisible(true);
+          }}
+        >
+          <View style={styles.couponHeader}>
+            <Text style={styles.couponName}>{coupon.name}</Text>
+            <Text style={styles.couponPercentage}>{coupon.percentage}% OFF</Text>
+          </View>
+          <View style={styles.couponFooter}>
+            <Text style={styles.couponExpiry}>Expires: {formatDate(coupon.expire)}</Text>
+            <Text style={styles.viewDetailsText}>View Details →</Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+
+      {/* Coupon Details Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>{selectedCoupon?.name}</Text>
+            
+            <View style={styles.modalContent}>
+              <View style={styles.discountRow}>
+                <MaterialIcons name="discount" size={24} color="#FF5722" />
+                <View>
+                  <Text style={styles.discountPercentage}>
+                    {selectedCoupon?.percentage}% OFF
+                  </Text>
+                  <Text style={styles.discountDescription}>
+                    Save ₹{selectedCoupon ? calculateDiscount(selectedCoupon).discountAmount.toFixed(2) : '0.00'}
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.expiryRow}>
+                <MaterialIcons name="event" size={24} color="#4CAF50" />
+                <Text style={styles.expiryText}>
+                  Expires on {selectedCoupon ? formatDate(selectedCoupon.expire) : ''}
+                </Text>
+              </View>
+              
+              <Text style={styles.termsText}>* Terms and conditions apply</Text>
+            </View>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.secondaryButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.secondaryButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.primaryButton}
+                onPress={handleApplyCoupon}
+              >
+                <Text style={styles.primaryButtonText}>Apply Coupon</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+};
+
+
+
+export default CouponSection;

@@ -31,4 +31,8 @@ export const styles = StyleSheet.create({
   applyButtonText: {
     color: '#fff',
   },
+  resetButton: {
+  backgroundColor: '#f0f0f0',
+  marginRight: 8,
+},
 });

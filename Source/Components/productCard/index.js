@@ -146,7 +146,7 @@ const CustomProductCard = ({
                   style={styles.favouriteButton}
                   onPress={() => handleWishlistToggle(id)}
                 >
-                  <View style={{ width: 30, height: 30, justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={{ width: 25, height: 25, justifyContent: 'center', alignItems: 'center' }}>
                     {lottieState[id] ? (
                       <LottieView
                         source={require('../../../assets/lottie/animation.json')}
@@ -160,9 +160,9 @@ const CustomProductCard = ({
                         }}
                       />
                     ) : isFavourite ? (
-                      <MaterialIcons name="favorite" size={20} color="#E53E3E" />
+                      <MaterialIcons name="favorite" size={18} color="#E53E3E" />
                     ) : (
-                      <MaterialIcons name="favorite-border" size={20} color={COLORS.white} />
+                      <MaterialIcons name="favorite-border" size={18} color={COLORS.white} />
                     )}
                   </View>
                 </TouchableOpacity>

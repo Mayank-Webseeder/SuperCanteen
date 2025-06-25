@@ -62,8 +62,6 @@ export const addToCart = createAsyncThunk(
       isDigital: item.isDigital || false,
       variantId: item.variantId || null,
     };
-    console.log("CART ITEM IS",cartItem)
-
    if (!auth.token) {
   const guestCart = await loadGuestCart();
   const existingItemIndex = guestCart.findIndex(
