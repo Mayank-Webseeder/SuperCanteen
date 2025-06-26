@@ -50,8 +50,6 @@ const CouponScreen = ({ navigation, route }) => {
 
  const handleApplyCoupon = async (coupon) => {
   const response = await getData(GETALLPRODUCTS);
-  console.log("RESPONSE IS",response.data)
- 
   const eligibleProducts = response.data.filter(p => 
     p.coupons?.includes(coupon._id)
   );

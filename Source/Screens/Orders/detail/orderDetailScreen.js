@@ -86,7 +86,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
       </Text>
 
       {/* Download Invoice Button (Disabled) */}
-      {order.status !== 'cancelled' &&  <TouchableOpacity style={styles.disabledButton} disabled={true}>
+      {order.status !== 'cancelled' &&  <TouchableOpacity onPress={() => navigation.navigate('Invoice')} style={styles.disabledButton} disabled={true}>
               <Text style={styles.disabledButtonText}>Download Invoice</Text>
             </TouchableOpacity>}
           </View> 

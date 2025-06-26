@@ -1,22 +1,18 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { View, FlatList, RefreshControl } from 'react-native';
+import { View, FlatList, RefreshControl, Animated,TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector } from 'react-redux';
-import { Height } from '@constants';
 import Header from '../../../otherComponents/home/header';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 import ProductCategories from '../../../otherComponents/home/productCategories';
 import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
-import FullScreenLoader from '../../../Components/Common/fullScreenLoader';
-import ErrorView from '../../../Components/Common/errorView';
-import ContentSkeletonLoader from '../../../Components/Common/contentSkeletonLoader';
+import { styles } from './styles';
+import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
-import { styles } from './styles';
-import { COLORS } from '@constants/index';
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
@@ -24,6 +20,7 @@ const HomeScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const opacity = useState(new Animated.Value(0))[0];
 
   const dispatch = useDispatch();
 
@@ -44,6 +41,14 @@ const HomeScreen = ({ navigation }) => {
     loading: productsLoading,
     error: productsError,
   } = useSelector((state) => state.product);
+
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   // Handle errors
   useEffect(() => {
@@ -139,13 +144,35 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
+  // Skeleton loader components
+  const SkeletonCategory = () => (
+    <View style={styles.skeletonCategory}>
+      <View style={styles.skeletonCategoryImage} />
+      <View style={styles.skeletonCategoryText} />
+    </View>
+  );
+
+  const SkeletonBrand = () => (
+    <View style={styles.skeletonBrand}>
+      <View style={styles.skeletonBrandImage} />
+    </View>
+  );
+
+  const SkeletonProduct = () => (
+    <View style={styles.skeletonProduct}>
+      <View style={styles.skeletonProductImage} />
+      <View style={styles.skeletonProductText} />
+      <View style={styles.skeletonProductPrice} />
+    </View>
+  );
+
   // Skeleton loader for different sections
   const renderSkeleton = () => (
-    <>
+    <Animated.View style={{ opacity }}>
       {/* Categories Skeleton */}
       <View style={styles.skeletonCategoryContainer}>
         {[...Array(5)].map((_, i) => (
-          <View key={i} style={styles.skeletonCategory} />
+          <SkeletonCategory key={`category-${i}`} />
         ))}
       </View>
       
@@ -153,7 +180,7 @@ const HomeScreen = ({ navigation }) => {
       <HorizontalLine lineStyle={styles.lineStyle} />
       <View style={styles.skeletonBrandContainer}>
         {[...Array(3)].map((_, i) => (
-          <View key={i} style={styles.skeletonBrand} />
+          <SkeletonBrand key={`brand-${i}`} />
         ))}
       </View>
       
@@ -161,21 +188,25 @@ const HomeScreen = ({ navigation }) => {
       <HorizontalLine lineStyle={styles.horizontalLine} />
       <View style={styles.skeletonProductContainer}>
         {[...Array(4)].map((_, i) => (
-          <View key={i} style={styles.skeletonProduct} />
+          <SkeletonProduct key={`product-${i}`} />
         ))}
       </View>
-    </>
+    </Animated.View>
   );
 
   // Main content
   const renderMainContent = () => {
     if (error) {
       return (
-        <ErrorView 
-          message={error} 
-          onRetry={handleRefresh} 
-          containerStyle={{ marginVertical: Height(20) }} 
-        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={handleRefresh}
+          >
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
       );
     }
 
@@ -185,16 +216,20 @@ const HomeScreen = ({ navigation }) => {
 
     if (categories?.length === 0) {
       return (
-        <ErrorView 
-          message="No categories available" 
-          onRetry={handleRefresh} 
-          containerStyle={{ marginVertical: Height(20) }} 
-        />
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>No categories available</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={handleRefresh}
+          >
+            <Text style={styles.retryButtonText}>Refresh</Text>
+          </TouchableOpacity>
+        </View>
       );
     }
 
     return (
-      <>
+      <Animated.View style={{ opacity }}>
         <GetCategory
           categories={categories}
           navigation={navigation}
@@ -228,7 +263,7 @@ const HomeScreen = ({ navigation }) => {
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel horizontal={true} navigation={navigation} products={products} />
         </View>
-      </>
+      </Animated.View>
     );
   };
 
@@ -244,10 +279,8 @@ const HomeScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={[COLORS.green, COLORS.green]} 
-            tintColor="#FFFFFF"
-            title="Refreshing..."
-            titleColor="#FFFFFF"
+            colors={[COLORS.green]}
+            tintColor={COLORS.green}
           />
         }
       />

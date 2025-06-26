@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Toast from 'react-native-toast-message';
-
+import { showMessage } from 'react-native-flash-message';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomAddressTextInput from '../../../Components/TextInput/customAddressTextInput';
-import CustomBottomDrop from '../../../Components/TextInput/customBottomDrop';
 import CustomButton from '../../../Components/CustomBotton';
 import { styles } from './styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,12 +12,10 @@ import { addAddress, updateAddress } from '../../../redux/slices/addressSlice';
 const CreateAddressScreen = ({ navigation, route }) => {
   const { addressToEdit } = route.params || {};
   const { user } = useSelector(state => state.auth);
-  const {loading} = useSelector(state => state.address)
+  const { loading } = useSelector(state => state.address);
   const dispatch = useDispatch();
-  console.log("ADDRESS TO EDIT IS",addressToEdit)
 
   const [errors, updateFormErrors] = useState({});
-
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -27,27 +23,16 @@ const CreateAddressScreen = ({ navigation, route }) => {
     city: '',
     state: '',
     pincode: '',
-    country: 'India',
+    country: '',
     addressType: 'Home',
     isDefault: false,
   });
-
-  const countries = ['India', 'USA', 'UK'];
-  const cities = ['Mumbai', 'Delhi', 'New York', 'London'];
-  const states = ['Maharashtra', 'New York', 'California'];
-  const pincodes = ['400001', '110001', '10001'];
-
-  const addressTypes = [
-    { id: 'Home', icon: 'home' },
-    { id: 'Office', icon: 'business' },
-    { id: 'Other', icon: 'location-on' },
-  ];
 
   useEffect(() => {
     if (addressToEdit) {
       setFormData({
         ...addressToEdit,
-        contact: addressToEdit.contactNo , 
+        contact: addressToEdit.contactNo, 
         pincode: addressToEdit.postalCode
       });
     }
@@ -87,52 +72,50 @@ const CreateAddressScreen = ({ navigation, route }) => {
     if (!validateForm()) return;
 
     const mappedAddress = {
-  name: formData.name,
-  contactNo: formData.contact,
-  address: formData.address,
-  city: formData.city,
-  state: formData.state,
-  postalCode: formData.pincode,
-  country: formData.country,
-  addressType: formData.addressType,
-};
+      name: formData.name,
+      contactNo: formData.contact,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      postalCode: formData.pincode,
+      country: formData.country,
+      addressType: formData.addressType,
+    };
 
     try {
       if (addressToEdit) {
-        // 🔄 Update
         await dispatch(updateAddress({
           userId: user.id,
           addressId: addressToEdit._id,
           updatedAddress: mappedAddress
         })).unwrap();
-
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Address updated successfully!',
-        });
+         showMessage({
+              message: 'Address updated successfully!',
+              type: 'success',
+              icon: 'success',
+              duration: 3000,
+            });
       } else {
-        // ➕ Add
         await dispatch(addAddress({
           userId: user.id,
           address: mappedAddress
         })).unwrap();
-
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Address saved successfully!',
-        });
+         showMessage({
+              message: 'Address saved successfully!',
+              type: 'success',
+              icon: 'success',
+              duration: 3000,
+            });
       }
 
       navigation.goBack();
     } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: error?.message || 'Failed to save the address.',
-      });
-      console.error('Address save error:', error);
+        showMessage({
+            message: error?.message || 'Failed to save the address.',
+            type: 'danger',
+            icon: 'danger',
+            duration: 4000,
+          });
     }
   }, [formData, validateForm, dispatch, user.id, addressToEdit, navigation]);
 
@@ -186,48 +169,49 @@ const CreateAddressScreen = ({ navigation, route }) => {
             onChangeText={(text) => handleInputChange('address', text)}
             placeholder="House No, Building, Street, Area*"
             error={errors.address}
-            inputStyle={styles.inputStyle}
+            inputStyle={styles.textArea}
+            multiline
           />
 
           <View style={styles.row}>
             <View style={styles.halfInput}>
-              <CustomBottomDrop
+              <CustomAddressTextInput
                 value={formData.city}
                 onChangeText={(text) => handleInputChange('city', text)}
                 placeholder="City*"
-                dropdownData={cities}
                 error={errors.city}
+                 inputStyle={styles.textArea}
               />
             </View>
             <View style={styles.halfInput}>
-              <CustomBottomDrop
+              <CustomAddressTextInput
                 value={formData.state}
                 onChangeText={(text) => handleInputChange('state', text)}
                 placeholder="State*"
-                dropdownData={states}
                 error={errors.state}
+                  inputStyle={styles.textArea}
               />
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.halfInput}>
-              <CustomBottomDrop
+              <CustomAddressTextInput
                 value={formData.pincode}
                 onChangeText={(text) => handleInputChange('pincode', text)}
                 placeholder="Pincode*"
-                dropdownData={pincodes}
-                error={errors.pincode}
                 keyboardType="numeric"
+                error={errors.pincode}
+                  inputStyle={styles.textArea}
               />
             </View>
             <View style={styles.halfInput}>
-              <CustomBottomDrop
+              <CustomAddressTextInput
                 value={formData.country}
                 onChangeText={(text) => handleInputChange('country', text)}
                 placeholder="Country*"
-                dropdownData={countries}
                 error={errors.country}
+                  inputStyle={styles.textArea}
               />
             </View>
           </View>
@@ -241,25 +225,28 @@ const CreateAddressScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.typeBtnContainer}>
-            {addressTypes.map((type) => (
+            {['Home', 'Office', 'Other'].map((type) => (
               <TouchableOpacity
-                key={type.id}
+                key={type}
                 style={[
                   styles.typeButton,
-                  formData.addressType === type.id && styles.selectedTypeButton
+                  formData.addressType === type && styles.selectedTypeButton
                 ]}
-                onPress={() => handleInputChange('addressType', type.id)}
+                onPress={() => handleInputChange('addressType', type)}
               >
                 <Icon
-                  name={type.icon}
+                  name={
+                    type === 'Home' ? 'home' : 
+                    type === 'Office' ? 'business' : 'location-on'
+                  }
                   size={18}
-                  color={formData.addressType === type.id ? '#2E6074' : '#95a5a6'}
+                  color={formData.addressType === type ? '#2E6074' : '#95a5a6'}
                 />
                 <Text style={[
                   styles.typeButtonText,
-                  formData.addressType === type.id && styles.selectedTypeButtonText
+                  formData.addressType === type && styles.selectedTypeButtonText
                 ]}>
-                  {type.id}
+                  {type}
                 </Text>
               </TouchableOpacity>
             ))}

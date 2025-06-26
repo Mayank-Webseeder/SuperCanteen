@@ -119,19 +119,19 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
             
             <View style={styles.modalContent}>
               <View style={styles.discountRow}>
-                <MaterialIcons name="discount" size={24} color="#FF5722" />
+                <MaterialIcons name="discount" size={22} color="#FF5722" />
                 <View>
                   <Text style={styles.discountPercentage}>
                     {selectedCoupon?.percentage}% OFF
                   </Text>
                   <Text style={styles.discountDescription}>
-                    Save ₹{selectedCoupon ? calculateDiscount(selectedCoupon).discountAmount.toFixed(2) : '0.00'}
+                  <Text style={styles.saveText}>Save </Text> ₹{selectedCoupon ? calculateDiscount(selectedCoupon).discountAmount.toFixed(2) : '0.00'}
                   </Text>
                 </View>
               </View>
               
               <View style={styles.expiryRow}>
-                <MaterialIcons name="event" size={24} color="#4CAF50" />
+                <MaterialIcons name="event" size={22} color="#4CAF50" />
                 <Text style={styles.expiryText}>
                   Expires on {selectedCoupon ? formatDate(selectedCoupon.expire) : ''}
                 </Text>

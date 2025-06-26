@@ -99,5 +99,91 @@ appVersion: {
   cardStyle:{
     borderWidth:0,
     padding:0
-  }
+  },
+  // Skeleton Styles
+skeletonCategoryContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  paddingHorizontal: 15,
+  paddingVertical: 10,
+},
+skeletonCategory: {
+  width: 60,
+  alignItems: 'center',
+},
+skeletonCategoryImage: {
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: '#e1e1e1',
+},
+skeletonCategoryText: {
+  width: 50,
+  height: 10,
+  backgroundColor: '#e1e1e1',
+  marginTop: 5,
+  borderRadius: 5,
+},
+skeletonBrandContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-around',
+  paddingVertical: 15,
+},
+skeletonBrand: {
+  width: 100,
+  height: 50,
+  backgroundColor: '#e1e1e1',
+  borderRadius: 10,
+},
+skeletonProductContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  justifyContent: 'space-between',
+  padding: 15,
+},
+skeletonProduct: {
+  width: '48%',
+  marginBottom: 15,
+},
+skeletonProductImage: {
+  width: '100%',
+  height: 150,
+  backgroundColor: '#e1e1e1',
+  borderRadius: 10,
+},
+skeletonProductText: {
+  width: '80%',
+  height: 12,
+  backgroundColor: '#e1e1e1',
+  marginTop: 8,
+  borderRadius: 4,
+},
+skeletonProductPrice: {
+  width: '50%',
+  height: 12,
+  backgroundColor: '#e1e1e1',
+  marginTop: 8,
+  borderRadius: 4,
+},
+errorContainer: {
+  padding: 20,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+errorText: {
+  color: COLORS.red,
+  fontSize: 16,
+  textAlign: 'center',
+  marginBottom: 15,
+},
+retryButton: {
+  backgroundColor: COLORS.green,
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  borderRadius: 5,
+},
+retryButtonText: {
+  color: '#fff',
+  fontWeight: 'bold',
+},
 });

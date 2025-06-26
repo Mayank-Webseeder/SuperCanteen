@@ -20,14 +20,15 @@ export const getColorHex = (colorName) => {
   return '#CCCCCC';
 };
 
-export const showWishlistToast = (message, type = 'success') => {
+export const showWishlistToast = (message,iconType) => {
   Toast.show({
     type: 'wishlistToast',
     text1: message,
     position: 'bottom',
-    visibilityTime: 2000,
+ visibilityTime: 1500,
     autoHide: true,
     bottomOffset: 70,
+    props: { iconType: iconType },
   });
 };
 

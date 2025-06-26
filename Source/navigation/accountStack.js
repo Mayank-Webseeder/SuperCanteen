@@ -3,7 +3,6 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AccountScreen from '@screens/Account';
 import AddressListScreen from '../Components/address/addressList';
 import LoginSecurityScreen from '@screens/otherSettings/loginSecurity';
-import EditFieldScreen from '@screens/otherSettings/loginSecurity/EditFieldScreen';
 import HelpSupport from '@screens/otherSettings/helpSupport';
 
 const Stack = createNativeStackNavigator();
@@ -14,9 +13,7 @@ export default function AccountStack() {
     <Stack.Screen name="AccountMain" component={AccountScreen} />
     <Stack.Screen name="AddressListScreen" component={AddressListScreen} />
     <Stack.Screen name="LoginSecurity" component={LoginSecurityScreen} />
-    <Stack.Screen name="EditField" component={EditFieldScreen} />
     <Stack.Screen name="HelpSupport" component={HelpSupport} />
-   
   </Stack.Navigator>
   )
 }

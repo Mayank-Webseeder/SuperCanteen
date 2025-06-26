@@ -10,7 +10,6 @@ import {
   TouchableWithoutFeedback,
   Platform,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Icon from 'react-native-vector-icons/AntDesign';
@@ -29,6 +28,7 @@ import { IMGURL } from '../../utils/dataFormatters';
 import { fetchCartProductById } from '../../redux/slices/cartProductsSlice';
 import { styles } from './styles';
 import DeleteConfirmationModal from '../../otherComponents/deleteConfirmationModal';
+import { showMessage } from 'react-native-flash-message';
 
 const CustomDropdown = React.memo(
   ({
@@ -158,6 +158,15 @@ const CartCard = React.memo(
     const errorProduct = errors[productId];
      const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
 
+  const availableStock = useMemo(() => {
+    if (item.variantId && product?.variants) {
+      const variant = product.variants.find(v => v._id === item.variantId);
+      return variant?.countInStock || 0;
+    }
+    return product?.countInStock || 0;
+  }, [product, item.variantId]);
+
+  const isOutOfStock = product?.outOfStock || availableStock <= 0;
 
     useEffect(() => {
       if (productId && !product && !isLoadingProduct && !errorProduct) {
@@ -183,6 +192,17 @@ const CartCard = React.memo(
 
     const handleQtyChange = useCallback(
       (newQty) => {
+      if (newQty > availableStock) {
+          showMessage({
+                message:'Only ${availableStock} items available',
+                type: 'danger',
+                icon: 'danger',
+                duration: 4000,
+              });
+        return;
+      }
+
+
         const payload = {
           product: productId,
           qty: parseInt(newQty),
@@ -191,7 +211,7 @@ const CartCard = React.memo(
         };
         onQuantityChange(item._id || item.id, payload);
       },
-      [productId, item, onQuantityChange]
+      [availableStock,productId, item, onQuantityChange]
     );
 
     const getDisplayPrice = useCallback(() => {
@@ -303,6 +323,12 @@ const CartCard = React.memo(
             {stripHtml(product?.description || '')}
           </Text>
 
+ {/* Out of stock badge */}
+      {isOutOfStock && (
+        <View style={styles.outOfStockBadge}>
+          <Text style={styles.outOfStockText}>Out of Stock</Text>
+        </View>
+      )}
           {product?.mrp && (
             <View style={styles.priceInfo}>
               <Text style={styles.originalPrice}>₹{product.mrp}</Text>
@@ -316,24 +342,35 @@ const CartCard = React.memo(
             )}
 
             <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                onPress={() => item.qty > 1 && handleQtyChange(item.qty - 1)}
-                style={styles.stepperButton}
-                disabled={item.qty <= 1 || isLoading}
-              >
-                <Text style={styles.stepperText}>−</Text>
-              </TouchableOpacity>
+              
+           <TouchableOpacity
+  onPress={() => onQuantityChange(item._id || item.id, item.qty - 1)}
+  disabled={item.qty <= 1 || isLoading}
+>
+  <Text style={styles.stepperText}>−</Text>
+</TouchableOpacity>
 
-              <Text style={styles.qtyText}>{item.qty}</Text>
-              <TouchableOpacity
-                onPress={() => handleQtyChange(item.qty + 1)}
-                style={styles.stepperButton}
-                disabled={isLoading}
-              >
-                <Text style={styles.stepperText}>+</Text>
-              </TouchableOpacity>
+<Text style={styles.qtyText}>{item.qty}</Text>
+
+<TouchableOpacity
+  onPress={() => onQuantityChange(item._id || item.id, item.qty + 1)}
+  disabled={isLoading}
+>
+  <Text style={styles.stepperText}>+</Text>
+</TouchableOpacity>
             </View>
           </View>
+             {/* Stock message */}
+      {!isOutOfStock && availableStock > 0 && (
+        <Text style={[
+          styles.stockMessage,
+          availableStock < 5 && styles.lowStockMessage
+        ]}>
+          {availableStock < 5 
+            ? `Only ${availableStock} left!` 
+            : `${availableStock} available`}
+        </Text>
+      )}
           <View style={styles.deliveryInfo}>
             <Feather name="truck" size={14} color="#416E81" />
             <Text style={styles.deliveryText}>
@@ -385,9 +422,6 @@ const CustomCartCard = () => {
  const [deletingItemId, setDeletingItemId] = useState(null);
  const [showConfirmation, setShowConfirmation] = useState(false);
 const slideAnim = useRef(new Animated.Value(300)).current;
-
-console.log("CART IS",items)
-
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
@@ -453,24 +487,57 @@ const handleSelectAll = useCallback(() => {
   }
 }, [selectedItems.length]);
 
-  const handleQuantityChange = useCallback(
-    async (itemId, payload) => {
-      setUpdatingItems((prev) => ({ ...prev, [itemId]: true }));
-      try {
-        await dispatch(updateCartItem({ itemId, payload })).unwrap();
-      } catch (error) {
-        console.error('Failed to update quantity:', error);
-      } finally {
-        setUpdatingItems((prev) => {
-          const newState = { ...prev };
-          delete newState[itemId];
-          return newState;
-        });
+const handleQuantityChange = useCallback(
+  async (itemId, newQty) => {
+    try {
+      setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
+      
+      // Find the item in cart
+      const item = items.find(item => item._id === itemId || item.id === itemId);
+      if (!item) {
+        throw new Error('Item not found in cart');
       }
-    },
-    [dispatch]
-  );
 
+      // Ensure newQty is a number
+      const quantity = typeof newQty === 'object' ? newQty.qty : parseInt(newQty);
+      
+      // Validate quantity
+      if (isNaN(quantity) || quantity < 1) {
+        throw new Error('Invalid quantity');
+      }
+
+      // Check stock availability
+      const availableStock = item.product?.countInStock || 0;
+      if (quantity > availableStock) {
+        throw new Error(`Only ${availableStock} items available`);
+      }
+
+      // Prepare payload - only send what your API needs
+      const payload = {
+        qty: quantity
+      };
+
+      await dispatch(updateCartItem({ 
+        itemId, 
+        payload 
+      })).unwrap();
+      
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+      showMessage({
+        type: 'danger',
+        message: error.message || 'Failed to update quantity',
+      });
+    } finally {
+      setUpdatingItems(prev => {
+        const newState = { ...prev };
+        delete newState[itemId];
+        return newState;
+      });
+    }
+  },
+  [dispatch, items]
+);
   const handleSizeChange = (itemId, newSize) => {
     console.log(`Size changed for ${itemId} to ${newSize}`);
   };

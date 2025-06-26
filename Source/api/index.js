@@ -25,6 +25,10 @@ export const DELETE_ADDRESS_BY_USERID = '/users/delete-AddressByUserId';
 export const UPDATE_ADDRESS_BY_USERID = '/users/update-AddressByUserId';
 export const GET_ALL_COUPONS = '/coupon/get-allCoupon'
 export const GET_COUPON_BY_ID = '/coupon/get-couponById'
+export const GET_PROFILE = '/users/get-Profile'
+export const GET_USER_ADDRESS = '/users/get-userProfileAddress'
+export const UPDATE_PROFILE = '/users/update-Profile'
+
 
 
 

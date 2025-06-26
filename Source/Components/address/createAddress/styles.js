@@ -113,4 +113,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
+  textArea:{
+   marginVertical:3
+  }
 });

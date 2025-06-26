@@ -16,6 +16,7 @@ import { styles } from './styles';
 import Footer from './footer';
 import AgreeTerms from './agreeTerms';
 import { useSelector } from 'react-redux';
+import EmptyState from '@components/emptyComponent/EmptyState';
 
 export default function CartScreen({ navigation }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -23,7 +24,6 @@ export default function CartScreen({ navigation }) {
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [selectedTime, setSelectedTime] = useState('');
   const { items } = useSelector((state) => state.cart);
-
   const toggleStatus = (option) => {
     if (selectedStatuses.includes(option)) {
       setSelectedStatuses(selectedStatuses.filter(item => item !== option));
@@ -46,7 +46,7 @@ export default function CartScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CustomCommonHeader title={'Your Cart'} navigation={navigation} />
-      <ScrollView 
+      { items.length > 0 ?   <ScrollView 
         contentContainerStyle={styles.contentContainerStyle} 
         showsVerticalScrollIndicator={false}
       >
@@ -94,7 +94,15 @@ export default function CartScreen({ navigation }) {
             <AgreeTerms setAgreeTerms={setAgreeTerms} agreeTerms={agreeTerms} />
           </>
         )}
-      </ScrollView>
+      </ScrollView> : 
+      
+      <EmptyState
+        title={ 'Your cart is empty'}
+        imageSource={require('../../../../assets/Icons/emptyCart.jpg')}
+        onPress={() => navigation.navigate('Main')}
+      />
+      } 
+    
 
       <OrderFilterModal
         visible={modalVisible}
@@ -108,7 +116,8 @@ export default function CartScreen({ navigation }) {
       />
 
       {/* Footer */}
-      <Footer navigation={navigation} agreeTerms={agreeTerms}  />
+      { items.length > 0 &&
+      <Footer navigation={navigation} agreeTerms={agreeTerms}  /> }
     </View>
   );
 }

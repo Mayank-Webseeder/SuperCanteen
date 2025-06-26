@@ -342,5 +342,36 @@ removeButton: {
 removeText: {
   color: '#FF3B30',
   fontSize: 14,
-}
+},
+  outOfStockCard: {
+    opacity: 0.6,
+  },
+  outOfStockBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: COLORS.error,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    zIndex: 1,
+  },
+  outOfStockText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  disabledStepper: {
+    opacity: 0.5,
+  },
+  stockMessage: {
+    fontSize: 12,
+    color: COLORS.green,
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
+  lowStockMessage: {
+    color: COLORS.error,
+    fontWeight: 'bold',
+  },
 });

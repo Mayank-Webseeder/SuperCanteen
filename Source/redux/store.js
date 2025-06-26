@@ -17,7 +17,8 @@ import cartReducer from './slices/cartSlice'
 import cartProductReducer from './slices/cartProductsSlice'
 import wishlistReducer from './slices/wishlistSlice'
 import addressReducer from './slices/addressSlice';
-import couponSlice from './slices/couponSlice'
+import couponReducer from './slices/couponSlice'
+import userReducer from './slices/userSlice'
 
 const rootReducer = combineReducers({
     auth:authReducer,
@@ -35,7 +36,8 @@ const rootReducer = combineReducers({
     cartProducts:cartProductReducer,
     wishlist:wishlistReducer,
     address: addressReducer,
-    coupon:couponSlice
+    coupon:couponReducer,
+    user:userReducer
 });
 
 const persistConfig = {

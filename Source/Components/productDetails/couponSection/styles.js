@@ -51,11 +51,24 @@ import { StyleSheet } from "react-native";
     fontWeight: 'bold',
     color: '#FF5722',
     marginLeft: 12,
+    marginBottom:Height(4)
   },
   discountDescription: {
     fontSize: 14,
     color: '#666',
     marginLeft: 12,
+  },
+  saveText:{
+ backgroundColor: '#FFF2F2', // Light background for highlight
+  color: '#FF6B6B', // Same as parent
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  borderRadius: 4,
+  overflow: 'hidden',
+  textTransform: 'uppercase',
+  fontSize: 14,
+  letterSpacing: 0.5,
+ 
   },
   expiryRow: {
     flexDirection: 'row',

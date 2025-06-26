@@ -1,32 +1,88 @@
-import { StyleSheet } from "react-native";
-import { COLORS, Height } from "../../../constants";
+import { StyleSheet } from 'react-native';
+import { COLORS, Height, Width } from '../../../constants';
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.white },
-  content: { padding: 16,marginTop:Height(18),borderWidth:1,borderColor:'#d2d2d2',marginHorizontal:20 },
-  sectionTitle: { marginBottom: 10 , fontFamily:'Inter-SemiBold'},
-  card: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 10,
+  },
+  content: {
+    padding: 15,
+    paddingBottom: 30,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    color: COLORS.black,
+    fontFamily: 'Inter-SemiBold',
+    marginBottom: Height(12),
+  },
+  sectionCard: {
+    backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    paddingBottom: Height(19),
+  },
+  fieldContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fafafa',
+    paddingVertical: 12,
   },
-  label: { fontSize: 12, color: '#999', fontFamily:'Inter-SemiBold' },
-  value: { fontSize: 14, marginTop: 2 , fontFamily:'Inter-Regular'},
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: COLORS.green,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 8,
+  fieldLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  fieldValue: {
+    fontSize: 14,
+    color: '#333',
+    fontFamily: 'Inter-SemiBold',
+  },
+  input: {
+    fontSize: 14,
+    color: '#333',
+    fontFamily: 'Inter-SemiBold',
     paddingVertical: 4,
-    gap: 4,
+    width: Width(200),
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.green,
+    backgroundColor: '#fff', // fixes underline issue on Android
   },
-  editText: { color: COLORS.green, fontSize: 12 },
+  inputFocused: {
+    borderBottomColor: COLORS.border,
+  },
+  editButton: {
+    padding: 6,
+  },
+  editText: {
+    color: COLORS.green,
+    fontFamily: 'Inter-SemiBold',
+  },
+  saveButton: {
+    backgroundColor: COLORS.green,
+    padding: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: Height(14),
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#F44336',
+    marginTop: 4,
+  },
 });

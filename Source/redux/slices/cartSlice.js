@@ -101,36 +101,42 @@ export const addToCart = createAsyncThunk(
 
 export const updateCartItem = createAsyncThunk(
   'cart/updateCartItem',
-  async ({ itemId, payload }, { getState }) => {
+  async ({ itemId, payload }, { getState, rejectWithValue }) => {
     const { auth } = getState();
+    const { qty } = payload; 
     
-    if (!auth.token) {
-      const guestCart = await loadGuestCart();
-      const itemIndex = guestCart.findIndex(item => item.id === itemId);
-      
-      if (itemIndex >= 0) {
-        guestCart[itemIndex] = { 
-          ...guestCart[itemIndex], 
-          ...payload
-        };
-        await saveGuestCart(guestCart);
-        return guestCart;
-      }
-      throw new Error('Item not found in guest cart');
-    }
+    try {
+      if (!auth.token) {
+        const guestCart = await loadGuestCart();
+        const itemIndex = guestCart.findIndex(item => item.id === itemId || item._id === itemId);
 
-    // Authenticated user flow
-    await axios.patch(
-      `${CART_BASE}/updateCartItemById/${itemId}`,
-      payload,
-      { headers: { Authorization: `Bearer ${auth.token}` }}
-    );
-    
-    // Fetch updated cart after modification
-    const response = await axios.get(`${CART_BASE}/getAllCartItems`, {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    });
-    return response.data.data;
+        if (itemIndex >= 0) {
+          guestCart[itemIndex] = { 
+            ...guestCart[itemIndex], 
+            qty 
+          };
+          await saveGuestCart(guestCart);
+          return guestCart;
+        }
+        throw new Error('Item not found in guest cart');
+      }
+
+      // For authenticated users
+      const response = await axios.patch(
+        `${CART_BASE}/updateCartItemById/${itemId}`,
+        { qty },
+        { headers: { Authorization: `Bearer ${auth.token}` }}
+      );
+      
+      // Return the entire updated cart for authenticated users
+      const cartResponse = await axios.get(`${CART_BASE}/getAllCartItems`, {
+        headers: { Authorization: `Bearer ${auth.token}` }
+      });
+      
+      return cartResponse.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
   }
 );
 
@@ -265,12 +271,14 @@ const cartSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
+        console.log("FULLFIELD DATA IS",action.payload)
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
          state.initialized = true
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
+        console.log("REJECTED  DATA IS",action.payload)
         state.loading = false;
         state.error = action.error.message;
       })
@@ -291,11 +299,20 @@ const cartSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateCartItem.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload || [];
-        state.lastUpdated = Date.now();
-      })
+    .addCase(updateCartItem.fulfilled, (state, action) => {
+  state.loading = false;
+  
+  // Handle both guest and authenticated user cases
+  if (Array.isArray(action.payload)) {
+    // For authenticated users - payload is the full cart array
+    state.items = action.payload;
+  } else {
+    // For guest users - payload is the updated guest cart array
+    state.items = action.payload;
+  }
+  
+  state.lastUpdated = Date.now();
+})
       .addCase(updateCartItem.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;

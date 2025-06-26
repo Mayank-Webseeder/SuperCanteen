@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState,useEffect } from 'react';
 import {
   View,
   Dimensions,
@@ -18,6 +18,8 @@ import { IMGURL } from '../../../utils/dataFormatters';
 import LottieView from 'lottie-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist } from '../../../redux/slices/wishlistSlice';
+import { fetchWishlistItems } from '../../../redux/slices/wishlistSlice';
+import { showWishlistToast } from '../../../utils/helper';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.45;
@@ -37,6 +39,11 @@ const ProductCarousel = ({
   const { user } = useSelector(state => state.auth);
   const [lottieState, setLottieState] = useState({});
   const [wishlistState, setWishlistState] = useState({});
+
+
+ useEffect(() => {
+      dispatch(fetchWishlistItems(userId));
+  }, [dispatch, userId,wishlistItems]);
 
   const isInWishlist = (productId) =>
     wishlistItems?.some((item) => item._id === productId) || wishlistState[productId];
@@ -58,7 +65,7 @@ const ProductCarousel = ({
     return;
   }
 
-  const wishlistItem = wishlistItems.find(item => item._id === productId);
+  const wishlistItem = wishlistItems.find(item => item._id === productId || item.productId === productId);
   const wishlistId = wishlistItem?.wishlistId;
 
   if (isInWishlist(productId)) {
@@ -70,11 +77,13 @@ const ProductCarousel = ({
     dispatch(removeFromWishlist({ wishlistId, userId }));
     setWishlistState(prev => ({ ...prev, [productId]: false }));
     setLottieState(prev => ({ ...prev, [productId]: false }));
+    showWishlistToast('Removed from Wishlist','💔');
     console.log("✅ Removed from wishlist:", wishlistId);
   } else {
     dispatch(addToWishlist({ productId, token }));
     setWishlistState(prev => ({ ...prev, [productId]: true }));
     setLottieState(prev => ({ ...prev, [productId]: true }));
+    showWishlistToast('Added to Wishlist','❤️');
     console.log("✅ Added to wishlist:", productId);
   }
 

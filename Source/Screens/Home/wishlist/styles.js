@@ -163,42 +163,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     fontSize: FontSize(12),
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: Height(80),
-  },
-  emptyImage: {
-    width: Width(180),
-    height: Height(180),
-    resizeMode: 'contain',
-    marginBottom: Height(20),
-  },
-  emptyTitle: {
-    fontSize: FontSize(18),
-    color: COLORS.black,
-    fontFamily: 'Inter-Bold',
-    marginBottom: Height(4),
-  },
-  emptyText: {
-    fontSize: FontSize(14),
-    color: COLORS.gray,
-    fontFamily: 'Inter-Regular',
-    marginBottom: Height(20),
-    textAlign: 'center',
-  },
-  browseButton: {
-    backgroundColor:COLORS.green,
-    paddingVertical: Height(12),
-    paddingHorizontal: Width(32),
-    borderRadius: 24,
-  },
-  browseButtonText: {
-    color: COLORS.white,
-    fontFamily: 'Inter-SemiBold',
-    fontSize: FontSize(14),
-  },
+
   noDataContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -222,5 +187,26 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#2E6074', // Or any color that matches your theme
   },
+  errorContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 20,
+},
+errorText: {
+  color: COLORS.red,
+  textAlign: 'center',
+  marginVertical: 10,
+},
+retryButton: {
+  backgroundColor: COLORS.green,
+  padding: 10,
+  borderRadius: 5,
+  marginTop: 15,
+},
+retryButtonText: {
+  color: 'white',
+  fontWeight: 'bold',
+},
 
 });

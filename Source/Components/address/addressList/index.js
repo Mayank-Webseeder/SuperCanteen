@@ -7,25 +7,21 @@ import {
   Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
-
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import ConfirmationModal from '../../../otherComponents/confirmationModal';
 import { styles } from './styles';
-
-import { deleteAddress } from '../../../redux/slices/addressSlice';
+import { deleteAddress, fetchUserAddresses } from '../../../redux/slices/addressSlice';
 
 const AddressListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
- const { addresses, loading } = useSelector(state => state.address);
- 
- 
+  const { addresses, loading } = useSelector(state => state.address);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
 
+  // Fetch addresses when screen focuses
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       Animated.timing(fadeAnim, {
@@ -33,10 +29,11 @@ const AddressListScreen = ({ navigation }) => {
         duration: 500,
         useNativeDriver: true,
       }).start();
+      dispatch(fetchUserAddresses(user.id));
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, user.id]);
 
   const showDeleteConfirmation = (id) => {
     setAddressToDelete(id);
@@ -44,32 +41,25 @@ const AddressListScreen = ({ navigation }) => {
   };
 
   const handleDelete = async () => {
-    console.log("USER ID IS",user.id)
     try {
       await dispatch(
         deleteAddress({
-          userId: user.id, // ✅ make sure to use _id from auth
-          addressId: addressToDelete,
+          userId: user.id,
+          addressId: addressToDelete
         })
       ).unwrap();
-      Toast.show({
-        type: 'success',
-        text1: 'Deleted!',
-        text2: 'Address deleted successfully.',
-      });
-
-      // Optionally: Trigger a refetch or reload user profile here if needed
+      // Refresh addresses after deletion
+      dispatch(fetchUserAddresses(user.id));
     } catch (err) {
-      console.log("ERROR IS",err)
-      Toast.show({
-        type: 'error',
-        text1: 'Delete Failed',
-        text2: err?.message || 'Something went wrong.',
-      });
-      console.log('Delete address error:', err);
     } finally {
       setDeleteModalVisible(false);
     }
+  };
+
+  const handleEditAddress = (address) => {
+    navigation.navigate('CreateAddressScreen', {
+      addressToEdit: address
+    });
   };
 
   const renderAddressItem = ({ item }) => (
@@ -77,26 +67,22 @@ const AddressListScreen = ({ navigation }) => {
       <View style={styles.cardHeader}>
         <View style={styles.addressTypeBadge}>
           <Icon
-            name={item.addressType === 'Office' ? 'business' : 'home'}
+            name={item?.addressType === 'Office' ? 'business' : 'home'}
             size={16}
             color="#fff"
           />
-          <Text style={styles.addressTypeText}>{item.addressType}</Text>
+          <Text style={styles.addressTypeText}>{item?.addressType}</Text>
         </View>
 
         <View style={styles.actionsContainer}>
           <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('CreateAddressScreen', {
-                addressToEdit: item,
-              })
-            }
+            onPress={() => handleEditAddress(item)}
             style={styles.editButton}
           >
             <Icon name="edit" size={20} color="#2E6074" />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => showDeleteConfirmation(item._id)}
+            onPress={() => showDeleteConfirmation(item?._id)}
             style={styles.deleteButton}
           >
             <Icon name="delete" size={20} color="#e74c3c" />
@@ -105,8 +91,8 @@ const AddressListScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.cardBody}>
-        <Text style={styles.nameText}>{item.name}</Text>
-        <Text style={styles.contactText}>{item.contactNo}</Text>
+        <Text style={styles.nameText}>{item?.name}</Text>
+        <Text style={styles.contactText}>{item?.contactNo}</Text>
 
         <View style={styles.addressDetails}>
           <Icon
@@ -116,7 +102,7 @@ const AddressListScreen = ({ navigation }) => {
             style={styles.locationIcon}
           />
           <Text style={styles.addressText}>
-            {[item.address, item.city, `${item.state} - ${item.postalCode}`, item.country]
+            {[item?.address, item?.city, `${item?.state} - ${item?.postalCode}`, item?.country]
               .filter(Boolean)
               .join(', ')}
           </Text>
@@ -138,11 +124,12 @@ const AddressListScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="My Addresses" />
+      
       {addresses.length > 0 ? (
         <FlatList
           data={addresses}
           renderItem={renderAddressItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item) => item?._id}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
         />
