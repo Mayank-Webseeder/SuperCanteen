@@ -36,16 +36,9 @@ export const styles = StyleSheet.create({
     color: COLORS.muted,
     fontFamily: 'Inter-Regular',
   },
-  sectionTitle: {
-    fontSize: FontSize(16),
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: Height(16),
-    fontFamily: 'Inter-Bold',
-    marginTop:Height(16)
-  },
   faqContainer: {
     marginBottom: Height(10),
+    marginTop:Height(20)
   },
   faqItem: {
     marginBottom: 12,

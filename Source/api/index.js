@@ -28,7 +28,7 @@ export const GET_COUPON_BY_ID = '/coupon/get-couponById'
 export const GET_PROFILE = '/users/get-Profile'
 export const GET_USER_ADDRESS = '/users/get-userProfileAddress'
 export const UPDATE_PROFILE = '/users/update-Profile'
-
+export const GET_ALL_SECTIONS = '/section/getAllActiveSections'
 
 
 

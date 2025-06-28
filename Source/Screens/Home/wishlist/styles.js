@@ -8,6 +8,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  loaderContainer:{
+    flex:1,
+    alignItems:"center",
+    justifyContent:"center"
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -87,8 +92,9 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    marginBottom: Height(4),
-      marginHorizontal:8
+    marginBottom: Height(12),
+    marginHorizontal:10,
+    left:3
 
   },
   closeBtn: {
@@ -157,7 +163,20 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    
   },
+  cartButtonDisabled: {
+  backgroundColor: '#cccccc', // or COLORS.gray if you have a gray color defined
+  paddingVertical: Height(8),
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+cartButtonTextDisabled: {
+  color: '#888888',
+  fontWeight: 'bold',
+  fontSize: 14,
+},
   cartButtonText: {
     color: COLORS.white,
     fontFamily: 'Inter-SemiBold',
@@ -169,6 +188,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: Height(80),
+  },
+  containerStyle:{
+   paddingTop:10
   },
   noDataTitle: {
     fontSize: FontSize(18),

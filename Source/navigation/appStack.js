@@ -12,7 +12,7 @@ import CartScreen from '../Screens/Orders/cart';
 import OrderDetailScreen from '../Screens/Orders/detail/orderDetailScreen';
 import OrderConfirmFinal from '../Screens/Orders/orderConfirm/orderFinal';
 import WishlistScreen from '../Screens/Home/wishlist';
-import ProductsScreen from '../Screens/categories/product';
+import ProductsScreen from '../Screens/categories/product'
 import PaymentMethodScreen from '../Screens/Orders/payment/selectPayment';
 import PaymentConfirmationProcess from '../Screens/Orders/payment/confirm';
 import CreateAddressScreen from '../Components/address/createAddress';

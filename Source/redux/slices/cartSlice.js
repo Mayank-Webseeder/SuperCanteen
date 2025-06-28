@@ -271,14 +271,12 @@ const cartSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
-        console.log("FULLFIELD DATA IS",action.payload)
         state.loading = false;
         state.items = action.payload || [];
         state.lastUpdated = Date.now();
          state.initialized = true
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
-        console.log("REJECTED  DATA IS",action.payload)
         state.loading = false;
         state.error = action.error.message;
       })
@@ -354,5 +352,5 @@ const cartSlice = createSlice({
 }
 });
 
-export const { clearCart , markCartInitialized  } = cartSlice.actions;
+export const { clearCart , markCartInitialized,setGuestCart  } = cartSlice.actions;
 export default cartSlice.reducer;

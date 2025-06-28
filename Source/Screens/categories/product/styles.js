@@ -71,6 +71,9 @@ export const styles = StyleSheet.create({
   containerStyle:{
     marginTop:Height(-18)
   },
+  categortTitleStyle:{
+    marginHorizontal:4
+  },
   marginTop:{
     marginTop: 20
   },
@@ -165,6 +168,9 @@ export const styles = StyleSheet.create({
   },
   productContainer:{
     paddingHorizontal:Width(10)
+  },
+  categoryContainer:{
+     paddingHorizontal:Width(14)
   },
    disabledStyle:{
     opacity:1

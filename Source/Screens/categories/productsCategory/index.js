@@ -17,10 +17,10 @@ import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import CustomFilterBtn from '../../../Components/CustomFilterBtn';
 import { formateSubCategoryProducts, formateSubCategorySegments, formatProductBySegment } from '../../../utils/dataFormatters';
 import CustomSearch from '../../../Components/searchInput'
-import {fetchGetSegmentsByCategory } from '../../../redux/slices/segmentSlice';
+import { fetchGetSegmentsByCategory } from '../../../redux/slices/segmentSlice';
 import { fetchProductsBySegment, clearSegmentProducts } from '../../../redux/slices/productBySegmentSlice';
 import EmptyComponent from '@components/emptyComponent';
-import { fetchProductsByBrand  } from '../../../redux/slices/productsByBrandSlice';
+import { fetchProductsByBrand } from '../../../redux/slices/productsByBrandSlice';
 import SortBottomSheet from '@components/modals/sortBottomsheet';
 
 const ProductCategoryScreen = ({ navigation, route }) => {
@@ -31,8 +31,6 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
-   console.log("Dddddddddddddd",selectedSegment)
-
 
   // Filter and sort states
   const [filters, setFilters] = useState({
@@ -65,7 +63,6 @@ const ProductCategoryScreen = ({ navigation, route }) => {
 
   const { segmentProducts } = useSelector(state => state.productsBySegment);
 
-  
   // Memoized data transformations
   const products = useMemo(() => productsBySubcategory[selectedCategory] || [], [productsBySubcategory, selectedCategory]);
   const segments = useMemo(() => segmentsByCategory.segments || [], [segmentsByCategory]);
@@ -73,166 +70,155 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
 
-  
   // Filter options extraction with memoization
-const filterOptions = useMemo(() => {
-  const brands = new Set();
-  const colors = new Set();
-  const sizes = new Set();
-  let hasNewProducts = false;
-  let hasPopularProducts = false;
+  const filterOptions = useMemo(() => {
+    const brands = new Set();
+    const colors = new Set();
+    const sizes = new Set();
+    let hasNewProducts = false;
+    let hasPopularProducts = false;
 
-  products.forEach(product => {
-    // ✅ Add brand safely
-    if (product.brand?.name) {
-      brands.add(product.brand.name);
-    }
-
-    // ✅ Loop through variants
-    product.variants?.forEach(variant => {
-      // ✅ Add color safely
-      const color = typeof variant.color === 'string' ? variant.color.trim() : '';
-      if (color) {
-        colors.add(color);
+    products.forEach(product => {
+      if (product.brand?.name) {
+        brands.add(product.brand.name);
       }
 
-      // ✅ Add sizes safely
-      if (typeof variant.size === 'string') {
-        variant.size.split(',').forEach(size => {
-          const trimmedSize = size.trim();
-          if (trimmedSize) {
-            sizes.add(trimmedSize);
-          }
-        });
+      product.variants?.forEach(variant => {
+        const color = typeof variant.color === 'string' ? variant.color.trim() : '';
+        if (color) {
+          colors.add(color);
+        }
+
+        if (typeof variant.size === 'string') {
+          variant.size.split(',').forEach(size => {
+            const trimmedSize = size.trim();
+            if (trimmedSize) {
+              sizes.add(trimmedSize);
+            }
+          });
+        }
+      });
+
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      if (new Date(product.createdAt) > oneMonthAgo) {
+        hasNewProducts = true;
+      }
+
+      if (product.isBestSeller) {
+        hasPopularProducts = true;
       }
     });
 
-    // ✅ Check if new product
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    if (new Date(product.createdAt) > oneMonthAgo) {
-      hasNewProducts = true;
-    }
-
-    // ✅ Check if popular
-    if (product.isBestSeller) {
-      hasPopularProducts = true;
-    }
-  });
-
-  return {
-    brands: Array.from(brands),
-    colors: Array.from(colors),
-    sizes: Array.from(sizes),
-    hasNewProducts,
-    hasPopularProducts,
-  };
-}, [products]);
-
+    return {
+      brands: Array.from(brands),
+      colors: Array.from(colors),
+      sizes: Array.from(sizes),
+      hasNewProducts,
+      hasPopularProducts,
+    };
+  }, [products]);
 
   // Apply filters and sorting with memoization
-const filteredProducts = useMemo(() => {
-  if (products.length === 0) return [];
+  const filteredProducts = useMemo(() => {
+    if (products.length === 0) return [];
 
-  let result = [...products];
+    let result = [...products];
 
-  // 🔽 1. Sort FIRST
-  switch (sortOption) {
-    case 'Price: Low to High':
-      result.sort((a, b) => (a.offerPrice || a.mrp) - (b.offerPrice || b.mrp));
-      break;
-    case 'Price: High to Low':
-      result.sort((a, b) => (b.offerPrice || b.mrp) - (a.offerPrice || a.mrp));
-      break;
-    case 'Discount':
-      result.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
-      break;
-    case 'Rating: High to Low':
-      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      break;
-    case 'Rating: Low to High':
-      result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-      break;
-    case 'Best Seller':
-      result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
-      break;
-    case 'Popular':
-    default:
-      result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
-      break;
-  }
+    // Sort first
+    switch (sortOption) {
+      case 'Price: Low to High':
+        result.sort((a, b) => (a.offerPrice || a.mrp) - (b.offerPrice || b.mrp));
+        break;
+      case 'Price: High to Low':
+        result.sort((a, b) => (b.offerPrice || b.mrp) - (a.offerPrice || a.mrp));
+        break;
+      case 'Discount':
+        result.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0));
+        break;
+      case 'Rating: High to Low':
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'Rating: Low to High':
+        result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+        break;
+      case 'Best Seller':
+        result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+        break;
+      case 'Popular':
+      default:
+        result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
+        break;
+    }
 
-  // 🔽 2. Apply filters AFTER sorting
- if (filters.colors.length > 0) {
-  result = result.filter(product =>
-    product.variants?.some(variant => {
-      const color = typeof variant.color === 'string' ? variant.color.trim() : '';
-      return color && filters.colors.includes(color);
-    })
-  );
-}
+    // Apply filters after sorting
+    if (filters.colors.length > 0) {
+      result = result.filter(product =>
+        product.variants?.some(variant => {
+          const color = typeof variant.color === 'string' ? variant.color.trim() : '';
+          return color && filters.colors.includes(color);
+        })
+      );
+    }
 
+    if (filters.sizes.length > 0) {
+      result = result.filter(product =>
+        product.variants?.some(variant => {
+          if (typeof variant.size !== 'string') return false;
+          const sizes = variant.size.split(',').map(s => s.trim());
+          return sizes.some(size => filters.sizes.includes(size));
+        })
+      );
+    }
 
-  if (filters.sizes.length > 0) {
-  result = result.filter(product =>
-    product.variants?.some(variant => {
-      if (typeof variant.size !== 'string') return false;
-      const sizes = variant.size.split(',').map(s => s.trim());
-      return sizes.some(size => filters.sizes.includes(size));
-    })
-  );
-}
+    if (filters.brands.length > 0) {
+      result = result.filter(product =>
+        product.brand?.name && filters.brands.includes(product.brand.name)
+      );
+    }
 
+    if (filters.isNew) {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      result = result.filter(product => new Date(product.createdAt) > oneMonthAgo);
+    }
 
- if (filters.brands.length > 0) {
-  result = result.filter(product =>
-    product.brand?.name && filters.brands.includes(product.brand.name)
-  );
-}
+    if (filters.isPopular) {
+      result = result.filter(product => product.isBestSeller);
+    }
 
-
-  if (filters.isNew) {
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    result = result.filter(product => new Date(product.createdAt) > oneMonthAgo);
-  }
-
-  if (filters.isPopular) {
-    result = result.filter(product => product.isBestSeller);
-  }
-
-  return result;
-}, [products, filters, sortOption]);
+    return result;
+  }, [products, filters, sortOption]);
 
   // Dynamic Sort Options Based on Available Product Data
-const availableSortOptions = useMemo(() => {
-  if (products.length === 0) return ['Popular'];
+  const availableSortOptions = useMemo(() => {
+    if (products.length === 0) return ['Popular'];
 
-  const hasOfferPrice = products.some(p => p.offerPrice || p.mrp);
-  const hasDiscount = products.some(p => (p.discountPercent || 0) > 0);
-  const hasRating = products.some(p => (p.rating || 0) > 0);
-  const hasBestSeller = products.some(p => p.isBestSeller === true);
+    const hasOfferPrice = products.some(p => p.offerPrice || p.mrp);
+    const hasDiscount = products.some(p => (p.discountPercent || 0) > 0);
+    const hasRating = products.some(p => (p.rating || 0) > 0);
+    const hasBestSeller = products.some(p => p.isBestSeller === true);
 
-  const options = ['Popular'];
+    const options = ['Popular'];
 
-  if (hasOfferPrice) {
-    options.push('Price: Low to High', 'Price: High to Low');
-  }
+    if (hasOfferPrice) {
+      options.push('Price: Low to High', 'Price: High to Low');
+    }
 
-  if (hasDiscount) {
-    options.push('Discount');
-  }
+    if (hasDiscount) {
+      options.push('Discount');
+    }
 
-  if (hasBestSeller) {
-    options.push('Best Seller');
-  }
+    if (hasBestSeller) {
+      options.push('Best Seller');
+    }
 
-  if (hasRating) {
-    options.push('Rating: High to Low', 'Rating: Low to High');
-  }
+    if (hasRating) {
+      options.push('Rating: High to Low', 'Rating: Low to High');
+    }
 
-  return options;
-}, [products]);
+    return options;
+  }, [products]);
 
   // Reset all filters
   const resetFilters = useCallback(() => {
@@ -248,7 +234,6 @@ const availableSortOptions = useMemo(() => {
 
   // Handle segment selection
   const handleSegmentSelect = useCallback((segmentId) => {
- 
     setSelectedSegment(segmentId);
     dispatch(clearSegmentProducts());
     dispatch(fetchProductsBySegment(segmentId));
@@ -291,13 +276,6 @@ const availableSortOptions = useMemo(() => {
     }
   }, [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
 
-  // Set initial segment when segments load
-  useEffect(() => {
-    if (!segmentsLoading && segments.length > 0 && selectedSegment === null) {
-    
-    }
-  }, [segmentsLoading, segments, selectedSegment]);
-
   // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -328,17 +306,16 @@ const availableSortOptions = useMemo(() => {
   }, []);
 
   const getActiveFilterCount = (filters) => {
-  let count = 0;
-  count += filters.colors.length;
-  count += filters.sizes.length;
-  count += filters.brands.length;
-  if (filters.isNew) count++;
-  if (filters.isPopular) count++;
-  return count;
-};
+    let count = 0;
+    count += filters.colors.length;
+    count += filters.sizes.length;
+    count += filters.brands.length;
+    if (filters.isNew) count++;
+    if (filters.isPopular) count++;
+    return count;
+  };
 
-
-  // Render sections
+  // Optimized render sections
   const renderSection = useCallback(({ item }) => item, []);
   
   const sections = useMemo(() => [
@@ -354,7 +331,7 @@ const availableSortOptions = useMemo(() => {
               backgroundColor={'#fff'}
               disabled
               containerStyle={styles.searchInput}
-              inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
+              inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
             />
           </Pressable>
         </View>
@@ -382,48 +359,45 @@ const availableSortOptions = useMemo(() => {
       )}
 
       {/* Filter Buttons */}
-   <View style={styles.bottomSheetContainer}>
-  <SortBottomSheet 
-    visible={sortSheetVisible} 
-    onClose={() => setSortSheetVisible(false)}
-    onApply={handleSortApply}
-    selectedOption={sortOption}
-    options={availableSortOptions}
-  />
+      <View style={styles.bottomSheetContainer}>
+        <SortBottomSheet 
+          visible={sortSheetVisible} 
+          onClose={() => setSortSheetVisible(false)}
+          onApply={handleSortApply}
+          selectedOption={sortOption}
+          options={availableSortOptions}
+        />
 
-  <CustomBottomSheet 
-    visible={showSheet} 
-    onClose={() => setShowSheet(false)}
-    onApply={handleFilterApply}
-    initialFilters={filters}
-    filterOptions={filterOptions}
-    products={products}
-    onReset={resetFilters}
-  />
+        <CustomBottomSheet 
+          visible={showSheet} 
+          onClose={() => setShowSheet(false)}
+          onApply={handleFilterApply}
+          initialFilters={filters}
+          filterOptions={filterOptions}
+          products={products}
+          onReset={resetFilters}
+        />
 
-  {/* ✅ Updated Filter Button with Active Count */}
-  <CustomFilterBtn
-   title={'Filter'}
-    // title={`Filter${getActiveFilterCount(filters) > 0 ? ` (${getActiveFilterCount(filters)})` : ''}`}
-    width={80}
-    height={30}
-    onPress={() => setShowSheet(true)}
-    icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
-  />
+        <CustomFilterBtn
+          title={'Filter'}
+          width={80}
+          height={30}
+          onPress={() => setShowSheet(true)}
+          icon={<Icon name="filter-list" size={20} color="#1C1B1F7D" />}
+        />
 
-  <CustomFilterBtn
-    title="Sort"
-    width={80}
-    height={30}
-    onPress={() => setSortSheetVisible(true)}
-    icon={
-      <View style={{ transform: [{ rotate: '270deg' }] }}>
-        <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
+        <CustomFilterBtn
+          title="Sort"
+          width={80}
+          height={30}
+          onPress={() => setSortSheetVisible(true)}
+          icon={
+            <View style={{ transform: [{ rotate: '270deg' }] }}>
+              <Icon name="sync-alt" size={20} color="#1C1B1F7D" />
+            </View>
+          }
+        />
       </View>
-    }
-  />
-</View>
-
 
       <HorizontalLine />
 
@@ -530,7 +504,8 @@ const availableSortOptions = useMemo(() => {
     error,
     handleRefresh,
     formattedProducts,
-    filteredProducts
+    filteredProducts,
+    availableSortOptions
   ]);
 
   if (pageLoading) {
@@ -546,6 +521,10 @@ const availableSortOptions = useMemo(() => {
           keyExtractor={(_, index) => index.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: Height(20) }}
+          windowSize={5}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          updateCellsBatchingPeriod={100}
         />
       </PullToRefresh>
     </View>

@@ -1,4 +1,4 @@
-import React, { useRef, useState,useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Dimensions,
@@ -17,8 +17,11 @@ import { styles } from './styles';
 import { IMGURL } from '../../../utils/dataFormatters';
 import LottieView from 'lottie-react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToWishlist, removeFromWishlist } from '../../../redux/slices/wishlistSlice';
-import { fetchWishlistItems } from '../../../redux/slices/wishlistSlice';
+import {
+  addToWishlist,
+  removeFromWishlist,
+  fetchWishlistItems,
+} from '../../../redux/slices/wishlistSlice';
 import { showWishlistToast } from '../../../utils/helper';
 
 const { width } = Dimensions.get('window');
@@ -30,72 +33,69 @@ const ProductCarousel = ({
   navigation,
   horizontal = false,
   title = 'The Swipe & Shop Spectacular',
+  containerStyle,
 }) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const dispatch = useDispatch();
   const wishlistItems = useSelector(state => state.wishlist.items);
+  const initialized = useSelector(state => state.wishlist.initialized);
   const userId = useSelector(state => state.auth.user?.id);
   const token = useSelector(state => state.auth.token);
   const { user } = useSelector(state => state.auth);
   const [lottieState, setLottieState] = useState({});
   const [wishlistState, setWishlistState] = useState({});
 
-
- useEffect(() => {
+  useEffect(() => {
+    if (userId && !initialized) {
       dispatch(fetchWishlistItems(userId));
-  }, [dispatch, userId,wishlistItems]);
+    }
+  }, [dispatch, userId, initialized]);
 
-  const isInWishlist = (productId) =>
-    wishlistItems?.some((item) => item._id === productId) || wishlistState[productId];
+  const isInWishlist = productId =>
+    wishlistItems?.some(item => item._id === productId) || wishlistState[productId];
 
-
- const handleWishlistToggle = (productId) => {
-  if (!user || !user.username) {
-    navigation.reset({
-      index: 0,
-      routes: [
-        {
-          name: 'Auth',
-          state: {
-            routes: [{ name: 'Signin' }]
-          }
-        }
-      ]
-    });
-    return;
-  }
-
-  const wishlistItem = wishlistItems.find(item => item._id === productId || item.productId === productId);
-  const wishlistId = wishlistItem?.wishlistId;
-
-  if (isInWishlist(productId)) {
-    if (!wishlistId) {
-      console.warn('❌ Wishlist ID not found for product:', productId);
+  const handleWishlistToggle = productId => {
+    if (!user || !user.username) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
+      });
       return;
     }
 
-    dispatch(removeFromWishlist({ wishlistId, userId }));
-    setWishlistState(prev => ({ ...prev, [productId]: false }));
-    setLottieState(prev => ({ ...prev, [productId]: false }));
-    showWishlistToast('Removed from Wishlist','💔');
-    console.log("✅ Removed from wishlist:", wishlistId);
-  } else {
-    dispatch(addToWishlist({ productId, token }));
-    setWishlistState(prev => ({ ...prev, [productId]: true }));
-    setLottieState(prev => ({ ...prev, [productId]: true }));
-    showWishlistToast('Added to Wishlist','❤️');
-    console.log("✅ Added to wishlist:", productId);
-  }
+    const wishlistItem = wishlistItems.find(
+      item => item._id === productId || item.productId === productId
+    );
+    const wishlistId = wishlistItem?.wishlistId;
 
-  setTimeout(() => {
-    setLottieState(prev => ({ ...prev, [productId]: false }));
-  }, 1500);
-};
+    if (isInWishlist(productId)) {
+      if (!wishlistId) return;
+
+      dispatch(removeFromWishlist({ wishlistId, userId }));
+      requestAnimationFrame(() => {
+        setWishlistState(prev => ({ ...prev, [productId]: false }));
+        setLottieState(prev => ({ ...prev, [productId]: false }));
+      });
+      showWishlistToast('Removed from Wishlist', '💔');
+    } else {
+      console.log("PRODUCT ID IS",productId)
+      dispatch(addToWishlist({ productId, token }));
+      requestAnimationFrame(() => {
+        setWishlistState(prev => ({ ...prev, [productId]: true }));
+        setLottieState(prev => ({ ...prev, [productId]: true }));
+      });
+      showWishlistToast('Added to Wishlist', '❤️');
+    }
+
+    
+  };
 
   const gridItemWidth = (width - Width(40)) / 3;
 
   const renderItem = ({ item, index }) => {
-    const discountPercentage = Math.round(((item.mrp - item.offerPrice) / item.mrp) * 100);
+    const discountPercentage = Math.round(
+      ((item.mrp - item.offerPrice) / item.mrp) * 100
+    );
     const isGrid = !horizontal;
 
     const scale = horizontal
@@ -160,12 +160,15 @@ const ProductCarousel = ({
               style={[styles.wishlistButton, isGrid && styles.gridWishlistButton]}
               onPress={() => handleWishlistToggle(item._id)}
             >
-              <View style={{ width: 40, height: 40,alignItems:"center",justifyContent:"center" }}>
+              <View
+                style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+              >
                 {lottieState[item._id] ? (
                   <LottieView
                     source={require('../../../../assets/lottie/animation.json')}
                     autoPlay
                     loop={false}
+                    pointerEvents="none"
                     style={{
                       width: 40,
                       height: 40,
@@ -184,7 +187,6 @@ const ProductCarousel = ({
                     name="favorite-border"
                     size={isGrid ? 16 : 20}
                     color={COLORS.white}
-                    
                   />
                 )}
               </View>
@@ -220,14 +222,14 @@ const ProductCarousel = ({
   return (
     <View style={styles.container}>
       {products.length > 0 && (
-        <HeaderRow containerStyle={{ marginTop: Height(10) }} title={title} />
+        <HeaderRow containerStyle={{ marginTop: Height(10), ...containerStyle }} title={title} />
       )}
 
       {horizontal ? (
         <Animated.FlatList
           data={products}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={item => item._id}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListContent}
@@ -238,18 +240,26 @@ const ProductCarousel = ({
             { useNativeDriver: true }
           )}
           scrollEventThrottle={16}
+          removeClippedSubviews={true}
+          initialNumToRender={5}
+          maxToRenderPerBatch={6}
+          windowSize={7}
         />
       ) : (
         <FlatList
           data={products}
           renderItem={renderItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={item => item._id}
           numColumns={3}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.gridContentContainer,
             { marginTop: horizontal ? Height(10) : '' },
           ]}
+          removeClippedSubviews={true}
+          initialNumToRender={6}
+          maxToRenderPerBatch={9}
+          windowSize={7}
         />
       )}
     </View>

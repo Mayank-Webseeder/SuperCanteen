@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState,useMemo } from 'react';
 import {
   Modal,
   View,
@@ -8,12 +8,12 @@ import {
   ScrollView,
   Dimensions,
   Platform,
+
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS, Height } from '../../../constants';
 import BottomActionButtons from '../../../otherComponents/productCategory/bottomActionButtons';
 import { styles } from './styles';
-import { getColorHex } from '../../../utils/helper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -36,7 +36,6 @@ const CustomBottomSheet = ({
   const [selectedBrands, setSelectedBrands] = useState(initialFilters.brands || []);
   const [isNew, setIsNew] = useState(initialFilters.isNew || false);
   const [isPopular, setIsPopular] = useState(initialFilters.isPopular || false);
-
 
   useEffect(() => {
     if (visible) {
@@ -86,191 +85,174 @@ const CustomBottomSheet = ({
   };
 
   const ResetButton = () => (
-     <TouchableOpacity
+    <TouchableOpacity
       onPress={() => handleReset()}
       style={styles.footerButton} 
     >
-         <Icon name="restore" size={18} color={COLORS.green} style={{ marginRight: 6,marginTop:2 }} />
+      <Icon name="restore" size={18} color={COLORS.green} style={{ marginRight: 6, marginTop: 2 }} />
       <Text style={styles.resetText}>Reset</Text>
     </TouchableOpacity>
-  )
+  );
 
-  const renderRightPane = () => {
-    switch (selectedCategory) {
-      case 'Brand':
-        return (
-          <View style={styles.rightPaneContainer}>
-            <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-             
-            <Text style={styles.sectionTitle}>Select Brands</Text>
-              <ResetButton/>
-            </View>
-          
-         <View style={styles.optionsGrid}>
-  {filterOptions.brands.length === 0 ? (
-    <Text style={styles.emptyText}>No brands available for this product.</Text>
-  ) : (
-    filterOptions.brands.map(brand => (
-      <TouchableOpacity
-        key={brand}
-        style={[
-          styles.optionItem,
-          selectedBrands.includes(brand) && styles.optionItemSelected,
-        ]}
-        onPress={() => toggleSelection(brand, 'brand')}
-      >
-        <Text style={styles.optionText}>{brand}</Text>
-        {selectedBrands.includes(brand) && (
-          <Ionicons
-            name="checkmark-circle"
-            size={20}
-            color="#376275"
-            style={styles.checkIcon}
-          />
-        )}
-      </TouchableOpacity>
-    ))
-  )}
-</View>
+  const renderRightPane = useMemo(() => {
+    const renderBrands = () => (
+      <View style={styles.rightPaneContainer}>
+        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.sectionTitle}>Select Brands</Text>
+          <ResetButton/>
+        </View>
+        <View style={styles.optionsGrid}>
+          {filterOptions.brands.length === 0 ? (
+            <Text style={styles.emptyText}>No brands available for this product.</Text>
+          ) : (
+            filterOptions.brands.map(brand => (
+              <TouchableOpacity
+                key={brand}
+                style={[
+                  styles.optionItem,
+                  selectedBrands.includes(brand) && styles.optionItemSelected,
+                ]}
+                onPress={() => toggleSelection(brand, 'brand')}
+              >
+                <Text style={styles.optionText}>{brand}</Text>
+                {selectedBrands.includes(brand) && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={20}
+                    color="#376275"
+                    style={styles.checkIcon}
+                  />
+                )}
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
+      </View>
+    );
 
-          </View>
-        );
-
-      case 'Color':
-        return (
-          <View style={styles.panelContainer}>
-             <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-             
-             <Text style={styles.sectionTitle}>Select Colors</Text>
-         <ResetButton/>
-            </View>
-        
+    const renderColors = () => (
+      <View style={styles.panelContainer}>
+        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.sectionTitle}>Select Colors</Text>
+          <ResetButton/>
+        </View>
         <View style={styles.colorContainer}>
-  {filterOptions.colors.length === 0 ? (
-    <Text style={styles.emptyText}>No colors available for this product.</Text>
-  ) : (
-    filterOptions.colors.map(color => (
-      <TouchableOpacity
-        key={color}
-        style={[
-          styles.colorItem,
-          selectedColors.includes(color)
-        ]}
-        onPress={() => toggleSelection(color, 'color')}
-      >
-        <View style={[
-          styles.colorCircleStyle,
-          { backgroundColor: color.toLowerCase() }
-        ]} />
-        <Text style={styles.optionText}>{color}</Text>
-        {selectedColors.includes(color) && (
-          <Ionicons
-            name="checkmark-circle"
-            size={20}
-            color="#376275"
-            style={styles.checkIcon}
-          />
-        )}
-      </TouchableOpacity>
-    ))
-  )}
-</View>
-
-          </View>
-        );
-
-      case 'Size':
-        return (
-          <View style={styles.rightPaneContainer}>
-              <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-             
-            <Text style={styles.sectionTitle}>Select Sizes</Text>
-              <ResetButton/>
-            </View>
-          
-           <View style={styles.optionsGrid}>
-  {filterOptions.sizes.length === 0 ? (
-    <Text style={styles.emptyText}>No sizes available for this product.</Text>
-  ) : (
-    filterOptions.sizes.map(size => (
-      <TouchableOpacity
-        key={size}
-        style={[
-          styles.sizeOption,
-          selectedSizes.includes(size) && styles.sizeOptionSelected
-        ]}
-        onPress={() => toggleSelection(size, 'size')}
-      >
-        <Text style={[
-          styles.sizeText,
-          selectedSizes.includes(size) && styles.sizeTextSelected
-        ]}>
-          {size}
-        </Text>
-      </TouchableOpacity>
-    ))
-  )}
-</View>
-
-          </View>
-        );
-
-      case 'New':
-        return (
-          <View style={styles.rightPaneContainer}>
-              <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-               <Text style={styles.sectionTitle}>New Arrivals</Text>
-         <ResetButton/>
-            </View>
-         
-            <View style={styles.checkboxContainer}>
-              <TouchableOpacity 
-                onPress={() => setIsNew(!isNew)} 
-                style={styles.checkboxTouchable}
+          {filterOptions.colors.length === 0 ? (
+            <Text style={styles.emptyText}>No colors available for this product.</Text>
+          ) : (
+            filterOptions.colors.map(color => (
+              <TouchableOpacity
+                key={color}
+                style={[
+                  styles.colorItem,
+                  selectedColors.includes(color)
+                ]}
+                onPress={() => toggleSelection(color, 'color')}
               >
-                <Ionicons
-                  name={isNew ? 'checkbox' : 'checkbox-outline'}
-                  size={24}
-                  color={isNew ? '#376275' : '#ccc'}
-                />
-                <Text style={styles.checkboxLabel}>Show only new products</Text>
+                <View style={[
+                  styles.colorCircleStyle,
+                  { backgroundColor: color.toLowerCase() }
+                ]} />
+                <Text style={styles.optionText}>{color}</Text>
+                {selectedColors.includes(color) && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={20}
+                    color="#376275"
+                    style={styles.checkIcon}
+                  />
+                )}
               </TouchableOpacity>
-            </View>
-          </View>
-        );
+            ))
+          )}
+        </View>
+      </View>
+    );
 
-      case 'Popular':
-        return (
-          <View style={styles.rightPaneContainer}>
-               <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-               <Text style={styles.sectionTitle}>Popular Items</Text>
-         <ResetButton/>
-            </View>
-          
-            <View style={styles.checkboxContainer}>
-              <TouchableOpacity 
-                onPress={() => setIsPopular(!isPopular)} 
-                style={styles.checkboxTouchable}
+    const renderSizes = () => (
+      <View style={styles.rightPaneContainer}>
+        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.sectionTitle}>Select Sizes</Text>
+          <ResetButton/>
+        </View>
+        <View style={styles.optionsGrid}>
+          {filterOptions.sizes.length === 0 ? (
+            <Text style={styles.emptyText}>No sizes available for this product.</Text>
+          ) : (
+            filterOptions.sizes.map(size => (
+              <TouchableOpacity
+                key={size}
+                style={[
+                  styles.sizeOption,
+                  selectedSizes.includes(size) && styles.sizeOptionSelected
+                ]}
+                onPress={() => toggleSelection(size, 'size')}
               >
-                <Ionicons
-                  name={isPopular ? 'checkbox' : 'checkbox-outline'}
-                  size={24}
-                  color={isPopular ? '#376275' : '#ccc'}
-                />
-                <Text style={styles.checkboxLabel}>Show only popular products</Text>
+                <Text style={[
+                  styles.sizeText,
+                  selectedSizes.includes(size) && styles.sizeTextSelected
+                ]}>
+                  {size}
+                </Text>
               </TouchableOpacity>
-            </View>
-          </View>
-        );
+            ))
+          )}
+        </View>
+      </View>
+    );
 
-      default:
-        return (
-          <View style={styles.rightPaneContainer}>
-            <Text style={styles.sectionTitle}>No Options Available</Text>
-          </View>
-        );
-    }
-  };
+    const renderNew = () => (
+      <View style={styles.rightPaneContainer}>
+        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.sectionTitle}>New Arrivals</Text>
+          <ResetButton/>
+        </View>
+        <View style={styles.checkboxContainer}>
+          <TouchableOpacity 
+            onPress={() => setIsNew(!isNew)} 
+            style={styles.checkboxTouchable}
+          >
+            <Ionicons
+              name={isNew ? 'checkbox' : 'checkbox-outline'}
+              size={24}
+              color={isNew ? '#376275' : '#ccc'}
+            />
+            <Text style={styles.checkboxLabel}>Show only new products</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+
+    const renderPopular = () => (
+      <View style={styles.rightPaneContainer}>
+        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+          <Text style={styles.sectionTitle}>Popular Items</Text>
+          <ResetButton/>
+        </View>
+        <View style={styles.checkboxContainer}>
+          <TouchableOpacity 
+            onPress={() => setIsPopular(!isPopular)} 
+            style={styles.checkboxTouchable}
+          >
+            <Ionicons
+              name={isPopular ? 'checkbox' : 'checkbox-outline'}
+              size={24}
+              color={isPopular ? '#376275' : '#ccc'}
+            />
+            <Text style={styles.checkboxLabel}>Show only popular products</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+
+    return {
+      Brand: renderBrands,
+      Color: renderColors,
+      Size: renderSizes,
+      New: renderNew,
+      Popular: renderPopular
+    };
+  }, [selectedBrands, selectedColors, selectedSizes, isNew, isPopular, filterOptions]);
 
   return (
     <Modal animationType="none" transparent visible={visible} onRequestClose={onClose}>
@@ -292,15 +274,18 @@ const CustomBottomSheet = ({
                 shadowOffset: { width: 0, height: -3 },
                 shadowOpacity: 0.2,
                 shadowRadius: 5,
+                 backgroundColor: 'white', 
               },
               android: {
                 elevation: 20,
+                 backgroundColor: 'white',
+                overflow: 'hidden', // Prevent content clipping
               },
             }),
           }
         ]}>
           <View style={styles.dragHandle} />
-          <View style={styles.mainContent}>
+         <View style={[styles.mainContent, { overflow: 'hidden' }]}>
             <View style={styles.leftColumn}>
               <ScrollView 
                 showsVerticalScrollIndicator={false}
@@ -326,30 +311,32 @@ const CustomBottomSheet = ({
               </ScrollView>
             </View>
 
-            <View style={styles.rightColumn}>
-              
+           <View style={[styles.rightColumn, { overflow: 'hidden' }]}>
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.rightColumnContent}
               >
-                {renderRightPane()}
+                {renderRightPane[selectedCategory]?.() || (
+                  <View style={styles.rightPaneContainer}>
+                    <Text style={styles.sectionTitle}>No Options Available</Text>
+                  </View>
+                )}
               </ScrollView>
             </View>
           </View>
 
-        <BottomActionButtons
-  onCancel={onClose}
-  onApply={() => {
-    onApply({
-      colors: selectedColors,
-      sizes: selectedSizes,
-      brands: selectedBrands,
-      isNew,
-      isPopular
-    });
-  }}
-/>
-
+          <BottomActionButtons
+            onCancel={onClose}
+            onApply={() => {
+              onApply({
+                colors: selectedColors,
+                sizes: selectedSizes,
+                brands: selectedBrands,
+                isNew,
+                isPopular
+              });
+            }}
+          />
         </Animated.View>
       </View>
     </Modal>

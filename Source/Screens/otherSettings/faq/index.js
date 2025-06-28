@@ -78,7 +78,7 @@ const FAQScreen = ({ navigation }) => {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+        
 
         <View style={styles.faqContainer}>
           {filteredFaqs.length === 0 ? (

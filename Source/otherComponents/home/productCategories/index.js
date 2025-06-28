@@ -57,6 +57,7 @@ export default function ProductCategories({
       ) : (
         <>
           <HeaderRow
+            containerStyle={containerStyle}
             title={subcategories[0]?.category?.name || 'Category'}
             navigation={navigation}
             selectedCategoryId={subcategories[0]?.category?._id}

@@ -31,6 +31,7 @@ import VariantSelector from './variantSelector';
 import { IMGURL } from '../../utils/dataFormatters';
 import CouponSection from './couponSection';
 import Share from 'react-native-share';
+import { showMessage } from 'react-native-flash-message';
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -43,7 +44,7 @@ const ProductDetails = ({ navigation, route }) => {
   const [animationImage, setAnimationImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [selectionError, setSelectionError] = useState(null);
-  
+  const cartItems = useSelector(state => state.cart.items, )
 
   const productData = product?.product;
   const subCategoryProducts = useSelector(
@@ -87,11 +88,29 @@ const shareWithImage = async () => {
 };
 
 const OnAddToCart = (item) => {
-  
+
+try {
+
   const selectedItem = item || productData;
   const selectedProductId = selectedItem?.id || productId;
-
   const basePrice = selectedItem.offerPrice || selectedItem.price;
+  const availableStock = selectedItem.countInStock || 0;
+
+     if (availableStock <= 0) {
+        showMessage({ message: 'Out of stock', type: 'danger' });
+        return;
+      }
+
+ // Use the cartItems from component scope
+      const cartItem = cartItems.find(ci => 
+        (ci.product?._id === selectedItem._id || ci.product === selectedItem._id) && 
+        (!ci.variantId || ci.variantId === selectedVariant?._id)
+      );
+      
+      const currentQty = cartItem?.qty || 0;
+      if (currentQty + 1 > availableStock) {
+        throw new Error(`Only ${availableStock} available`);
+      }
 
   // 🔁 If item is coming from similar products and has variantDetails inside it (fake variant)
   const isFromSimilarProducts = !!item;
@@ -108,6 +127,45 @@ const OnAddToCart = (item) => {
         images: selectedItem.images,
         sku: selectedItem.sku || '',
       };
+       // Check variant stock - IMPROVED VERSION
+     let variantStock = selectedItem.countInStock || 0;
+    
+    if (finalVariant?.countInStock !== undefined) {
+      variantStock = finalVariant.countInStock;
+    } 
+    else if (finalVariant?.color && selectedItem?.variants) {
+      const colorVariant = selectedItem.variants.find(v => 
+        v.color?.code === finalVariant.color?.code
+      );
+      variantStock = colorVariant?.countInStock ?? variantStock;
+    }
+    else if (finalVariant?._id && selectedItem?.variants) {
+      const variant = selectedItem.variants.find(v => v._id === finalVariant._id);
+      variantStock = variant?.countInStock ?? variantStock;
+    }
+
+    // 2. Show message if out of stock
+    if (variantStock <= 0) {
+      showMessage({
+        message: finalVariant?.color?.name 
+          ? `The ${finalVariant.color.name} color is out of stock` 
+          : 'This item is out of stock',
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (currentQty + 1 > variantStock) {
+      showMessage({
+        message: finalVariant?.color?.name
+          ? `Only ${variantStock} ${finalVariant.color.name} items available (${currentQty} in cart)`
+          : `Only ${variantStock} items available (${currentQty} in cart)`,
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
 
   // 🛑 Don't check for selectedVariant if it's coming from similarProducts (no real variant selection)
   if (!isFromSimilarProducts &&   hasSizeVariants && selectedItem?.variants?.length > 0 && !selectedVariant) {
@@ -122,8 +180,6 @@ const productImage =
   Array.isArray(selectedItem?.images) && selectedItem.images.length > 0
     ? selectedItem.images[0]
     : selectedItem?.image || null;
-
-    
 
   const imageUrl =
   typeof variantImage === 'object' && variantImage?.url
@@ -159,6 +215,10 @@ const productImage =
       setAddtoCartLoading(false);
       setShowAnimation(false);
     });
+  
+} catch (error) {
+    showMessage({ message: error.message, type: 'danger' });
+}  
 };
 
   const handleAnimationComplete = () => {
@@ -217,7 +277,7 @@ const productImage =
 
   return (
     <View style={styles.wrapper}>
-       <AddToCartAnimation
+      <AddToCartAnimation
         key={animationKey} // Important for resetting the animation
         visible={showAnimation}
         imageUrl={animationImage}
@@ -252,7 +312,7 @@ const productImage =
                   </Pressable>
             
         </View>
-        <View>
+       <View>
           <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
          <CustomZoomCasual
   cardHeight={Height(200)}
@@ -260,8 +320,8 @@ const productImage =
   data={imagesToShow}  
 
 />
-        </View>
-        <Description productData={formattedProduct}  selectedVariant={selectedVariant}/>
+        </View> 
+         <Description productData={formattedProduct}  selectedVariant={selectedVariant}/>
            {formattedProduct?.variants?.length > 0 && (
             <VariantSelector 
               product={formattedProduct} 
@@ -281,26 +341,26 @@ const productImage =
                        />
            </>
                        }
-        <AddressRow
+       <AddressRow
           navigation={navigation}
           address={formattedProduct.shippingAddress}
-        />
-        <View style={styles.infoRow}>
+        /> 
+       <View style={styles.infoRow}>
           <PolicyIcon />
           <Text style={styles.infoText}>
             {formattedProduct?.returnPolicy?.returnable
               ? `${formattedProduct?.returnPolicy?.returnWindow} Days Return Policy`
               : 'No returns available'}
           </Text>
-        </View>
+        </View> 
         <View style={[styles.infoRow, { marginTop: 7 }]}>
           <CurruncyRupees />
           <Text style={styles.infoText}>Cash on Delivery & UPI Available</Text>
-        </View>
-        <View style={styles.borderStyle} />
+        </View> 
+       <View style={styles.borderStyle} />
         <CustomProductDetailsData  productData={formattedProduct} />
         {/* Similar Products Section - Fixed filtering */}
-        {similarLoading ? (
+       {similarLoading ? (
           <ActivityIndicator size="small" color="#416F81" style={{ marginVertical: 20 }} />
         ) : similarError ? (
           <Text style={styles.errorText}>Failed to load similar products</Text>
@@ -317,7 +377,7 @@ const productImage =
           <></>
         )}
       </ScrollView>
-      <BottomPurchaseBar
+     <BottomPurchaseBar
   addToCartLoading={addToCartLoading}
   onSharePress={shareWithImage} 
   onAddToCart={() => OnAddToCart()}

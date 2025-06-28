@@ -91,21 +91,15 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   containerView: {
-    marginTop: Height(4),
-    
+     paddingHorizontal:Height(15)
   },
   textStyle: {
     fontSize: 12,
     textAlign: 'center',
     marginTop: Height(5),
-    fontFamily: "Inter-Medium"
+    fontFamily: "Inter-Medium",
+    
   },
-
-
-
-
-
-
 debouncingText: {
   marginTop: Height(10),
   color: '#666',

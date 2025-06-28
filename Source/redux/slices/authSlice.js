@@ -7,27 +7,41 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const apiCall = async (url, data) => {
   try {
     const response = await axios.post(url, data, {
-      timeout: 10000, // 10 second timeout
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
-    return response;
+    return { data: response.data };
   } catch (error) {
     if (error.code === 'ECONNABORTED') {
-      return { error: 'Request timed out. Please try again.' };
+      return { error: 'Request timed out' };
     }
-    return { error: error.response?.data?.message || error.message };
+    return { 
+      error: error.response?.data?.message || 
+             error.message || 
+             'Network request failed'
+    };
+  }
+};
+
+const setAuthData = async (user, token) => {
+  try {
+    await Promise.all([
+      AsyncStorage.setItem('authUser', JSON.stringify(user)),
+      AsyncStorage.setItem('authToken', token)
+    ]);
+  } catch (e) {
+    console.warn('AsyncStorage set error:', e);
   }
 };
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ identifier, password }, { rejectWithValue }) => {
-    const response = await apiCall(LOGINAPI, { identifier, password });
-    
-    if (response.error) {
-      return rejectWithValue(response.error);
-    }
-    
-    return response.data;
+    const { data, error } = await apiCall(LOGINAPI, { identifier, password });
+    return error ? rejectWithValue(error) : data;
   }
 );
 
@@ -76,16 +90,21 @@ const authSlice = createSlice({
     user: null,
     token: null,
     loading: false,
-    error: null
+    error: null,
+    initialized: false
   },
   reducers: {
     logout: (state) => {
-  state.user = null;
-  state.token = null;
-  AsyncStorage.multiRemove(['authUser', 'authToken']);
-},
+      state.user = null;
+      state.token = null;
+      state.initialized = false;
+      AsyncStorage.multiRemove(['authUser', 'authToken']).catch(console.warn);
+    },
+    setAuthInitialized: (state) => {
+      state.initialized = true;
+    }
   },
-  extraReducers: builder => {
+extraReducers: builder => {
     const handlePending = (state) => {
       state.loading = true;
       state.error = null;
@@ -111,9 +130,7 @@ const authSlice = createSlice({
   };
   state.token = action.payload.token;
 
-  // Save to AsyncStorage
-  AsyncStorage.setItem('authUser', JSON.stringify(state.user));
-  AsyncStorage.setItem('authToken', action.payload.token);
+   setAuthData(state.user, action.payload.token);
 })
       .addCase(loginUser.rejected, handleRejected)
       
@@ -140,5 +157,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setAuthInitialized } = authSlice.actions;
 export default authSlice.reducer;

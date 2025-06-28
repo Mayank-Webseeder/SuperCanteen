@@ -1,25 +1,37 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { View, FlatList, RefreshControl, Animated,TouchableOpacity } from 'react-native';
+import {
+  View,
+  FlatList,
+  RefreshControl,
+  Animated,
+  TouchableOpacity,
+  InteractionManager,
+  Text,
+  ScrollView,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import HotDealsSection from '../../../otherComponents/home/hotDeals'
+
 import Header from '../../../otherComponents/home/header';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 import ProductCategories from '../../../otherComponents/home/productCategories';
 import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
+
 import { styles } from './styles';
 import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
+import { fetchSections } from '../../../redux/slices/sectionSlice';
+
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
-  const [selectedCategoryItems, setSelectedCategoryItems] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(null);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const opacity = useState(new Animated.Value(0))[0];
 
   const dispatch = useDispatch();
@@ -28,87 +40,100 @@ const HomeScreen = ({ navigation }) => {
     categories,
     loading: categoriesLoading,
     error: categoriesError,
-  } = useSelector((state) => state.category);
+  } = useSelector(state => state.category, shallowEqual);
 
   const {
     subCategories,
     loading: subCategoriesLoading,
     error: subCategoriesError,
-  } = useSelector((state) => state.subCategory);
+  } = useSelector(state => state.subCategory, shallowEqual);
 
   const {
     products,
     loading: productsLoading,
     error: productsError,
-  } = useSelector((state) => state.product);
+  } = useSelector(state => state.product, shallowEqual);
 
+  const {
+    sections,
+    loading: sectionsLoading,
+    error: sectionsError,
+  } = useSelector(state => state.section, shallowEqual); // Add this selector
+
+  // Set selected category and fetch products
   useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 500,
+    if (categories?.length > 0 && !selectedCategoryIndex) {
+      const firstCategoryId = categories[0]._id;
+      setSelectedCategoryIndex(firstCategoryId);
+      dispatch(getProductsByCategory(firstCategoryId));
+    }
+  }, [categories, selectedCategoryIndex, dispatch]);
+
+  // Trigger product fetch on category change
+  useEffect(() => {
+    if (selectedCategoryIndex) {
+      dispatch(getProductsByCategory(selectedCategoryIndex));
+    }
+  }, [selectedCategoryIndex, dispatch]);
+
+  // Fetch active sections
+  useEffect(() => {
+    dispatch(fetchSections());
+  }, [dispatch]);
+
+  // Fade-in animation
+  useEffect(() => {
+    const animation = Animated.timing(opacity, {
+      toValue: isReady ? 1 : 0,
+      duration: 300,
       useNativeDriver: true,
-    }).start();
+    });
+
+    if (isReady) animation.start();
+    return () => animation.stop();
+  }, [isReady, opacity]);
+
+  // Initial data fetch
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      fetchInitialData();
+    });
+
+    return () => task.cancel();
   }, []);
 
-  // Handle errors
-  useEffect(() => {
-    const apiError = categoriesError || subCategoriesError || productsError;
-    if (apiError) {
-      setError(apiError);
-    }
-  }, [categoriesError, subCategoriesError, productsError]);
-
-  // Fetch initial data
   const fetchInitialData = useCallback(async () => {
-    setError(null);
     try {
       await Promise.all([
         dispatch(getCategories()),
-        dispatch(getSubCategories())
+        dispatch(fetchSections())
       ]);
-      setInitialLoadComplete(true);
+      InteractionManager.runAfterInteractions(async () => {
+        await dispatch(getSubCategories());
+        setIsReady(true);
+      });
     } catch (err) {
-      setError('Failed to load initial data');
+      console.error('Initial Load Error:', err);
     }
   }, [dispatch]);
 
-  // Handle refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    setError(null);
     try {
       await Promise.all([
         dispatch(getCategories()),
-        selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
-        dispatch(getSubCategories())
+        dispatch(getSubCategories()),
+        dispatch(fetchSections()),
+        selectedCategoryIndex ? dispatch(getProductsByCategory(selectedCategoryIndex)) : null,
       ]);
     } catch (err) {
-      setError('Failed to refresh data');
+      console.error('Refresh Error:', err);
     } finally {
       setRefreshing(false);
     }
   }, [dispatch, selectedCategoryIndex]);
 
-  // Set initial category when categories are loaded
-  useEffect(() => {
-    if (categories?.length > 0 && selectedCategoryIndex === null) {
-      setSelectedCategoryIndex(categories[0]._id);
-    }
-  }, [categories, selectedCategoryIndex]);
-
-  // Fetch products when category changes
-  useEffect(() => {
-    if (selectedCategoryIndex && initialLoadComplete) {
-      dispatch(getProductsByCategory(selectedCategoryIndex));
-    }
-  }, [selectedCategoryIndex, dispatch, initialLoadComplete]);
-
-  // Initial data load
-  useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
-
-  // Memoized filtered data
+  // Memoized filtered subcategories
   const filteredSubcategories = useMemo(() => {
     if (!subCategories || !selectedCategoryIndex) return [];
     return subCategories.filter(item => item.category?._id === selectedCategoryIndex);
@@ -116,21 +141,24 @@ const HomeScreen = ({ navigation }) => {
 
   const brands = useMemo(() => {
     if (!products) return [];
-    const brandMap = {};
-    products.forEach(product => {
-      if (product.brand && !brandMap[product.brand._id]) {
-        brandMap[product.brand._id] = product.brand;
+    const seen = new Set();
+    return products.reduce((acc, product) => {
+      if (product.brand && !seen.has(product.brand._id)) {
+        seen.add(product.brand._id);
+        acc.push(product.brand);
       }
-    });
-    return Object.values(brandMap);
+      return acc;
+    }, []);
   }, [products]);
 
-  // Loading states
   const isLoading = useMemo(() => {
-    return categoriesLoading || subCategoriesLoading || productsLoading;
-  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
+    return categoriesLoading || subCategoriesLoading || productsLoading || sectionsLoading;
+  }, [categoriesLoading, subCategoriesLoading, productsLoading, sectionsLoading]);
 
-  // Header component
+  const error = useMemo(() => {
+    return categoriesError || subCategoriesError || productsError || sectionsError;
+  }, [categoriesError, subCategoriesError, productsError, sectionsError]);
+
   const stickyHeader = (
     <View style={{ backgroundColor: '#A3B9C3' }}>
       <LinearGradient
@@ -144,89 +172,49 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
-  // Skeleton loader components
-  const SkeletonCategory = () => (
-    <View style={styles.skeletonCategory}>
-      <View style={styles.skeletonCategoryImage} />
-      <View style={styles.skeletonCategoryText} />
+  const renderError = () => (
+    <View style={styles.errorContainer}>
+      <Text style={styles.errorText}>
+        {typeof error === 'string' && error.length > 0 ? error : 'Something went wrong'}
+      </Text>
+      <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+        <Text style={styles.retryButtonText}>Try Again</Text>
+      </TouchableOpacity>
     </View>
   );
 
-  const SkeletonBrand = () => (
-    <View style={styles.skeletonBrand}>
-      <View style={styles.skeletonBrandImage} />
-    </View>
-  );
-
-  const SkeletonProduct = () => (
-    <View style={styles.skeletonProduct}>
-      <View style={styles.skeletonProductImage} />
-      <View style={styles.skeletonProductText} />
-      <View style={styles.skeletonProductPrice} />
-    </View>
-  );
-
-  // Skeleton loader for different sections
   const renderSkeleton = () => (
-    <Animated.View style={{ opacity }}>
-      {/* Categories Skeleton */}
-      <View style={styles.skeletonCategoryContainer}>
+    <View style={styles.fullScreenSkeleton}>
+      <View style={styles.skeletonHeader} />
+      <View style={styles.skeletonRow}>
         {[...Array(5)].map((_, i) => (
-          <SkeletonCategory key={`category-${i}`} />
+          <View key={`cat-${i}`} style={styles.skeletonCategory} />
         ))}
       </View>
-      
-      {/* Brands Skeleton */}
-      <HorizontalLine lineStyle={styles.lineStyle} />
-      <View style={styles.skeletonBrandContainer}>
-        {[...Array(3)].map((_, i) => (
-          <SkeletonBrand key={`brand-${i}`} />
-        ))}
+      <View style={styles.skeletonSection}>
+        <View style={styles.skeletonTitle} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {[...Array(3)].map((_, i) => (
+            <View key={`brand-${i}`} style={styles.skeletonBrand} />
+          ))}
+        </ScrollView>
       </View>
-      
-      {/* Products Skeleton */}
-      <HorizontalLine lineStyle={styles.horizontalLine} />
-      <View style={styles.skeletonProductContainer}>
-        {[...Array(4)].map((_, i) => (
-          <SkeletonProduct key={`product-${i}`} />
-        ))}
+      <View style={styles.skeletonSection}>
+        <View style={styles.skeletonTitle} />
+        <View style={styles.skeletonGrid}>
+          {[...Array(6)].map((_, i) => (
+            <View key={`prod-${i}`} style={styles.skeletonProduct} />
+          ))}
+        </View>
       </View>
-    </Animated.View>
+    </View>
   );
 
-  // Main content
-  const renderMainContent = () => {
-    if (error) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={handleRefresh}
-          >
-            <Text style={styles.retryButtonText}>Try Again</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+ 
 
-    if (!initialLoadComplete || isLoading) {
-      return renderSkeleton();
-    }
-
-    if (categories?.length === 0) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>No categories available</Text>
-          <TouchableOpacity 
-            style={styles.retryButton}
-            onPress={handleRefresh}
-          >
-            <Text style={styles.retryButtonText}>Refresh</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
+  const renderContent = () => {
+     if (error) return renderError();
+    if (!isReady || isLoading) return renderSkeleton();
 
     return (
       <Animated.View style={{ opacity }}>
@@ -237,16 +225,18 @@ const HomeScreen = ({ navigation }) => {
           setSelectedIndex={setSelectedCategoryIndex}
         />
         <View style={styles.mainContent}>
-          {brands.length > 0 && <HorizontalLine lineStyle={styles.lineStyle} />}
           {brands.length > 0 && (
-            <Brandcarousel 
-              imageStyle={styles.imageStyle} 
-              contentContainerStyle={styles.contentContainerStyle}  
-              cardStyle={styles.cardStyle}  
-              paginationStyle={styles.paginationStyle} 
-              dotStyle={styles.dotStyle} 
-              brands={brands} 
-            />
+            <>
+              <HorizontalLine lineStyle={styles.lineStyle} />
+              <Brandcarousel
+                brands={brands}
+                imageStyle={styles.imageStyle}
+                contentContainerStyle={styles.contentContainerStyle}
+                cardStyle={styles.cardStyle}
+                paginationStyle={styles.paginationStyle}
+                dotStyle={styles.dotStyle}
+              />
+            </>
           )}
           <HorizontalLine lineStyle={styles.horizontalLine} />
           {filteredSubcategories.length > 0 && (
@@ -254,14 +244,20 @@ const HomeScreen = ({ navigation }) => {
               navigation={navigation}
               subcategories={filteredSubcategories}
               selectedCategoryId={selectedCategoryIndex}
-              selectedCategoryItems={selectedCategoryItems}
-              setSelectedCategoryItems={setSelectedCategoryItems}
               gotoScreen={'ProdcutCategory'}
               mainStyle={styles.mainStyle}
             />
           )}
+          
+          {/* Updated Hot Deals Section */}
+          {sections?.length > 0 && <HotDealsSection navigation={navigation} sections={sections} />}
+          
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
-          <ProductCarousel horizontal={true} navigation={navigation} products={products} />
+          <ProductCarousel
+            horizontal={true}
+            navigation={navigation}
+            products={products}
+          />
         </View>
       </Animated.View>
     );
@@ -270,7 +266,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={[stickyHeader, renderMainContent()]}
+        data={[stickyHeader, renderContent()]}
         renderItem={({ item }) => item}
         keyExtractor={(_, index) => index.toString()}
         stickyHeaderIndices={[0]}
@@ -283,9 +279,12 @@ const HomeScreen = ({ navigation }) => {
             tintColor={COLORS.green}
           />
         }
+        maxToRenderPerBatch={5}
+        updateCellsBatchingPeriod={50}
+        windowSize={7}
       />
     </View>
   );
 };
 
-export default HomeScreen;
+export default React.memo(HomeScreen);

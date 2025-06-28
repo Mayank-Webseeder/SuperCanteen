@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, Text, FlatList, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Height, Width } from '../../constants';
 import CustomSearch from '../searchInput';
@@ -90,141 +90,145 @@ const SearchScreen = ({ navigation }) => {
   const groupedProducts = formatProductGroupedData(groupProductsByCategory())
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconStyle}>
-           <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
-        </TouchableOpacity>
-        <View style={styles.searchContainer}>
-          <CustomSearch
-            showCrossIcon={!!searchQuery}
-            onChangeText={handleSearchChange}
-            value={searchQuery}
-            onCrossPress={clearSearch}
-            placeholder="Search in SuperCanteen store"
-            autoFocus={true}
-            containerStyle={styles.searchInput}
-             backgroundColor={'#fff'}
-            inputStyle={{ fontSize: 14, paddingVertical: 11,  marginLeft: 2}}
-          />
-        </View>
+  <View style={styles.container}>
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconStyle}>
+        <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
+      </TouchableOpacity>
+      <View style={styles.searchContainer}>
+        <CustomSearch
+          showCrossIcon={!!searchQuery}
+          onChangeText={handleSearchChange}
+          value={searchQuery}
+          onCrossPress={clearSearch}
+          placeholder="Search in SuperCanteen store"
+          autoFocus={true}
+          containerStyle={styles.searchInput}
+          backgroundColor={'#fff'}
+          inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+        />
       </View>
-
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        {loading ? (
-          <ActivityIndicator size="large" color="#008ECC" />
-        ) : error ? (
-          <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>{error}</Text>
-          </View>
-        ) : searchQuery && results.length === 0 ? (
-          <View style={styles.noDataContainer}>
-            <Text style={styles.noDataText}>No products found for "{searchQuery}"</Text>
-            <Text style={styles.suggestionText}>Try searching for something else</Text>
-          </View>
-        ) : searchQuery && !showSuggestions ? (
-          Object.keys(groupedProducts).map(categoryId => {
-            const category = formattedCategories.find(cat => cat.id === categoryId);
-            return (
-              <View key={categoryId}>
-                <HeaderRow
-                  title={category?.name || 'Products'}
-                  navigation={navigation}
-                />
-                <CustomCategoryList
-                  data={groupedProducts[categoryId]}
-                  horizontal={false}
-                  numColumns={3}
-                  bgColor="#D4DEF226"
-                  width={Width(95)}
-                  height={Height(105)}
-                  borderRadius={Width(5)}
-                  selectedBorderColor="#008ECC"
-                  textColor="#333"
-                  textStyle={styles.textStyle}
-                  containerStyle={styles.containerView}
-                  gap={Width(20)}
-                  imageSize={Height(65)}
-                  navigation={navigation}
-                  gotoScreen={"ProductDetails"}
-                />
-              </View>
-            );
-          })
-        ) : (
-          <>
-            {/* Recent Searches - Now at the top */}
-            {recentSearches.length > 0 && (
-              <View style={styles.suggestionSection}>
-                <View style={styles.sectionHeader}>
-                  <Icon name="history" size={20} color="#666" />
-                  <Text style={styles.suggestionTitle}>Recent Searches</Text>
-                </View>
-                <View style={styles.suggestionsGrid}>
-                  {recentSearches.map((search, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.searchSuggestionItem}
-                      onPress={() => handleRecentSearchPress(search)}
-                    >
-                      <Text style={styles.searchSuggestionText}>{search}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Popular Searches */}
-            {popularSearches.length > 0 && (
-              <View style={styles.suggestionSection}>
-                <View style={styles.sectionHeader}>
-                  <Icon name="local-fire-department" size={20} color="#666" />
-                  <Text style={styles.suggestionTitle}>Popular Searches</Text>
-                </View>
-                <View style={styles.suggestionsGrid}>
-                  {popularSearches.map((term, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.searchSuggestionItem}
-                      onPress={() => handleRecentSearchPress(term)}
-                    >
-                      <Text style={styles.searchSuggestionText}>{term}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Popular Categories */}
-            <View style={[styles.suggestionSection,{paddingHorizontal:0}]}>
-              <View style={[styles.sectionHeader,{ paddingHorizontal:Height(15)}]}>
-                <Icon name="search" size={20} color="#666" />
-                <Text style={styles.suggestionTitle}>Browse Categories</Text>
-              </View>
-              <CustomCategoryList
-                data={formattedCategories}
-                horizontal={false}
-                numColumns={4}
-                bgColor="#D4DEF226"
-                width={Width(65)}
-                height={Height(65)}
-                borderRadius={Width(5)}
-                textColor="#333"
-                textStyle={styles.textStyle}
-                containerStyle={styles.containerView}
-                gap={Width(19)}
-                       imageSize={Height(50)}
-                navigation={navigation}
-              />
-            </View>
-          </>
-        )}
-      </ScrollView>
     </View>
-  );
+
+    <FlatList
+      data={[]} // empty to disable rendering list items
+      keyExtractor={(_, index) => index.toString()}
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+      ListHeaderComponent={
+        <>
+          {loading ? (
+            <ActivityIndicator size="large" color="#008ECC" />
+          ) : error ? (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>{error}</Text>
+            </View>
+          ) : searchQuery && results.length === 0 ? (
+            <View style={styles.noDataContainer}>
+              <Text style={styles.noDataText}>No products found for "{searchQuery}"</Text>
+              <Text style={styles.suggestionText}>Try searching for something else</Text>
+            </View>
+          ) : searchQuery && !showSuggestions ? (
+            Object.keys(groupedProducts).map(categoryId => {
+              const category = formattedCategories.find(cat => cat.id === categoryId);
+              return (
+                <View key={categoryId}>
+                  <HeaderRow
+                    title={category?.name || 'Products'}
+                    navigation={navigation}
+                    containerStyle={{marginBottom:6,paddingHorizontal:10}}
+                  />
+                  <CustomCategoryList
+                    data={groupedProducts[categoryId]}
+                    horizontal={false}
+                    numColumns={3}
+                    bgColor="#D4DEF226"
+                    width={Width(85)}
+                    height={Height(85)}
+                    borderRadius={Width(5)}
+                    selectedBorderColor="#008ECC"
+                    textColor="#333"
+                    textStyle={styles.textStyle}
+                    containerStyle={[styles.containerView,{  paddingHorizontal:Height(20)}]}
+                    gap={Width(20)}
+                    imageSize={Height(60)}
+                    navigation={navigation}
+                    gotoScreen={"ProductDetails"}
+                  />
+                </View>
+              );
+            })
+          ) : (
+            <>
+              {recentSearches.length > 0 && (
+                <View style={styles.suggestionSection}>
+                  <View style={styles.sectionHeader}>
+                    <Icon name="history" size={20} color="#666" />
+                    <Text style={styles.suggestionTitle}>Recent Searches</Text>
+                  </View>
+                  <View style={styles.suggestionsGrid}>
+                    {recentSearches.map((search, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.searchSuggestionItem}
+                        onPress={() => handleRecentSearchPress(search)}
+                      >
+                        <Text style={styles.searchSuggestionText}>{search}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {popularSearches.length > 0 && (
+                <View style={styles.suggestionSection}>
+                  <View style={styles.sectionHeader}>
+                    <Icon name="local-fire-department" size={20} color="#666" />
+                    <Text style={styles.suggestionTitle}>Popular Searches</Text>
+                  </View>
+                  <View style={styles.suggestionsGrid}>
+                    {popularSearches.map((term, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.searchSuggestionItem}
+                        onPress={() => handleRecentSearchPress(term)}
+                      >
+                        <Text style={styles.searchSuggestionText}>{term}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              <View style={[styles.suggestionSection, { paddingHorizontal: 0 }]}>
+                <View style={[styles.sectionHeader, { paddingHorizontal: Height(15) }]}>
+                  <Icon name="search" size={20} color="#666" />
+                  <Text style={styles.suggestionTitle}>Browse Categories</Text>
+                </View>
+                <CustomCategoryList
+                  data={formattedCategories}
+                  horizontal={false}
+                  numColumns={4}
+                  bgColor="#D4DEF226"
+                  width={Width(65)}
+                  height={Height(65)}
+                  borderRadius={Width(5)}
+                  textColor="#333"
+                  textStyle={[styles.textStyle,{paddingBottom:19}]}
+                  containerStyle={styles.containerView}
+                  gap={Width(19)}
+                  imageSize={Height(50)}
+                  navigation={navigation}
+                />
+              </View>
+            </>
+          )}
+        </>
+      }
+    />
+  </View>
+);
+
 };
 
 export default SearchScreen;

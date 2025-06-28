@@ -101,70 +101,57 @@ appVersion: {
     padding:0
   },
   // Skeleton Styles
-skeletonCategoryContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  paddingHorizontal: 15,
-  paddingVertical: 10,
-},
-skeletonCategory: {
-  width: 60,
-  alignItems: 'center',
-},
-skeletonCategoryImage: {
-  width: 50,
-  height: 50,
-  borderRadius: 25,
-  backgroundColor: '#e1e1e1',
-},
-skeletonCategoryText: {
-  width: 50,
-  height: 10,
-  backgroundColor: '#e1e1e1',
-  marginTop: 5,
-  borderRadius: 5,
-},
-skeletonBrandContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  paddingVertical: 15,
-},
-skeletonBrand: {
-  width: 100,
-  height: 50,
-  backgroundColor: '#e1e1e1',
-  borderRadius: 10,
-},
-skeletonProductContainer: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  justifyContent: 'space-between',
-  padding: 15,
-},
-skeletonProduct: {
-  width: '48%',
-  marginBottom: 15,
-},
-skeletonProductImage: {
-  width: '100%',
-  height: 150,
-  backgroundColor: '#e1e1e1',
-  borderRadius: 10,
-},
-skeletonProductText: {
-  width: '80%',
-  height: 12,
-  backgroundColor: '#e1e1e1',
-  marginTop: 8,
-  borderRadius: 4,
-},
-skeletonProductPrice: {
-  width: '50%',
-  height: 12,
-  backgroundColor: '#e1e1e1',
-  marginTop: 8,
-  borderRadius: 4,
-},
+ fullScreenSkeleton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 16,
+  },
+  skeletonHeader: {
+    height: 60,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  skeletonSection: {
+    marginBottom: 25,
+  },
+  skeletonTitle: {
+    height: 20,
+    width: 120,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 4,
+    marginBottom: 15,
+  },
+  skeletonCategory: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#f0f0f0',
+  },
+  skeletonBrand: {
+    width: 120,
+    height: 80,
+    marginRight: 15,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  skeletonProduct: {
+    width: '48%',
+    height: 180,
+    marginBottom: 15,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  skeletonGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
 errorContainer: {
   padding: 20,
   alignItems: 'center',

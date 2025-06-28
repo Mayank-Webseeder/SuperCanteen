@@ -228,6 +228,10 @@ stepperButton: {
   paddingHorizontal: 6,
   paddingVertical: 2,
 },
+stepperButtonDisabled: {
+  opacity: 0.5,
+  backgroundColor: '#e0e0e0',
+},
 stepperText: {
   fontSize: 16,
   color: '#416E81',
@@ -367,11 +371,42 @@ removeText: {
   stockMessage: {
     fontSize: 12,
     color: COLORS.green,
-    marginTop: 4,
+     marginBottom: 4,
     fontStyle: 'italic',
   },
   lowStockMessage: {
     color: COLORS.error,
     fontWeight: 'bold',
   },
+   variantContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+     gap: 8,
+     marginTop:4
+  },
+
+  variantPill: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#e8f4f8', 
+    borderWidth: 1,
+    borderColor: '#d1e3ea', 
+    alignSelf: 'flex-start',
+     marginTop: Height(10),
+  },
+
+  variantPillText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#2d3e50', 
+  },
+  colorPill: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#d9d9d9', 
+  },
+  sizePill: {
+    backgroundColor: '#e8f4f8',
+    borderColor: '#008ecc', 
+  }
 });

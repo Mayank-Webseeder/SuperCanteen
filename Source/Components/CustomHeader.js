@@ -7,7 +7,7 @@ import { COLORS, Width } from '../constants';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 
-const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon }) => {
+const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon,screenName }) => {
   const navigation = useNavigation();
   const { items = [] } = useSelector((state) => state.cart);
   const { user } = useSelector(state => state.auth);
@@ -38,7 +38,16 @@ const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon 
   return (
     <View style={[styles.container, containerStyle]}>
       {!notShowingBackIcon && (
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.leftIcon}>
+       <TouchableOpacity
+  onPress={() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Main', { screen: screenName }); 
+    }
+  }}
+  style={styles.leftIcon}
+>
           <Entypo name="chevron-small-left" size={26} color="#1C1B1F" />
         </TouchableOpacity>
       )}

@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet,Platform } from "react-native";
 import { COLORS, FontSize, Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
@@ -18,6 +18,7 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 16,
+    paddingBottom: Platform.select({ ios: 20, android: 0 }), 
    
   },
   footerButton:{

@@ -1,7 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { combineReducers } from "@reduxjs/toolkit";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
 import authReducer from './slices/authSlice'
-import { persistStore , persistReducer } from "redux-persist";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import categoryReducer from './slices/categorySlice'
 import brandReducer from './slices/brandSlice'
@@ -19,9 +28,11 @@ import wishlistReducer from './slices/wishlistSlice'
 import addressReducer from './slices/addressSlice';
 import couponReducer from './slices/couponSlice'
 import userReducer from './slices/userSlice'
+import sectionReducer from './slices/sectionSlice'
 
-const rootReducer = combineReducers({
-    auth:authReducer,
+// Combine all reducers
+const appReducer = combineReducers({
+     auth:authReducer,
     category:categoryReducer,
     brand:brandReducer,
     subCategory: subCategoryReducer,
@@ -37,26 +48,52 @@ const rootReducer = combineReducers({
     wishlist:wishlistReducer,
     address: addressReducer,
     coupon:couponReducer,
-    user:userReducer
+    user:userReducer,
+    section: sectionReducer,
+ 
 });
 
-const persistConfig = {
-    key:'root',
-    storage:AsyncStorage,
-    whitelist: ['auth','coupon']
-}
+// Root reducer with reset state capability
+const rootReducer = (state, action) => {
+  if (action.type === 'RESET_STATE') {
+    // Clear persisted state on logout
+    AsyncStorage.removeItem('persist:root');
+    return appReducer(undefined, action);
+  }
+  return appReducer(state, action);
+};
 
-const persistedReducer  = persistReducer(persistConfig,rootReducer)
+const persistConfig = {
+  key: 'root',
+  storage: AsyncStorage,
+  whitelist: ['auth', 'coupon'],
+  // Optional performance optimizations
+  throttle: 1000, // Throttle storage saves
+  version: 1,
+  migrate: (state) => {
+    // Add migration logic if needed
+    return Promise.resolve(state);
+  },
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-    reducer:persistedReducer ,
-    middleware: getDefaultMiddleware =>
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+      // Disable immutable check in production for performance
+      immutableCheck: process.env.NODE_ENV !== 'production',
     }),
-})
+  // Enable dev tools only in development
+  devTools: process.env.NODE_ENV !== 'production',
+});
 
-export const persistor = persistStore(store);
-
-
+export const persistor = persistStore(store, null, () => {
+  // Optional: Add callback when rehydration is complete
+  console.log('Rehydration complete');
+});
  

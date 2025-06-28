@@ -10,6 +10,7 @@ import PriceSummaryCard from "@components/Common/PriceSummaryCard";
 import { SimilarProductData } from '../../../Mock/Data/SimilarProductData';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
+import { COLORS } from '@constants/index';
 
 const OrderDetailScreen = ({ route, navigation }) => {
   const { order } = route.params;
@@ -86,7 +87,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
       </Text>
 
       {/* Download Invoice Button (Disabled) */}
-      {order.status !== 'cancelled' &&  <TouchableOpacity onPress={() => navigation.navigate('Invoice')} style={styles.disabledButton} disabled={true}>
+      {order.status !== 'cancelled' &&  <TouchableOpacity onPress={() => navigation.navigate('Invoice')} style={styles.disabledButton}>
               <Text style={styles.disabledButtonText}>Download Invoice</Text>
             </TouchableOpacity>}
           </View> 

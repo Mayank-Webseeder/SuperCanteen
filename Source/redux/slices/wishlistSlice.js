@@ -125,13 +125,10 @@ const wishlistSlice = createSlice({
             !state.items.some(item => item.category === removedItem.category)) {
           state.categories = state.categories.filter(catId => catId !== removedItem.category);
         }
-
-        console.log("FULLFIELD DATA IS",action.payload)
       })
       .addCase(removeFromWishlist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        console.log("REJECTD DATA IS",action.payload)
       })
   }
 });

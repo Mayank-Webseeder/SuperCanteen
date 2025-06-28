@@ -1,8 +1,10 @@
 import {  Height, Width } from '@constants/index';
 import React, {useEffect} from 'react';
 import {View, StyleSheet, Animated,Image} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const SplashScreen = ({navigation}) => {
+const SplashScreen = () => {
+  const navigation = useNavigation();
   const logoScaleAnimation = new Animated.Value(0);
 
   useEffect(() => {

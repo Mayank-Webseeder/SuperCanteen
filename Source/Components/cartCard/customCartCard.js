@@ -158,13 +158,18 @@ const CartCard = React.memo(
     const errorProduct = errors[productId];
      const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
 
-  const availableStock = useMemo(() => {
-    if (item.variantId && product?.variants) {
-      const variant = product.variants.find(v => v._id === item.variantId);
-      return variant?.countInStock || 0;
-    }
-    return product?.countInStock || 0;
-  }, [product, item.variantId]);
+const availableStock = useMemo(() => {
+  if (!product) return 0;
+  
+  // Check variant stock first
+  if (item.variantId && product?.variants) {
+    const variant = product.variants.find(v => v._id === item.variantId);
+    if (variant) return variant.countInStock || 0;
+  }
+  
+  // Fall back to product stock
+  return product.countInStock || 0;
+}, [product, item.variantId]);
 
   const isOutOfStock = product?.outOfStock || availableStock <= 0;
 
@@ -189,31 +194,53 @@ const CartCard = React.memo(
         useNativeDriver: true,
       }).start();
     }, [scaleAnim]);
+    
 
-    const handleQtyChange = useCallback(
-      (newQty) => {
-      if (newQty > availableStock) {
-          showMessage({
-                message:'Only ${availableStock} items available',
-                type: 'danger',
-                icon: 'danger',
-                duration: 4000,
-              });
-        return;
-      }
+const handleQtyChange = useCallback(
+  (newQty) => {
+    const parsedNewQty = parseInt(newQty);
+    const parsedAvailableStock = parseInt(availableStock);
 
+    console.log("Quantity Change Debug:", {
+      newQty,
+      parsedNewQty,
+      availableStock,
+      parsedAvailableStock,
+      product: product,
+      variant: matchedVariant
+    });
 
-        const payload = {
-          product: productId,
-          qty: parseInt(newQty),
-          selectedPrice: item.selectedPrice,
-          isDigital: item.isDigital || false,
-        };
-        onQuantityChange(item._id || item.id, payload);
-      },
-      [availableStock,productId, item, onQuantityChange]
-    );
+    if (isNaN(parsedNewQty) || parsedNewQty < 1) {
+      showMessage({
+        message: 'Oops! Quantity must be at least 1',
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
 
+    if (parsedNewQty > parsedAvailableStock) {
+      showMessage({
+        message: `Only ${parsedAvailableStock} items available`,
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
+
+    const payload = {
+      product: productId,
+      qty: parsedNewQty,
+      selectedPrice: item.selectedPrice,
+      isDigital: item.isDigital || false,
+      variantId: item.variantId || null,
+      variantDetails: item.variantDetails || null,
+    };
+    
+    onQuantityChange(item._id || item.id, payload);
+  },
+  [availableStock, productId, item, onQuantityChange, product]
+);
     const getDisplayPrice = useCallback(() => {
       if (!product) return item.selectedPrice;
 
@@ -303,14 +330,6 @@ const CartCard = React.memo(
   resizeMode="contain"
 />
 
-{/* {item?.variantDetails?.size && (
-  <Text style={styles.variantSizeText}>Size: {item.variantDetails.size}</Text>
-)}
-{item?.variantDetails?.color?.name && (
-  <Text style={styles.variantColorText}>Color: {item.variantDetails.color.name}</Text>
-)} */}
-
-
         <View style={styles.details}>
           <View style={styles.titleRow}>
             <Text style={styles.title} numberOfLines={1}>
@@ -341,25 +360,45 @@ const CartCard = React.memo(
               <Text style={styles.dropdownTextSmall}>{item.variant.name}</Text>
             )}
 
-            <View style={styles.stepperContainer}>
-              
-           <TouchableOpacity
-  onPress={() => onQuantityChange(item._id || item.id, item.qty - 1)}
-  disabled={item.qty <= 1 || isLoading}
->
-  <Text style={styles.stepperText}>−</Text>
-</TouchableOpacity>
+          <View style={styles.stepperContainer}>
+ <TouchableOpacity
+  onPress={() => handleQtyChange(item.qty - 1)}
+  
 
-<Text style={styles.qtyText}>{item.qty}</Text>
+    style={[
+      styles.stepperButton,
+      (item.qty <= 1 || isLoading) && styles.stepperButtonDisabled
+    ]}
+  >
+    <Text style={styles.stepperText}>−</Text>
+  </TouchableOpacity>
 
-<TouchableOpacity
-  onPress={() => onQuantityChange(item._id || item.id, item.qty + 1)}
-  disabled={isLoading}
->
-  <Text style={styles.stepperText}>+</Text>
-</TouchableOpacity>
-            </View>
+  <Text style={styles.qtyText}>{item.qty}</Text>
+
+  <TouchableOpacity
+    onPress={() => handleQtyChange(item.qty + 1)}
+    style={[
+      styles.stepperButton,
+      (isLoading || item.qty >= availableStock) && styles.stepperButtonDisabled
+    ]}
+  >
+    <Text style={styles.stepperText}>+</Text>
+  </TouchableOpacity>
+</View>
           </View>
+
+          <View style={styles.variantContainer}>
+  {item?.variantDetails?.size && (
+    <View style={styles.variantPill}>
+      <Text style={styles.variantPillText}>Size: {item.variantDetails.size}</Text>
+    </View>
+  )}
+  {item?.variantDetails?.color?.name && (
+    <View style={[styles.variantPill, { backgroundColor: '#f0f0f0' }]}>
+      <Text style={styles.variantPillText}>Color: {item.variantDetails.color.name}</Text>
+    </View>
+  )}
+</View>
              {/* Stock message */}
       {!isOutOfStock && availableStock > 0 && (
         <Text style={[
@@ -501,15 +540,9 @@ const handleQuantityChange = useCallback(
       // Ensure newQty is a number
       const quantity = typeof newQty === 'object' ? newQty.qty : parseInt(newQty);
       
-      // Validate quantity
+      // Validate quantity (basic validation only)
       if (isNaN(quantity) || quantity < 1) {
         throw new Error('Invalid quantity');
-      }
-
-      // Check stock availability
-      const availableStock = item.product?.countInStock || 0;
-      if (quantity > availableStock) {
-        throw new Error(`Only ${availableStock} items available`);
       }
 
       // Prepare payload - only send what your API needs
@@ -538,6 +571,7 @@ const handleQuantityChange = useCallback(
   },
   [dispatch, items]
 );
+
   const handleSizeChange = (itemId, newSize) => {
     console.log(`Size changed for ${itemId} to ${newSize}`);
   };
