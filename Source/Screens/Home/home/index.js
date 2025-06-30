@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import HotDealsSection from '../../../otherComponents/home/hotDeals'
 
 import Header from '../../../otherComponents/home/header';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
@@ -25,7 +24,7 @@ import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
-import { fetchSections } from '../../../redux/slices/sectionSlice';
+import SectionRenderer from '../../../otherComponents/home/sections';
 
 
 const HomeScreen = ({ navigation }) => {
@@ -54,12 +53,6 @@ const HomeScreen = ({ navigation }) => {
     error: productsError,
   } = useSelector(state => state.product, shallowEqual);
 
-  const {
-    sections,
-    loading: sectionsLoading,
-    error: sectionsError,
-  } = useSelector(state => state.section, shallowEqual); // Add this selector
-
   // Set selected category and fetch products
   useEffect(() => {
     if (categories?.length > 0 && !selectedCategoryIndex) {
@@ -75,11 +68,6 @@ const HomeScreen = ({ navigation }) => {
       dispatch(getProductsByCategory(selectedCategoryIndex));
     }
   }, [selectedCategoryIndex, dispatch]);
-
-  // Fetch active sections
-  useEffect(() => {
-    dispatch(fetchSections());
-  }, [dispatch]);
 
   // Fade-in animation
   useEffect(() => {
@@ -106,7 +94,6 @@ const HomeScreen = ({ navigation }) => {
     try {
       await Promise.all([
         dispatch(getCategories()),
-        dispatch(fetchSections())
       ]);
       InteractionManager.runAfterInteractions(async () => {
         await dispatch(getSubCategories());
@@ -123,7 +110,6 @@ const HomeScreen = ({ navigation }) => {
       await Promise.all([
         dispatch(getCategories()),
         dispatch(getSubCategories()),
-        dispatch(fetchSections()),
         selectedCategoryIndex ? dispatch(getProductsByCategory(selectedCategoryIndex)) : null,
       ]);
     } catch (err) {
@@ -152,12 +138,12 @@ const HomeScreen = ({ navigation }) => {
   }, [products]);
 
   const isLoading = useMemo(() => {
-    return categoriesLoading || subCategoriesLoading || productsLoading || sectionsLoading;
-  }, [categoriesLoading, subCategoriesLoading, productsLoading, sectionsLoading]);
+    return categoriesLoading || subCategoriesLoading || productsLoading;
+  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
 
   const error = useMemo(() => {
-    return categoriesError || subCategoriesError || productsError || sectionsError;
-  }, [categoriesError, subCategoriesError, productsError, sectionsError]);
+    return categoriesError || subCategoriesError || productsError ;
+  }, [categoriesError, subCategoriesError, productsError]);
 
   const stickyHeader = (
     <View style={{ backgroundColor: '#A3B9C3' }}>
@@ -174,9 +160,9 @@ const HomeScreen = ({ navigation }) => {
 
   const renderError = () => (
     <View style={styles.errorContainer}>
-      <Text style={styles.errorText}>
+      {/* <Text style={styles.errorText}>
         {typeof error === 'string' && error.length > 0 ? error : 'Something went wrong'}
-      </Text>
+      </Text> */}
       <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
         <Text style={styles.retryButtonText}>Try Again</Text>
       </TouchableOpacity>
@@ -250,14 +236,14 @@ const HomeScreen = ({ navigation }) => {
           )}
           
           {/* Updated Hot Deals Section */}
-          {sections?.length > 0 && <HotDealsSection navigation={navigation} sections={sections} />}
+      <SectionRenderer navigation={navigation}  />
           
-          <HorizontalLine containerStyle={{ marginBottom: 2 }} />
+        <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel
             horizontal={true}
             navigation={navigation}
             products={products}
-          />
+          /> 
         </View>
       </Animated.View>
     );

@@ -20,7 +20,7 @@ const PaymentMethodScreen = ({ navigation }) => {
   const [agreed, setAgreed] = useState(false);
   const [showAgreementError, setShowAgreementError] = useState(false);
 
-  const onlineOptions = ['UPI', 'Credit/Debit Card', 'Wallets', 'EMI', 'Net Banking'];
+  const onlineOptions = ['Pay with Razorpay'];
   const deliveryOption = 'Cash on Delivery';
   const upiApps = [
     { name: 'PhonePe', logo: require('../../../../../assets/Icons/Banks/pp1.png') },

@@ -9,6 +9,7 @@ export const fetchSections = createAsyncThunk(
       const res = await getData(GET_ALL_SECTIONS);
       return res.data;  // array of sections
     } catch (err) {
+      console.log("EEROR IS",err)
       return thunkAPI.rejectWithValue(err.message || 'Failed to load sections');
     }
   }
@@ -28,13 +29,13 @@ const sectionSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSections.fulfilled, (state, { payload }) => {
+     .addCase(fetchSections.fulfilled, (state, action) => {
         state.loading = false;
-        state.sections = payload;
+        state.sections = action.payload;
       })
-      .addCase(fetchSections.rejected, (state, { payload }) => {
+    .addCase(fetchSections.rejected, (state, action) => {
         state.loading = false;
-        state.error = payload;
+        state.error = action.payload;
       });
   }
 });
