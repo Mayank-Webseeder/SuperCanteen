@@ -1,3 +1,4 @@
+
 export const BASE_URL = "https://super-canteen-backend.onrender.com/api"
 export const IMG_URL = "https://super-canteen-backend.onrender.com/";
 export const LOGINAPI = `${BASE_URL}/users/auth`
@@ -16,7 +17,7 @@ export const POPULARPRODUCTS = '/products/allProducts?limit=6&sort=-popularity'
 export const GETPRODUCTBYSEGMENT = '/segment/segmentsBySubCategory/'
 export const GET_PRODUCT_BY_SEGMENT = '/products/getProductBySegment/'
 export const GET_PRODUCT_BY_BRAND = '/products/allProducts?brand='
-export const CART_BASE = 'https://super-canteen-backend.onrender.com/api/cart';
+export const CART_BASE = `${BASE_URL}/cart`;
 export const ADD_TO_WISHLIST = '/wishlist/addToWishlist';
 export const REMOVE_FROM_WISHLIST = '/wishlist/removeProductFromWishlist';
 export const GET_WHISHLIST_BY_USERID = '/wishlist/getWishlistByUserId'
@@ -29,6 +30,8 @@ export const GET_PROFILE = '/users/get-Profile'
 export const GET_USER_ADDRESS = '/users/get-userProfileAddress'
 export const UPDATE_PROFILE = '/users/update-Profile'
 export const GET_ALL_SECTIONS = '/section/getAllActiveSections'
+export const CREATE_ORDER = '/orders/createOrder'
+export const GET_RAZORPAY_KEY = '/orders/getRazorPayKey'
 
 
 

@@ -8,6 +8,7 @@ import {
   InteractionManager,
   Text,
   ScrollView,
+  Dimensions
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -18,40 +19,61 @@ import GetCategory from '../../../otherComponents/home/getAllCategories';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 import ProductCategories from '../../../otherComponents/home/productCategories';
 import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
+import SectionRenderer from '../../../otherComponents/home/sections';
 
 import { styles } from './styles';
 import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
-import SectionRenderer from '../../../otherComponents/home/sections';
 
+const { width } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const opacity = useState(new Animated.Value(0))[0];
+  const [skeletonAnimation] = useState(new Animated.Value(0));
 
   const dispatch = useDispatch();
 
-  const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useSelector(state => state.category, shallowEqual);
+  // Redux selectors
+  const { categories, loading: categoriesLoading, error: categoriesError } = 
+    useSelector(state => state.category, shallowEqual);
+  const { subCategories, loading: subCategoriesLoading, error: subCategoriesError } = 
+    useSelector(state => state.subCategory, shallowEqual);
+  const { products, loading: productsLoading, error: productsError } = 
+    useSelector(state => state.product, shallowEqual);
 
-  const {
-    subCategories,
-    loading: subCategoriesLoading,
-    error: subCategoriesError,
-  } = useSelector(state => state.subCategory, shallowEqual);
+  // Animation for skeleton loader
+  useEffect(() => {
+    const animateSkeleton = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(skeletonAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(skeletonAnimation, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
 
-  const {
-    products,
-    loading: productsLoading,
-    error: productsError,
-  } = useSelector(state => state.product, shallowEqual);
+    if (!initialLoadComplete) {
+      animateSkeleton();
+    }
+
+    return () => {
+      skeletonAnimation.stopAnimation();
+    };
+  }, [initialLoadComplete]);
 
   // Set selected category and fetch products
   useEffect(() => {
@@ -69,7 +91,7 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [selectedCategoryIndex, dispatch]);
 
-  // Fade-in animation
+  // Fade-in animation when content is ready
   useEffect(() => {
     const animation = Animated.timing(opacity, {
       toValue: isReady ? 1 : 0,
@@ -81,10 +103,20 @@ const HomeScreen = ({ navigation }) => {
     return () => animation.stop();
   }, [isReady, opacity]);
 
-  // Initial data fetch
+  // Initial data fetch with timeout fallback
   useEffect(() => {
     const task = InteractionManager.runAfterInteractions(() => {
       fetchInitialData();
+      
+      // Fallback in case requests stall
+      const timeout = setTimeout(() => {
+        if (!initialLoadComplete) {
+          setIsReady(true);
+          setInitialLoadComplete(true);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timeout);
     });
 
     return () => task.cancel();
@@ -94,13 +126,13 @@ const HomeScreen = ({ navigation }) => {
     try {
       await Promise.all([
         dispatch(getCategories()),
+        dispatch(getSubCategories()),
       ]);
-      InteractionManager.runAfterInteractions(async () => {
-        await dispatch(getSubCategories());
-        setIsReady(true);
-      });
+      setInitialLoadComplete(true);
+      setIsReady(true);
     } catch (err) {
       console.error('Initial Load Error:', err);
+      setIsReady(true); // Still show UI even if error occurs
     }
   }, [dispatch]);
 
@@ -119,7 +151,7 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [dispatch, selectedCategoryIndex]);
 
-  // Memoized filtered subcategories
+  // Memoized data
   const filteredSubcategories = useMemo(() => {
     if (!subCategories || !selectedCategoryIndex) return [];
     return subCategories.filter(item => item.category?._id === selectedCategoryIndex);
@@ -142,9 +174,10 @@ const HomeScreen = ({ navigation }) => {
   }, [categoriesLoading, subCategoriesLoading, productsLoading]);
 
   const error = useMemo(() => {
-    return categoriesError || subCategoriesError || productsError ;
+    return categoriesError || subCategoriesError || productsError;
   }, [categoriesError, subCategoriesError, productsError]);
 
+  // Header component
   const stickyHeader = (
     <View style={{ backgroundColor: '#A3B9C3' }}>
       <LinearGradient
@@ -158,49 +191,104 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 
+  // Error component
   const renderError = () => (
     <View style={styles.errorContainer}>
-      {/* <Text style={styles.errorText}>
-        {typeof error === 'string' && error.length > 0 ? error : 'Something went wrong'}
-      </Text> */}
-      <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+      <Text style={styles.errorText}>
+        {error?.message || 'Could not load data. Please check your connection.'}
+      </Text>
+      <TouchableOpacity 
+        style={styles.retryButton} 
+        onPress={handleRefresh}
+      >
         <Text style={styles.retryButtonText}>Try Again</Text>
       </TouchableOpacity>
     </View>
   );
 
-  const renderSkeleton = () => (
-    <View style={styles.fullScreenSkeleton}>
-      <View style={styles.skeletonHeader} />
-      <View style={styles.skeletonRow}>
-        {[...Array(5)].map((_, i) => (
-          <View key={`cat-${i}`} style={styles.skeletonCategory} />
-        ))}
+  // Skeleton component
+  const renderSkeleton = () => {
+    const shimmerAnimation = skeletonAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['-100%', '100%']
+    });
+
+    const SkeletonElement = ({ width, height, style = {} }) => (
+      <View 
+        style={[
+          {
+            width,
+            height,
+            backgroundColor: '#E1E9EE',
+            borderRadius: 4,
+            overflow: 'hidden',
+          },
+          style,
+        ]}
+      >
+        <Animated.View
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#F2F8FC',
+            transform: [{ translateX: shimmerAnimation }],
+          }}
+        />
       </View>
-      <View style={styles.skeletonSection}>
-        <View style={styles.skeletonTitle} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {[...Array(3)].map((_, i) => (
-            <View key={`brand-${i}`} style={styles.skeletonBrand} />
-          ))}
-        </ScrollView>
-      </View>
-      <View style={styles.skeletonSection}>
-        <View style={styles.skeletonTitle} />
-        <View style={styles.skeletonGrid}>
-          {[...Array(6)].map((_, i) => (
-            <View key={`prod-${i}`} style={styles.skeletonProduct} />
+    );
+
+    return (
+      <View style={styles.skeletonContainer}>
+        {/* Header Skeleton */}
+        <SkeletonElement width={width - 32} height={60} style={{ marginBottom: 16 }} />
+        
+        {/* Categories Skeleton */}
+        <View style={styles.skeletonCategoryRow}>
+          {[...Array(5)].map((_, i) => (
+            <SkeletonElement key={`cat-${i}`} width={60} height={60} style={{ borderRadius: 30 }} />
           ))}
         </View>
+        
+        {/* Brands Skeleton */}
+        <View style={styles.skeletonSection}>
+          <SkeletonElement width={120} height={20} style={{ marginBottom: 12 }} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[...Array(3)].map((_, i) => (
+              <SkeletonElement key={`brand-${i}`} width={100} height={100} style={{ marginRight: 12 }} />
+            ))}
+          </ScrollView>
+        </View>
+        
+        {/* Products Skeleton */}
+        <View style={styles.skeletonSection}>
+          <SkeletonElement width={120} height={20} style={{ marginBottom: 22 }} />
+          <View style={styles.skeletonProductGrid}>
+            {[...Array(6)].map((_, i) => (
+              <SkeletonElement 
+        key={`prod-${i}`} 
+        width={(width / 2) - 24} 
+        height={150} 
+        style={{ 
+          marginBottom: 16, 
+          marginRight: i % 2 === 0 ? 16 : 0 
+        }}
+      />
+            ))}
+          </View>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
- 
-
+  // Main content renderer
   const renderContent = () => {
-     if (error) return renderError();
-    if (!isReady || isLoading) return renderSkeleton();
+    if (error && initialLoadComplete) {
+      return renderError();
+    }
+
+    if (!initialLoadComplete || isLoading) {
+      return renderSkeleton();
+    }
 
     return (
       <Animated.View style={{ opacity }}>
@@ -235,10 +323,9 @@ const HomeScreen = ({ navigation }) => {
             />
           )}
           
-          {/* Updated Hot Deals Section */}
-      <SectionRenderer navigation={navigation}  />
+          <SectionRenderer navigation={navigation} />
           
-        <HorizontalLine containerStyle={{ marginBottom: 2 }} />
+          <HorizontalLine containerStyle={{ marginBottom: 2 }} />
           <ProductCarousel
             horizontal={true}
             navigation={navigation}
@@ -272,5 +359,6 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 };
+
 
 export default React.memo(HomeScreen);

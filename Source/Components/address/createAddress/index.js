@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView,  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { showMessage } from 'react-native-flash-message';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
@@ -120,7 +123,13 @@ const CreateAddressScreen = ({ navigation, route }) => {
   }, [formData, validateForm, dispatch, user.id, addressToEdit, navigation]);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+  >
+     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+ <View style={styles.container}>
       <CustomCommonHeader
         navigation={navigation}
         title={addressToEdit ? 'Edit Address' : 'Add Address'}
@@ -265,14 +274,23 @@ const CreateAddressScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        <CustomButton
+        
+      </ScrollView>
+      <View style={styles.buttonView}>
+   <CustomButton
           label={addressToEdit ? 'Update Address' : 'Save Address'}
           onPress={saveAddressData}
           style={styles.saveButton}
           loading={loading}
         />
-      </ScrollView>
+      </View>
+   
     </View>
+
+     </TouchableWithoutFeedback>
+
+   
+    </KeyboardAvoidingView>
   );
 };
 

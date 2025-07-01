@@ -142,14 +142,12 @@ const handleWishlistToggle = useCallback((productId) => {
     return (
       <View style={[
         styles.sectionHeader,
-        sectionType === 'bestSellers' && styles.bestSellersHeader,
         sectionType === 'deals' && styles.dealsHeader,
         sectionType === 'newArrivals' && styles.newArrivalsHeader
       ]}>
         <Text style={[
           styles.sectionTitle,
           sectionType === 'deals' && styles.dealsTitle,
-          sectionType === 'bestSellers' && styles.bestSellersTitle
         ]}>{title}</Text>
       </View>
     );

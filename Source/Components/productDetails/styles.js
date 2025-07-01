@@ -10,9 +10,9 @@ export const styles = StyleSheet.create({
       backgroundColor: '#fff',
     },
     loadingContainer:{
-      flex:1,
-      alignItems:"center",
-      justifyContent:"center"
+       flex: 1,
+  padding: 15, 
+  backgroundColor: '#fff'
     },
     mainContainer:{
       paddingHorizontal:Width(6)

@@ -4,60 +4,149 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { Height } from "@constants";
 import { styles } from './styles';
-import FastImage from 'react-native-fast-image';
+import PriceSummaryCard from '@components/Common/PriceSummaryCard';
+import { showMessage } from 'react-native-flash-message';
+import { createRazorpayOrder } from '../../../../redux/slices/paymentSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectSelectedAddress } from '../../../../redux/slices/selectedAddressSlice'
+import { IMGURL } from '../../../../utils/dataFormatters'
+import { createOrder } from '../../../../redux/slices/paymentSlice';
 
-const PaymentMethodScreen = ({ navigation }) => {
+const PaymentMethodScreen = ({ navigation, route }) => {
+  // State management
   const [selectedOption, setSelectedOption] = useState(null);
-  const [showUPIDropdown, setShowUPIDropdown] = useState(false);
-  const [selectedUPIApp, setSelectedUPIApp] = useState(null);
   const [agreed, setAgreed] = useState(false);
   const [showAgreementError, setShowAgreementError] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Redux and route data
+  const dispatch = useDispatch();
+  const { loading: orderLoading } = useSelector(state => state.payment);
+  const { user } = useSelector(state => state.auth);
+  const { product = {} } = route?.params;
+  const selectedAddress = useSelector(selectSelectedAddress);
 
+  // Payment options
   const onlineOptions = ['Pay with Razorpay'];
   const deliveryOption = 'Cash on Delivery';
-  const upiApps = [
-    { name: 'PhonePe', logo: require('../../../../../assets/Icons/Banks/pp1.png') },
-    { name: 'Paytm', logo: require('../../../../../assets/Icons/Banks/pp2.png') },
-  ];
 
-  const priceDetails = {
-    totalMRP: 44000,
-    discountMRP: 2000,
-    couponDiscount: 2000,
-    shippingFee: 0,
-  };
-
-  const totalAmount = priceDetails.totalMRP - priceDetails.discountMRP - priceDetails.couponDiscount;
-
+  // Handle payment method selection
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
-    setShowUPIDropdown(option === 'UPI');
   };
 
+
+  // Prepare order payload dynamically
+const prepareOrderPayload = () => {
+  // Get items from either cart or single product
+  const orderItems = route.params?.fromCart 
+    ? cartItems  // Array of cart items
+    : [product]; // Single product array
+
+  // Validate required fields
+  if (orderItems.length === 0 || orderItems.some(item => !item?._id)) {
+   console.log('Product information is incomplete');
+  }
+  // Build the payload
+  return {
+    paymentMethod: "RazorPay",
+    couponCode:  null,
+    shippingAddress: {
+      name: String(selectedAddress.name),
+      contactNo: String(selectedAddress.contactNo),
+      address: String(selectedAddress.address),
+      city: String(selectedAddress.city),
+      state: String(selectedAddress.state),
+      postalCode: String(selectedAddress.postalCode),
+      country: String(selectedAddress.country || 'India'),
+      addressType: String(selectedAddress.addressType || 'Home')
+    },
+    orderItems: orderItems.map(item => ({
+      name: String(item.name),
+      qty: Number(item.quantity) || 1,
+      image: `${IMGURL}${item.images[0]}`,
+      productData: { _id: item._id },
+      ...(item.variantId && { variantId: item.variantId }),
+      ...(item.sku && { sku: item.sku }),
+      unit: item.unit || 'piece',
+      variantDetails: item.variantDetails || {}
+    }))
+  };
+};
+  // Handle Razorpay payment initiation
+  const initiateRazorpayPayment = async () => {
+    try {
+      setIsProcessing(true);
+    const payload = prepareOrderPayload();
+console.log("Payload to send:", JSON.stringify(payload, null, 2));
+ const resultAction = await dispatch(createOrder(payload));
+ if (resultAction.meta.requestStatus === 'fulfilled') {
+  const data = resultAction.payload;
+
+  navigation.navigate('RazorpayWebView', {
+    orderId: data?.RazorpayOrderId,
+    amount: data?.amount,
+    userDetails: {
+      name: data?.order?.shippingAddress?.name,
+      email: user?.email,
+      phone: data?.order?.shippingAddress?.contactNo
+    }
+  });
+}
+
+ else {
+      console.log(resultAction.payload || 'Order creation failed');
+      }
+    } catch (error) {
+    console.log("error is",error)
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle Cash on Delivery
+  const handleCashOnDelivery = () => {
+    navigation.navigate('OrderConfirm', { 
+      paymentMethod: 'COD',
+      product: product 
+    });
+  };
+
+  // Main order confirmation handler
   const handleConfirmOrder = () => {
     if (!agreed) {
       setShowAgreementError(true);
       return;
     }
+    
     if (!selectedOption) {
-      Alert.alert('Select Payment Method', 'Please select a payment method to continue');
+      showMessage({
+        message: 'Please select a payment method to continue',
+        type: 'danger',
+        duration: 4000,
+      });
       return;
     }
-    navigation.navigate('OrderConfirm');
+
+    if (selectedOption === 'Pay with Razorpay') {
+      initiateRazorpayPayment();
+    } else {
+      handleCashOnDelivery();
+    }
   };
 
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Select Payment Method" />
+      
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Payment Options */}
+        {/* Payment Options Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>
           
@@ -68,20 +157,7 @@ const PaymentMethodScreen = ({ navigation }) => {
               option={option}
               isSelected={selectedOption === option}
               onSelect={handleOptionSelect}
-            >
-              {option === 'UPI' && selectedOption === 'UPI' && showUPIDropdown && (
-                <View style={styles.dropdownContainer}>
-                  {upiApps.map((upi) => (
-                    <UPIOption
-                      key={upi.name}
-                      upi={upi}
-                      isSelected={selectedUPIApp === upi.name}
-                      onSelect={setSelectedUPIApp}
-                    />
-                  ))}
-                </View>
-              )}
-            </PaymentOption>
+            />
           ))}
 
           <Text style={styles.subSectionTitle}>Pay on Delivery Options</Text>
@@ -102,9 +178,7 @@ const PaymentMethodScreen = ({ navigation }) => {
             }}
           >
             <View style={[styles.checkbox, agreed && styles.checkboxSelected]}>
-              {agreed && (
-                <MaterialCommunityIcons name="check" size={14} color="#fff" />
-              )}
+              {agreed && <MaterialCommunityIcons name="check" size={14} color="#fff" />}
             </View>
             <Text style={styles.agreementText}>
               I agree to the terms and policy of the company
@@ -115,29 +189,30 @@ const PaymentMethodScreen = ({ navigation }) => {
           )}
         </View>
 
-        {/* Price Details */}
-        <PriceDetails 
-          totalAmount={totalAmount} 
-          priceDetails={priceDetails} 
-        />
-
-        {/* Confirm Button */}
-        <TouchableOpacity
-          style={[
-            styles.confirmButton,
-            !agreed && styles.disabledButton
-          ]}
-          onPress={handleConfirmOrder}
-          disabled={!agreed}
-        >
-          <Text style={styles.confirmButtonText}>Confirm Your Order</Text>
-        </TouchableOpacity>
+        {/* Price Summary - Dynamic based on product */}
+        <PriceSummaryCard product={product} />
       </ScrollView>
+      
+      {/* Confirm Order Button */}
+      <TouchableOpacity
+        style={[
+          styles.confirmButton, 
+          (!agreed || isProcessing) && styles.disabledButton
+        ]}
+        onPress={handleConfirmOrder}
+        disabled={!agreed || isProcessing}
+      >
+        {isProcessing ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.confirmButtonText}>Confirm Your Order</Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
 
-// Reusable Payment Option Component
+// Reusable Payment Option Component (unchanged)
 const PaymentOption = ({ option, isSelected, onSelect, children }) => {
   return (
     <View style={styles.paymentOptionContainer}>
@@ -173,67 +248,5 @@ const PaymentOption = ({ option, isSelected, onSelect, children }) => {
     </View>
   );
 };
-
-// Reusable UPI Option Component
-const UPIOption = ({ upi, isSelected, onSelect }) => {
-  return (
-    <TouchableOpacity
-      style={styles.upiOption}
-      onPress={() => onSelect(upi.name)}
-    >
-      <View style={styles.upiRadioButton}>
-        {isSelected && <View style={styles.upiRadioButtonSelected} />}
-      </View>
-      <FastImage source={upi.logo} style={styles.upiLogo} />
-      <Text style={styles.upiText}>{upi.name}</Text>
-    </TouchableOpacity>
-  );
-};
-
-// Reusable Price Details Component
-const PriceDetails = ({ totalAmount, priceDetails }) => {
-  return (
-    <View style={styles.priceDetailsContainer}>
-      <View style={styles.priceHeader}>
-        <FastImage 
-          source={require('../../../../../assets/Icons/money_bag.png')}
-          style={styles.moneyIcon}
-        />
-        <Text style={styles.priceTitle}>PRICE DETAILS</Text>
-      </View>
-      
-      <View style={styles.priceRow}>
-        <Text style={styles.priceLabel}>Total MRP</Text>
-        <Text style={styles.priceValue}>₹{priceDetails.totalMRP.toLocaleString()}</Text>
-      </View>
-      
-      <View style={styles.priceRow}>
-        <Text style={styles.priceLabel}>Discount on MRP</Text>
-        <Text style={styles.discountValue}>-₹{priceDetails.discountMRP.toLocaleString()}</Text>
-      </View>
-      
-      <View style={styles.priceRow}>
-        <Text style={styles.priceLabel}>Coupon Discount</Text>
-        <Text style={styles.discountValue}>-₹{priceDetails.couponDiscount.toLocaleString()}</Text>
-      </View>
-      
-      <View style={styles.priceRow}>
-        <Text style={styles.priceLabel}>Shipping Fee</Text>
-        <Text style={styles.priceValue}>₹{priceDetails.shippingFee.toLocaleString()}</Text>
-      </View>
-      
-      <View style={styles.totalRow}>
-        <Text style={styles.totalLabel}>Total Amount</Text>
-        <Text style={styles.totalValue}>₹{totalAmount.toLocaleString()}</Text>
-      </View>
-      
-      <Text style={styles.savingsText}>
-        You save ₹{(priceDetails.discountMRP + priceDetails.couponDiscount).toLocaleString()} on this order
-      </Text>
-    </View>
-  );
-};
-
-
 
 export default PaymentMethodScreen;

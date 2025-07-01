@@ -29,6 +29,8 @@ import addressReducer from './slices/addressSlice';
 import couponReducer from './slices/couponSlice'
 import userReducer from './slices/userSlice'
 import sectionReducer from './slices/sectionSlice'
+import selectAddressReducer from './slices/selectedAddressSlice'
+import paymentReducer from './slices/paymentSlice'
 
 // Combine all reducers
 const appReducer = combineReducers({
@@ -50,6 +52,8 @@ const appReducer = combineReducers({
     coupon:couponReducer,
     user:userReducer,
     section: sectionReducer,
+    selectedAddress:selectAddressReducer,
+    payment:paymentReducer
  
 });
 

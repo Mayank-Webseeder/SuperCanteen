@@ -3,7 +3,6 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator
 } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomCartCard from '../../../Components/cartCard/customCartCard';
@@ -17,7 +16,7 @@ import Footer from './footer';
 import AgreeTerms from './agreeTerms';
 import { useSelector } from 'react-redux';
 import EmptyState from '@components/emptyComponent/EmptyState';
-import { COLORS } from '@constants/index';
+import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 
 export default function CartScreen({ navigation }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -64,7 +63,7 @@ export default function CartScreen({ navigation }) {
       <View style={styles.container}>
         <CustomCommonHeader title={'Your Cart'} navigation={navigation} />
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color={COLORS.green} />
+         <ContentSkeletonLoader/>
         </View>
       </View>
     );

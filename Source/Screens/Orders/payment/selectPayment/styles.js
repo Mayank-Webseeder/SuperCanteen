@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom:Height(30)
+    paddingBottom:Height(10)
   },
   sectionContainer: {
     backgroundColor: '#fff',
@@ -20,6 +20,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    marginTop:1
   },
 
   sectionTitle: {
@@ -154,82 +155,13 @@ export const styles = StyleSheet.create({
     marginTop: 4,
     marginLeft: 30,
   },
-  priceDetailsContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  priceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  moneyIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  priceTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2E6074',
-  },
-  priceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  priceLabel: {
-    fontSize: 14,
-    color: '#555',
-  },
-  priceValue: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  discountValue: {
-    fontSize: 14,
-    color: '#4CAF50',
-    fontWeight: '500',
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  totalValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2E6074',
-  },
-  savingsText: {
-    fontSize: 12,
-    color: '#4CAF50',
-    textAlign: 'right',
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
   confirmButton: {
     backgroundColor: '#2E6074',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    margin:20
   },
   disabledButton: {
     backgroundColor: '#CCCCCC',

@@ -104,6 +104,7 @@ const addressSlice = createSlice({
       .addCase(addAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        
       })
       
       // Update address

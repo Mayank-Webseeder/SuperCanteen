@@ -28,7 +28,8 @@ import PrivacyPolicyScreen from '@screens/otherSettings/privacyPolicy';
 import FAQScreen from '@screens/otherSettings/faq';
 import CouponProductsScreen from '@screens/otherSettings/Coupons/CouponProducts';
 import InvoiceScreen from '@screens/Orders/invoice';
-
+import AddressListScreen from '@components/address/addressList';
+import RazorpayWebView from '@screens/Orders/payment/razorpayWebView';
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -49,8 +50,7 @@ const AppStack = () => {
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="FAQ" component={FAQScreen} />
       <Stack.Screen name="CouponProduct" component={CouponProductsScreen} />
-      <Stack.Screen name="Invoice" component={InvoiceScreen} />
-      
+     
  
       {/* Protected screens */}
       <Stack.Screen name="Wishlist" component={WishlistScreen} />
@@ -61,10 +61,14 @@ const AppStack = () => {
       <Stack.Screen name="PaymentMethodScreen" component={PaymentMethodScreen} />
       <Stack.Screen name="PaymentConfirmationProcess" component={PaymentConfirmationProcess} />
       <Stack.Screen name="CreateAddressScreen" component={CreateAddressScreen} />
+      <Stack.Screen name="AddressListScreen" component={AddressListScreen} />
       <Stack.Screen name="Coupons" component={CouponScreen} />
       <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
-     
+      <Stack.Screen name="RazorpayWebView" component={RazorpayWebView} />
+      <Stack.Screen name="Invoice" component={InvoiceScreen} />
+      
+
     </Stack.Navigator>
   );
 };

@@ -103,7 +103,6 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
   },
   saveButton: {
-    marginTop: Height(8),
     height: Height(46),
     borderRadius: 8,
     backgroundColor: COLORS.green,
@@ -112,8 +111,14 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+    marginVertical:18
   },
   textArea:{
    marginVertical:3
+  },
+  buttonView:{
+    marginHorizontal:20,
+    marginBottom:8,
+    
   }
 });

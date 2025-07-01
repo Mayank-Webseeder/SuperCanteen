@@ -32,6 +32,7 @@ import { IMGURL } from '../../utils/dataFormatters';
 import CouponSection from './couponSection';
 import Share from 'react-native-share';
 import { showMessage } from 'react-native-flash-message';
+import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -254,7 +255,7 @@ const productImage =
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#416F81" />
+        <ContentSkeletonLoader type="product" itemCount={6} />
       </View>
     );
   }
@@ -388,7 +389,7 @@ const productImage =
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-      navigation.navigate('ProductCheckoutScreen');
+      navigation.navigate('ProductCheckoutScreen',{  product: productData });
     }
   }}
   selectedVariant={selectedVariant}

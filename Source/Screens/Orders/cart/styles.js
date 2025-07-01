@@ -50,7 +50,6 @@ export const styles = StyleSheet.create({
   confirmText: {color:COLORS.white, fontWeight: '600'},
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+     backgroundColor:COLORS.white
   }
 });

@@ -1,48 +1,79 @@
-import React , {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { FontSize } from '../../constants';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
+import { FontSize } from '../../constants';
 
-const PriceSummaryCard = () => {
+const PriceSummaryCard = ({ product = null }) => {
   const { items } = useSelector((state) => state.cart);
-  
-  // Memoized calculations for better performance
-  const { totalMRP, totalPrice, totalDiscount, couponDiscount, shippingFee, totalAmount } = useMemo(() => {
-    // Calculate prices with proper fallbacks
-    let calculatedMRP = 0;
-    let calculatedPrice = 0;
-    
-    items.forEach(item => {
-      const qty = item.qty || 1;
-      calculatedMRP += (item.product?.mrp || item.selectedPrice || 0) * qty;
-      calculatedPrice += (item.selectedPrice || item.price || 0) * qty;
-    });
-    
-    const calculatedDiscount = calculatedMRP - calculatedPrice;
-    const coupon = 0; // Coupon logic can be added later
-    const shipping = 0; // Free shipping
-    const calculatedTotal = calculatedPrice + shipping - coupon;
-    
-    return {
-      totalMRP: calculatedMRP,
-      totalPrice: calculatedPrice,
-      totalDiscount: calculatedDiscount,
-      couponDiscount: coupon,
-      shippingFee: shipping,
-      totalAmount: calculatedTotal
-    };
-  }, [items]);
+
+  const {
+    totalMRP,
+    totalPrice,
+    totalDiscount,
+    couponDiscount,
+    shippingFee,
+    totalAmount
+  } = useMemo(() => {
+    if (product) {
+      // Show real price only for single unit (like Amazon)
+      const mrp = product.mrp || 0;
+      const offerPrice = product.offerPrice || mrp;
+      const shipping = product.shippingRate || 0;
+
+      const totalMRP = mrp;
+      const totalPrice = offerPrice;
+      const totalDiscount = mrp - offerPrice;
+      const couponDiscount = 0;
+      const shippingFee = shipping;
+      const totalAmount = offerPrice + shipping - couponDiscount;
+
+      return {
+        totalMRP,
+        totalPrice,
+        totalDiscount,
+        couponDiscount,
+        shippingFee,
+        totalAmount
+      };
+    } else {
+      // Cart logic
+      let calculatedMRP = 0;
+      let calculatedPrice = 0;
+
+      items.forEach(item => {
+        const qty = item.qty || 1;
+        const mrp = item.product?.mrp || item.selectedPrice || 0;
+        const price = item.selectedPrice || item.price || 0;
+
+        calculatedMRP += mrp * qty;
+        calculatedPrice += price * qty;
+      });
+
+      const calculatedDiscount = calculatedMRP - calculatedPrice;
+      const coupon = 0;
+      const shipping = 0;
+      const calculatedTotal = calculatedPrice + shipping - coupon;
+
+      return {
+        totalMRP: calculatedMRP,
+        totalPrice: calculatedPrice,
+        totalDiscount: calculatedDiscount,
+        couponDiscount: coupon,
+        shippingFee: shipping,
+        totalAmount: calculatedTotal
+      };
+    }
+  }, [product, items]);
 
   return (
     <View style={styles.container}>
       <View style={styles.headerAccent} />
-      
       <View style={styles.card}>
         <View style={styles.titleContainer}>
-          <FastImage 
-            style={styles.moneyIcon} 
+          <FastImage
+            style={styles.moneyIcon}
             source={require('../../../assets/Icons/money_bag.png')}
           />
           <Text style={styles.title}>PRICE DETAILS</Text>
@@ -63,12 +94,16 @@ const PriceSummaryCard = () => {
               <FontAwesome5 name="chevron-right" size={10} color="#2E6074" />
             </TouchableOpacity>
           </View>
-          <Text style={[styles.priceValue, styles.discountValue]}>- ₹{totalDiscount.toFixed(2)}</Text>
+          <Text style={[styles.priceValue, styles.discountValue]}>
+            - ₹{totalDiscount.toFixed(2)}
+          </Text>
         </View>
 
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Coupon Discount</Text>
-          <Text style={[styles.priceValue, styles.discountValue]}>- ₹{couponDiscount.toFixed(2)}</Text>
+          <Text style={[styles.priceValue, styles.discountValue]}>
+            - ₹{couponDiscount.toFixed(2)}
+          </Text>
         </View>
 
         <View style={styles.priceRow}>
@@ -79,7 +114,14 @@ const PriceSummaryCard = () => {
               <FontAwesome5 name="chevron-right" size={10} color="#2E6074" />
             </TouchableOpacity>
           </View>
-          <Text style={[styles.priceValue, styles.freeValue]}>FREE</Text>
+          <Text
+            style={[
+              styles.priceValue,
+              shippingFee === 0 ? styles.freeValue : null,
+            ]}
+          >
+            {shippingFee === 0 ? 'FREE' : `₹${shippingFee.toFixed(2)}`}
+          </Text>
         </View>
 
         <View style={styles.totalContainer}>
@@ -89,27 +131,22 @@ const PriceSummaryCard = () => {
             <Text style={styles.totalValue}>₹{totalAmount.toFixed(2)}</Text>
           </View>
           {totalDiscount > 0 && (
-            <Text style={styles.savingsText}>You save ₹{totalDiscount.toFixed(2)} on this order</Text>
+            <Text style={styles.savingsText}>
+              You save ₹{totalDiscount.toFixed(2)} on this {product ? 'item' : 'order'}
+            </Text>
           )}
         </View>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    //position: 'relative',
-    // marginVertical: 16,
-    marginTop:10
+    marginTop: 10,
   },
   headerAccent: {
-    //position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     height: 4,
-  //  backgroundColor: '#2E6074',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
@@ -138,7 +175,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontFamily:'Inter-SemiBold',
+    fontFamily: 'Inter-SemiBold',
     color: '#2E6074',
     letterSpacing: 0.5,
   },
@@ -160,11 +197,11 @@ const styles = StyleSheet.create({
   priceLabel: {
     fontSize: 14,
     color: '#555',
-    fontFamily:'Inter-SemiBold'
+    fontFamily: 'Inter-SemiBold',
   },
   priceValue: {
     fontSize: 14,
-    fontFamily:'Inter-Medium',
+    fontFamily: 'Inter-Medium',
     color: '#333',
   },
   discountValue: {
@@ -199,12 +236,12 @@ const styles = StyleSheet.create({
   },
   totalLabel: {
     fontSize: 16,
-    fontFamily:'Inter-Medium',
+    fontFamily: 'Inter-Medium',
     color: '#333',
   },
   totalValue: {
     fontSize: 16,
-    fontFamily:'Inter-Bold',
+    fontFamily: 'Inter-Bold',
     color: '#2E6074',
   },
   savingsText: {

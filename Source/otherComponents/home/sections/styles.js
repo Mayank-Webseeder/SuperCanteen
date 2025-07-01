@@ -29,14 +29,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  bestSellersHeader: {
-    backgroundColor: '#FFA000',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 12,
-    marginBottom: 8,
-    marginTop:4
-  },
   dealsHeader: {
     paddingBottom: 8,
     paddingHorizontal: 12,
@@ -53,7 +45,7 @@ export const styles = StyleSheet.create({
     marginTop:4
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#333',
     fontFamily: 'Inter-SemiBold',
     marginHorizontal:6
@@ -65,10 +57,6 @@ export const styles = StyleSheet.create({
     right:12,
     marginBottom:6,
     marginTop:3
-  },
-  bestSellersTitle: {
-    color: '#fff',
-    fontSize:14
   },
   // Product Cards
   productCard: {
@@ -90,8 +78,8 @@ featuredCard: {
 },
   dealCard: {
     borderWidth: 1,
-    borderColor: '#FFE0B2',
-    backgroundColor: '#FFF8E1',
+   borderColor: '#FFCC80',
+backgroundColor: '#FFF3E0',
     width: width * 0.65,
     marginRight: 12,
   },
@@ -159,7 +147,7 @@ featuredCard: {
     zIndex: 2,
   },
   dealRibbon: {
-    backgroundColor: '#E53935',
+    backgroundColor: '#F57C00',
   },
   bestSellerRibbon: {
     backgroundColor: '#FFA000',
@@ -273,7 +261,7 @@ featuredCard: {
   },
   endingSoon: {
     fontSize: 10,
-    color: '#E53935',
+ color: '#E53935',
     marginLeft: 'auto',
     fontFamily: 'Roboto-Medium',
   },
@@ -294,14 +282,14 @@ featuredCard: {
   currentPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.green,
+    color: COLORS.black,
     fontFamily: 'Roboto-Bold',
   },
   featuredPrice: {
     fontSize: 18,
   },
   bestSellerPrice: {
-    color: '#FF6D00',
+    color: COLORS.black,
   },
   newArrivalPrice: {
     fontSize: 15,
@@ -349,18 +337,18 @@ featuredCard: {
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#FFCDD2',
+   backgroundColor: '#FFE0B2' ,
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#E53935',
+ backgroundColor: '#FB8C00',
     borderRadius: 3,
   },
   stockText: {
     fontSize: 10,
-    color: '#E53935',
+   color: '#FB8C00',
     marginTop: 4,
     alignSelf: 'flex-end',
     fontFamily: 'Roboto-Medium',
@@ -405,7 +393,7 @@ featuredCard: {
   justifyContent: 'center',
   alignItems: 'center',
   elevation: 2,
-  marginBottom: 8,
+  marginBottom: 12,
   overflow: 'hidden',
  
 },

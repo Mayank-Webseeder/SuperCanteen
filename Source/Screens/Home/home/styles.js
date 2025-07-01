@@ -100,57 +100,22 @@ appVersion: {
     borderWidth:0,
     padding:0
   },
-  // Skeleton Styles
- fullScreenSkeleton: {
-    flex: 1,
-    backgroundColor: '#fff',
+  skeletonContainer: {
     padding: 16,
   },
-  skeletonHeader: {
-    height: 60,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  skeletonRow: {
+  skeletonCategoryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   skeletonSection: {
-    marginBottom: 25,
+    marginBottom: 24,
   },
-  skeletonTitle: {
-    height: 20,
-    width: 120,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    marginBottom: 15,
-  },
-  skeletonCategory: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#f0f0f0',
-  },
-  skeletonBrand: {
-    width: 120,
-    height: 80,
-    marginRight: 15,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  skeletonProduct: {
-    width: '48%',
-    height: 180,
-    marginBottom: 15,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-  },
-  skeletonGrid: {
+  skeletonProductGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginBottom: 20,
   },
 errorContainer: {
   padding: 20,
