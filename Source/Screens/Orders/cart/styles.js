@@ -51,5 +51,6 @@ export const styles = StyleSheet.create({
   loaderContainer: {
     flex: 1,
      backgroundColor:COLORS.white
-  }
+  },
+  
 });

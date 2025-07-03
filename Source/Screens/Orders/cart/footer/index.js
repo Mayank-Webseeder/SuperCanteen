@@ -3,29 +3,37 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 
 const Footer = ({ navigation, agreeTerms }) => {
-  const cartState = useSelector((state) => state.cart);
-  const items = Array.isArray(cartState?.items) ? cartState.items : [];
-   const { user } = useSelector(state => state.auth);
+  const { items: cartItems } = useSelector(state => state.cart);
+ const { user } = useSelector(state => state.auth);
 
   // Calculate total amount with proper duplicate handling
-  const totalAmount = useMemo(() => {
-    return items.reduce((sum, item) => {
+ const totalAmount = useMemo(() => {
+    const total = cartItems.reduce((sum, item) => {
       try {
-        const price = item.selectedPrice || item.price || 0;
-        const qty = item.qty || 1;
-        return sum + (Number(price) * Number(qty));
+        const price = Number(item.selectedPrice || item.price || 0);
+        const qty = Number(item.qty || 1);
+        const taxPercent = Number(item?.product?.tax || 10); // Default 10% tax
+        const shippingRate = item.product.shippingRate
+
+        const subtotal = price * qty;
+        const tax = (subtotal * taxPercent) / 100;
+        return sum + subtotal + tax + shippingRate;
       } catch (error) {
-        console.error('Error calculating item total:', error);
+        console.error('Calculation error:', error);
         return sum;
       }
     }, 0);
-  }, [items]);
+    return Math.round(total); // Final rounding
+  }, [cartItems]);
+
+  const itemCount = cartItems.reduce((count, item) => count + (item.qty || 1), 0);
+
 
   const  handleCheckout = () => {
     if (!agreeTerms) {
       return;
     }
-    if (items.length === 0) {
+    if (cartItems.length === 0) {
       return;
     }
       if (!user || !user.username) {
@@ -34,14 +42,11 @@ const Footer = ({ navigation, agreeTerms }) => {
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-      navigation.navigate('ProductCheckoutScreen', { totalAmount });
+      navigation.navigate('ProductCheckoutScreen', { totalAmount , fromCart:true  });
     }
   };
 
-  // Calculate item count considering variants as unique items
-  const itemCount = items.reduce((count, item) => {
-    return count + (item.qty || 1);
-  }, 0);
+
 
   return (
     <View style={styles.footerContainer}>
@@ -53,12 +58,12 @@ const Footer = ({ navigation, agreeTerms }) => {
         </View>
       </View>
       <TouchableOpacity
-        style={[styles.checkoutButton, (!agreeTerms || items.length === 0) && styles.disabledButton]}
+        style={[styles.checkoutButton, (!agreeTerms || cartItems.length === 0) && styles.disabledButton]}
         onPress={handleCheckout}
-        disabled={!agreeTerms || items.length === 0}
+        disabled={!agreeTerms || cartItems.length === 0}
       >
         <Text style={styles.checkoutText}>
-          {items.length > 0 ? 'Proceed to Checkout' : 'Cart Empty'}
+          {cartItems.length > 0 ? 'Proceed to Checkout' : 'Cart Empty'}
         </Text>
       </TouchableOpacity>
     </View>

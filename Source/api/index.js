@@ -1,6 +1,6 @@
 
-export const BASE_URL = "https://super-canteen-backend.onrender.com/api"
-export const IMG_URL = "https://super-canteen-backend.onrender.com/";
+export const BASE_URL = "https://www.api-supercanteen.webseeder.tech/api"
+export const IMG_URL = "https://www.api-supercanteen.webseeder.tech/";
 export const LOGINAPI = `${BASE_URL}/users/auth`
 export const SIGNUPAPI = `${BASE_URL}/users/signup`
 export const SENDRESETPASSWORDOTP = `${BASE_URL}/users/sendResetPassword-otp`
@@ -32,6 +32,9 @@ export const UPDATE_PROFILE = '/users/update-Profile'
 export const GET_ALL_SECTIONS = '/section/getAllActiveSections'
 export const CREATE_ORDER = '/orders/createOrder'
 export const GET_RAZORPAY_KEY = '/orders/getRazorPayKey'
+export const VERIFY_PAYMENT = '/orders/verify-payment'
+export const GET_ORDER_BY_USERID = '/orders/getOrdersByUserId'
+export const GET_ORDER_BY_ID = '/orders/getOrderById'
 
 
 

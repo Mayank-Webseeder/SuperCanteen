@@ -12,7 +12,9 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
+// Component imports
 import Header from '../../../otherComponents/home/header';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import GetCategory from '../../../otherComponents/home/getAllCategories';
@@ -30,6 +32,7 @@ import { getProductsByCategory } from '../../../redux/slices/productSlice';
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
+  // State management
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -75,21 +78,70 @@ const HomeScreen = ({ navigation }) => {
     };
   }, [initialLoadComplete]);
 
-  // Set selected category and fetch products
+  // Set first category as default when categories load
   useEffect(() => {
     if (categories?.length > 0 && !selectedCategoryIndex) {
       const firstCategoryId = categories[0]._id;
       setSelectedCategoryIndex(firstCategoryId);
       dispatch(getProductsByCategory(firstCategoryId));
     }
-  }, [categories, selectedCategoryIndex, dispatch]);
+  }, [categories, selectedCategoryIndex]);
 
-  // Trigger product fetch on category change
+  // Optimized data loading with useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      
+      const fetchData = async () => {
+        try {
+          if (!initialLoadComplete) {
+            setIsReady(false);
+            await Promise.all([
+              dispatch(getCategories()),
+              dispatch(getSubCategories())
+            ]);
+            
+            if (isActive) {
+              setInitialLoadComplete(true);
+              setIsReady(true);
+            }
+          }
+        } catch (error) {
+          console.error('Data loading error:', error);
+          if (isActive) {
+            setIsReady(true); // Still show UI
+          }
+        }
+      };
+
+      const task = InteractionManager.runAfterInteractions(() => {
+        fetchData();
+        
+        // Fallback timeout
+        const timeout = setTimeout(() => {
+          if (isActive && !initialLoadComplete) {
+            setIsReady(true);
+          }
+        }, 3000);
+
+        return () => clearTimeout(timeout);
+      });
+
+      return () => {
+        isActive = false;
+        task.cancel();
+      };
+    }, [initialLoadComplete])
+  );
+
+  // Handle category changes
   useEffect(() => {
-    if (selectedCategoryIndex) {
-      dispatch(getProductsByCategory(selectedCategoryIndex));
+    if (selectedCategoryIndex && initialLoadComplete) {
+      setIsReady(false);
+      dispatch(getProductsByCategory(selectedCategoryIndex))
+        .finally(() => setIsReady(true));
     }
-  }, [selectedCategoryIndex, dispatch]);
+  }, [selectedCategoryIndex, initialLoadComplete]);
 
   // Fade-in animation when content is ready
   useEffect(() => {
@@ -103,46 +155,13 @@ const HomeScreen = ({ navigation }) => {
     return () => animation.stop();
   }, [isReady, opacity]);
 
-  // Initial data fetch with timeout fallback
-  useEffect(() => {
-    const task = InteractionManager.runAfterInteractions(() => {
-      fetchInitialData();
-      
-      // Fallback in case requests stall
-      const timeout = setTimeout(() => {
-        if (!initialLoadComplete) {
-          setIsReady(true);
-          setInitialLoadComplete(true);
-        }
-      }, 5000);
-
-      return () => clearTimeout(timeout);
-    });
-
-    return () => task.cancel();
-  }, []);
-
-  const fetchInitialData = useCallback(async () => {
-    try {
-      await Promise.all([
-        dispatch(getCategories()),
-        dispatch(getSubCategories()),
-      ]);
-      setInitialLoadComplete(true);
-      setIsReady(true);
-    } catch (err) {
-      console.error('Initial Load Error:', err);
-      setIsReady(true); // Still show UI even if error occurs
-    }
-  }, [dispatch]);
-
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.all([
         dispatch(getCategories()),
         dispatch(getSubCategories()),
-        selectedCategoryIndex ? dispatch(getProductsByCategory(selectedCategoryIndex)) : null,
+        selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
       ]);
     } catch (err) {
       console.error('Refresh Error:', err);
@@ -169,14 +188,6 @@ const HomeScreen = ({ navigation }) => {
     }, []);
   }, [products]);
 
-  const isLoading = useMemo(() => {
-    return categoriesLoading || subCategoriesLoading || productsLoading;
-  }, [categoriesLoading, subCategoriesLoading, productsLoading]);
-
-  const error = useMemo(() => {
-    return categoriesError || subCategoriesError || productsError;
-  }, [categoriesError, subCategoriesError, productsError]);
-
   // Header component
   const stickyHeader = (
     <View style={{ backgroundColor: '#A3B9C3' }}>
@@ -188,21 +199,6 @@ const HomeScreen = ({ navigation }) => {
       >
         <Header navigation={navigation} />
       </LinearGradient>
-    </View>
-  );
-
-  // Error component
-  const renderError = () => (
-    <View style={styles.errorContainer}>
-      <Text style={styles.errorText}>
-        {error?.message || 'Could not load data. Please check your connection.'}
-      </Text>
-      <TouchableOpacity 
-        style={styles.retryButton} 
-        onPress={handleRefresh}
-      >
-        <Text style={styles.retryButtonText}>Try Again</Text>
-      </TouchableOpacity>
     </View>
   );
 
@@ -265,14 +261,14 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.skeletonProductGrid}>
             {[...Array(6)].map((_, i) => (
               <SkeletonElement 
-        key={`prod-${i}`} 
-        width={(width / 2) - 24} 
-        height={150} 
-        style={{ 
-          marginBottom: 16, 
-          marginRight: i % 2 === 0 ? 16 : 0 
-        }}
-      />
+                key={`prod-${i}`} 
+                width={(width / 2) - 24} 
+                height={150} 
+                style={{ 
+                  marginBottom: 16, 
+                  marginRight: i % 2 === 0 ? 16 : 0 
+                }}
+              />
             ))}
           </View>
         </View>
@@ -282,11 +278,7 @@ const HomeScreen = ({ navigation }) => {
 
   // Main content renderer
   const renderContent = () => {
-    if (error && initialLoadComplete) {
-      return renderError();
-    }
-
-    if (!initialLoadComplete || isLoading) {
+    if (!isReady) {
       return renderSkeleton();
     }
 
@@ -359,6 +351,5 @@ const HomeScreen = ({ navigation }) => {
     </View>
   );
 };
-
 
 export default React.memo(HomeScreen);

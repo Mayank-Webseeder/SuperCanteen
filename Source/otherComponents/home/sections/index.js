@@ -279,9 +279,6 @@ const handleWishlistToggle = useCallback((productId) => {
                 styles.ratingCount,
                 sectionType === 'newArrivals' && styles.newArrivalRatingCount
               ]}></Text>
-              {sectionType === 'deals' && (
-                <Text style={styles.endingSoon}>Ends soon</Text>
-              )}
               {sectionType === 'newArrivals' && (
                 <Text style={styles.newTag}>NEW</Text>
               )}
@@ -311,16 +308,6 @@ const handleWishlistToggle = useCallback((productId) => {
               </Text>
             )}
           </View>
-
-          {sectionType === 'deals' && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${Math.random() * 100}%` }]} />
-              </View>
-              <Text style={styles.stockText}>Only {Math.floor(Math.random() * 20) + 5} left</Text>
-            </View>
-          )}
-
           {sectionType === 'featured' && (
             <TouchableOpacity onPress={() => onAddToCart(item)}  style={[
                         styles.addToCartButton, 

@@ -34,7 +34,7 @@ const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
   return (
-    <Stack.Navigator  screenOptions={{ headerShown: false }}>   
+    <Stack.Navigator   screenOptions={{ headerShown: false }}>   
       {/* Public screens */}
        <Stack.Screen name="Main" component={BottomTabs} />
       <Stack.Screen name="Search" component={SearchScreen} />

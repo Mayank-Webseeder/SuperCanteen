@@ -1,71 +1,80 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { View, Text, StyleSheet } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
-import { FontSize } from '../../constants';
 
-const PriceSummaryCard = ({ product = null }) => {
-  const { items } = useSelector((state) => state.cart);
-
+const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails = {} }) => {
+  const { items: cartItems, appliedCoupon } = useSelector((state) => state.cart)
   const {
-    totalMRP,
-    totalPrice,
+    originalPrice,   // Original MRP (strikethrough)
+    sellingPrice,    // Actual price user pays
     totalDiscount,
     couponDiscount,
     shippingFee,
-    totalAmount
+    taxAmount,
+    totalAmount,
+    isSingleProduct
   } = useMemo(() => {
-    if (product) {
-      // Show real price only for single unit (like Amazon)
-      const mrp = product.mrp || 0;
-      const offerPrice = product.offerPrice || mrp;
-      const shipping = product.shippingRate || 0;
+    const isSingleProduct = !!product;
+    
+    // === CASE 1: Single product checkout ===
+   if (isSingleProduct) {
+  const mrp = product.mrp || product.price;
+  const price = product.offerPrice || product.price || mrp;
+  const shipping = product.shippingRate
+  const taxPercent = product.tax; 
 
-      const totalMRP = mrp;
-      const totalPrice = offerPrice;
-      const totalDiscount = mrp - offerPrice;
-      const couponDiscount = 0;
-      const shippingFee = shipping;
-      const totalAmount = offerPrice + shipping - couponDiscount;
+  const tax = (price * taxPercent) / 100;
+  const total = price + tax + shipping;
 
-      return {
-        totalMRP,
-        totalPrice,
-        totalDiscount,
-        couponDiscount,
-        shippingFee,
-        totalAmount
-      };
-    } else {
-      // Cart logic
-      let calculatedMRP = 0;
-      let calculatedPrice = 0;
+  return {
+    originalPrice: mrp,
+    sellingPrice: price,
+    totalDiscount: mrp - price,
+    couponDiscount: 0,
+    shippingFee: shipping,
+    taxAmount: tax,
+    totalAmount: total, // This should now match ₹379
+    isSingleProduct: true
+  };
+}
 
-      items.forEach(item => {
-        const qty = item.qty || 1;
-        const mrp = item.product?.mrp || item.selectedPrice || 0;
-        const price = item.selectedPrice || item.price || 0;
 
-        calculatedMRP += mrp * qty;
-        calculatedPrice += price * qty;
-      });
+    // === CASE 2: Cart checkout ===
+    let totalOriginal = 0;
+    let totalSelling = 0;
+    let tax = 0;
+   let shipping = 0;
 
-      const calculatedDiscount = calculatedMRP - calculatedPrice;
-      const coupon = 0;
-      const shipping = 0;
-      const calculatedTotal = calculatedPrice + shipping - coupon;
+    const itemsToUse = propItems.length > 0 ? propItems : cartItems;
+    
+    itemsToUse.forEach(item => {
+      const qty = item.qty || 1;
+      const mrp = item.mrp || item.product?.mrp || item.price || 0;
+      const price = item.offerPrice || item.price || item.selectedPrice || mrp;
+      const taxPercent = item.tax || item.product?.tax || 0;
+      const shippingRate = item.product?.shippingRate || 0;
 
-      return {
-        totalMRP: calculatedMRP,
-        totalPrice: calculatedPrice,
-        totalDiscount: calculatedDiscount,
-        couponDiscount: coupon,
-        shippingFee: shipping,
-        totalAmount: calculatedTotal
-      };
-    }
-  }, [product, items]);
+      totalOriginal += mrp * qty;
+      totalSelling += price * qty;
+      tax += ((price * qty) * taxPercent) / 100;
+        shipping += shippingRate; 
+    });
+
+    const couponDisc = appliedCoupon?.discountValue || 0;
+    const total = totalSelling + tax + shipping - couponDisc;
+
+    return {
+      originalPrice: totalOriginal,
+      sellingPrice: totalSelling,
+      totalDiscount: totalOriginal - totalSelling,
+      couponDiscount: couponDisc,
+      shippingFee: shipping,
+      taxAmount: tax,
+      totalAmount: total,
+      isSingleProduct: false
+    };
+  }, [product, cartItems, propItems, priceDetails, appliedCoupon]);
 
   return (
     <View style={styles.container}>
@@ -81,60 +90,62 @@ const PriceSummaryCard = ({ product = null }) => {
 
         <View style={styles.divider} />
 
+        {/* Price Display - Same for both single product and cart */}
         <View style={styles.priceRow}>
-          <Text style={styles.priceLabel}>Total MRP</Text>
-          <Text style={styles.priceValue}>₹{totalMRP.toFixed(2)}</Text>
-        </View>
-
-        <View style={styles.priceRow}>
-          <View style={styles.labelContainer}>
-            <Text style={styles.priceLabel}>Discount on MRP</Text>
-            <TouchableOpacity style={styles.detailButton}>
-              <Text style={styles.detailText}>Details</Text>
-              <FontAwesome5 name="chevron-right" size={10} color="#2E6074" />
-            </TouchableOpacity>
+          <Text style={styles.priceLabel}>Price</Text>
+          <View style={styles.priceContainer}>
+            {originalPrice > sellingPrice && (
+              <Text style={styles.originalPrice}>₹{Math.round(originalPrice)}</Text>
+            )}
+            <Text style={styles.sellingPrice}>₹{Math.round(sellingPrice)}</Text>
           </View>
-          <Text style={[styles.priceValue, styles.discountValue]}>
-            - ₹{totalDiscount.toFixed(2)}
-          </Text>
         </View>
 
-        <View style={styles.priceRow}>
-          <Text style={styles.priceLabel}>Coupon Discount</Text>
-          <Text style={[styles.priceValue, styles.discountValue]}>
-            - ₹{couponDiscount.toFixed(2)}
-          </Text>
-        </View>
-
-        <View style={styles.priceRow}>
-          <View style={styles.labelContainer}>
-            <Text style={styles.priceLabel}>Shipping Fee</Text>
-            <TouchableOpacity style={styles.detailButton}>
-              <Text style={styles.detailText}>Details</Text>
-              <FontAwesome5 name="chevron-right" size={10} color="#2E6074" />
-            </TouchableOpacity>
+        {/* You Save - Only show if there's a discount */}
+        {(totalDiscount > 0) && (
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>You Save</Text>
+            <Text style={[styles.priceValue, styles.discountValue]}>
+              ₹{Math.round(totalDiscount)}
+            </Text>
           </View>
-          <Text
-            style={[
-              styles.priceValue,
-              shippingFee === 0 ? styles.freeValue : null,
-            ]}
-          >
-            {shippingFee === 0 ? 'FREE' : `₹${shippingFee.toFixed(2)}`}
+        )}
+
+        {/* Coupon Discount */}
+        {couponDiscount > 0 && (
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>
+              Coupon Discount{appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
+            </Text>
+            <Text style={[styles.priceValue, styles.discountValue]}>
+              -₹{Math.round(couponDiscount)}
+            </Text>
+          </View>
+        )}
+
+        {/* Tax */}
+        {taxAmount > 0 && (
+          <View style={styles.priceRow}>
+            <Text style={styles.priceLabel}>Tax</Text>
+            <Text style={styles.priceValue}>₹{Math.round(taxAmount)}</Text>
+          </View>
+        )}
+
+        {/* Delivery */}
+        <View style={styles.priceRow}>
+          <Text style={styles.priceLabel}>Delivery Charges</Text>
+          <Text style={styles.priceValue}>
+            {shippingFee === 0 ? 'FREE' : `₹${Math.round(shippingFee)}`}
           </Text>
         </View>
 
+        {/* Total Amount */}
         <View style={styles.totalContainer}>
           <View style={styles.totalDivider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>₹{totalAmount.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>₹{Math.round(totalAmount)}</Text>
           </View>
-          {totalDiscount > 0 && (
-            <Text style={styles.savingsText}>
-              You save ₹{totalDiscount.toFixed(2)} on this {product ? 'item' : 'order'}
-            </Text>
-          )}
         </View>
       </View>
     </View>
@@ -142,23 +153,25 @@ const PriceSummaryCard = ({ product = null }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 10,
-  },
+  container: { marginTop: 10 },
   headerAccent: {
     height: 4,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    backgroundColor: '#2E6074',
+    marginHorizontal: 3,
+    marginTop: 2
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 3,
     borderWidth: 1,
     borderColor: '#F0F4F8',
   },
@@ -190,9 +203,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  labelContainer: {
+  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+  },
+  originalPrice: {
+    fontSize: 14,
+    textDecorationLine: 'line-through',
+    color: '#999',
+  },
+  sellingPrice: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: '#333',
   },
   priceLabel: {
     fontSize: 14,
@@ -206,20 +230,6 @@ const styles = StyleSheet.create({
   },
   discountValue: {
     color: '#4CAF50',
-  },
-  freeValue: {
-    color: '#4CAF50',
-    fontWeight: '600',
-  },
-  detailButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  detailText: {
-    fontSize: 12,
-    color: '#2E6074',
-    marginRight: 4,
   },
   totalContainer: {
     marginTop: 8,
@@ -243,12 +253,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter-Bold',
     color: '#2E6074',
-  },
-  savingsText: {
-    fontSize: FontSize(13),
-    color: '#4CAF50',
-    textAlign: 'right',
-    fontStyle: 'italic',
   },
 });
 

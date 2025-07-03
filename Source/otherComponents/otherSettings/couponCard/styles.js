@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     maxWidth: '48%',
+    marginBottom:8
    
   },
   singleCard: {

@@ -1,39 +1,64 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Animated } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import { useNavigation } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchOrderById } from '../../../redux/slices/orderSlice';
+import LottieView from 'lottie-react-native';
+import { Height } from '@constants/index';
 
-const OrderConfirm = () => {
+const OrderConfirm = ({ route }) => {
   const navigation = useNavigation();
-
+  const dispatch = useDispatch();
+  const { orderId } = route.params;
+  const { currentOrder } = useSelector(state => state.orders);
+  const fadeAnim = new Animated.Value(0);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate('OrderConfirmFinal'); // Ensure this screen is registered in your navigator
-    }, 500);
+    dispatch(fetchOrderById(orderId));
+    
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
 
-    return () => clearTimeout(timer); // cleanup if component unmounts early
-  }, [navigation]);
+    const timer = setTimeout(() => {
+      navigation.navigate('OrderConfirmFinal', { orderId });
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [orderId]);
 
   return (
     <View style={styles.container}>
-      <CustomCommonHeader navigation={navigation} title="Order Confirm Page" />
-      <View style={styles.content}>
-        <Text style={styles.title}>Order Placed!</Text>
-        <Text style={styles.subtitle}>
-          Your order's on its way — and we're already excited for your next visit!
-        </Text>
-        <FastImage
-          source={require('../../../../assets/OrderPlaced.png')}
-          style={styles.image}
-          resizeMode="contain"
+      <CustomCommonHeader navigation={navigation} title="Order Confirmed" showBack={false} />
+      
+      <Animated.View style={[styles.content]}>
+        <LottieView
+          source={require('../../../../assets/lottie/success.json')}
+          autoPlay
+          loop={false}
+          style={styles.animation}
         />
-      </View>
+        
+        <Text style={styles.title}>Order Placed Successfully!</Text>
+        <Text style={styles.subtitle}>
+          Your order #{currentOrder?.orderId} has been confirmed
+        </Text>
+        
+        <View style={styles.deliveryInfo}>
+          <Text style={styles.deliveryText}>
+            Estimated Delivery: {new Date(currentOrder?.createdAt).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              month: 'short', 
+              day: 'numeric' 
+            })}
+          </Text>
+        </View>
+      </Animated.View>
     </View>
   );
 };
-
-export default OrderConfirm;
 
 const styles = StyleSheet.create({
   container: {
@@ -46,22 +71,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
-  image: {
+  animation: {
     width: 200,
     height: 200,
     marginBottom: 24,
   },
   title: {
     fontSize: 24,
-    fontWeight:'Inter-Medium',
+    fontFamily: 'Inter-SemiBold',
     marginBottom: 12,
-    color: '#216213',
+    color: '#2E7D32',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#616161',
     textAlign: 'center',
-    paddingHorizontal: 12,
+    marginBottom: 24,
+    fontFamily: 'Inter-Regular',
+    lineHeight:Height(20)
+  },
+  deliveryInfo: {
+    backgroundColor: '#E8F5E9',
+    padding: 16,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  deliveryText: {
+    fontSize: 14,
+    color: '#2E7D32',
+    fontFamily: 'Inter-Medium',
   },
 });
+
+export default OrderConfirm;

@@ -6,24 +6,84 @@ import { Width } from "@constants";
 import PriceSummaryCard from '@components/Common/PriceSummaryCard';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
 import CouponView from '../../../../otherComponents/checkOut/couponView';
-import { styles } from './styles';
+import { styles , productStyles } from './styles';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
 import { IMGURL } from '../../../../utils/dataFormatters'
 import moment from 'moment';
+import { showMessage } from 'react-native-flash-message';
+import { calculateFinalAmount } from '../../../../utils/helper';
+import { COLORS } from '@constants';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
+
+const ProductItemCard = ({ item }) => {
+  const productData = item.product || item; // Handle both cart item and direct product
+  return (
+    <View style={[productStyles.container,{marginBottom: item.product ? 13 : 8 }]}>
+      <FastImage
+        source={{ uri: `${IMGURL}${productData?.images?.[0]}` }}
+        style={productStyles.image}
+      />
+      <View style={productStyles.details}>
+        <Text style={productStyles.name} numberOfLines={2}>{productData?.name}</Text>
+        <View style={productStyles.priceRow}>
+          <Text style={productStyles.price}>₹{item.selectedPrice || productData?.offerPrice}</Text>
+          {productData?.mrp > (item.selectedPrice || productData?.offerPrice) && (
+            <Text style={productStyles.originalPrice}>₹{productData?.mrp}</Text>
+          )}
+        </View>
+        <Text style={productStyles.qty}>Qty: {item.qty || 1}</Text>
+        <View style={productStyles.deliveryEstimate}>
+          <Icon 
+            name="truck-delivery-outline" 
+            size={16} 
+            color={COLORS.green} 
+            style={productStyles.deliveryIcon}
+          />
+          <Text style={productStyles.deliveryText}>
+            Est. delivery: {moment().add(productData?.deliveryDays || 3, 'days').format('Do MMM')}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
 
 const ConfirmOrderScreen = ({ navigation, route }) => {
-  const {product} =  route?.params
+  const { product, fromCart } = route?.params || {};
   const { selectedAddress } = useSelector(state => state.selectedAddress);
   const { user } = useSelector(state => state.auth);
+  const { appliedCoupons } = useSelector(state => state.coupon);
+  const { items: cartItems } = useSelector(state => state.cart);
+  
+  const finalAmount = calculateFinalAmount({
+    product: product?.isSingleProductCheckout ? product : null,
+    cartItems,
+    appliedCoupon
+  });
 
+  // Get applied coupon for this product (if any)
+  const appliedCoupon = product?.isSingleProductCheckout 
+    ? product?.appliedCoupon || appliedCoupons[product?._id]
+    : appliedCoupons?.cartWide;
 
   const handleProceedToPayment = () => {
     if (!selectedAddress) {
-      alert('Please select a delivery address');
+      showMessage({
+        message: 'Please select a delivery address',
+        type: 'danger',
+        icon: 'danger',
+        duration: 4000,
+      });
       return;
     }
-    navigation.navigate('PaymentMethodScreen',{product:product});
+    navigation.navigate('PaymentMethodScreen', { 
+      product: {
+        ...product,
+        selectedAddress,
+      },
+      fromCart
+    });
   };
 
   return (
@@ -34,22 +94,42 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <AddressView navigation={navigation} address={selectedAddress} userId={user._id} />
 
-        <View style={[styles.deliveryCard,{marginBottom:product?.coupons.length > 0 ? 20 : 7}]}>
-          <FastImage
-            source={{uri:`${IMGURL}${product?.images[0]}`}}
-            style={styles.deliveryImage}
-          />
-          <View>
-            <Text style={styles.deliveryLabel}>Estimated Delivery</Text>
-          <Text style={styles.deliveryDate}>
-   {moment().add(product.deliveryDays, 'days').format('dddd, Do MMMM')}
-</Text>
-          </View>
+        {/* Products Section */}
+        <Text style={productStyles.sectionTitle}>
+            {fromCart ? `Your Items (${cartItems.length})` : 'Your Item'}
+          </Text>
+        <View >
+          
+          
+          {fromCart ? (
+            cartItems.map((item, index) => (
+              <ProductItemCard key={item._id || index} item={item} />
+            ))
+          ) : (
+            <ProductItemCard item={product} />
+          )}
         </View>
 
-       {product?.coupons.length > 0 && <CouponView navigation={navigation} />} 
+        {/* Coupon Section */}
+        {(appliedCoupon || product?.coupons?.length > 0) && (
+          <CouponView 
+            navigation={navigation} 
+            productId={product?._id}
+            currentCoupon={appliedCoupon}
+          />
+        )}
 
-        <PriceSummaryCard product={product}/>
+        {/* Price Summary with proper coupon handling */}
+        <PriceSummaryCard 
+          product={product?.isSingleProductCheckout ? product : null}
+          cartItems={fromCart ? cartItems : null}
+          priceDetails={{
+            subtotal: product?.offerPrice || product?.price || 0,
+            deliveryCharge: product?.deliveryCharge || 0,
+            couponDiscount: appliedCoupon?.discountAmount || 0,
+            total: finalAmount
+          }}
+        />
       </ScrollView>
 
       <View style={styles.footer}>
@@ -59,7 +139,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
         <CustomAuthButton 
           onPress={handleProceedToPayment} 
           width={Width(320)} 
-          title={'Confirm Your Order'}
+          title={`Confirm Order  ₹${Math.round(finalAmount)}`}
           buttonStyle={styles.confirmButton}
           textStyle={styles.confirmButtonText}
         />
@@ -67,5 +147,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
     </View>
   );
 };
+
+
 
 export default ConfirmOrderScreen;

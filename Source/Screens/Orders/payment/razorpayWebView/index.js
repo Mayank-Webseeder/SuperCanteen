@@ -1,34 +1,42 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, BackHandler } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, ActivityIndicator, BackHandler, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useDispatch, useSelector } from 'react-redux';
 import { showMessage } from 'react-native-flash-message';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
-import { getRazorpayKey, clearPaymentState } from '../../../../redux/slices/paymentSlice'
-import { COLORS } from '@constants/index';
+import { getRazorpayKey, clearPaymentState, verifyPayment } from '../../../../redux/slices/paymentSlice';
 import { COLORS } from '@constants/index';
 
 const RazorpayWebView = ({ navigation, route }) => {
   const dispatch = useDispatch();
-  const { razorpayKey, loading: keyLoading } = useSelector(state => state.payment);
-  const { orderId, amount, userDetails } = route.params;
+  const webViewRef = useRef(null);
+  const { 
+    razorpayKey, 
+    loading: keyLoading,
+    verificationLoading,
+    verificationError,
+    isVerified
+  } = useSelector(state => state.payment);
+  
+  const {orderId, RazorpayOrderId, amount, userDetails } = route.params;
   const [showWebView, setShowWebView] = React.useState(false);
+  const [paymentStatus, setPaymentStatus] = React.useState(null);
+
   console.log("🧾 Razorpay Params:", {
-  razorpayKey,
-  orderId,
-  amount,
-  userDetails
-});
+    razorpayKey,
+    RazorpayOrderId,
+    amount,
+    userDetails
+  });
 
-useEffect(() => {
-  if (razorpayKey && orderId && amount) {
-    setTimeout(() => {
-      setShowWebView(true);
-    }, 300); // wait a bit to ensure render
-  }
-}, [razorpayKey]);
+  useEffect(() => {
+    if (razorpayKey && RazorpayOrderId && amount) {
+      setTimeout(() => {
+        setShowWebView(true);
+      }, 300);
+    }
+  }, [razorpayKey]);
 
-  // Get Razorpay key on mount
   useEffect(() => {
     dispatch(getRazorpayKey());
     
@@ -37,45 +45,105 @@ useEffect(() => {
     };
   }, [dispatch]);
 
-  // Handle Android back button
+  // Enhanced back handler
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      navigation.goBack();
+      if (paymentStatus === null) {
+        showMessage({
+          message: 'Payment in progress. Are you sure you want to cancel?',
+          type: 'warning',
+          actions: [
+            {
+              text: 'Cancel Payment',
+              onPress: () => {
+                setPaymentStatus('cancelled');
+                navigation.goBack();
+              },
+              color: COLORS.red
+            },
+            {
+              text: 'Continue',
+              onPress: () => {},
+              color: COLORS.green
+            }
+          ]
+        });
+      } else {
+        navigation.goBack();
+      }
       return true;
     });
 
     return () => backHandler.remove();
-  }, [navigation]);
+  }, [navigation, paymentStatus]);
 
-  const handleMessage = (event) => {
+  const handleMessage = async (event) => {
     const data = JSON.parse(event.nativeEvent.data);
-    
     if (data.status === 'success') {
-      navigation.replace('OrderConfirm', { 
-        paymentSuccess: true,
-        paymentId: data.paymentId
-      });
+      setPaymentStatus('success');
+      try {
+        await dispatch(verifyPayment({
+          orderId: orderId,
+          razorpay_payment_id: data.paymentId,
+          razorpay_order_id:RazorpayOrderId,
+          razorpay_signature: data.signature
+        })).unwrap();
+
+        navigation.replace('OrderConfirm', { 
+          paymentSuccess: true,
+          paymentId: data.paymentId,
+          orderId: orderId,
+        });
+      } catch (error) {
+        setPaymentStatus('verification_failed');
+        showMessage({
+          message: error.message || 'Payment verification failed',
+          type: 'danger',
+          icon: 'danger',
+          duration: 4000,
+          onHide: () => navigation.goBack() // Only navigate back after message is hidden
+        });
+      }
     } else if (data.status === 'failed') {
+      setPaymentStatus('failed');
+      let errorMessage = data.error?.description || 'Payment failed. Please try again.';
+      
+      if (errorMessage.includes('another method')) {
+        errorMessage = 'The selected payment method failed. Please try another bank or payment option.';
+      }
+
       showMessage({
-        message: data.error?.description || 'Payment failed. Please try again.',
+        message: errorMessage,
         type: 'danger',
         icon: 'danger',
         duration: 4000,
+        onHide: () => navigation.goBack() // Only navigate back after message is hidden
       });
-      navigation.goBack();
     }
   };
 
- if (!showWebView) {
-  return (
-    <View style={styles.container}>
-      <CustomCommonHeader navigation={navigation} title="Secure Payment" />
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color={COLORS.green}/>
+  if (!showWebView) {
+    return (
+      <View style={styles.container}>
+        <CustomCommonHeader navigation={navigation} title="Secure Payment" />
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color={COLORS.green}/>
+        </View>
       </View>
-    </View>
-  );
-}
+    );
+  }
+
+  if (verificationLoading) {
+    return (
+      <View style={styles.container}>
+        <CustomCommonHeader navigation={navigation} title="Verifying Payment" />
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color={COLORS.green}/>
+          <Text style={{ marginTop: 10 }}>Verifying your payment...</Text>
+        </View>
+      </View>
+    );
+  }
 
   const htmlContent = `
     <html>
@@ -91,12 +159,12 @@ useEffect(() => {
             "currency": "INR",
             "name": "Super Canteen",
             "description": "Order Payment",
-            "order_id": "${orderId}",
+            "order_id": "${RazorpayOrderId}",
             "handler": function (response) {
               window.ReactNativeWebView.postMessage(JSON.stringify({
                 status: 'success',
                 paymentId: response.razorpay_payment_id,
-                orderId: response.razorpay_order_id,
+                RazorpayOrderId: response.razorpay_order_id,
                 signature: response.razorpay_signature
               }));
             },
@@ -106,7 +174,7 @@ useEffect(() => {
               "contact": "${userDetails.phone}"
             },
             "theme": {
-              "color": ${COLORS.green}
+              "color": '#2E6074'
             }
           };
           var rzp1 = new Razorpay(options);
@@ -127,11 +195,22 @@ useEffect(() => {
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Secure Payment" />
       <WebView
+        ref={webViewRef}
         source={{ html: htmlContent }}
         onMessage={handleMessage}
         javaScriptEnabled={true}
         domStorageEnabled={true}
         startInLoadingState={true}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent;
+          console.error('WebView error:', nativeEvent);
+          showMessage({
+            message: 'Payment gateway error. Please try another method.',
+            type: 'danger',
+            duration: 4000,
+            onHide: () => navigation.goBack()
+          });
+        }}
         renderLoading={() => (
           <View style={styles.loader}>
             <ActivityIndicator size="large" color="#0000ff" />

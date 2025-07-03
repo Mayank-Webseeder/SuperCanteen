@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -8,11 +8,11 @@ import {
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
-import { useSelector , useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
-import { applyCoupon , removeCoupon } from '../../../redux/slices/couponSlice';
+import { applyCoupon, removeCoupon } from '../../../redux/slices/couponSlice';
 
-const CouponSection = ({ data = [], price = 0, productId }) => {
+const CouponSection = ({ data = [], price = 0, productId , onCouponApplied , localAppliedCoupon }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const dispatch = useDispatch();
@@ -22,6 +22,11 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
   const appliedCoupon = productId 
     ? appliedCoupons[productId] 
     : appliedCoupons.cartWide;
+
+  // Sync local applied coupon with redux state
+  useEffect(() => {
+    onCouponApplied(appliedCoupon);
+  }, [appliedCoupon]);
 
   const calculateDiscount = (coupon) => {
     if (!coupon) return { discountAmount: 0, totalAfter: price };
@@ -38,17 +43,19 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
         productId, // null for cart-wide
         coupon: selectedCoupon
       }));
+      onCouponApplied(selectedCoupon);
       setModalVisible(false);
     }
   };
 
   const handleRemove = () => {
     dispatch(removeCoupon({ productId }));
+    onCouponApplied(null);
   };
 
   // Filter out already applied coupons
   const availableCoupons = data.filter(coupon => 
-    !appliedCoupon || appliedCoupon._id !== coupon._id
+    !localAppliedCoupon || localAppliedCoupon._id !== coupon._id
   );
 
   return (
@@ -56,7 +63,7 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
       <Text style={styles.title}>Available Coupons</Text>
 
       {/* Applied Coupon Banner */}
-      {appliedCoupon && (
+      {localAppliedCoupon && (
         <View style={styles.appliedContainer}>
           <View style={styles.appliedHeader}>
             <View style={styles.appliedBadge}>
@@ -68,18 +75,18 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
             </TouchableOpacity>
           </View>
           
-          <Text style={styles.couponName}>{appliedCoupon.name}</Text>
+          <Text style={styles.couponName}>{localAppliedCoupon.name}</Text>
           
           <View style={styles.priceContainer}>
             <Text style={styles.originalPrice}>₹{price.toFixed(2)}</Text>
             <Text style={styles.discountedPrice}>
-              ₹{calculateDiscount(appliedCoupon).totalAfter.toFixed(2)}
+              ₹{calculateDiscount(localAppliedCoupon).totalAfter.toFixed(2)}
             </Text>
           </View>
           
           <View style={styles.savingsContainer}>
             <Text style={styles.savingsText}>
-              YOU SAVE ₹{calculateDiscount(appliedCoupon).discountAmount.toFixed(2)}!
+              YOU SAVE ₹{calculateDiscount(localAppliedCoupon).discountAmount.toFixed(2)}!
             </Text>
           </View>
         </View>
@@ -125,7 +132,8 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
                     {selectedCoupon?.percentage}% OFF
                   </Text>
                   <Text style={styles.discountDescription}>
-                  <Text style={styles.saveText}>Save </Text> ₹{selectedCoupon ? calculateDiscount(selectedCoupon).discountAmount.toFixed(2) : '0.00'}
+                    <Text style={styles.saveText}>Save </Text> 
+                    ₹{selectedCoupon ? calculateDiscount(selectedCoupon).discountAmount.toFixed(2) : '0.00'}
                   </Text>
                 </View>
               </View>
@@ -161,7 +169,5 @@ const CouponSection = ({ data = [], price = 0, productId }) => {
     </View>
   );
 };
-
-
 
 export default CouponSection;

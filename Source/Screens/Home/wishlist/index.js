@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  RefreshControl
+  RefreshControl,
+  Animated
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
@@ -36,6 +37,8 @@ const WishlistScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartLoadingId, setCartLoadingId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [skeletonAnimation] = useState(new Animated.Value(0));
+  const [isDataReady, setIsDataReady] = useState(false);
   
   const { user } = useSelector(state => state.auth);
   const userId = user?.id;
@@ -48,33 +51,74 @@ const WishlistScreen = ({ navigation }) => {
     lastAdded
   } = useSelector(selectWishlistWithCategories);
 
+  // Skeleton animation
+  useEffect(() => {
+    const animateSkeleton = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(skeletonAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(skeletonAnimation, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    if (loading && !wishlistItems.length) {
+      animateSkeleton();
+    }
+
+    return () => {
+      skeletonAnimation.stopAnimation();
+    };
+  }, [loading, wishlistItems.length]);
+
   // Load data on focus and initial mount
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+
       const loadData = async () => {
-        setRefreshing(true);
         try {
+          setIsDataReady(false);
           await dispatch(getCategories());
           await dispatch(fetchWishlistItems(userId));
+          if (isActive) {
+            setIsDataReady(true);
+          }
+        } catch (err) {
+          if (isActive) {
+            setIsDataReady(true);
+          }
         } finally {
-          setRefreshing(false);
+          if (isActive) {
+            setRefreshing(false);
+          }
         }
       };
 
       if (userId) {
+        setRefreshing(true);
         loadData();
       }
 
       return () => {
+        isActive = false;
         dispatch(resetWishlistError());
       };
-    },[userId, lastAdded])
+    }, [userId, lastAdded])
   );
 
   // Handle errors
   useEffect(() => {
     if (error) {
-     console.log("error",error)
+      console.log("error", error);
     }
   }, [error]);
 
@@ -86,25 +130,27 @@ const WishlistScreen = ({ navigation }) => {
 
   // Memoized filtered items
   const filteredItems = useMemo(() => {
+    if (!isDataReady) return [];
     if (activeCategory === 'All') return wishlistItems;
     
     return wishlistItems.filter(item => {
       const itemCategory = reduxCategories.find(cat => cat._id === item.category);
       return itemCategory?.name === activeCategory;
     });
-  }, [wishlistItems, activeCategory, reduxCategories, lastAdded]);
+  }, [wishlistItems, activeCategory, reduxCategories, lastAdded, isDataReady]);
 
   // Memoized search results
   const filteredWishListData = useMemo(() => {
+    if (!isDataReady) return [];
     if (!searchQuery) return filteredItems;
     
     return filteredItems.filter(item =>
       item?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [filteredItems, searchQuery]);
+  }, [filteredItems, searchQuery, isDataReady]);
 
-  const noDataFound = searchQuery && filteredWishListData.length === 0;
+  const noDataFound = searchQuery && filteredWishListData.length === 0 && isDataReady;
 
   const handleRefresh = useCallback(() => {
     if (userId) {
@@ -162,6 +208,50 @@ const WishlistScreen = ({ navigation }) => {
     }
   }, []);
 
+  const renderSkeletonItem = useCallback(() => {
+    const shimmerAnimation = skeletonAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['-100%', '100%']
+    });
+
+    return (
+      <View style={styles.card}>
+        <View style={[styles.image, { backgroundColor: '#E1E9EE', overflow: 'hidden' }]}>
+          <Animated.View
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#F2F8FC',
+              transform: [{ translateX: shimmerAnimation }],
+            }}
+          />
+        </View>
+        <View style={styles.content}>
+          <View style={{ width: '80%', height: 20, backgroundColor: '#E1E9EE', marginBottom: 8, overflow: 'hidden' }}>
+            <Animated.View
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#F2F8FC',
+                transform: [{ translateX: shimmerAnimation }],
+              }}
+            />
+          </View>
+          <View style={{ width: '60%', height: 16, backgroundColor: '#E1E9EE', marginBottom: 12, overflow: 'hidden' }}>
+            <Animated.View
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#F2F8FC',
+                transform: [{ translateX: shimmerAnimation }],
+              }}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }, [skeletonAnimation]);
+
   const renderItem = useCallback(({ item }) => (
     <View style={styles.card}>
       <TouchableOpacity
@@ -171,12 +261,11 @@ const WishlistScreen = ({ navigation }) => {
         <Ionicons name="close" size={18} color="#000" />
       </TouchableOpacity>
 
-   <FastImage
-  source={{ uri: `${IMGURL}${item?.images?.[0]}` }}
-  style={styles.image}
-  resizeMode={FastImage.resizeMode.contain}
-/>
-
+      <FastImage
+        source={{ uri: `${IMGURL}${item?.images?.[0]}` }}
+        style={styles.image}
+        resizeMode={FastImage.resizeMode.contain}
+      />
 
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>{item.name}</Text>
@@ -218,15 +307,26 @@ const WishlistScreen = ({ navigation }) => {
     </View>
   ), [handleRemoveItem, onAddToCart, cartLoadingId]);
 
-  if (loading && !wishlistItems.length) {
+  if (!isDataReady && !wishlistItems.length) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={COLORS.white} />
+      <View style={styles.container}>
+        <CustomCommonHeader navigation={navigation} title="My Wishlist" />
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Saved Items</Text>
+          <Text style={styles.itemCount}>0 items</Text>
+        </View>
+        <FlatList
+          data={[...Array(6)]}
+          renderItem={renderSkeletonItem}
+          keyExtractor={(_, index) => index.toString()}
+          numColumns={2}
+          contentContainerStyle={styles.containerStyle}
+        />
       </View>
     );
   }
 
-  if (!loading && !wishlistItems.length) {
+  if (isDataReady && !wishlistItems.length) {
     return (
       <View style={styles.container}>
         <CustomCommonHeader navigation={navigation} title="My Wishlist" />
@@ -298,9 +398,9 @@ const WishlistScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={filteredWishListData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.wishlistId}
+          data={isDataReady ? filteredWishListData : [...Array(6)]}
+          renderItem={isDataReady ? renderItem : renderSkeletonItem}
+          keyExtractor={isDataReady ? (item) => item.wishlistId : (_, index) => index.toString()}
           removeClippedSubviews
           windowSize={5}
           initialNumToRender={8}

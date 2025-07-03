@@ -55,8 +55,7 @@ export const styles = StyleSheet.create({
     fontFamily:"Inter-SemiBold",
     fontSize:FontSize(14),
     right:12,
-    marginBottom:6,
-    marginTop:3
+   
   },
   // Product Cards
   productCard: {
@@ -77,11 +76,13 @@ featuredCard: {
  
 },
   dealCard: {
-    borderWidth: 1,
-   borderColor: '#FFCC80',
-backgroundColor: '#FFF3E0',
+backgroundColor:"#FFFAF3",
+elevation:3,
     width: width * 0.65,
     marginRight: 12,
+    paddingBottom:0,
+    marginVertical:1
+    
   },
  
   bestSellerCard: {
@@ -259,12 +260,6 @@ backgroundColor: '#FFF3E0',
   newArrivalRatingCount: {
     color: '#666',
   },
-  endingSoon: {
-    fontSize: 10,
- color: '#E53935',
-    marginLeft: 'auto',
-    fontFamily: 'Roboto-Medium',
-  },
   newTag: {
     fontSize: 10,
     color: '#00C853',
@@ -329,29 +324,6 @@ backgroundColor: '#FFF3E0',
     fontSize: 10,
     fontWeight: '700',
     marginLeft: 4,
-  },
-
-  // Progress Bar
-  progressContainer: {
-    marginTop: 8,
-  },
-  progressBar: {
-    height: 6,
-   backgroundColor: '#FFE0B2' ,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
- backgroundColor: '#FB8C00',
-    borderRadius: 3,
-  },
-  stockText: {
-    fontSize: 10,
-   color: '#FB8C00',
-    marginTop: 4,
-    alignSelf: 'flex-end',
-    fontFamily: 'Roboto-Medium',
   },
 
 

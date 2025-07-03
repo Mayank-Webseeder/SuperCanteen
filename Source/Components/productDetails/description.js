@@ -2,11 +2,10 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { styles } from './styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import moment from 'moment';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '@constants/index';
 
-export default function Description({ productData, selectedVariant }) {
+export default function Description({ productData, selectedVariant,priceDetails }) {
   const rating = productData?.rating || 0;
   const reviews = productData?.numReviews || 0;
 
@@ -14,9 +13,6 @@ export default function Description({ productData, selectedVariant }) {
   const halfStar = rating - fullStars >= 0.5;
   const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-  const deliveryDate = moment()
-    .add(productData?.deliveryDays, 'days')
-    .format('Do MMMM');
 
   // Pricing logic
   const baseOfferPrice = productData?.offerPrice || 0;
@@ -58,7 +54,7 @@ export default function Description({ productData, selectedVariant }) {
       {/* Price */}
       <View style={styles.priceContainer}>
        <View style={{flexDirection:"row",alignItems:"center"}}>
-         <Text style={styles.price}>₹{finalOfferPrice}</Text>
+         <Text style={styles.price}>₹{priceDetails?.finalPrice}</Text>
         {finalMrp > finalOfferPrice && (
           <Text style={styles.originalPrice}>₹{finalMrp}</Text>
         )}

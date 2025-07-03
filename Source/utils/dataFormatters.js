@@ -34,7 +34,7 @@ export const formatProductData = (products = []) => {
   return products.map((product) => {
     // Handle images - use first image as main image, or placeholder if none
     const mainImage = product.images?.length > 0 
-      && `https://super-canteen-backend.onrender.com${product.images[0]}` 
+      && `https://www.api-supercanteen.webseeder.tech${product.images[0]}` 
      
     
     // Handle brand - can be object or string in different responses
@@ -92,7 +92,7 @@ export const stripHtml = (html) => {
 
 
 // utils/productFormatters.js
-export const IMGURL = "https://super-canteen-backend.onrender.com";
+export const IMGURL = "https://www.api-supercanteen.webseeder.tech";
 
 export const formatProductDetailData = (product) => {
   if (!product) return null;
