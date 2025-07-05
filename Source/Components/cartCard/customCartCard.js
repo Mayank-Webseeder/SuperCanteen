@@ -157,7 +157,6 @@ const CartCard = React.memo(
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
      const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
-
 const availableStock = useMemo(() => {
   if (!product) return 0;
   
@@ -335,7 +334,7 @@ const handleQtyChange = useCallback(
             <Text style={styles.title} numberOfLines={1}>
               {product?.name}
             </Text>
-            <Text style={styles.price}>₹{item.selectedPrice}</Text>
+            <Text style={styles.price}>₹{Math.round(item.selectedPrice)}</Text>
           </View>
 
           <Text style={styles.subtitle} numberOfLines={2}>
@@ -350,7 +349,9 @@ const handleQtyChange = useCallback(
       )}
           {product?.mrp && (
             <View style={styles.priceInfo}>
-              <Text style={styles.originalPrice}>₹{product.mrp}</Text>
+              <Text style={styles.originalPrice}>
+         ₹{matchedVariant ? (matchedVariant?.additionalPrice + product.mrp) : product.mrp}
+        </Text>
               <Text style={styles.discount}>{discount}% off</Text>
             </View>
           )}

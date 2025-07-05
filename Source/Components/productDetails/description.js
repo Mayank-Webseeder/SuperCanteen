@@ -21,7 +21,8 @@ export default function Description({ productData, selectedVariant,priceDetails 
 
   const finalOfferPrice = baseOfferPrice + additionalPrice;
   const finalMrp = baseMrp + additionalPrice;
-
+  const originalPrice =  priceDetails?.variantPrice - priceDetails?.discountAmount
+ 
   // Stock info
   const stock = selectedVariant?.countInStock ?? productData?.stock ?? 0;
 
@@ -54,7 +55,7 @@ export default function Description({ productData, selectedVariant,priceDetails 
       {/* Price */}
       <View style={styles.priceContainer}>
        <View style={{flexDirection:"row",alignItems:"center"}}>
-         <Text style={styles.price}>₹{priceDetails?.finalPrice}</Text>
+         <Text style={styles.price}>₹{originalPrice}</Text>
         {finalMrp > finalOfferPrice && (
           <Text style={styles.originalPrice}>₹{finalMrp}</Text>
         )}

@@ -33,7 +33,7 @@ import CouponSection from './couponSection';
 import Share from 'react-native-share';
 import { showMessage } from 'react-native-flash-message';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
-import { formatPrice, calculateProductPrice } from '../../utils/helper'
+import { calculateProductPrice } from '../../utils/helper'
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -77,6 +77,8 @@ const ProductDetails = ({ navigation, route }) => {
   const getPriceDetails = useCallback((item = productData, variant = selectedVariant) => {
     return calculateProductPrice(item, variant, localAppliedCoupon);
   }, [productData, selectedVariant, localAppliedCoupon]);
+
+
 
   // Handle variant selection
   const handleVariantChange = (variant) => {
@@ -388,9 +390,9 @@ const ProductDetails = ({ navigation, route }) => {
             <CouponSection
               productId={productData?._id}
               data={productData?.coupons}
-              price={productData?.offerPrice || productData?.price}
               onCouponApplied={setLocalAppliedCoupon}
               localAppliedCoupon={localAppliedCoupon}
+              priceDetails={getPriceDetails()}
             />
           </>
         )}

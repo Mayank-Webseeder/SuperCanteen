@@ -39,6 +39,7 @@ export const styles = StyleSheet.create({
     marginTop: 32,
     fontSize: 16,
     color: '#666',
+    fontFamily:"Inter-Bold"
   },
 
 });

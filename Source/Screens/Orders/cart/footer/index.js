@@ -1,30 +1,20 @@
-import React, { useMemo , } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
+import { calculateFinalAmount } from '../../../../utils/helper'
 
 const Footer = ({ navigation, agreeTerms }) => {
   const { items: cartItems } = useSelector(state => state.cart);
  const { user } = useSelector(state => state.auth);
 
-  // Calculate total amount with proper duplicate handling
- const totalAmount = useMemo(() => {
-    const total = cartItems.reduce((sum, item) => {
-      try {
-        const price = Number(item.selectedPrice || item.price || 0);
-        const qty = Number(item.qty || 1);
-        const taxPercent = Number(item?.product?.tax || 10); // Default 10% tax
-        const shippingRate = item.product.shippingRate
+  const { appliedCoupons } = useSelector(state => state.coupon);
+    const appliedCoupon = appliedCoupons?.cartWide;
 
-        const subtotal = price * qty;
-        const tax = (subtotal * taxPercent) / 100;
-        return sum + subtotal + tax + shippingRate;
-      } catch (error) {
-        console.error('Calculation error:', error);
-        return sum;
-      }
-    }, 0);
-    return Math.round(total); // Final rounding
-  }, [cartItems]);
+  const finalAmount = calculateFinalAmount({
+     cartItems,
+     appliedCoupon
+   });
+
 
   const itemCount = cartItems.reduce((count, item) => count + (item.qty || 1), 0);
 
@@ -42,7 +32,7 @@ const Footer = ({ navigation, agreeTerms }) => {
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-      navigation.navigate('ProductCheckoutScreen', { totalAmount , fromCart:true  });
+      navigation.navigate('ProductCheckoutScreen', { finalAmount , fromCart:true  });
     }
   };
 
@@ -54,7 +44,7 @@ const Footer = ({ navigation, agreeTerms }) => {
         <Text style={styles.itemCount}>{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</Text>
         <View style={styles.priceWrapper}>
           <Text style={styles.priceLabel}>Total:</Text>
-          <Text style={styles.priceValue}>₹{totalAmount.toFixed(2)}</Text>
+          <Text style={styles.priceValue}>₹{Math.round(finalAmount)}</Text>
         </View>
       </View>
       <TouchableOpacity

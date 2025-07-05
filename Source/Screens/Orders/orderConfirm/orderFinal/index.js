@@ -25,6 +25,7 @@ const OrderConfirmFinal = () => {
   const [loading, setLoading] = useState(true);
   const fadeAnim = new Animated.Value(0);
 
+  console.log("ddddddddddddddd",currentOrder)
   useEffect(() => {
     dispatch(fetchOrderById(orderId))
       .then(() => setLoading(false));
@@ -44,10 +45,19 @@ const OrderConfirmFinal = () => {
     );
   }
 
-  const renderOrderItem = (item, index) => (
+  const renderOrderItem = (item, index) => {
+  const matchedVariant = item.product.variants.find(
+    variant => variant._id === item.variantId
+  );
+
+  return ( // ✅ return is required
     <View key={index} style={styles.itemCard}>
       <FastImage
-        source={{ uri: `${IMGURL}${item.image}` }}
+        source={{
+          uri: matchedVariant
+            ? `${IMGURL}${matchedVariant?.images?.[0]}`
+            : `${IMGURL}${item.image}`
+        }}
         style={styles.productImage}
         resizeMode="contain"
       />
@@ -63,11 +73,11 @@ const OrderConfirmFinal = () => {
             {item.variantDetails.color && (
               <View style={styles.variantItem}>
                 <Text style={styles.variantLabel}>Color: </Text>
-                <View 
+                <View
                   style={[
-                    styles.colorBox, 
+                    styles.colorBox,
                     { backgroundColor: item.variantDetails.color.code }
-                  ]} 
+                  ]}
                 />
               </View>
             )}
@@ -82,6 +92,8 @@ const OrderConfirmFinal = () => {
       </View>
     </View>
   );
+};
+
 
   return (
     <Animated.View style={styles.container}>
@@ -189,7 +201,7 @@ const OrderConfirmFinal = () => {
         <View style={styles.paymentCard}>
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>Item Total</Text>
-            <Text style={styles.paymentValue}>₹{currentOrder?.itemsPrice}</Text>
+            <Text style={styles.paymentValue}>₹{currentOrder?.itemsPrice }</Text>
           </View>
           
           <View style={styles.paymentRow}>

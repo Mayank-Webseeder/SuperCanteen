@@ -9,7 +9,7 @@ import CouponView from '../../../../otherComponents/checkOut/couponView';
 import { styles , productStyles } from './styles';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
-import { IMGURL } from '../../../../utils/dataFormatters'
+import { IMGURL } from '../../../../utils/dataFormatters';
 import moment from 'moment';
 import { showMessage } from 'react-native-flash-message';
 import { calculateFinalAmount } from '../../../../utils/helper';
@@ -17,27 +17,36 @@ import { COLORS } from '@constants';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
 
 const ProductItemCard = ({ item }) => {
-  const productData = item.product || item; // Handle both cart item and direct product
+  const productData = item.product || item;
+  const variantDetails = item.variantDetails || productData.variantDetails;
+
+  const mrp = variantDetails?.additionalPrice
+    ? (productData?.mrp || 0) + variantDetails?.additionalPrice
+    : productData?.mrp;
+
+  const toShowImage = variantDetails?.images?.[0] || productData?.images?.[0];
+  const displayPrice = item.selectedPrice || productData?.finalPrice || productData?.offerPrice || productData?.price;
+
   return (
-    <View style={[productStyles.container,{marginBottom: item.product ? 13 : 8 }]}>
+    <View style={[productStyles.container, { marginBottom: item.product ? 13 : 8 }]}>
       <FastImage
-        source={{ uri: `${IMGURL}${productData?.images?.[0]}` }}
+        source={{ uri: `${IMGURL}${toShowImage}` }}
         style={productStyles.image}
       />
       <View style={productStyles.details}>
         <Text style={productStyles.name} numberOfLines={2}>{productData?.name}</Text>
         <View style={productStyles.priceRow}>
-          <Text style={productStyles.price}>₹{item.selectedPrice || productData?.offerPrice}</Text>
-          {productData?.mrp > (item.selectedPrice || productData?.offerPrice) && (
-            <Text style={productStyles.originalPrice}>₹{productData?.mrp}</Text>
+          <Text style={productStyles.price}>₹{displayPrice}</Text>
+          {productData?.mrp > displayPrice && (
+            <Text style={productStyles.originalPrice}>₹{mrp}</Text>
           )}
         </View>
         <Text style={productStyles.qty}>Qty: {item.qty || 1}</Text>
         <View style={productStyles.deliveryEstimate}>
-          <Icon 
-            name="truck-delivery-outline" 
-            size={16} 
-            color={COLORS.green} 
+          <Icon
+            name="truck-delivery-outline"
+            size={16}
+            color={COLORS.green}
             style={productStyles.deliveryIcon}
           />
           <Text style={productStyles.deliveryText}>
@@ -55,17 +64,16 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
   const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
   const { items: cartItems } = useSelector(state => state.cart);
-  
+
+  const appliedCoupon = product?.isSingleProductCheckout
+    ? product?.appliedCoupon || appliedCoupons[product?._id]
+    : appliedCoupons?.cartWide;
+
   const finalAmount = calculateFinalAmount({
     product: product?.isSingleProductCheckout ? product : null,
     cartItems,
     appliedCoupon
   });
-
-  // Get applied coupon for this product (if any)
-  const appliedCoupon = product?.isSingleProductCheckout 
-    ? product?.appliedCoupon || appliedCoupons[product?._id]
-    : appliedCoupons?.cartWide;
 
   const handleProceedToPayment = () => {
     if (!selectedAddress) {
@@ -77,7 +85,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
       });
       return;
     }
-    navigation.navigate('PaymentMethodScreen', { 
+    navigation.navigate('PaymentMethodScreen', {
       product: {
         ...product,
         selectedAddress,
@@ -89,38 +97,29 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title={'Confirm Order'} />
-      <View style={styles.borderStyle}/>
-      
+      <View style={styles.borderStyle} />
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <AddressView navigation={navigation} address={selectedAddress} userId={user._id} />
 
-        {/* Products Section */}
         <Text style={productStyles.sectionTitle}>
-            {fromCart ? `Your Items (${cartItems.length})` : 'Your Item'}
-          </Text>
-        <View >
-          
-          
+          {fromCart ? `Your Items (${cartItems.length})` : 'Your Item'}
+        </Text>
+        <View>
           {fromCart ? (
             cartItems.map((item, index) => (
-              <ProductItemCard key={item._id || index} item={item} />
+              <ProductItemCard
+                key={item._id || index}
+                item={item}
+                couponDiscount={appliedCoupon?.discountAmount || 0}
+              />
             ))
           ) : (
             <ProductItemCard item={product} />
           )}
         </View>
 
-        {/* Coupon Section */}
-        {(appliedCoupon || product?.coupons?.length > 0) && (
-          <CouponView 
-            navigation={navigation} 
-            productId={product?._id}
-            currentCoupon={appliedCoupon}
-          />
-        )}
-
-        {/* Price Summary with proper coupon handling */}
-        <PriceSummaryCard 
+        <PriceSummaryCard
           product={product?.isSingleProductCheckout ? product : null}
           cartItems={fromCart ? cartItems : null}
           priceDetails={{
@@ -136,9 +135,9 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
         <View style={styles.paymentButton}>
           <Text style={styles.paymentText}>SELECT PAYMENT METHOD</Text>
         </View>
-        <CustomAuthButton 
-          onPress={handleProceedToPayment} 
-          width={Width(320)} 
+        <CustomAuthButton
+          onPress={handleProceedToPayment}
+          width={Width(320)}
           title={`Confirm Order  ₹${Math.round(finalAmount)}`}
           buttonStyle={styles.confirmButton}
           textStyle={styles.confirmButtonText}
@@ -147,7 +146,5 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
     </View>
   );
 };
-
-
 
 export default ConfirmOrderScreen;

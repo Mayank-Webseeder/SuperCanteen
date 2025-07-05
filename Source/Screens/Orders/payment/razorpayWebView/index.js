@@ -22,12 +22,12 @@ const RazorpayWebView = ({ navigation, route }) => {
   const [showWebView, setShowWebView] = React.useState(false);
   const [paymentStatus, setPaymentStatus] = React.useState(null);
 
-  console.log("🧾 Razorpay Params:", {
-    razorpayKey,
-    RazorpayOrderId,
-    amount,
-    userDetails
-  });
+  // console.log("🧾 Razorpay Params:", {
+  //   razorpayKey,
+  //   RazorpayOrderId,
+  //   amount,
+  //   userDetails
+  // });
 
   useEffect(() => {
     if (razorpayKey && RazorpayOrderId && amount) {

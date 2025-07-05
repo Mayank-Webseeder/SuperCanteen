@@ -75,43 +75,357 @@ export const calculateProductPrice = (product, variant = null, coupon = null) =>
 }
 
 
-export const calculateFinalAmount = ({ product = null, cartItems = [], appliedCoupon = null }) => {
+export const calculateFinalAmount = ({ product = null, cartItems = [], appliedCoupon }) => {
+  // === CASE: Single Product Checkout ===
   if (product?.isSingleProductCheckout) {
     const qty = product.quantity || 1;
-    const price = product.offerPrice || product.price || 0;
-    const shipping = product.shippingRate ;
-    const taxPercent = product.tax || 0;
-    const coupon = appliedCoupon?.discountValue || 0;
 
-    const subtotal = price * qty;
+    const basePrice = product.offerPrice || product.price || 0;
+    const variantPrice = product?.selectedVariant?.additionalPrice || 0;
+
+    const pricePerItem = basePrice + variantPrice;
+    const subtotal = pricePerItem * qty;
+
+    const taxPercent = product.tax || 0;
     const tax = (subtotal * taxPercent) / 100;
 
-    const total = subtotal + tax + shipping - coupon;
+    const shipping = product.shippingRate || 0;
 
-    
+    const couponDiscount = appliedCoupon?.percentage
+      ? (subtotal * appliedCoupon.percentage) / 100
+      : appliedCoupon?.discountValue || 0;
+
+    const total = subtotal + tax + shipping - couponDiscount;
 
     return Math.round(total);
   }
 
-  // === CASE: Multiple cart items ===
-   let subtotal = 0;
+  // === CASE: Multiple Cart Items ===
+  let subtotal = 0;
   let tax = 0;
   let shipping = 0;
 
   cartItems.forEach(item => {
     const qty = item.qty || 1;
-    const price = item.selectedPrice || item.price || 0;
-    const taxPercent = item.tax || item.product?.tax || 10; // Default 10% tax
+    const basePrice = item.offerPrice || item.price || item.selectedPrice || 0;
+    const variantPrice = item?.selectedVariant?.additionalPrice || 0;
+    const pricePerItem = basePrice + variantPrice;
+
+    const taxPercent = item.tax || item.product?.tax || 0;
     const itemShipping = item.shippingRate || item.product?.shippingRate || 0;
 
-    subtotal += price * qty;
-    tax += (price * qty * taxPercent) / 100;
-    shipping += itemShipping; // Sum up individual shipping rates
+    const itemSubtotal = pricePerItem * qty;
+
+    subtotal += itemSubtotal;
+    tax += (itemSubtotal * taxPercent) / 100;
+    shipping += itemShipping;
   });
 
-  const couponDiscount = appliedCoupon?.discountValue || 0;
-  const total = subtotal + tax + shipping - couponDiscount;
+  const couponDiscount = appliedCoupon?.percentage
+    ? (subtotal * appliedCoupon.percentage) / 100
+    : appliedCoupon?.discountValue || 0;
+
+  const total = subtotal + tax + shipping ;
 
   return Math.round(total);
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

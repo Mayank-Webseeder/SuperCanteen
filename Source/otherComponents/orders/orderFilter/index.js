@@ -8,39 +8,42 @@ import {
 } from 'react-native';
 import { styles } from './styles';
 
+const STATUS_OPTIONS = [
+  'All Orders',
+  'Awaited',
+  'Processing',
+  'Shipped',
+  'Delivered',
+  'Cancelled',
+  'Return',
+  'Exchange'
+];
+
+const TIME_OPTIONS = [
+  'All',
+  'Last 30 Days',
+  'Last 6 Months',
+  'This Year',
+  'Last Year',
+];
+
 const OrderFilterModal = ({
   visible,
   onClose,
-  selectedStatuses,
-  selectedTime,
+  selectedStatuses = [],
+  selectedTime = '',
   toggleStatus,
   setSelectedTime,
   onApply,
   onCancel,
 }) => {
-  const statusOptions = [
-    'All Orders',
-    'Arriving',
-    'Delivered',
-    'Cancelled',
-    'Return',
-    'Exchange',
-  ];
-
-  const timeOptions = [
-    'All',
-    'Last 30 Days',
-    'Last 6 Months',
-    'This Year',
-    'Last Year',
-  ];
-
   return (
     <Modal
       visible={visible}
-      animationType={"fade"}
+      animationType="fade"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
@@ -54,19 +57,21 @@ const OrderFilterModal = ({
           <View style={styles.filterSection}>
             <Text style={styles.sectionTitle}>Order Status</Text>
             <View style={styles.optionsContainer}>
-              {statusOptions.map((option, index) => (
+              {STATUS_OPTIONS.map((option) => (
                 <Pressable
-                  key={`status-${index}`}
+                  key={`status-${option}`}
                   style={[
                     styles.optionButton,
                     selectedStatuses.includes(option) && styles.optionSelected,
                   ]}
-                  onPress={() => toggleStatus(option)}>
+                  onPress={() => toggleStatus(option)}
+                >
                   <Text
                     style={[
                       styles.optionText,
                       selectedStatuses.includes(option) && styles.optionTextSelected,
-                    ]}>
+                    ]}
+                  >
                     {option}
                   </Text>
                 </Pressable>
@@ -78,19 +83,21 @@ const OrderFilterModal = ({
           <View style={styles.filterSection}>
             <Text style={styles.sectionTitle}>Time Range</Text>
             <View style={styles.optionsContainer}>
-              {timeOptions.map((option, index) => (
+              {TIME_OPTIONS.map((option) => (
                 <Pressable
-                  key={`time-${index}`}
+                  key={`time-${option}`}
                   style={[
                     styles.optionButton,
                     selectedTime === option && styles.optionSelected,
                   ]}
-                  onPress={() => setSelectedTime(option)}>
+                  onPress={() => setSelectedTime(option)}
+                >
                   <Text
                     style={[
                       styles.optionText,
                       selectedTime === option && styles.optionTextSelected,
-                    ]}>
+                    ]}
+                  >
                     {option}
                   </Text>
                 </Pressable>
@@ -98,16 +105,18 @@ const OrderFilterModal = ({
             </View>
           </View>
 
-          {/* Buttons */}
+          {/* Action Buttons */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.cancelButton]}
-              onPress={onCancel}>
+              onPress={onCancel}
+            >
               <Text style={styles.cancelButtonText}>Reset</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.applyButton]}
-              onPress={onApply}>
+              onPress={onApply}
+            >
               <Text style={styles.applyButtonText}>Apply Filters</Text>
             </TouchableOpacity>
           </View>
@@ -116,7 +125,5 @@ const OrderFilterModal = ({
     </Modal>
   );
 };
-
-
 
 export default OrderFilterModal;

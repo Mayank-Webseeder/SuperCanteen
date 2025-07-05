@@ -126,7 +126,7 @@ export const productStyles = StyleSheet.create({
   },
   originalPrice: {
     fontSize: 12,
-    color: COLORS.gray,
+    color: COLORS.darkGray,
     textDecorationLine: 'line-through',
     fontFamily: 'Inter-Regular'
   },

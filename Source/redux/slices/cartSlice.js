@@ -94,7 +94,6 @@ export const addToCart = createAsyncThunk(
       headers: { Authorization: `Bearer ${auth.token}` }
     });
 
-    console.log("cartItem is",cartItem)
     return response.data.data;
   }
 );

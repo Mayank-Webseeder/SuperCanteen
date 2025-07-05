@@ -4,7 +4,13 @@ import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
 
 const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails = {} }) => {
-  const { items: cartItems, appliedCoupon } = useSelector((state) => state.cart)
+const { items: cartItems } = useSelector((state) => state.cart)
+const { appliedCoupons } = useSelector(state => state.coupon)
+
+ const appliedCoupon = product?.isSingleProductCheckout 
+      ? appliedCoupons[product?._id]
+      : appliedCoupons?.cartWide;
+
   const {
     originalPrice,   // Original MRP (strikethrough)
     sellingPrice,    // Actual price user pays
@@ -18,51 +24,59 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
     const isSingleProduct = !!product;
     
     // === CASE 1: Single product checkout ===
-   if (isSingleProduct) {
-  const mrp = product.mrp || product.price;
-  const price = product.offerPrice || product.price || mrp;
-  const shipping = product.shippingRate
-  const taxPercent = product.tax; 
+if (isSingleProduct) {
+  const basePrice = product.offerPrice || product.price || 0;
+  const variantExtra = product?.selectedVariant?.additionalPrice || 0;
 
-  const tax = (price * taxPercent) / 100;
-  const total = price + tax + shipping;
+  const actualPrice = basePrice + variantExtra; // Price to apply tax & coupon on
+  const mrp = (product?.mrp || basePrice) + variantExtra;
+  const shipping = product.shippingRate || 0;
+  const taxPercent = product.tax || 0;
+
+  const tax = (actualPrice * taxPercent) / 100;
+
+  // ✅ COUPON DISCOUNT
+  const couponDiscount = appliedCoupon?.percentage
+    ? (actualPrice * appliedCoupon.percentage) / 100
+    : appliedCoupon?.discountValue || 0;
+
+  const total = actualPrice + tax + shipping - couponDiscount;
 
   return {
     originalPrice: mrp,
-    sellingPrice: price,
-    totalDiscount: mrp - price,
-    couponDiscount: 0,
+    sellingPrice: actualPrice,
+    totalDiscount: mrp - actualPrice,
+    couponDiscount,
     shippingFee: shipping,
     taxAmount: tax,
-    totalAmount: total, // This should now match ₹379
-    isSingleProduct: true
+    totalAmount: Math.round(total),
+    isSingleProduct: true,
   };
 }
-
-
     // === CASE 2: Cart checkout ===
     let totalOriginal = 0;
     let totalSelling = 0;
     let tax = 0;
-   let shipping = 0;
+    let shipping = 0;
 
-    const itemsToUse = propItems.length > 0 ? propItems : cartItems;
-    
+    const itemsToUse =  cartItems;
     itemsToUse.forEach(item => {
+      console.log("ITEM IS",item?.offerPrice)
       const qty = item.qty || 1;
       const mrp = item.mrp || item.product?.mrp || item.price || 0;
       const price = item.offerPrice || item.price || item.selectedPrice || mrp;
       const taxPercent = item.tax || item.product?.tax || 0;
       const shippingRate = item.product?.shippingRate || 0;
-
-      totalOriginal += mrp * qty;
+      totalOriginal += mrp * qty ;
       totalSelling += price * qty;
       tax += ((price * qty) * taxPercent) / 100;
         shipping += shippingRate; 
     });
 
+ 
+  
     const couponDisc = appliedCoupon?.discountValue || 0;
-    const total = totalSelling + tax + shipping - couponDisc;
+    const total = totalSelling + tax + shipping - couponDisc ;
 
     return {
       originalPrice: totalOriginal,
@@ -74,7 +88,8 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
       totalAmount: total,
       isSingleProduct: false
     };
-  }, [product, cartItems, propItems, priceDetails, appliedCoupon]);
+  }, [product, cartItems, propItems, priceDetails, appliedCoupons]);
+
 
   return (
     <View style={styles.container}>
@@ -95,9 +110,9 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
           <Text style={styles.priceLabel}>Price</Text>
           <View style={styles.priceContainer}>
             {originalPrice > sellingPrice && (
-              <Text style={styles.originalPrice}>₹{Math.round(originalPrice)}</Text>
+              <Text style={styles.originalPrice}>₹{(originalPrice)}</Text>
             )}
-            <Text style={styles.sellingPrice}>₹{Math.round(sellingPrice)}</Text>
+            <Text style={styles.sellingPrice}>₹{(sellingPrice)}</Text>
           </View>
         </View>
 
@@ -106,7 +121,7 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>You Save</Text>
             <Text style={[styles.priceValue, styles.discountValue]}>
-              ₹{Math.round(totalDiscount)}
+              ₹{(totalDiscount)}
             </Text>
           </View>
         )}
@@ -118,7 +133,7 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
               Coupon Discount{appliedCoupon?.code ? ` (${appliedCoupon.code})` : ''}
             </Text>
             <Text style={[styles.priceValue, styles.discountValue]}>
-              -₹{Math.round(couponDiscount)}
+              -₹{(couponDiscount.toFixed(2))}
             </Text>
           </View>
         )}
@@ -127,7 +142,7 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
         {taxAmount > 0 && (
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Tax</Text>
-            <Text style={styles.priceValue}>₹{Math.round(taxAmount)}</Text>
+            <Text style={styles.priceValue}>₹{taxAmount.toFixed(2)}</Text>
           </View>
         )}
 
@@ -135,7 +150,7 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
         <View style={styles.priceRow}>
           <Text style={styles.priceLabel}>Delivery Charges</Text>
           <Text style={styles.priceValue}>
-            {shippingFee === 0 ? 'FREE' : `₹${Math.round(shippingFee)}`}
+            {shippingFee === 0 ? 'FREE' : `₹${(shippingFee)}`}
           </Text>
         </View>
 
@@ -144,7 +159,7 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
           <View style={styles.totalDivider} />
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total Amount</Text>
-            <Text style={styles.totalValue}>₹{Math.round(totalAmount)}</Text>
+            <Text style={styles.totalValue}>₹{(totalAmount.toFixed(2))}</Text>
           </View>
         </View>
       </View>

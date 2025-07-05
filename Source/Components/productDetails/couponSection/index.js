@@ -12,11 +12,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import { applyCoupon, removeCoupon } from '../../../redux/slices/couponSlice';
 
-const CouponSection = ({ data = [], price = 0, productId , onCouponApplied , localAppliedCoupon }) => {
+const CouponSection = ({ data = [],  productId , onCouponApplied , localAppliedCoupon ,priceDetails}) => {
+
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const dispatch = useDispatch();
   const { appliedCoupons } = useSelector((state) => state.coupon);
+
   
   // Handle both single product and cart-wide coupons
   const appliedCoupon = productId 
@@ -29,9 +32,9 @@ const CouponSection = ({ data = [], price = 0, productId , onCouponApplied , loc
   }, [appliedCoupon]);
 
   const calculateDiscount = (coupon) => {
-    if (!coupon) return { discountAmount: 0, totalAfter: price };
-    const discountAmount = (price * coupon.percentage) / 100;
-    const totalAfter = price - discountAmount;
+    if (!coupon) return { discountAmount: 0, totalAfter: priceDetails?.variantPrice };
+    const discountAmount = (priceDetails?.variantPrice * coupon.percentage) / 100;
+    const totalAfter = priceDetails?.variantPrice - discountAmount;
     return { discountAmount, totalAfter };
   };
 
@@ -78,7 +81,7 @@ const CouponSection = ({ data = [], price = 0, productId , onCouponApplied , loc
           <Text style={styles.couponName}>{localAppliedCoupon.name}</Text>
           
           <View style={styles.priceContainer}>
-            <Text style={styles.originalPrice}>₹{price.toFixed(2)}</Text>
+            <Text style={styles.originalPrice}>₹{priceDetails?.variantPrice.toFixed(2)}</Text>
             <Text style={styles.discountedPrice}>
               ₹{calculateDiscount(localAppliedCoupon).totalAfter.toFixed(2)}
             </Text>

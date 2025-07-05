@@ -15,6 +15,7 @@ import { showMessage } from 'react-native-flash-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSelectedAddress } from '../../../../redux/slices/selectedAddressSlice';
 import { createOrder } from '../../../../redux/slices/paymentSlice';
+import { calculateFinalAmount } from '../../../../utils/helper';
 
 const PaymentMethodScreen = ({ navigation, route }) => {
   // State management
@@ -22,6 +23,8 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const [agreed, setAgreed] = useState(false);
   const [showAgreementError, setShowAgreementError] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+   const { appliedCoupons } = useSelector(state => state.coupon);
+ 
   
   // Redux and route data
   const dispatch = useDispatch();
@@ -29,7 +32,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const { product = {}, fromCart } = route?.params || {};
   const selectedAddress = useSelector(selectSelectedAddress);
   const cartItems = useSelector(state => state.cart?.items || []); // Get cart items from Redux
-
+ 
   // Payment options
   const onlineOptions = ['Pay with Razorpay'];
   const deliveryOption = 'Cash on Delivery';
@@ -37,11 +40,20 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const handleOptionSelect = (option) => {
     setSelectedOption(option);
   };
+    // Get applied coupon for this product (if any)
+    const appliedCoupon = product?.isSingleProductCheckout 
+      ? appliedCoupons[product?._id]
+      : appliedCoupons?.cartWide;
+      
+      const finalAmount = calculateFinalAmount({
+      product: product?.isSingleProductCheckout ? product : null,
+      cartItems,
+      appliedCoupon
+    });
 
   // Prepare order payload dynamically
 const prepareOrderPayload = (paymentMethod) => {
   const orderItems = fromCart ? cartItems : [product];
-
 
   if (orderItems.length === 0 || orderItems.some(item => !item?._id && !item?.product?._id)) {
     showMessage({
@@ -51,47 +63,54 @@ const prepareOrderPayload = (paymentMethod) => {
     });
     return null;
   }
+return {
+  paymentMethod: paymentMethod,
+  ...(appliedCoupon?._id && { couponCode: appliedCoupon._id }),
+  shippingAddress: {
+    name: String(selectedAddress.name),
+    contactNo: String(selectedAddress.contactNo),
+    address: String(selectedAddress.address),
+    city: String(selectedAddress.city),
+    state: String(selectedAddress.state),
+    postalCode: String(selectedAddress.postalCode),
+    country: String(selectedAddress.country || 'India'),
+    addressType: String(selectedAddress.addressType || 'Home')
+  },
+  orderItems: orderItems.map(item => {
+    const productData = fromCart ? item.product || {} : item;
+    const base = fromCart ? item : item;
 
-  return {
-    paymentMethod: paymentMethod,
-    couponCode: null,
-    shippingAddress: {
-      name: String(selectedAddress.name),
-      contactNo: String(selectedAddress.contactNo),
-      address: String(selectedAddress.address),
-      city: String(selectedAddress.city),
-      state: String(selectedAddress.state),
-      postalCode: String(selectedAddress.postalCode),
-      country: String(selectedAddress.country || 'India'),
-      addressType: String(selectedAddress.addressType || 'Home')
-    },
-    orderItems: orderItems.map(item => {
-      const productData = fromCart ? item.product || {} : item;
-      const base = fromCart ? item : item;
-      return {
-        name: String(productData.name || base.name || 'Product'),
-        qty: Number(base.qty || base.quantity || 1),
-        image: `${productData.images?.[0] || ''}`,
-        productData: { _id: productData._id },
-        ...(base.variantId && { variantId: base.variantId }),
-        ...(base.sku && { sku: base.sku }),
-        unit: base.unit || 'piece',
-        variantDetails: base.variantDetails || {},
-        price: base.selectedPrice || base.offerPrice || base.price || productData.price || 0
-      };
-    })
-  };
+    const variantDetails = base.variantDetails || base.selectedVariant || null;
+    const variantId = base.variantId || variantDetails?._id;
+
+    const productId = productData._id;
+    const productCoupon = appliedCoupons?.[productId]?._id;
+
+    const { color, size, additionalPrice } = variantDetails || {};
+
+    return {
+      name: String(productData.name || base.name || 'Product'),
+      qty: Number(base.qty || base.quantity || 1),
+      image: `${productData.images?.[0] || ''}`,
+      productData: { _id: productId },
+      ...(variantId && { variantId: String(variantId) }),
+      ...(base.sku && { sku: base.sku }),
+      unit: base.unit || 'piece',
+      ...(variantDetails && { variantDetails: { color, size, additionalPrice } }),
+      // ...(productCoupon && { couponCode: productCoupon }) // per-product coupon
+    };
+  })
 };
-
+};
 
   // Handle Razorpay payment initiation
   const initiateRazorpayPayment = async () => {
     try {
       setIsProcessing(true);
       const payload = prepareOrderPayload("RazorPay");
+      console.log("PAYLOAD IS",payload)
       if (!payload) return;
-
-      const resultAction = await dispatch(createOrder(payload));
+      const resultAction = await dispatch(createOrder(payload));       
       if (resultAction.meta.requestStatus === 'fulfilled') {
         const data = resultAction.payload;
         navigation.navigate('RazorpayWebView', {
@@ -123,9 +142,7 @@ const prepareOrderPayload = (paymentMethod) => {
     try {
       setIsProcessing(true);
       const payload = prepareOrderPayload("Cash on Delivery");
-      
       if (!payload) return;
-
       const resultAction = await dispatch(createOrder(payload));
       if (resultAction.meta.requestStatus === 'fulfilled') {
         const orderData = resultAction.payload;
@@ -245,8 +262,9 @@ const prepareOrderPayload = (paymentMethod) => {
   {isProcessing ? (
     <ActivityIndicator color="#fff" />
   ) : (
+    
     <Text style={styles.confirmButtonText}>
-      Confirm Your Order 
+    Confirm Order  ₹{Math.round(finalAmount)}
     </Text>
   )}
 </TouchableOpacity>
