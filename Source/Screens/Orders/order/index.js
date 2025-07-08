@@ -10,6 +10,10 @@ import { styles } from './styles';
 import CustomSearch from '../../../Components/searchInput';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserOrders } from '../../../redux/slices/orderSlice';
+import CancelOrderModal from '../../../otherComponents/orders/cancelOrder';
+import { cancelOrderById } from '../../../redux/slices/orderSlice';
+import { showMessage } from 'react-native-flash-message';
+import EmptyState from '@components/emptyComponent/EmptyState';
 
 // Status mapping configuration
 const STATUS_CONFIG = {
@@ -32,10 +36,13 @@ const Orders = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [isSearching, setIsSearching] = useState(false); // New state for search loading
+   const [cancelModalVisible, setCancelModalVisible] = useState(false);
+const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
   const navigation = useNavigation();
+
   
   const dispatch = useDispatch();
-  const { orders, loading, pagination } = useSelector(state => state.orders);
+  const { orders, loading, pagination,cancelLoading } = useSelector(state => state.orders);
   const { user } = useSelector(state => state.auth);
 
   // Convert selected status filters to API-compatible status values
@@ -133,6 +140,52 @@ const Orders = () => {
     await loadOrders(1);
   };
 
+  const handleCancelOrder = async ({ cancelReason }) => {
+  try {
+    if (!selectedOrderForCancel) {
+      throw new Error('Order ID is missing');
+    }
+
+    await dispatch(
+      cancelOrderById({ 
+        orderId: selectedOrderForCancel, 
+        cancelReason 
+      })
+    ).unwrap();
+
+    // 1️⃣ Close the modal first
+    setCancelModalVisible(false);
+
+    // 2️⃣ Show success toast after a small delay (ensures modal is gone)
+    setTimeout(() => {
+      showMessage({
+        message: 'Order cancelled successfully!',
+        type: 'success',
+        duration: 3000,
+        floating: true,  // Optional: Makes it float above other elements
+      });
+    }, 300); // 300ms delay is usually enough
+
+    // 3️⃣ Refresh orders
+    loadOrders(currentPage);
+    setSelectedOrderForCancel(null);
+
+  } catch (error) {
+    // 1️⃣ Close modal on error too
+    setCancelModalVisible(false);
+
+    // 2️⃣ Show error toast
+    setTimeout(() => {
+      showMessage({
+        message: error ? error?.message : 'Failed to cancel order',
+        type: 'danger',
+        duration: 3000,
+        floating: true,
+      });
+    }, 300);
+  }
+};
+
   // Client-side filtering for immediate UI updates
   const filteredOrders = React.useMemo(() => {
     return orders.filter(order => {
@@ -180,10 +233,16 @@ const Orders = () => {
     }
   };
 
+
+
   const renderItem = ({ item }) => (
     <OrderListItem 
       order={item}
       onPress={() => navigation.navigate('OrderDetailScreen', { order: item })}
+        onCancel={() => {
+        setSelectedOrderForCancel(item?._id);
+        setCancelModalVisible(true);
+      }}
     />
   );
 
@@ -207,7 +266,6 @@ const Orders = () => {
       </View>
 
       <View style={styles.orderHeaderRow}>
-        <Text style={styles.orderTitle}>Your Orders</Text>
         <CustomBtn
           width={90}
           height={30}
@@ -227,10 +285,14 @@ const Orders = () => {
         <FlatList
           data={filteredOrders}
           renderItem={renderItem}
-          keyExtractor={item => `${item._id}_${item.status}`}
+           keyExtractor={item => `${item._id}_${item.updatedAt || item.createdAt}`}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No orders found</Text>
+            <EmptyState
+                     title={'Your orders is empty'}
+                     imageSource={require('../../../../assets/no-order.png')}
+                     notDisplayButton
+                   />
           }
           onEndReached={loadMoreOrders}
           onEndReachedThreshold={0.5}
@@ -259,6 +321,16 @@ const Orders = () => {
         setSelectedTime={setSelectedTime}
         onApply={handleApply}
         onCancel={handleCancel}
+      />
+
+      <CancelOrderModal
+        visible={cancelModalVisible}
+        onClose={() => {
+          setCancelModalVisible(false);
+          setSelectedOrderForCancel(null);
+        }}
+        onCancelOrder={handleCancelOrder}
+        isLoading={cancelLoading} // Use the loading state from Redux
       />
     </View>
   );

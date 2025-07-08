@@ -23,12 +23,11 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const [agreed, setAgreed] = useState(false);
   const [showAgreementError, setShowAgreementError] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-   const { appliedCoupons } = useSelector(state => state.coupon);
- 
+  const { appliedCoupons } = useSelector(state => state.coupon);
+  const {  user } = useSelector(state => state.auth);
   
   // Redux and route data
   const dispatch = useDispatch();
-  const { user } = useSelector(state => state.auth);
   const { product = {}, fromCart } = route?.params || {};
   const selectedAddress = useSelector(selectSelectedAddress);
   const cartItems = useSelector(state => state.cart?.items || []); // Get cart items from Redux
@@ -43,18 +42,17 @@ const PaymentMethodScreen = ({ navigation, route }) => {
     // Get applied coupon for this product (if any)
     const appliedCoupon = product?.isSingleProductCheckout 
       ? appliedCoupons[product?._id]
-      : appliedCoupons?.cartWide;
+      : appliedCoupons;
       
       const finalAmount = calculateFinalAmount({
       product: product?.isSingleProductCheckout ? product : null,
       cartItems,
-      appliedCoupon
+      appliedCoupon,
     });
 
   // Prepare order payload dynamically
 const prepareOrderPayload = (paymentMethod) => {
   const orderItems = fromCart ? cartItems : [product];
-
   if (orderItems.length === 0 || orderItems.some(item => !item?._id && !item?.product?._id)) {
     showMessage({
       message: 'Product information is incomplete',
@@ -65,7 +63,6 @@ const prepareOrderPayload = (paymentMethod) => {
   }
 return {
   paymentMethod: paymentMethod,
-  ...(appliedCoupon?._id && { couponCode: appliedCoupon._id }),
   shippingAddress: {
     name: String(selectedAddress.name),
     contactNo: String(selectedAddress.contactNo),
@@ -84,7 +81,7 @@ return {
     const variantId = base.variantId || variantDetails?._id;
 
     const productId = productData._id;
-    const productCoupon = appliedCoupons?.[productId]?._id;
+    const productCoupon = fromCart ? appliedCoupons?.[productId]?._id :appliedCoupon?._id ;
 
     const { color, size, additionalPrice } = variantDetails || {};
 
@@ -97,7 +94,7 @@ return {
       ...(base.sku && { sku: base.sku }),
       unit: base.unit || 'piece',
       ...(variantDetails && { variantDetails: { color, size, additionalPrice } }),
-      // ...(productCoupon && { couponCode: productCoupon }) // per-product coupon
+       ...(productCoupon && { couponCode: productCoupon }) // per-product coupon
     };
   })
 };
@@ -108,7 +105,6 @@ return {
     try {
       setIsProcessing(true);
       const payload = prepareOrderPayload("RazorPay");
-      console.log("PAYLOAD IS",payload)
       if (!payload) return;
       const resultAction = await dispatch(createOrder(payload));       
       if (resultAction.meta.requestStatus === 'fulfilled') {

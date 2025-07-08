@@ -30,7 +30,23 @@ errorText: {
   color: 'red',
   textAlign: 'center',
   marginTop: 20
-}
- 
-
+},
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 30,
+    textAlign: 'center'
+  },
+  emptyView:{
+    alignItems:"center",
+    justifyContent:"center",
+    flex:1
+  }
 });

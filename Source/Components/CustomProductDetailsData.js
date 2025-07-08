@@ -1,4 +1,3 @@
-// CustomProductDetailsData.js
 import React, { useState, useMemo } from 'react';
 import {
   View,
@@ -10,7 +9,6 @@ import {
 import { Height } from '../constants';
 import { stripHtml } from '../utils/dataFormatters';
 import Collapsible from 'react-native-collapsible';
-import moment from 'moment';
 import { COLORS } from '../constants';
 
 const CustomProductDetailsData = ({ productData }) => {
@@ -33,23 +31,6 @@ const CustomProductDetailsData = ({ productData }) => {
       .map(line => line.trim())
       .filter(line => line.length > 0);
   }, [productData.specification]);
-
-  // Rating & reviews
-  const rating = productData?.rating || 0;
-  const reviews = productData?.numReviews || 0;
-
-  // Delivery date
-  const deliveryDate = moment()
-    .add(productData?.deliveryDays || 5, 'days')
-    .format('Do MMMM');
-
-  // Discount
-  const discountPercent =
-    productData?.mrp && productData?.offerPrice
-      ? Math.round(
-          ((productData.mrp - productData.offerPrice) / productData.mrp) * 100
-        )
-      : 0;
 
   return (
     <ScrollView style={styles.container}>
@@ -114,7 +95,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 8,
     color: '#2E6074',
-    // marginTop:10
   },
   specsContainer: {
     backgroundColor: '#F9FBFC',
@@ -172,28 +152,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.green,
   },
-  originalPrice: {
-    fontSize: 14,
-    color: COLORS.gray,
-    textDecorationLine: 'line-through',
-    marginLeft: 8,
-  },
   discount: {
     marginLeft: 8,
     fontSize: 14,
     color: COLORS.red,
     fontFamily: 'Inter-SemiBold',
-  },
-  subText: {
-    fontSize: 14,
-    color: '#2E6074',
-    paddingHorizontal: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    paddingHorizontal: 16,
-    marginTop: 4,
   },
 });
 

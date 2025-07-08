@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails = {} }) => {
 const { items: cartItems } = useSelector((state) => state.cart)
 const { appliedCoupons } = useSelector(state => state.coupon)
-
  const appliedCoupon = product?.isSingleProductCheckout 
       ? appliedCoupons[product?._id]
       : appliedCoupons?.cartWide;
@@ -33,7 +32,8 @@ if (isSingleProduct) {
   const shipping = product.shippingRate || 0;
   const taxPercent = product.tax || 0;
 
-  const tax = (actualPrice * taxPercent) / 100;
+  const tax = Math.round((actualPrice * taxPercent) / 100); // Round to nearest integer
+console.log("TAX IS", product.tax);
 
   // ✅ COUPON DISCOUNT
   const couponDiscount = appliedCoupon?.percentage
@@ -58,36 +58,58 @@ if (isSingleProduct) {
     let totalSelling = 0;
     let tax = 0;
     let shipping = 0;
+    let totalCouponDiscount = 0;
 
     const itemsToUse =  cartItems;
     itemsToUse.forEach(item => {
-      console.log("ITEM IS",item?.offerPrice)
+     
       const qty = item.qty || 1;
       const mrp = item.mrp || item.product?.mrp || item.price || 0;
-      const price = item.offerPrice || item.price || item.selectedPrice || mrp;
-      const taxPercent = item.tax || item.product?.tax || 0;
-      const shippingRate = item.product?.shippingRate || 0;
-      totalOriginal += mrp * qty ;
-      totalSelling += price * qty;
-      tax += ((price * qty) * taxPercent) / 100;
-        shipping += shippingRate; 
-    });
+      const price = item.offerPrice || item.price || item.product.offerPrice || mrp;
+      const additionalPrice = item.variantDetails?.additionalPrice || 0;
 
- 
+ // 2. Calculate actual price per unit (including variant additional price)
+  const pricePerUnit = price + additionalPrice;
+  const itemSubtotal = pricePerUnit * qty;
   
-    const couponDisc = appliedCoupon?.discountValue || 0;
-    const total = totalSelling + tax + shipping - couponDisc ;
+  // 3. Calculate coupon discount if available
+  const productId = item.product?._id;
+  const coupon = appliedCoupons?.[productId];
+  let itemDiscount = 0;
+  
+  if (coupon) {
+    itemDiscount = (itemSubtotal * coupon.percentage) / 100;
+    totalCouponDiscount += itemDiscount;
+  }
+  
+  // 4. Accumulate totals
+  totalOriginal += mrp * qty;
+  totalSelling += itemSubtotal;
+  
+  // 5. Calculate tax (10% on the item subtotal)
+  const taxPercent = item.tax || item.product?.tax || 10;
+  tax += (itemSubtotal * taxPercent) / 100;
+  
+  // 6. Add shipping
+  const shippingRate = item.product?.shippingRate || 0;
+  shipping += shippingRate;
+  
+});
 
-    return {
-      originalPrice: totalOriginal,
-      sellingPrice: totalSelling,
-      totalDiscount: totalOriginal - totalSelling,
-      couponDiscount: couponDisc,
-      shippingFee: shipping,
-      taxAmount: tax,
-      totalAmount: total,
-      isSingleProduct: false
-    };
+const total = totalSelling + tax + shipping - totalCouponDiscount;
+
+return {
+  originalPrice: totalOriginal,
+  sellingPrice: totalSelling,
+  totalDiscount: totalOriginal - totalSelling,
+  couponDiscount: totalCouponDiscount,
+  shippingFee: shipping,
+  taxAmount: tax,
+  totalAmount: total,
+  isSingleProduct: false
+};
+
+
   }, [product, cartItems, propItems, priceDetails, appliedCoupons]);
 
 

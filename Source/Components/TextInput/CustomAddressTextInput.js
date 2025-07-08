@@ -1,6 +1,5 @@
 import { COLORS, Height } from '@constants/index';
-import React from 'react';
-import { TextInput, StyleSheet, View, Text } from 'react-native'; // ✅ FIXED
+import { TextInput, StyleSheet, View, Text } from 'react-native'; 
 
 const CustomAddressTextInput = ({ value, onChangeText, placeholder, keyboardType, error, inputStyle }) => {
   return (

@@ -1,16 +1,12 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import { View,StyleSheet } from 'react-native'
 
 export default function HorizontalLine(props) {
   return (
     <View style={props.containerStyle}>
   <View key="line" style={[styles.main,props.lineStyle]} />
 
-    </View>
-    
+    </View> 
   )
-
- 
 }
 
  const styles = StyleSheet.create({

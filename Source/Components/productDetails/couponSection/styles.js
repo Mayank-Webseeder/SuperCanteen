@@ -59,8 +59,8 @@ import { StyleSheet } from "react-native";
     marginLeft: 12,
   },
   saveText:{
- backgroundColor: '#FFF2F2', // Light background for highlight
-  color: '#FF6B6B', // Same as parent
+ backgroundColor: '#FFF2F2',
+  color: '#FF6B6B',
   paddingHorizontal: 6,
   paddingVertical: 2,
   borderRadius: 4,

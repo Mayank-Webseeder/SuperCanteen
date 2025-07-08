@@ -1,5 +1,5 @@
 import Toast from 'react-native-toast-message';
-
+import Share from 'react-native-share';
 // Add this helper function to convert color names to hex codes
 export const getColorHex = (colorName) => {
   const colorMap = {
@@ -101,33 +101,81 @@ export const calculateFinalAmount = ({ product = null, cartItems = [], appliedCo
   }
 
   // === CASE: Multiple Cart Items ===
-  let subtotal = 0;
-  let tax = 0;
-  let shipping = 0;
+let subtotal = 0;
+let tax = 0;
+let shipping = 0;
+let couponDiscount = 0;
 
-  cartItems.forEach(item => {
-    const qty = item.qty || 1;
-    const basePrice = item.offerPrice || item.price || item.selectedPrice || 0;
-    const variantPrice = item?.selectedVariant?.additionalPrice || 0;
-    const pricePerItem = basePrice + variantPrice;
 
-    const taxPercent = item.tax || item.product?.tax || 0;
-    const itemShipping = item.shippingRate || item.product?.shippingRate || 0;
+cartItems.forEach(item => {
+  const qty = item.qty || 1;
+  
+  // 1. Get base prices - using item.product.offerPrice as you requested
+  const basePrice = item.product?.offerPrice || item.offerPrice || item.price || item.selectedPrice || 0;
+  
+  // 2. Get variant additional price (from either selectedVariant or variantDetails)
+  const variantPrice = item?.selectedVariant?.additionalPrice || 
+                      item?.variantDetails?.additionalPrice || 
+                      0;
+  
+  // 3. Calculate final price per item
+  const pricePerItem = basePrice + variantPrice;
+  const itemSubtotal = pricePerItem * qty;
+  
+  // 4. Calculate tax (default 10% if not specified)
+  const taxPercent = item.tax || item.product?.tax || 10;
+  tax += (itemSubtotal * taxPercent) / 100;
+  
+  // 5. Add shipping
+  const itemShipping = item.shippingRate || item.product?.shippingRate || 0;
+  shipping += itemShipping;
+  
+  // 6. Calculate coupon discount if product has specific coupon
+  const productId = item.product?._id;
+  const productCoupon = appliedCoupon?.[productId];
+  
+  if (productCoupon) {
+    couponDiscount += (itemSubtotal * productCoupon.percentage) / 100;
+  }
+  
+  // 7. Add to subtotal
+  subtotal += itemSubtotal;
 
-    const itemSubtotal = pricePerItem * qty;
+  // console.log("Item Calculation:", {
+  //   name: item.name,
+  //   basePrice,
+  //   variantPrice,
+  //   pricePerItem,
+  //   qty,
+  //   itemSubtotal,
+  //   tax: (itemSubtotal * taxPercent) / 100,
+  //   shipping: itemShipping,
+  //   coupon: productCoupon?.name || "None"
+  // });
+});
 
-    subtotal += itemSubtotal;
-    tax += (itemSubtotal * taxPercent) / 100;
-    shipping += itemShipping;
-  });
+// Apply cart-wide coupon if no product-specific coupons were applied
+if (couponDiscount === 0 && appliedCoupon) {
+  couponDiscount = appliedCoupon.percentage 
+    ? (subtotal * appliedCoupon.percentage) / 100 
+    : appliedCoupon.discountValue || 0;
+}
 
-  const couponDiscount = appliedCoupon?.percentage
-    ? (subtotal * appliedCoupon.percentage) / 100
-    : appliedCoupon?.discountValue || 0;
+const total = subtotal + tax + shipping - couponDiscount;
+return Math.round(total);
+};
 
-  const total = subtotal + tax + shipping ;
 
-  return Math.round(total);
+export const shareInvoice = async (filePath) => {
+  try {
+    await Share.open({
+      url: `file://${filePath}`,
+      type: 'application/pdf',
+      subject: `Invoice #${filePath.split('_').pop().replace('.pdf', '')}`,
+    });
+  } catch (error) {
+    console.error('Sharing failed:', error);
+  }
 };
 
 

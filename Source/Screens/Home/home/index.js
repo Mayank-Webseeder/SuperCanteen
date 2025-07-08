@@ -4,11 +4,10 @@ import {
   FlatList,
   RefreshControl,
   Animated,
-  TouchableOpacity,
   InteractionManager,
-  Text,
   ScrollView,
-  Dimensions
+  Dimensions,
+  ActivityIndicator
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -31,7 +30,7 @@ import { getProductsByCategory } from '../../../redux/slices/productSlice';
 
 const { width } = Dimensions.get('window');
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ navigation, route }) => {
   // State management
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,6 +38,8 @@ const HomeScreen = ({ navigation }) => {
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const opacity = useState(new Animated.Value(0))[0];
   const [skeletonAnimation] = useState(new Animated.Value(0));
+  const [isMounted, setIsMounted] = useState(false);
+  const [prevSelectedCategory, setPrevSelectedCategory] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -50,10 +51,24 @@ const HomeScreen = ({ navigation }) => {
   const { products, loading: productsLoading, error: productsError } = 
     useSelector(state => state.product, shallowEqual);
 
+  // Handle category selection from route params
+  useEffect(() => {
+    if (route.params?.selectedCategoryId && route.params.selectedCategoryId !== selectedCategoryIndex) {
+      setSelectedCategoryIndex(route.params.selectedCategoryId);
+      setPrevSelectedCategory(route.params.selectedCategoryId);
+    }
+  }, [route.params?.selectedCategoryId]);
+
+  // Track mount state
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
   // Animation for skeleton loader
   useEffect(() => {
-    const animateSkeleton = () => {
-      Animated.loop(
+    if (!initialLoadComplete) {
+      const animateSkeleton = Animated.loop(
         Animated.sequence([
           Animated.timing(skeletonAnimation, {
             toValue: 1,
@@ -66,28 +81,24 @@ const HomeScreen = ({ navigation }) => {
             useNativeDriver: true,
           }),
         ])
-      ).start();
-    };
-
-    if (!initialLoadComplete) {
-      animateSkeleton();
+      );
+      animateSkeleton.start();
+      
+      return () => animateSkeleton.stop();
     }
-
-    return () => {
-      skeletonAnimation.stopAnimation();
-    };
   }, [initialLoadComplete]);
 
   // Set first category as default when categories load
   useEffect(() => {
-    if (categories?.length > 0 && !selectedCategoryIndex) {
+    if (categories?.length > 0 && selectedCategoryIndex === null) {
       const firstCategoryId = categories[0]._id;
       setSelectedCategoryIndex(firstCategoryId);
+      setPrevSelectedCategory(firstCategoryId);
       dispatch(getProductsByCategory(firstCategoryId));
     }
-  }, [categories, selectedCategoryIndex]);
+  }, [categories]);
 
-  // Optimized data loading with useFocusEffect
+  // Data loading with useFocusEffect
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -101,28 +112,35 @@ const HomeScreen = ({ navigation }) => {
               dispatch(getSubCategories())
             ]);
             
-            if (isActive) {
+            if (isActive && isMounted) {
               setInitialLoadComplete(true);
               setIsReady(true);
             }
+          } else {
+            // Refresh data when revisiting
+            const promises = [dispatch(getCategories())];
+            
+            if (selectedCategoryIndex) {
+              promises.push(dispatch(getProductsByCategory(selectedCategoryIndex)));
+            }
+            
+            await Promise.all(promises);
+            if (isActive && isMounted) setIsReady(true);
           }
         } catch (error) {
           console.error('Data loading error:', error);
-          if (isActive) {
-            setIsReady(true); // Still show UI
-          }
+          if (isActive && isMounted) setIsReady(true);
         }
       };
 
       const task = InteractionManager.runAfterInteractions(() => {
         fetchData();
         
-        // Fallback timeout
         const timeout = setTimeout(() => {
-          if (isActive && !initialLoadComplete) {
+          if (isActive && isMounted && !isReady) {
             setIsReady(true);
           }
-        }, 3000);
+        }, 5000);
 
         return () => clearTimeout(timeout);
       });
@@ -131,31 +149,39 @@ const HomeScreen = ({ navigation }) => {
         isActive = false;
         task.cancel();
       };
-    }, [initialLoadComplete])
+    }, [initialLoadComplete, isMounted, selectedCategoryIndex])
   );
 
   // Handle category changes
-  useEffect(() => {
-    if (selectedCategoryIndex && initialLoadComplete) {
+  const handleCategoryChange = useCallback((categoryId) => {
+    if (categoryId !== selectedCategoryIndex) {
       setIsReady(false);
-      dispatch(getProductsByCategory(selectedCategoryIndex))
-        .finally(() => setIsReady(true));
+      setSelectedCategoryIndex(categoryId);
+      setPrevSelectedCategory(categoryId);
+      dispatch(getProductsByCategory(categoryId))
+        .then(() => {
+          if (isMounted) setIsReady(true);
+        })
+        .catch(() => {
+          if (isMounted) setIsReady(true);
+        });
     }
-  }, [selectedCategoryIndex, initialLoadComplete]);
+  }, [selectedCategoryIndex, isMounted]);
 
   // Fade-in animation when content is ready
   useEffect(() => {
-    const animation = Animated.timing(opacity, {
-      toValue: isReady ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    });
-
-    if (isReady) animation.start();
-    return () => animation.stop();
-  }, [isReady, opacity]);
+    if (isMounted) {
+      Animated.timing(opacity, {
+        toValue: isReady ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isReady, opacity, isMounted]);
 
   const handleRefresh = useCallback(async () => {
+    if (!isMounted) return;
+    
     setRefreshing(true);
     try {
       await Promise.all([
@@ -166,9 +192,9 @@ const HomeScreen = ({ navigation }) => {
     } catch (err) {
       console.error('Refresh Error:', err);
     } finally {
-      setRefreshing(false);
+      if (isMounted) setRefreshing(false);
     }
-  }, [dispatch, selectedCategoryIndex]);
+  }, [dispatch, selectedCategoryIndex, isMounted]);
 
   // Memoized data
   const filteredSubcategories = useMemo(() => {
@@ -282,13 +308,27 @@ const HomeScreen = ({ navigation }) => {
       return renderSkeleton();
     }
 
+    if (categoriesError || subCategoriesError || productsError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Failed to load data. Please try again.</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={handleRefresh}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     return (
       <Animated.View style={{ opacity }}>
         <GetCategory
           categories={categories}
           navigation={navigation}
           selectedIndex={selectedCategoryIndex}
-          setSelectedIndex={setSelectedCategoryIndex}
+          setSelectedIndex={handleCategoryChange}
         />
         <View style={styles.mainContent}>
           {brands.length > 0 && (
@@ -318,11 +358,15 @@ const HomeScreen = ({ navigation }) => {
           <SectionRenderer navigation={navigation} />
           
           <HorizontalLine containerStyle={{ marginBottom: 2 }} />
-          <ProductCarousel
-            horizontal={true}
-            navigation={navigation}
-            products={products}
-          /> 
+          {productsLoading ? (
+            <ActivityIndicator size="large" color={COLORS.green} />
+          ) : (
+            <ProductCarousel
+              horizontal={true}
+              navigation={navigation}
+              products={products}
+            />
+          )}
         </View>
       </Animated.View>
     );
@@ -347,6 +391,8 @@ const HomeScreen = ({ navigation }) => {
         maxToRenderPerBatch={5}
         updateCellsBatchingPeriod={50}
         windowSize={7}
+        key={`home-${selectedCategoryIndex}`}
+        extraData={selectedCategoryIndex}
       />
     </View>
   );

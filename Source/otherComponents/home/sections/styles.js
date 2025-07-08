@@ -1,4 +1,3 @@
-// SectionRendererStyles.js
 import { StyleSheet, Dimensions } from 'react-native';
 import { COLORS, FontSize, Width } from '@constants/index';
 import { Height } from '@constants/index';

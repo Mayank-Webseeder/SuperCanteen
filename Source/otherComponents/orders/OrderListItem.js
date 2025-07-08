@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Height } from '../../constants';
 import CustomOrderCard from '../../Components/order/orderCard/customOrderCard';
 
-const OrderListItem = ({ order, onPress }) => {
+
+const OrderListItem = ({ order, onPress,onCancel }) => {
   // Make sure order has the required properties
-  const orderId = order?._id || order?.id;
   // Format date without dayjs
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -62,6 +62,7 @@ const OrderListItem = ({ order, onPress }) => {
   // Enhanced action handlers
   const handleCancel = () => {
     console.log('Cancel order', order._id);
+    onCancel()
     // Add actual cancellation logic here
   };
 

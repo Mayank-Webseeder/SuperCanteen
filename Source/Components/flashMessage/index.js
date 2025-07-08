@@ -1,4 +1,3 @@
-import React from 'react';
 import FlashMessage from 'react-native-flash-message';
 import { StyleSheet } from 'react-native';
 

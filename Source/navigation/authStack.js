@@ -5,7 +5,6 @@ import SignUpScreen from '../Screens/auth/signUp';
 import ForgotPasswordScreen from '../Screens/auth/forgotPassword'
 import ResetPasswordScreen from '../Screens/auth/resetPassword';
 
-
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {

@@ -24,8 +24,7 @@ const OrderConfirmFinal = () => {
   const { currentOrder } = useSelector(state => state.orders);
   const [loading, setLoading] = useState(true);
   const fadeAnim = new Animated.Value(0);
-
-  console.log("ddddddddddddddd",currentOrder)
+  
   useEffect(() => {
     dispatch(fetchOrderById(orderId))
       .then(() => setLoading(false));

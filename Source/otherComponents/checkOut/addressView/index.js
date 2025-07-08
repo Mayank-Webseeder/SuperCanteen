@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
@@ -8,11 +7,10 @@ import { selectSelectedAddress } from '../../../redux/slices/selectedAddressSlic
 
 const AddressView = ({ navigation }) => {
   const selectedAddress = useSelector(selectSelectedAddress);
-
   const handleChangeAddress = () => {
     navigation.navigate('AddressListScreen', { fromCheckout: true });
   };
-
+  
   return (
     <View style={styles.card}>
       <View style={styles.sectionHeader}>

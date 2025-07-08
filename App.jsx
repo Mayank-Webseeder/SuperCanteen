@@ -13,6 +13,7 @@ import { toastConfig } from '@components/toastConfig';
 import { setAuthInitialized } from './Source/redux/slices/authSlice';
 import { setSelectedAddress } from './Source/redux/slices/selectedAddressSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initSocket, disconnectSocket,getSocket } from './Source/services/SocketService';
 
 const AppWrapper = () => {
   return (
@@ -29,6 +30,24 @@ const AppWrapper = () => {
 const App = () => {
   const dispatch = useDispatch();
   const { token, user } = useSelector(state => state.auth);
+
+    useEffect(() => {
+    if (token) {
+      initSocket(); // Connect only if user is authenticated
+      
+      // Optional: Basic connection logging
+      const socket = getSocket();
+      socket.on('connect', () => console.log('Socket connected'));
+      socket.on('disconnect', () => console.log('Socket disconnected'));
+    }
+
+    return () => {
+      if (token) {
+        disconnectSocket(); // Cleanup on unmount
+      }
+    };
+  }, [token]); // Reconnect if token changes
+
 
   const loadStoredAddress = async () => {
     try {

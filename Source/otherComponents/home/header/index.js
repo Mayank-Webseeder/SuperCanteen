@@ -1,5 +1,4 @@
 import { View, Pressable, Text } from 'react-native';
-import React , {useState,useEffect} from 'react';
 import { styles } from './styles';
 import CustomSearch from '../../../Components/searchInput';
 import FastImage from 'react-native-fast-image';

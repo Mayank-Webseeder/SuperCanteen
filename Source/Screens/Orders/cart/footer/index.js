@@ -6,13 +6,10 @@ import { calculateFinalAmount } from '../../../../utils/helper'
 const Footer = ({ navigation, agreeTerms }) => {
   const { items: cartItems } = useSelector(state => state.cart);
  const { user } = useSelector(state => state.auth);
-
   const { appliedCoupons } = useSelector(state => state.coupon);
-    const appliedCoupon = appliedCoupons?.cartWide;
-
   const finalAmount = calculateFinalAmount({
      cartItems,
-     appliedCoupon
+     appliedCoupon:appliedCoupons
    });
 
 

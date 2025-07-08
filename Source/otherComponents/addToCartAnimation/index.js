@@ -1,6 +1,5 @@
-// components/AddToCartAnimation.js
-import React, { useRef, useEffect } from 'react';
-import { Animated, View, StyleSheet, Easing, Dimensions } from 'react-native';
+import  { useRef, useEffect } from 'react';
+import { Animated, StyleSheet, Easing, Dimensions } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 const { width, height } = Dimensions.get('window');

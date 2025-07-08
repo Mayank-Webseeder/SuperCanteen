@@ -1,6 +1,4 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/AntDesign'; // Make sure to install this
 import { useNavigation } from '@react-navigation/native';
 import { FontSize, Height } from '../constants';
 import Entypo from 'react-native-vector-icons/Entypo';
@@ -16,10 +14,7 @@ const CustomAuthHeader = ({ title = 'Title', onBackPress , notShowBackArrow }) =
       >
        <Entypo name={ 'chevron-small-left'} size={27} color="#333" style={{left:8}} />
       </TouchableOpacity> }
-
       <Text style={styles.title}>{title}</Text>
-
-      {/* Placeholder for right icon (if needed) */}
       <View style={styles.rightSpace} />
     </View>
   );
@@ -50,6 +45,6 @@ const styles = StyleSheet.create({
     fontFamily:'Inter-SemiBold'
   },
   rightSpace: {
-    width: 40, // To balance the left back button
+    width: 40, 
   },
 });

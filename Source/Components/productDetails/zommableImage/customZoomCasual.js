@@ -9,7 +9,6 @@ import {
 import FastImage from 'react-native-fast-image';
 import ImageZoomViewer from './ImageZoomViewer';
 import { Height, Width } from '@constants/index';
-import { IMGURL } from '../../../utils/dataFormatters';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 

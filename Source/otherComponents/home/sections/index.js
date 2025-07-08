@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -107,7 +107,7 @@ const handleWishlistToggle = useCallback((productId) => {
       const wishlistItem = wishlistItems.find(item => item.product?._id === productId);
       
       // Debugging log
-      console.log('Wishlist item to remove:', wishlistItem);
+      console.log('Wishlist item to remove:', wishlistItem,productId);
       
       if (!wishlistItem) {
         console.error('No wishlist item found for product:', productId);

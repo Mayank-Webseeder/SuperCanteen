@@ -10,7 +10,6 @@ const CustomCommonHeader = ({ title, navigation, leftIconName = 'chevron-small-l
         <Entypo name={leftIconName} size={24} color="#333" />
       </TouchableOpacity>}
       <Text style={styles.title}>{title}</Text>
-      {/* Placeholder for right space to center the title */}
       <View style={styles.rightSpace} />
     </View>
   );
@@ -39,6 +38,6 @@ const styles = StyleSheet.create({
     fontFamily:'Inter-SemiBold'
   },
   rightSpace: {
-    width: 40, // same as left icon to center the title
+    width: 40, 
   },
 });

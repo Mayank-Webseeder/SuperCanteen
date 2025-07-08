@@ -1,7 +1,5 @@
 
 import { View, Text, StyleSheet } from 'react-native'
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
 export const toastConfig = {
   wishlistToast: ({ text1, props }) => (
     <View style={styles.toastContainer}>
@@ -49,10 +47,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Medium',
     flex: 1,
-  },
-  wishlistIcon: {
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   }
 })

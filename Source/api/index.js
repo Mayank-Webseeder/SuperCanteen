@@ -1,4 +1,3 @@
-
 export const BASE_URL = "https://www.api-supercanteen.webseeder.tech/api"
 export const IMG_URL = "https://www.api-supercanteen.webseeder.tech/";
 export const LOGINAPI = `${BASE_URL}/users/auth`
@@ -35,6 +34,7 @@ export const GET_RAZORPAY_KEY = '/orders/getRazorPayKey'
 export const VERIFY_PAYMENT = '/orders/verify-payment'
 export const GET_ORDER_BY_USERID = '/orders/getOrdersByUserId'
 export const GET_ORDER_BY_ID = '/orders/getOrderById'
+export const CANCEL_ORDER_BY_USER = '/orders/cancelOrderByUser'
 
 
 

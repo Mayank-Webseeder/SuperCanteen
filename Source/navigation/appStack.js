@@ -1,5 +1,3 @@
-// navigation/appStack.js
-
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabs from './bottomTab';
@@ -27,7 +25,6 @@ import AboutUsScreen from '@screens/otherSettings/aboutUs';
 import PrivacyPolicyScreen from '@screens/otherSettings/privacyPolicy';
 import FAQScreen from '@screens/otherSettings/faq';
 import CouponProductsScreen from '@screens/otherSettings/Coupons/CouponProducts';
-import InvoiceScreen from '@screens/Orders/invoice';
 import AddressListScreen from '@components/address/addressList';
 import RazorpayWebView from '@screens/Orders/payment/razorpayWebView';
 const Stack = createNativeStackNavigator();
@@ -66,8 +63,6 @@ const AppStack = () => {
       <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="RazorpayWebView" component={RazorpayWebView} />
-      <Stack.Screen name="Invoice" component={InvoiceScreen} />
-      
 
     </Stack.Navigator>
   );

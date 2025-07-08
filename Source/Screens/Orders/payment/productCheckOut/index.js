@@ -5,7 +5,6 @@ import CustomAuthButton from '../../../../Components/CustomAuthButton';
 import { Width } from "@constants";
 import PriceSummaryCard from '@components/Common/PriceSummaryCard';
 import AddressView from '../../../../otherComponents/checkOut/addressView';
-import CouponView from '../../../../otherComponents/checkOut/couponView';
 import { styles , productStyles } from './styles';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
@@ -67,12 +66,12 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
 
   const appliedCoupon = product?.isSingleProductCheckout
     ? product?.appliedCoupon || appliedCoupons[product?._id]
-    : appliedCoupons?.cartWide;
+    : appliedCoupons;
 
   const finalAmount = calculateFinalAmount({
     product: product?.isSingleProductCheckout ? product : null,
     cartItems,
-    appliedCoupon
+    appliedCoupon,
   });
 
   const handleProceedToPayment = () => {

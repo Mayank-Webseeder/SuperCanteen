@@ -13,13 +13,10 @@ import moment from 'moment';
 import { applyCoupon, removeCoupon } from '../../../redux/slices/couponSlice';
 
 const CouponSection = ({ data = [],  productId , onCouponApplied , localAppliedCoupon ,priceDetails}) => {
-
-
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const dispatch = useDispatch();
   const { appliedCoupons } = useSelector((state) => state.coupon);
-
   
   // Handle both single product and cart-wide coupons
   const appliedCoupon = productId 

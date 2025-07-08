@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { GET_ORDER_BY_USERID , GET_ORDER_BY_ID } from '../../api';
-import { getData } from '../../utils/apiClient'
+import { GET_ORDER_BY_USERID , GET_ORDER_BY_ID , CANCEL_ORDER_BY_USER } from '../../api';
+import { getData, putRequest} from '../../utils/apiClient'
 
 // In your orderSlice.js
 export const fetchUserOrders = createAsyncThunk(
@@ -46,6 +46,22 @@ export const fetchOrderById = createAsyncThunk(
     }
   }
 );
+
+export const cancelOrderById = createAsyncThunk(
+  'orders/cancelOrderById',
+  async ({ orderId, cancelReason }, { rejectWithValue }) => {
+    try {
+      const response = await putRequest(
+        `${CANCEL_ORDER_BY_USER}/${orderId}`,
+       { cancelReason} 
+      );
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 
 
 
@@ -94,7 +110,28 @@ const orderSlice = createSlice({
       .addCase(fetchOrderById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(cancelOrderById.pending, (state) => {
+      state.loading = true;
+    })
+    .addCase(cancelOrderById.fulfilled, (state, action) => {
+      state.loading = false;
+      const updatedOrder = action.payload.order;
+
+      // Update that specific order in state.orders
+      state.orders = state.orders.map(order =>
+        order._id === updatedOrder._id ? updatedOrder : order
+      );
+
+      // If currentOrder is the one cancelled, update that too
+      if (state.currentOrder && state.currentOrder._id === updatedOrder._id) {
+        state.currentOrder = updatedOrder;
+      }
+    })
+    .addCase(cancelOrderById.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
   },
 });
 

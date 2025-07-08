@@ -1,5 +1,5 @@
 // constants.js
-import { Platform, Dimensions } from 'react-native';
+import { Dimensions } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 // Device dimensions

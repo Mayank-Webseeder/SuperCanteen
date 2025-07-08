@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import CustomCategoryList from '../../../Components/CustomCategoryList';
 import { formatCategoryData } from '../../../utils/dataFormatters';

@@ -4,9 +4,9 @@ import {
   Text,
   FlatList,
   ActivityIndicator,
-  Alert
 } from 'react-native';
 import { useDispatch } from 'react-redux';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import { styles } from './styles';
@@ -48,17 +48,17 @@ const CouponScreen = ({ navigation, route }) => {
     });
   };
 
- const handleApplyCoupon = async (coupon) => {
-  const response = await getData(GETALLPRODUCTS);
-  const eligibleProducts = response.data.filter(p => 
-    p.coupons?.includes(coupon._id)
-  );
+  const handleApplyCoupon = async (coupon) => {
+    const response = await getData(GETALLPRODUCTS);
+    const eligibleProducts = response.data.filter(p => 
+      p.coupons?.includes(coupon._id)
+    );
 
- navigation.navigate('CouponProduct', { 
-    coupon,
-    products: eligibleProducts
-  });
-};
+    navigation.navigate('CouponProduct', { 
+      coupon,
+      products: eligibleProducts
+    });
+  };
 
   const filteredCoupons = () => {
     const now = new Date();
@@ -84,10 +84,29 @@ const CouponScreen = ({ navigation, route }) => {
     return filtered;
   };
 
+  const renderEmptyState = () => {
+    const emptyMessages = {
+      'All': 'No coupons available',
+      'Trending': 'No trending coupons right now',
+      'Biggest Discount': 'No discount coupons available',
+      'Expiring Soon': 'No coupons expiring soon',
+      'Recently Added': 'No recently added coupons'
+    };
+
+    return (
+      <View style={styles.emptyView}>
+        <Text style={styles.title}>{emptyMessages[selectedCategory]}</Text>
+        <Text style={styles.subtitle}>Check back later for new offers</Text>
+        
+      
+      </View>
+    );
+  };
+
   const renderCouponCard = ({ item, index }) => {
-   const isApplied = productId 
-    ? appliedCoupons[productId]?._id === item._id 
-    : Object.values(appliedCoupons).some(c => c._id === item._id); 
+    const isApplied = productId 
+      ? appliedCoupons[productId]?._id === item._id 
+      : Object.values(appliedCoupons).some(c => c._id === item._id); 
     const couponData = {
       ...item,
       title: `${item.percentage}% OFF`,
@@ -141,16 +160,22 @@ const CouponScreen = ({ navigation, route }) => {
         /> 
       </View>  
       <Text style={styles.titleStyle}>Your Coupons</Text>
-      <FlatList
-        data={filteredCoupons()}
-        keyExtractor={(item) => item._id}
-        numColumns={2}
-        columnWrapperStyle={filteredCoupons().length > 1 ? styles.row : null}
-        contentContainerStyle={styles.listContent}
-        renderItem={renderCouponCard}
-      />
+      
+      {filteredCoupons().length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <FlatList
+          data={filteredCoupons()}
+          keyExtractor={(item) => item._id}
+          numColumns={2}
+          columnWrapperStyle={filteredCoupons().length > 1 ? styles.row : null}
+          contentContainerStyle={styles.listContent}
+          renderItem={renderCouponCard}
+        />
+      )}
     </View>
   );
 };
+
 
 export default CouponScreen;

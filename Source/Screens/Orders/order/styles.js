@@ -20,15 +20,10 @@ export const styles = StyleSheet.create({
   },
   orderHeaderRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: 16,
     paddingHorizontal:Width(18)
-  },
-  orderTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.green,
   },
     listContent: {
     paddingVertical: Height(16),

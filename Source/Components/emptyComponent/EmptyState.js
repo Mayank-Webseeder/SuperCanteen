@@ -1,13 +1,13 @@
 import { COLORS, Height } from '@constants/index';
-import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const EmptyState = ({ 
   imageSource, 
   title, 
   subtitle = 'Just relax, let us help you find some first-class products', 
-  buttonLabel = 'Start Shopping', 
-  onPress 
+  buttonLabel = 'Continue Shopping', 
+  onPress,
+  notDisplayButton 
 }) => {
   return (
     <View style={styles.container}>
@@ -16,10 +16,10 @@ const EmptyState = ({
       )}
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
-
-      <TouchableOpacity style={styles.button} onPress={onPress}>
+{!notDisplayButton && <TouchableOpacity style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>{buttonLabel}</Text>
-      </TouchableOpacity>
+      </TouchableOpacity>}
+      
     </View>
   );
 };
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     fontFamily:"Inter-Regular"
   },
   button: {
-    backgroundColor: COLORS.green, // Purple button
+    backgroundColor: COLORS.green, 
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,

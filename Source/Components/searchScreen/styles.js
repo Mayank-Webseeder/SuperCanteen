@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { COLORS, FontSize, Height, Width } from "../../constants";
+import { Height, Width } from "../../constants";
 
 export const styles = StyleSheet.create({
    container: {
@@ -27,10 +27,10 @@ export const styles = StyleSheet.create({
     opacity: 1
   },
    searchInput: {
-    height: Height(34),  // Reduced height
-    borderRadius: 5,     // Tighter radius
+    height: Height(34), 
+    borderRadius: 5,     
     paddingHorizontal: 12,
-    fontSize: 14,        // Smaller font
+    fontSize: 14,      
   },
   scrollContainer: {
     paddingBottom: Height(20),

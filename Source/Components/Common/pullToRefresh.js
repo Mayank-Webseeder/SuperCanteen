@@ -1,5 +1,3 @@
-// src/Components/common/PullToRefresh.js
-import React from 'react';
 import { RefreshControl } from 'react-native';
 import { COLORS } from '@constants/index';
 

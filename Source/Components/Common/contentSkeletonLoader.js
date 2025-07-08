@@ -1,7 +1,5 @@
-// src/Components/common/ProductDetailsSkeleton.js
-import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { COLORS, Height, Width } from '@constants/index';
+import { COLORS, Height } from '@constants/index';
 
 const ContentSkeletonLoader = () => {
   return (
