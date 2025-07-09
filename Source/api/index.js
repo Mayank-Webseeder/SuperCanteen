@@ -35,6 +35,10 @@ export const VERIFY_PAYMENT = '/orders/verify-payment'
 export const GET_ORDER_BY_USERID = '/orders/getOrdersByUserId'
 export const GET_ORDER_BY_ID = '/orders/getOrderById'
 export const CANCEL_ORDER_BY_USER = '/orders/cancelOrderByUser'
+export const GET_NOTIFICATIONS = '/notification/getNotifications'
+export const UNREAD_COUNT = '/notification/unread-notificationCount'
+export const MARK_AS_READ = '/notification/markAsReadById'
+export const MARK_ALL_READ = '/notification/markAllAsRead/user'
 
 
 

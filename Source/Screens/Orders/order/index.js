@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomBtn from '../../../Components/CustomFilterBtn';
 import {useNavigation} from '@react-navigation/native';
@@ -14,10 +14,10 @@ import CancelOrderModal from '../../../otherComponents/orders/cancelOrder';
 import { cancelOrderById } from '../../../redux/slices/orderSlice';
 import { showMessage } from 'react-native-flash-message';
 import EmptyState from '@components/emptyComponent/EmptyState';
+import { initSocket } from "../../../services/SocketService";
 
-// Status mapping configuration
 const STATUS_CONFIG = {
-  'All Orders': [], // Special case - shows all orders
+  'All Orders': [],
   'Awaited': ['awaited'],
   'Processing': ['processing'],
   'Shipped': ['shipped'],
@@ -35,22 +35,69 @@ const Orders = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSearching, setIsSearching] = useState(false); // New state for search loading
-   const [cancelModalVisible, setCancelModalVisible] = useState(false);
-const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
-  const navigation = useNavigation();
+  const [isSearching, setIsSearching] = useState(false);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
+  const [localOrders, setLocalOrders] = useState([]); // Added local state for socket updates
 
-  
+  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { orders, loading, pagination,cancelLoading } = useSelector(state => state.orders);
+  const { orders: reduxOrders, loading, pagination, cancelLoading } = useSelector(state => state.orders);
   const { user } = useSelector(state => state.auth);
 
-  // Convert selected status filters to API-compatible status values
+  // Initialize with Redux orders
+  useEffect(() => {
+    console.log("REDUX ORDERS IS",reduxOrders)
+    setLocalOrders(reduxOrders);
+  }, [reduxOrders]);
+
+  // Socket implementation for real-time updates
+  useEffect(() => {
+    const socket = initSocket();
+
+    const handleOrderUpdate = (updatedOrder) => {
+      if (!updatedOrder?._id) {
+        console.error("Invalid order update received", updatedOrder);
+        return;
+      }
+
+      console.log("Received order update:", updatedOrder);
+
+      setLocalOrders(prevOrders => {
+        // Check if order exists
+        const orderIndex = prevOrders.findIndex(
+          order => String(order._id) === String(updatedOrder._id)
+        );
+
+        // If new order, add it
+        if (orderIndex === -1) {
+          return [...prevOrders, updatedOrder];
+        }
+
+        // If existing order, update it
+        return prevOrders.map(order => 
+          String(order._id) === String(updatedOrder._id) 
+            ? { ...order, ...updatedOrder, updatedAt: new Date().toISOString() }
+            : order
+        );
+      });
+    };
+
+    socket.on("orderUpdated", handleOrderUpdate);
+    socket.on("connect", () => console.log("Socket connected:", socket.id));
+    socket.on("disconnect", (reason) => console.log("Socket disconnected:", reason));
+
+    return () => {
+      socket.off("orderUpdated", handleOrderUpdate);
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+  }, []);
+
   const getApiStatusParams = () => {
     if (selectedStatuses.length === 0 || selectedStatuses.includes('All Orders')) {
-      return []; // Return empty array for all orders
+      return [];
     }
-    
     return selectedStatuses.flatMap(status => 
       STATUS_CONFIG[status] || [status.toLowerCase()]
     );
@@ -59,7 +106,6 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
   const loadOrders = useCallback(async (page = 1, refresh = false) => {
     try {
       const apiStatusParams = getApiStatusParams();
-      
       await dispatch(fetchUserOrders({ 
         userId: user?.id, 
         page,
@@ -70,61 +116,45 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
     } finally {
       if (refresh) setRefreshing(false);
       setIsLoadingMore(false);
-      setIsSearching(false); // Reset search loading state
+      setIsSearching(false);
     }
   }, [user?.id, selectedStatuses, selectedTime, searchQuery]);
 
-  // Load more orders
   const loadMoreOrders = () => {
     if (!isLoadingMore && pagination?.currentPage < pagination?.totalPages) {
       setIsLoadingMore(true);
       const nextPage = currentPage + 1;
-      loadOrders(nextPage)
-        .then(() => setCurrentPage(nextPage))
-        .catch(() => setIsLoadingMore(false));
+      loadOrders(nextPage).then(() => setCurrentPage(nextPage));
     }
   };
 
-  // Initial load
   useEffect(() => {
     loadOrders(1);
   }, [loadOrders]);
 
-  // Pull to refresh
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setCurrentPage(1);
     loadOrders(1, true);
   }, [loadOrders]);
 
-  // Toggle status filter
   const toggleStatus = (status) => {
-    if (status === 'All Orders') {
-      setSelectedStatuses(['All Orders']); // Select only 'All Orders'
-    } else {
-      setSelectedStatuses(prev => {
-        // Remove 'All Orders' if other filters are selected
-        const newStatuses = prev.filter(s => s !== 'All Orders');
-        
-        if (prev.includes(status)) {
-          // Remove the status if already selected
-          return newStatuses.filter(s => s !== status);
-        } else {
-          // Add the status
-          return [...newStatuses, status];
-        }
-      });
-    }
+    setSelectedStatuses(prev => {
+      if (status === 'All Orders') return ['All Orders'];
+      
+      const newStatuses = prev.filter(s => s !== 'All Orders');
+      return prev.includes(status) 
+        ? newStatuses.filter(s => s !== status)
+        : [...newStatuses, status];
+    });
   };
 
-  // Apply filters
   const handleApply = async () => {
     setModalVisible(false);
     setCurrentPage(1);
-    await loadOrders(1); // Wait for the load to complete
+    await loadOrders(1);
   };
 
-  // Reset filters
   const handleCancel = () => {
     setSelectedStatuses([]);
     setSelectedTime('');
@@ -133,64 +163,49 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
     loadOrders(1);
   };
 
-  // Handle search submission
   const handleSearchSubmit = async () => {
-    setIsSearching(true); // Activate search loading state
+    setIsSearching(true);
     setCurrentPage(1);
     await loadOrders(1);
   };
 
   const handleCancelOrder = async ({ cancelReason }) => {
-  try {
-    if (!selectedOrderForCancel) {
-      throw new Error('Order ID is missing');
-    }
-
-    await dispatch(
-      cancelOrderById({ 
+    try {
+      if (!selectedOrderForCancel) throw new Error('Order ID missing');
+      
+      await dispatch(cancelOrderById({ 
         orderId: selectedOrderForCancel, 
         cancelReason 
-      })
-    ).unwrap();
+      })).unwrap();
 
-    // 1️⃣ Close the modal first
-    setCancelModalVisible(false);
+      setCancelModalVisible(false);
+      setTimeout(() => {
+        showMessage({
+          message: 'Order cancelled successfully!',
+          type: 'success',
+          duration: 3000,
+          floating: true,
+        });
+      }, 300);
+      
+      loadOrders(currentPage);
+      setSelectedOrderForCancel(null);
+    } catch (error) {
+      setCancelModalVisible(false);
+      setTimeout(() => {
+        showMessage({
+          message: error?.message || 'Failed to cancel order',
+          type: 'danger',
+          duration: 3000,
+          floating: true,
+        });
+      }, 300);
+    }
+  };
 
-    // 2️⃣ Show success toast after a small delay (ensures modal is gone)
-    setTimeout(() => {
-      showMessage({
-        message: 'Order cancelled successfully!',
-        type: 'success',
-        duration: 3000,
-        floating: true,  // Optional: Makes it float above other elements
-      });
-    }, 300); // 300ms delay is usually enough
-
-    // 3️⃣ Refresh orders
-    loadOrders(currentPage);
-    setSelectedOrderForCancel(null);
-
-  } catch (error) {
-    // 1️⃣ Close modal on error too
-    setCancelModalVisible(false);
-
-    // 2️⃣ Show error toast
-    setTimeout(() => {
-      showMessage({
-        message: error ? error?.message : 'Failed to cancel order',
-        type: 'danger',
-        duration: 3000,
-        floating: true,
-      });
-    }, 300);
-  }
-};
-
-  // Client-side filtering for immediate UI updates
   const filteredOrders = React.useMemo(() => {
-    return orders.filter(order => {
-      // Status filter
-      const statusFilterPassed = selectedStatuses.length === 0 || 
+    return localOrders.filter(order => {
+      const statusMatch = selectedStatuses.length === 0 || 
         selectedStatuses.some(status => {
           if (status === 'All Orders') return true;
           const statusValues = STATUS_CONFIG[status] || [status.toLowerCase()];
@@ -199,55 +214,44 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
           );
         });
 
-      // Time filter
-      const timeFilterPassed = !selectedTime || checkTimeFilter(order.createdAt, selectedTime);
-
-      // Search filter
-      const searchFilterPassed = searchQuery === '' || 
+      const timeMatch = !selectedTime || checkTimeFilter(order.createdAt, selectedTime);
+      const searchMatch = searchQuery === '' || 
         order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.orderItems.some(item => 
           item.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-      return statusFilterPassed && timeFilterPassed && searchFilterPassed;
+      return statusMatch && timeMatch && searchMatch;
     });
-  }, [orders, selectedStatuses, selectedTime, searchQuery]);
+  }, [localOrders, selectedStatuses, selectedTime, searchQuery]);
 
-  // Time filter helper
   const checkTimeFilter = (orderDate, timeRange) => {
     const date = new Date(orderDate);
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
     
     switch(timeRange) {
-      case 'Last 30 Days':
-        return date > new Date(now - 30 * oneDay);
-      case 'Last 6 Months':
-        return date > new Date(now.setMonth(now.getMonth() - 6));
-      case 'This Year':
-        return date.getFullYear() === now.getFullYear();
-      case 'Last Year':
-        return date.getFullYear() === now.getFullYear() - 1;
-      default:
-        return true;
+      case 'Last 30 Days': return date > new Date(now - 30 * oneDay);
+      case 'Last 6 Months': return date > new Date(now.setMonth(now.getMonth() - 6));
+      case 'This Year': return date.getFullYear() === now.getFullYear();
+      case 'Last Year': return date.getFullYear() === now.getFullYear() - 1;
+      default: return true;
     }
   };
-
-
 
   const renderItem = ({ item }) => (
     <OrderListItem 
       order={item}
       onPress={() => navigation.navigate('OrderDetailScreen', { order: item })}
-        onCancel={() => {
+      onCancel={() => {
         setSelectedOrderForCancel(item?._id);
         setCancelModalVisible(true);
       }}
     />
   );
 
-  // Combined loading state
   const showLoader = (loading && currentPage === 1) || isSearching;
+
   return (
     <View style={styles.container}>
       <View style={styles.headerStyle}>
@@ -285,14 +289,14 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
         <FlatList
           data={filteredOrders}
           renderItem={renderItem}
-           keyExtractor={item => `${item._id}_${item.updatedAt || item.createdAt}`}
+          keyExtractor={item => `${item._id}_${item.updatedAt || item.createdAt}`}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <EmptyState
-                     title={'Your orders is empty'}
-                     imageSource={require('../../../../assets/no-order.png')}
-                     notDisplayButton
-                   />
+              title={'Your orders is empty'}
+              imageSource={require('../../../../assets/no-order.png')}
+              notDisplayButton
+            />
           }
           onEndReached={loadMoreOrders}
           onEndReachedThreshold={0.5}
@@ -330,7 +334,7 @@ const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
           setSelectedOrderForCancel(null);
         }}
         onCancelOrder={handleCancelOrder}
-        isLoading={cancelLoading} // Use the loading state from Redux
+        isLoading={cancelLoading}
       />
     </View>
   );

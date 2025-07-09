@@ -13,7 +13,8 @@ import { toastConfig } from '@components/toastConfig';
 import { setAuthInitialized } from './Source/redux/slices/authSlice';
 import { setSelectedAddress } from './Source/redux/slices/selectedAddressSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { initSocket, disconnectSocket,getSocket } from './Source/services/SocketService';
+import { navigationRef } from './Source/navigation/navigationService';
+import { requestNotificationPermission, setupNotificationHandlers } from './Source/services/notificationService';
 
 const AppWrapper = () => {
   return (
@@ -31,24 +32,6 @@ const App = () => {
   const dispatch = useDispatch();
   const { token, user } = useSelector(state => state.auth);
 
-    useEffect(() => {
-    if (token) {
-      initSocket(); // Connect only if user is authenticated
-      
-      // Optional: Basic connection logging
-      const socket = getSocket();
-      socket.on('connect', () => console.log('Socket connected'));
-      socket.on('disconnect', () => console.log('Socket disconnected'));
-    }
-
-    return () => {
-      if (token) {
-        disconnectSocket(); // Cleanup on unmount
-      }
-    };
-  }, [token]); // Reconnect if token changes
-
-
   const loadStoredAddress = async () => {
     try {
       const stored = await AsyncStorage.getItem('selectedAddress');
@@ -59,6 +42,14 @@ const App = () => {
       console.error('Error loading stored address:', err);
     }
   };
+
+  useEffect(() => {
+    const initNotifications = async () => {
+      await requestNotificationPermission();
+      setupNotificationHandlers();          
+    };
+    initNotifications();
+  }, []);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -81,7 +72,7 @@ const App = () => {
   }, [token, user?.id, dispatch]);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <RootStack />
       <CustomFlashMessage />
       <Toast config={toastConfig} />

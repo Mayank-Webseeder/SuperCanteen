@@ -1,52 +1,111 @@
+import { COLORS } from '@constants/index';
 import { StyleSheet } from 'react-native';
-import { COLORS, Height } from '../../../constants';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+    marginBottom:1
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily:"Inter-SemiBold",
+    color: COLORS.black,
+    marginLeft: 16,
+  },
+  markAllText: {
+    color: COLORS.green,
+    fontWeight: '500',
+    fontSize: 14,
   },
   listContent: {
-    paddingHorizontal: 16,
-    paddingTop:Height(4)
+    paddingBottom: 20,
   },
   notificationCard: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#fff',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 6,
     borderRadius: 12,
-    padding: 14,
-    marginBottom: Height(13),
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowColor: COLORS.black,
     shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 2,
   },
-  iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 16,
   },
   textContainer: {
     flex: 1,
+    marginRight: 8,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   notificationTitle: {
     fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
+    fontFamily:"Inter-SemiBold",
+    color: COLORS.black,
+    marginBottom: 4,
+  },
+  unreadBadge: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    position: 'absolute',
+    right: 12,
+    top: 12,
   },
   notificationMessage: {
     fontSize: 13,
-    color: '#4B5563',
-    marginTop: 4,
+    color: COLORS.darkGray,
+    marginBottom: 4,
+    lineHeight: 18,
   },
   notificationTime: {
     fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 6,
+    color: COLORS.gray,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: COLORS.darkGray,
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: COLORS.gray,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  loader: {
+    marginTop: 40,
+  }
 });
