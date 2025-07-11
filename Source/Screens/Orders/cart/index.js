@@ -15,7 +15,6 @@ import AddressView from '../../../otherComponents/checkOut/addressView';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 import PriceSummaryCard from '@components/Common/PriceSummaryCard';
 import Footer from './footer';
-import AgreeTerms from './agreeTerms';
 import EmptyState from '@components/emptyComponent/EmptyState';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 import { styles } from './styles';
@@ -160,10 +159,6 @@ export default function CartScreen({ navigation }) {
       <View style={styles.main}>
         <PriceSummaryCard />
       </View> 
-
-      {/* Custom Checkbox for Terms */}
-      <View style={styles.blankView} />
-      <AgreeTerms setAgreeTerms={setAgreeTerms} agreeTerms={agreeTerms} />
     </ScrollView>
   );
 
@@ -192,7 +187,7 @@ export default function CartScreen({ navigation }) {
 
       {/* Footer - Only show when not loading and cart has items */}
       {!isLoading && items.length > 0 && (
-        <Footer cartItems={items} navigation={navigation} agreeTerms={agreeTerms} />
+        <Footer cartItems={items} navigation={navigation} />
       )}
     </View>
   );

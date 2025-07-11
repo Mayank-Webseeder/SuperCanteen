@@ -67,7 +67,8 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     overflow: 'hidden',
-    marginBottom:1
+    marginBottom:1,
+  
   },
 featuredCard: {
   width: width * 0.45,
@@ -487,4 +488,37 @@ categoryImage: {
     fontWeight: '600',
     marginRight: 8,
   },
+  whishlistButton:{
+    position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: COLORS.green,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        justifyContent: 'center',
+        alignItems: 'center'
+  },
+  title:{
+    fontSize: 16, fontFamily:"Inter-SemiBold", marginHorizontal: 22, 
+    marginBottom:4
+  },
+  titleStyle:{
+  marginBottom: 12,
+ 
+  },
+  name:{
+    fontSize: 13, marginBottom: 4,
+    fontFamily:"Inter-SemiBold",
+    lineHeight:22
+  },
+  titleContainer:{
+    paddingVertical: 8 ,
+paddingHorizontal:10,
+  },
+  price:{
+    fontSize: 14, fontFamily:"Inter-Bold",
+    marginVertical:Height(2)
+  }
+ 
 });

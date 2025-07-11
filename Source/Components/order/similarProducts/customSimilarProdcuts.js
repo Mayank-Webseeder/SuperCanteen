@@ -125,7 +125,7 @@ const CustomSimilarProducts = ({
             </View>
 
             {/* Rating Section */}
-            {item.rating > 0 && (
+            {/* {item.rating > 0 && (
               <View style={styles.ratingContainer}>
                 <View style={styles.ratingPill}>
                   <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
@@ -133,7 +133,7 @@ const CustomSimilarProducts = ({
                 </View>
                 <Text style={styles.reviews}>({item.reviews || 0})</Text>
               </View>
-            )}
+            )} */}
 
             {/* Add to Cart Button */}
             <TouchableOpacity onPress={() => onAddToCart(item)} style={styles.addButton}>

@@ -29,7 +29,6 @@ import { fetchCartProductById } from '../../redux/slices/cartProductsSlice';
 import { styles } from './styles';
 import DeleteConfirmationModal from '../../otherComponents/deleteConfirmationModal';
 import { showMessage } from 'react-native-flash-message';
-import debounce from 'lodash.debounce';
 
 const CustomDropdown = React.memo(
   ({
@@ -142,13 +141,11 @@ const CartCard = React.memo(
     onQuantityChange,
     onSizeChange,
     onRemoveItem,
-    isLoading,
     isDeleteLoading,
   }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
-    const [localLoading, setLocalLoading] = useState(false);
-    const [qtyChangeDirection, setQtyChangeDirection] = useState(null);
+ const [activeButton, setActiveButton] = useState(null); // Local loader state for quantity changes
 
     const productId = item.product?._id ? item.product._id : item.product;
     const { products, loading, errors } = useSelector(
@@ -158,15 +155,17 @@ const CartCard = React.memo(
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
     const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
-
+    
     const availableStock = useMemo(() => {
       if (!product) return 0;
       
+      // Check variant stock first
       if (item.variantId && product?.variants) {
         const variant = product.variants.find(v => v._id === item.variantId);
         if (variant) return variant.countInStock || 0;
       }
       
+      // Fall back to product stock
       return product.countInStock || 0;
     }, [product, item.variantId]);
 
@@ -194,53 +193,50 @@ const CartCard = React.memo(
       }).start();
     }, [scaleAnim]);
     
-    const debouncedQtyChange = useMemo(
-      () => debounce((newQty) => {
-        const parsedNewQty = parseInt(newQty);
-        const parsedAvailableStock = parseInt(availableStock);
+  const handleQtyChange = useCallback(
+  async (newQty, type) => {
+    const parsedNewQty = parseInt(newQty);
+    const parsedAvailableStock = parseInt(availableStock);
 
-        if (isNaN(parsedNewQty) || parsedNewQty < 1) {
-          showMessage({
-            message: 'Oops! Quantity must be at least 1',
-            type: 'danger',
-            duration: 4000,
-          });
-          return;
-        }
+    if (isNaN(parsedNewQty) || parsedNewQty < 1) {
+      showMessage({
+        message: 'Oops! Quantity must be at least 1',
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
 
-        if (parsedNewQty > parsedAvailableStock) {
-          showMessage({
-            message: `Only ${parsedAvailableStock} items available`,
-            type: 'danger',
-            duration: 4000,
-          });
-          return;
-        }
+    if (parsedNewQty > parsedAvailableStock) {
+      showMessage({
+        message: `Only ${parsedAvailableStock} items available`,
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
 
-        const payload = {
-          product: productId,
-          qty: parsedNewQty,
-          selectedPrice: item.selectedPrice,
-          isDigital: item.isDigital || false,
-          variantId: item.variantId || null,
-          variantDetails: item.variantDetails || null,
-        };
-        
-        onQuantityChange(item._id || item.id, payload);
-        setLocalLoading(false);
-      }, 300),
-      [availableStock, productId, item, onQuantityChange]
-    );
+    const payload = {
+      product: productId,
+      qty: parsedNewQty,
+      selectedPrice: item.selectedPrice,
+      isDigital: item.isDigital || false,
+      variantId: item.variantId || null,
+      variantDetails: item.variantDetails || null,
+    };
 
-    const handleQtyChange = useCallback(
-      (newQty) => {
-        const direction = newQty > item.qty ? 'increment' : 'decrement';
-        setQtyChangeDirection(direction);
-        setLocalLoading(true);
-        debouncedQtyChange(newQty);
-      },
-      [item.qty, debouncedQtyChange]
-    );
+    try {
+      setActiveButton(type);
+      await onQuantityChange(item._id || item.id, payload);
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+    } finally {
+      setActiveButton(null);
+    }
+  },
+  [availableStock, productId, item, onQuantityChange]
+);
+
 
     const getDisplayPrice = useCallback(() => {
       if (!product) return item.selectedPrice;
@@ -288,7 +284,7 @@ const CartCard = React.memo(
       ? Math.round(((product.mrp - price) / product.mrp) * 100)
       : 0;
 
-    const memoizedCardContent = useMemo(() => (
+    return (
       <Animated.View
         style={[
           styles.card,
@@ -341,6 +337,7 @@ const CartCard = React.memo(
             {stripHtml(product?.description || '')}
           </Text>
 
+          {/* Out of stock badge */}
           {isOutOfStock && (
             <View style={styles.outOfStockBadge}>
               <Text style={styles.outOfStockText}>Out of Stock</Text>
@@ -362,37 +359,43 @@ const CartCard = React.memo(
             )}
 
             <View style={styles.stepperContainer}>
-              <TouchableOpacity
-                onPress={() => handleQtyChange(item.qty - 1)}
-                style={[
-                  styles.stepperButton,
-                  (item.qty <= 1 || isLoading || localLoading) && styles.stepperButtonDisabled
-                ]}
-                disabled={item.qty <= 1 || isLoading || localLoading}
-              >
-                {localLoading && qtyChangeDirection === 'decrement' ? (
-                  <ActivityIndicator size="small" color={COLORS.green} />
-                ) : (
-                  <Text style={styles.stepperText}>−</Text>
-                )}
-              </TouchableOpacity>
+            <TouchableOpacity
+  onPress={() => handleQtyChange(item.qty - 1, 'decrement')}
+  style={[
+    styles.stepperButton,
+    (item.qty <= 1 || activeButton !== null) && styles.stepperButtonDisabled,
+  ]}
+  disabled={item.qty <= 1 || activeButton !== null}
+>
+  <View style={{ width: 20, alignItems: 'center' }}>
+    {activeButton === 'decrement' ? (
+      <ActivityIndicator size="small" color={COLORS.green} />
+    ) : (
+      <Text style={styles.stepperText}>−</Text>
+    )}
+  </View>
+</TouchableOpacity>
 
-              <Text style={styles.qtyText}>{item.qty}</Text>
+<Text style={styles.qtyText}>{item.qty}</Text>
 
-              <TouchableOpacity
-                onPress={() => handleQtyChange(item.qty + 1)}
-                style={[
-                  styles.stepperButton,
-                  (isLoading || localLoading || item.qty >= availableStock) && styles.stepperButtonDisabled
-                ]}
-                disabled={isLoading || localLoading || item.qty >= availableStock}
-              >
-                {localLoading && qtyChangeDirection === 'increment' ? (
-                  <ActivityIndicator size="small" color={COLORS.green} />
-                ) : (
-                  <Text style={styles.stepperText}>+</Text>
-                )}
-              </TouchableOpacity>
+<TouchableOpacity
+  onPress={() => handleQtyChange(item.qty + 1, 'increment')}
+  style={[
+    styles.stepperButton,
+    (item.qty >= availableStock || activeButton !== null) && styles.stepperButtonDisabled,
+  ]}
+  disabled={item.qty >= availableStock || activeButton !== null}
+>
+  <View style={{ width: 20, alignItems: 'center' }}>
+    {activeButton === 'increment' ? (
+      <ActivityIndicator size="small" color={COLORS.green} />
+    ) : (
+      <Text style={styles.stepperText}>+</Text>
+    )}
+  </View>
+</TouchableOpacity>
+
+
             </View>
           </View>
 
@@ -409,6 +412,7 @@ const CartCard = React.memo(
             )}
           </View>
           
+          {/* Stock message */}
           {!isOutOfStock && availableStock > 0 && (
             <Text style={[
               styles.stockMessage,
@@ -459,24 +463,6 @@ const CartCard = React.memo(
           </View>
         </View>
       </Animated.View>
-    ), [
-      item, isSelected, isLoading, isDeleteLoading, product, matchedVariant,
-      availableStock, isOutOfStock, discount, localLoading, qtyChangeDirection,
-      scaleAnim, handlePressIn, handlePressOut, onSelect, handleQtyChange,
-      handleRemove, getDisplayPrice
-    ]);
-
-    return memoizedCardContent;
-  },
-  (prevProps, nextProps) => {
-    // Only re-render if these specific props change
-    return (
-      prevProps.item.qty === nextProps.item.qty &&
-      prevProps.isSelected === nextProps.isSelected &&
-      prevProps.isLoading === nextProps.isLoading &&
-      prevProps.isDeleteLoading === nextProps.isDeleteLoading &&
-      prevProps.item.variantId === nextProps.item.variantId &&
-      prevProps.item.selectedPrice === nextProps.item.selectedPrice
     );
   }
 );
@@ -486,7 +472,6 @@ const CustomCartCard = () => {
   const { items, loading, error } = useSelector((state) => state.cart);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const [updatingItems, setUpdatingItems] = useState({});
   const [deletingItemId, setDeletingItemId] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
@@ -510,10 +495,12 @@ const CustomCartCard = () => {
 
   const handleSelectAll = useCallback(() => {
     if (isAllSelected) {
+      // Deselect all
       setSelectedItems([]);
       setIsAllSelected(false);
       setShowConfirmation(false); 
     } else {
+      // Select all
       const allItemIds = items.map((item) => item._id || item.id);
       setSelectedItems(allItemIds);
       setIsAllSelected(true);
@@ -525,24 +512,17 @@ const CustomCartCard = () => {
       handleDeleteSelected();
     }
     setShowConfirmation(false);
-  }, [selectedItems.length]);
+  }, [selectedItems]);
 
   const handleDeleteSelected = useCallback(async () => {
     if (selectedItems.length === 0) return;
 
     try {
-      const updates = {};
-      selectedItems.forEach((id) => (updates[id] = true));
-      setUpdatingItems(updates);
-
       await dispatch(removeMultipleGuestCartItems(selectedItems)).unwrap();
-
       setSelectedItems([]);
       setIsAllSelected(false);
     } catch (error) {
       console.error('Failed to remove items:', error);
-    } finally {
-      setUpdatingItems({});
     }
   }, [selectedItems, dispatch]);
 
@@ -553,40 +533,22 @@ const CustomCartCard = () => {
   }, [selectedItems.length]);
 
   const handleQuantityChange = useCallback(
-    async (itemId, newQty) => {
-      if (updatingItems[itemId]) return;
-
+    async (itemId, payload) => {
       try {
-        setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
-        
-        const item = items.find(item => item._id === itemId || item.id === itemId);
-        if (!item) return;
-
-        const quantity = typeof newQty === 'object' ? newQty.qty : parseInt(newQty);
-        
-        if (isNaN(quantity)) return;
-        if (quantity === item.qty) return;
-
         await dispatch(updateCartItem({ 
           itemId, 
-          payload: { qty: quantity }
+          payload 
         })).unwrap();
-        
       } catch (error) {
         console.error('Failed to update quantity:', error);
         showMessage({
           type: 'danger',
           message: error.message || 'Failed to update quantity',
         });
-      } finally {
-        setUpdatingItems(prev => {
-          const newState = { ...prev };
-          delete newState[itemId];
-          return newState;
-        });
+        throw error; // Re-throw to let the CartCard handle it
       }
     },
-    [dispatch, items, updatingItems]
+    [dispatch]
   );
 
   const handleSizeChange = (itemId, newSize) => {
@@ -596,7 +558,6 @@ const CustomCartCard = () => {
   const handleRemoveItem = useCallback(
     async (itemId) => {
       setDeletingItemId(itemId);
-      setUpdatingItems((prev) => ({ ...prev, [itemId]: true }));
       try {
         await dispatch(removeCartItem(itemId)).unwrap();
         setSelectedItems((prev) => prev.filter((id) => id !== itemId));
@@ -604,11 +565,6 @@ const CustomCartCard = () => {
         console.error('Failed to remove item:', error);
       } finally {
         setDeletingItemId(null);
-        setUpdatingItems((prev) => {
-          const newState = { ...prev };
-          delete newState[itemId];
-          return newState;
-        });
       }
     },
     [dispatch]
@@ -630,7 +586,7 @@ const CustomCartCard = () => {
     }
   }, [showConfirmation, slideAnim]);
 
-  if (loading) {
+  if (loading && items.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.green} />
@@ -687,17 +643,11 @@ const CustomCartCard = () => {
           disabled={selectedCount === 0}
           activeOpacity={0.6}
         >
-          {selectedItems.some((id) => updatingItems[id]) ? (
-            <ActivityIndicator size="small" color="#FF3B30" />
-          ) : (
-            <>
-              <Icon
-                name="delete"
-                size={16}
-                color={selectedCount > 0 ? '#FF3B30' : '#999'}
-              />
-            </>
-          )}
+          <Icon
+            name="delete"
+            size={16}
+            color={selectedCount > 0 ? '#FF3B30' : '#999'}
+          />
         </TouchableOpacity>
       </View>
 
@@ -712,7 +662,6 @@ const CustomCartCard = () => {
             onQuantityChange={handleQuantityChange}
             onSizeChange={handleSizeChange}
             onRemoveItem={handleRemoveItem}
-            isLoading={updatingItems[item._id || item.id]}
             isDeleteLoading={deletingItemId === (item._id || item.id)} 
           />
         )}
@@ -723,11 +672,6 @@ const CustomCartCard = () => {
             <Text style={styles.emptyCartText}>Your cart is empty</Text>
           </View>
         }
-        initialNumToRender={5}
-        maxToRenderPerBatch={5}
-        windowSize={10}
-        updateCellsBatchingPeriod={50}
-        removeClippedSubviews={true}
       />
 
       <DeleteConfirmationModal

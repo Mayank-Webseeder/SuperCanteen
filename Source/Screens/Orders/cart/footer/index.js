@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import { calculateFinalAmount } from '../../../../utils/helper'
 
-const Footer = ({ navigation, agreeTerms }) => {
+const Footer = ({ navigation }) => {
   const { items: cartItems } = useSelector(state => state.cart);
  const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
@@ -14,12 +14,7 @@ const Footer = ({ navigation, agreeTerms }) => {
 
 
   const itemCount = cartItems.reduce((count, item) => count + (item.qty || 1), 0);
-
-
   const  handleCheckout = () => {
-    if (!agreeTerms) {
-      return;
-    }
     if (cartItems.length === 0) {
       return;
     }
@@ -45,9 +40,9 @@ const Footer = ({ navigation, agreeTerms }) => {
         </View>
       </View>
       <TouchableOpacity
-        style={[styles.checkoutButton, (!agreeTerms || cartItems.length === 0) && styles.disabledButton]}
+        style={[styles.checkoutButton, (cartItems.length === 0) && styles.disabledButton]}
         onPress={handleCheckout}
-        disabled={!agreeTerms || cartItems.length === 0}
+        disabled={cartItems.length === 0}
       >
         <Text style={styles.checkoutText}>
           {cartItems.length > 0 ? 'Proceed to Checkout' : 'Cart Empty'}
