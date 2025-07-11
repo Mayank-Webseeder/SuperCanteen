@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getData, postData, putData } from '../../utils/apiClient';
-import { GET_NOTIFICATIONS , UNREAD_COUNT , MARK_AS_READ,MARK_ALL_READ } from '../../api';
+import { GET_NOTIFICATIONS , UNREAD_COUNT , MARK_AS_READ,MARK_ALL_READ,SAVE_FCM_TOKEN } from '../../api';
 
 // Async Thunks
 export const fetchNotifications = createAsyncThunk(
@@ -20,7 +20,7 @@ export const fetchUnreadCount = createAsyncThunk(
   async (userId, thunkAPI) => {
     try {
       const data = await getData(`${UNREAD_COUNT}/${userId}`);
-     
+      console.log("DATA IS",data)
       return data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -44,21 +44,52 @@ export const markAllNotificationsAsRead = createAsyncThunk(
   'notification/markAllAsRead',
   async (userId, thunkAPI) => {
     try {
-      await postData(`${MARK_ALL_READ}/${userId}`);
+   await postData(MARK_ALL_READ, { userId });
+     
       return userId;
     } catch (error) {
+      console.log("error is",error)
       return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
+export const saveFcmTokenToServer = createAsyncThunk(
+  'notification/saveFcmTokenToServer',
+  async (token, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+
+      const response = await postData(
+        `${SAVE_FCM_TOKEN}`,
+        { token },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.token}`,
+          },
+        }
+      );
+
+      console.log('✅ FCM token successfully saved:', response.message);
+      return token;
+    } catch (error) {
+      console.error('❌ FCM Token Save Failed:', error.message);
+      if (error?.response) {
+        console.error('➡️ Backend Response:', error.response.data);
+      }
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
 const initialState = {
-  fcmToken: null, // Added FCM token support
+  fcmToken: null,
   notifications: [],
   unreadCount: 0,
   loading: false,
   error: null,
-  socketConnected: false
+  socketConnected: false,
 };
 
 const notificationSlice = createSlice({
@@ -113,7 +144,15 @@ const notificationSlice = createSlice({
       // Unread Count
       .addCase(fetchUnreadCount.fulfilled, (state, action) => {
         state.unreadCount = action.payload;
+        console.log("fetchUnreadCount",action.payload)
       })
+
+        .addCase(fetchUnreadCount.rejected, (state, action) => {
+         state.loading = false;
+        state.error = action.payload;
+        console.log("fetchUnreadCount Rejected",action.payload)
+      })
+      
       
       // Mark as Read
       .addCase(markNotificationAsRead.fulfilled, (state, action) => {
@@ -127,15 +166,22 @@ const notificationSlice = createSlice({
       })
       
       // Mark All as Read
-      .addCase(markAllNotificationsAsRead.fulfilled, (state) => {
+      .addCase(markAllNotificationsAsRead.fulfilled, (state,action) => {
         state.notifications.forEach(n => n.read = true);
         state.unreadCount = 0;
-      });
+        console.log("ddddddddddddddddddd",action.payload)
+      })
+
+      .addCase(saveFcmTokenToServer.fulfilled, (state,action) => {
+        state.fcmToken = action.payload;
+      })
+        .addCase(saveFcmTokenToServer.rejected, (state, action) => {
+      })
+
   }
 });
 
 export const {  
-  saveFCMToken,
   addNotification,
   markAsRead,
   markAllAsRead,

@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, FlatList, ActivityIndicator, RefreshControl} from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomBtn from '../../../Components/CustomFilterBtn';
 import {useNavigation} from '@react-navigation/native';
@@ -45,54 +45,49 @@ const Orders = () => {
   const { orders: reduxOrders, loading, pagination, cancelLoading } = useSelector(state => state.orders);
   const { user } = useSelector(state => state.auth);
 
-  // Initialize with Redux orders
   useEffect(() => {
-    console.log("REDUX ORDERS IS",reduxOrders)
+  if (reduxOrders.length > 0) {
     setLocalOrders(reduxOrders);
-  }, [reduxOrders]);
+  }
+}, [reduxOrders]);
 
-  // Socket implementation for real-time updates
-  useEffect(() => {
-    const socket = initSocket();
-
-    const handleOrderUpdate = (updatedOrder) => {
-      if (!updatedOrder?._id) {
-        console.error("Invalid order update received", updatedOrder);
-        return;
-      }
-
-      console.log("Received order update:", updatedOrder);
-
-      setLocalOrders(prevOrders => {
-        // Check if order exists
-        const orderIndex = prevOrders.findIndex(
-          order => String(order._id) === String(updatedOrder._id)
-        );
-
-        // If new order, add it
-        if (orderIndex === -1) {
-          return [...prevOrders, updatedOrder];
-        }
-
-        // If existing order, update it
-        return prevOrders.map(order => 
-          String(order._id) === String(updatedOrder._id) 
-            ? { ...order, ...updatedOrder, updatedAt: new Date().toISOString() }
-            : order
-        );
-      });
-    };
-
-    socket.on("orderUpdated", handleOrderUpdate);
-    socket.on("connect", () => console.log("Socket connected:", socket.id));
-    socket.on("disconnect", (reason) => console.log("Socket disconnected:", reason));
-
-    return () => {
-      socket.off("orderUpdated", handleOrderUpdate);
-      socket.off("connect");
-      socket.off("disconnect");
-    };
+ useEffect(() => {
+    loadOrders(1);
   }, []);
+
+  useEffect(() => {
+  console.log("🔍 User ID for socket:", user?.id);
+  initSocket(); // Just ensure socket connects
+}, []);
+
+
+useEffect(() => {
+  if (!user?.id) return;
+
+  const socket = initSocket();
+
+  const handleOrderUpdate = (updatedOrder) => {
+    console.log("📦 Order Updated via Socket:", updatedOrder);
+    if (!updatedOrder?._id) return;
+
+    setLocalOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order._id === updatedOrder._id ? updatedOrder : order
+      )
+    );
+  };
+
+  socket.on("orderUpdated", handleOrderUpdate);
+
+  return () => {
+    console.log("🧹 Cleaning up socket");
+    socket.off("orderUpdated", handleOrderUpdate);
+    socket.disconnect();
+  };
+}, [user?.id]);
+
+
+
 
   const getApiStatusParams = () => {
     if (selectedStatuses.length === 0 || selectedStatuses.includes('All Orders')) {
@@ -102,6 +97,9 @@ const Orders = () => {
       STATUS_CONFIG[status] || [status.toLowerCase()]
     );
   };
+
+
+ 
 
   const loadOrders = useCallback(async (page = 1, refresh = false) => {
     try {
@@ -128,9 +126,7 @@ const Orders = () => {
     }
   };
 
-  useEffect(() => {
-    loadOrders(1);
-  }, [loadOrders]);
+ 
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -239,6 +235,7 @@ const Orders = () => {
     }
   };
 
+
   const renderItem = ({ item }) => (
     <OrderListItem 
       order={item}
@@ -257,7 +254,8 @@ const Orders = () => {
       <View style={styles.headerStyle}>
         <CustomCommonHeader notShowingBackIcon navigation={navigation} title={'Your Orders'} />
       </View>
-     
+
+
       <View style={{marginHorizontal: 16}}>
         <CustomSearch
           value={searchQuery}
@@ -335,7 +333,7 @@ const Orders = () => {
         }}
         onCancelOrder={handleCancelOrder}
         isLoading={cancelLoading}
-      />
+      /> 
     </View>
   );
 };

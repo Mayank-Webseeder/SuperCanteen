@@ -29,6 +29,7 @@ import { fetchCartProductById } from '../../redux/slices/cartProductsSlice';
 import { styles } from './styles';
 import DeleteConfirmationModal from '../../otherComponents/deleteConfirmationModal';
 import { showMessage } from 'react-native-flash-message';
+import debounce from 'lodash.debounce';
 
 const CustomDropdown = React.memo(
   ({
@@ -144,10 +145,10 @@ const CartCard = React.memo(
     isLoading,
     isDeleteLoading,
   }) => {
-
-
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
+    const [localLoading, setLocalLoading] = useState(false);
+    const [qtyChangeDirection, setQtyChangeDirection] = useState(null);
 
     const productId = item.product?._id ? item.product._id : item.product;
     const { products, loading, errors } = useSelector(
@@ -156,21 +157,20 @@ const CartCard = React.memo(
     const product = products[productId];
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
-     const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
-const availableStock = useMemo(() => {
-  if (!product) return 0;
-  
-  // Check variant stock first
-  if (item.variantId && product?.variants) {
-    const variant = product.variants.find(v => v._id === item.variantId);
-    if (variant) return variant.countInStock || 0;
-  }
-  
-  // Fall back to product stock
-  return product.countInStock || 0;
-}, [product, item.variantId]);
+    const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
 
-  const isOutOfStock = product?.outOfStock || availableStock <= 0;
+    const availableStock = useMemo(() => {
+      if (!product) return 0;
+      
+      if (item.variantId && product?.variants) {
+        const variant = product.variants.find(v => v._id === item.variantId);
+        if (variant) return variant.countInStock || 0;
+      }
+      
+      return product.countInStock || 0;
+    }, [product, item.variantId]);
+
+    const isOutOfStock = product?.outOfStock || availableStock <= 0;
 
     useEffect(() => {
       if (productId && !product && !isLoadingProduct && !errorProduct) {
@@ -194,52 +194,54 @@ const availableStock = useMemo(() => {
       }).start();
     }, [scaleAnim]);
     
+    const debouncedQtyChange = useMemo(
+      () => debounce((newQty) => {
+        const parsedNewQty = parseInt(newQty);
+        const parsedAvailableStock = parseInt(availableStock);
 
-const handleQtyChange = useCallback(
-  (newQty) => {
-    const parsedNewQty = parseInt(newQty);
-    const parsedAvailableStock = parseInt(availableStock);
+        if (isNaN(parsedNewQty) || parsedNewQty < 1) {
+          showMessage({
+            message: 'Oops! Quantity must be at least 1',
+            type: 'danger',
+            duration: 4000,
+          });
+          return;
+        }
 
-    console.log("Quantity Change Debug:", {
-      newQty,
-      parsedNewQty,
-      availableStock,
-      parsedAvailableStock,
-      product: product,
-      variant: matchedVariant
-    });
+        if (parsedNewQty > parsedAvailableStock) {
+          showMessage({
+            message: `Only ${parsedAvailableStock} items available`,
+            type: 'danger',
+            duration: 4000,
+          });
+          return;
+        }
 
-    if (isNaN(parsedNewQty) || parsedNewQty < 1) {
-      showMessage({
-        message: 'Oops! Quantity must be at least 1',
-        type: 'danger',
-        duration: 4000,
-      });
-      return;
-    }
+        const payload = {
+          product: productId,
+          qty: parsedNewQty,
+          selectedPrice: item.selectedPrice,
+          isDigital: item.isDigital || false,
+          variantId: item.variantId || null,
+          variantDetails: item.variantDetails || null,
+        };
+        
+        onQuantityChange(item._id || item.id, payload);
+        setLocalLoading(false);
+      }, 300),
+      [availableStock, productId, item, onQuantityChange]
+    );
 
-    if (parsedNewQty > parsedAvailableStock) {
-      showMessage({
-        message: `Only ${parsedAvailableStock} items available`,
-        type: 'danger',
-        duration: 4000,
-      });
-      return;
-    }
+    const handleQtyChange = useCallback(
+      (newQty) => {
+        const direction = newQty > item.qty ? 'increment' : 'decrement';
+        setQtyChangeDirection(direction);
+        setLocalLoading(true);
+        debouncedQtyChange(newQty);
+      },
+      [item.qty, debouncedQtyChange]
+    );
 
-    const payload = {
-      product: productId,
-      qty: parsedNewQty,
-      selectedPrice: item.selectedPrice,
-      isDigital: item.isDigital || false,
-      variantId: item.variantId || null,
-      variantDetails: item.variantDetails || null,
-    };
-    
-    onQuantityChange(item._id || item.id, payload);
-  },
-  [availableStock, productId, item, onQuantityChange, product]
-);
     const getDisplayPrice = useCallback(() => {
       if (!product) return item.selectedPrice;
 
@@ -286,7 +288,7 @@ const handleQtyChange = useCallback(
       ? Math.round(((product.mrp - price) / product.mrp) * 100)
       : 0;
 
-    return (
+    const memoizedCardContent = useMemo(() => (
       <Animated.View
         style={[
           styles.card,
@@ -312,22 +314,20 @@ const handleQtyChange = useCallback(
           </View>
         </TouchableOpacity>
 
-  
-
-<FastImage
-  source={{
-    uri: `${IMGURL}${
-      matchedVariant?.images?.[0]?.url ||
-      matchedVariant?.images?.[0] ||
-      product?.images?.[0]?.url ||
-      product?.images?.[0] ||
-      ''
-    }`,
-    priority: FastImage.priority.normal,
-  }}
-  style={styles.image}
-  resizeMode="contain"
-/>
+        <FastImage
+          source={{
+            uri: `${IMGURL}${
+              matchedVariant?.images?.[0]?.url ||
+              matchedVariant?.images?.[0] ||
+              product?.images?.[0]?.url ||
+              product?.images?.[0] ||
+              ''
+            }`,
+            priority: FastImage.priority.normal,
+          }}
+          style={styles.image}
+          resizeMode="contain"
+        />
 
         <View style={styles.details}>
           <View style={styles.titleRow}>
@@ -341,17 +341,17 @@ const handleQtyChange = useCallback(
             {stripHtml(product?.description || '')}
           </Text>
 
- {/* Out of stock badge */}
-      {isOutOfStock && (
-        <View style={styles.outOfStockBadge}>
-          <Text style={styles.outOfStockText}>Out of Stock</Text>
-        </View>
-      )}
+          {isOutOfStock && (
+            <View style={styles.outOfStockBadge}>
+              <Text style={styles.outOfStockText}>Out of Stock</Text>
+            </View>
+          )}
+          
           {product?.mrp && (
             <View style={styles.priceInfo}>
               <Text style={styles.originalPrice}>
-         ₹{matchedVariant ? (matchedVariant?.additionalPrice + product.mrp) : product.mrp}
-        </Text>
+                ₹{matchedVariant ? (matchedVariant?.additionalPrice + product.mrp) : product.mrp}
+              </Text>
               <Text style={styles.discount}>{discount}% off</Text>
             </View>
           )}
@@ -361,56 +361,65 @@ const handleQtyChange = useCallback(
               <Text style={styles.dropdownTextSmall}>{item.variant.name}</Text>
             )}
 
-          <View style={styles.stepperContainer}>
- <TouchableOpacity
-  onPress={() => handleQtyChange(item.qty - 1)}
-  
+            <View style={styles.stepperContainer}>
+              <TouchableOpacity
+                onPress={() => handleQtyChange(item.qty - 1)}
+                style={[
+                  styles.stepperButton,
+                  (item.qty <= 1 || isLoading || localLoading) && styles.stepperButtonDisabled
+                ]}
+                disabled={item.qty <= 1 || isLoading || localLoading}
+              >
+                {localLoading && qtyChangeDirection === 'decrement' ? (
+                  <ActivityIndicator size="small" color={COLORS.green} />
+                ) : (
+                  <Text style={styles.stepperText}>−</Text>
+                )}
+              </TouchableOpacity>
 
-    style={[
-      styles.stepperButton,
-      (item.qty <= 1 || isLoading) && styles.stepperButtonDisabled
-    ]}
-  >
-    <Text style={styles.stepperText}>−</Text>
-  </TouchableOpacity>
+              <Text style={styles.qtyText}>{item.qty}</Text>
 
-  <Text style={styles.qtyText}>{item.qty}</Text>
-
-  <TouchableOpacity
-    onPress={() => handleQtyChange(item.qty + 1)}
-    style={[
-      styles.stepperButton,
-      (isLoading || item.qty >= availableStock) && styles.stepperButtonDisabled
-    ]}
-  >
-    <Text style={styles.stepperText}>+</Text>
-  </TouchableOpacity>
-</View>
+              <TouchableOpacity
+                onPress={() => handleQtyChange(item.qty + 1)}
+                style={[
+                  styles.stepperButton,
+                  (isLoading || localLoading || item.qty >= availableStock) && styles.stepperButtonDisabled
+                ]}
+                disabled={isLoading || localLoading || item.qty >= availableStock}
+              >
+                {localLoading && qtyChangeDirection === 'increment' ? (
+                  <ActivityIndicator size="small" color={COLORS.green} />
+                ) : (
+                  <Text style={styles.stepperText}>+</Text>
+                )}
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.variantContainer}>
-  {item?.variantDetails?.size && (
-    <View style={styles.variantPill}>
-      <Text style={styles.variantPillText}>Size: {item.variantDetails.size}</Text>
-    </View>
-  )}
-  {item?.variantDetails?.color?.name && (
-    <View style={[styles.variantPill, { backgroundColor: '#f0f0f0' }]}>
-      <Text style={styles.variantPillText}>Color: {item.variantDetails.color.name}</Text>
-    </View>
-  )}
-</View>
-             {/* Stock message */}
-      {!isOutOfStock && availableStock > 0 && (
-        <Text style={[
-          styles.stockMessage,
-          availableStock < 5 && styles.lowStockMessage
-        ]}>
-          {availableStock < 5 
-            ? `Only ${availableStock} left!` 
-            : `${availableStock} available`}
-        </Text>
-      )}
+            {item?.variantDetails?.size && (
+              <View style={styles.variantPill}>
+                <Text style={styles.variantPillText}>Size: {item.variantDetails.size}</Text>
+              </View>
+            )}
+            {item?.variantDetails?.color?.name && (
+              <View style={[styles.variantPill, { backgroundColor: '#f0f0f0' }]}>
+                <Text style={styles.variantPillText}>Color: {item.variantDetails.color.name}</Text>
+              </View>
+            )}
+          </View>
+          
+          {!isOutOfStock && availableStock > 0 && (
+            <Text style={[
+              styles.stockMessage,
+              availableStock < 5 && styles.lowStockMessage
+            ]}>
+              {availableStock < 5 
+                ? `Only ${availableStock} left!` 
+                : `${availableStock} available`}
+            </Text>
+          )}
+          
           <View style={styles.deliveryInfo}>
             <Feather name="truck" size={14} color="#416E81" />
             <Text style={styles.deliveryText}>
@@ -424,6 +433,7 @@ const handleQtyChange = useCallback(
             <Entypo name="cycle" size={14} color="#416E81" />
             <Text style={styles.returnPolicy}>7 days return policy</Text>
           </View>
+          
           <View
             style={{
               flexDirection: 'row',
@@ -449,6 +459,24 @@ const handleQtyChange = useCallback(
           </View>
         </View>
       </Animated.View>
+    ), [
+      item, isSelected, isLoading, isDeleteLoading, product, matchedVariant,
+      availableStock, isOutOfStock, discount, localLoading, qtyChangeDirection,
+      scaleAnim, handlePressIn, handlePressOut, onSelect, handleQtyChange,
+      handleRemove, getDisplayPrice
+    ]);
+
+    return memoizedCardContent;
+  },
+  (prevProps, nextProps) => {
+    // Only re-render if these specific props change
+    return (
+      prevProps.item.qty === nextProps.item.qty &&
+      prevProps.isSelected === nextProps.isSelected &&
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.isDeleteLoading === nextProps.isDeleteLoading &&
+      prevProps.item.variantId === nextProps.item.variantId &&
+      prevProps.item.selectedPrice === nextProps.item.selectedPrice
     );
   }
 );
@@ -459,9 +487,10 @@ const CustomCartCard = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [updatingItems, setUpdatingItems] = useState({});
- const [deletingItemId, setDeletingItemId] = useState(null);
- const [showConfirmation, setShowConfirmation] = useState(false);
-const slideAnim = useRef(new Animated.Value(300)).current;
+  const [deletingItemId, setDeletingItemId] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
   useEffect(() => {
     dispatch(fetchCartItems());
   }, [dispatch]);
@@ -479,28 +508,24 @@ const slideAnim = useRef(new Animated.Value(300)).current;
     );
   }, []);
 
-const handleSelectAll = useCallback(() => {
-  if (isAllSelected) {
-    // Deselect all
-    setSelectedItems([]);
-    setIsAllSelected(false);
-     setShowConfirmation(false); 
-  } else {
-    // Select all
-    const allItemIds = items.map((item) => item._id || item.id);
-    setSelectedItems(allItemIds);
-    setIsAllSelected(true);
-  }
-}, [isAllSelected, items]);
+  const handleSelectAll = useCallback(() => {
+    if (isAllSelected) {
+      setSelectedItems([]);
+      setIsAllSelected(false);
+      setShowConfirmation(false); 
+    } else {
+      const allItemIds = items.map((item) => item._id || item.id);
+      setSelectedItems(allItemIds);
+      setIsAllSelected(true);
+    }
+  }, [isAllSelected, items]);
 
-
- const confirmAction = useCallback(() => {
-
-  if (selectedItems.length > 0) { // Check if items are selected
-    handleDeleteSelected();
-  }
-  setShowConfirmation(false);
-}, [handleDeleteSelected, selectedItems]);
+  const confirmAction = useCallback(() => {
+    if (selectedItems.length > 0) {
+      handleDeleteSelected();
+    }
+    setShowConfirmation(false);
+  }, [selectedItems.length]);
 
   const handleDeleteSelected = useCallback(async () => {
     if (selectedItems.length === 0) return;
@@ -521,57 +546,48 @@ const handleSelectAll = useCallback(() => {
     }
   }, [selectedItems, dispatch]);
 
- const showDeleteConfirmation = useCallback(() => {
-  if (selectedItems.length > 0) { // Only show if items are selected
-    setShowConfirmation(true);
-  }
-}, [selectedItems.length]);
-
-const handleQuantityChange = useCallback(
-  async (itemId, newQty) => {
-    try {
-      setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
-      
-      // Find the item in cart
-      const item = items.find(item => item._id === itemId || item.id === itemId);
-      if (!item) {
-        throw new Error('Item not found in cart');
-      }
-
-      // Ensure newQty is a number
-      const quantity = typeof newQty === 'object' ? newQty.qty : parseInt(newQty);
-      
-      // Validate quantity (basic validation only)
-      if (isNaN(quantity) || quantity < 1) {
-        throw new Error('Invalid quantity');
-      }
-
-      // Prepare payload - only send what your API needs
-      const payload = {
-        qty: quantity
-      };
-
-      await dispatch(updateCartItem({ 
-        itemId, 
-        payload 
-      })).unwrap();
-      
-    } catch (error) {
-      console.error('Failed to update quantity:', error);
-      showMessage({
-        type: 'danger',
-        message: error.message || 'Failed to update quantity',
-      });
-    } finally {
-      setUpdatingItems(prev => {
-        const newState = { ...prev };
-        delete newState[itemId];
-        return newState;
-      });
+  const showDeleteConfirmation = useCallback(() => {
+    if (selectedItems.length > 0) {
+      setShowConfirmation(true);
     }
-  },
-  [dispatch, items]
-);
+  }, [selectedItems.length]);
+
+  const handleQuantityChange = useCallback(
+    async (itemId, newQty) => {
+      if (updatingItems[itemId]) return;
+
+      try {
+        setUpdatingItems(prev => ({ ...prev, [itemId]: true }));
+        
+        const item = items.find(item => item._id === itemId || item.id === itemId);
+        if (!item) return;
+
+        const quantity = typeof newQty === 'object' ? newQty.qty : parseInt(newQty);
+        
+        if (isNaN(quantity)) return;
+        if (quantity === item.qty) return;
+
+        await dispatch(updateCartItem({ 
+          itemId, 
+          payload: { qty: quantity }
+        })).unwrap();
+        
+      } catch (error) {
+        console.error('Failed to update quantity:', error);
+        showMessage({
+          type: 'danger',
+          message: error.message || 'Failed to update quantity',
+        });
+      } finally {
+        setUpdatingItems(prev => {
+          const newState = { ...prev };
+          delete newState[itemId];
+          return newState;
+        });
+      }
+    },
+    [dispatch, items, updatingItems]
+  );
 
   const handleSizeChange = (itemId, newSize) => {
     console.log(`Size changed for ${itemId} to ${newSize}`);
@@ -579,7 +595,7 @@ const handleQuantityChange = useCallback(
 
   const handleRemoveItem = useCallback(
     async (itemId) => {
-     setDeletingItemId(itemId);
+      setDeletingItemId(itemId);
       setUpdatingItems((prev) => ({ ...prev, [itemId]: true }));
       try {
         await dispatch(removeCartItem(itemId)).unwrap();
@@ -587,7 +603,7 @@ const handleQuantityChange = useCallback(
       } catch (error) {
         console.error('Failed to remove item:', error);
       } finally {
-       setDeletingItemId(null);
+        setDeletingItemId(null);
         setUpdatingItems((prev) => {
           const newState = { ...prev };
           delete newState[itemId];
@@ -697,7 +713,7 @@ const handleQuantityChange = useCallback(
             onSizeChange={handleSizeChange}
             onRemoveItem={handleRemoveItem}
             isLoading={updatingItems[item._id || item.id]}
-          isDeleteLoading={deletingItemId === (item._id || item.id)} 
+            isDeleteLoading={deletingItemId === (item._id || item.id)} 
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -707,6 +723,11 @@ const handleQuantityChange = useCallback(
             <Text style={styles.emptyCartText}>Your cart is empty</Text>
           </View>
         }
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews={true}
       />
 
       <DeleteConfirmationModal

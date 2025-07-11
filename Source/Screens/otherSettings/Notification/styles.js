@@ -13,7 +13,9 @@ export const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.lightGray,
-    marginBottom:1
+    marginBottom:8,
+    
+
   },
   row: {
     flexDirection: 'row',
@@ -23,7 +25,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily:"Inter-SemiBold",
     color: COLORS.black,
-    marginLeft: 16,
+    marginLeft: 6,
   },
   markAllText: {
     color: COLORS.green,
@@ -46,6 +48,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 3,
     elevation: 2,
+
   },
   iconContainer: {
     width: 40,

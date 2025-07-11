@@ -19,6 +19,8 @@ import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import { mergeGuestCart } from '../../../redux/slices/cartSlice';
+import { getToken , getMessaging } from '@react-native-firebase/messaging';
+import { saveFcmTokenToServer } from '../../../redux/slices/notificationSlice';
 
 const SigninScreen = () => {
   const navigation = useNavigation();
@@ -87,12 +89,18 @@ const SigninScreen = () => {
     );
     
     if (loginUser.fulfilled.match(resultAction)) {
+        const fcmToken = await getToken(getMessaging());
+          if (fcmToken) {
+          await dispatch(saveFcmTokenToServer(fcmToken));  
+  }
 
-         try {
+    try {
       await dispatch(mergeGuestCart()).unwrap();
     } catch (error) {
       console.log('Cart merge failed (non-critical)', error);
     }
+
+    // console.log("RESULT ACTION IS",resultAction?.payload?.token)
 
        showMessage({
         message: 'Sign In Successful!',

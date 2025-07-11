@@ -14,7 +14,9 @@ import { setAuthInitialized } from './Source/redux/slices/authSlice';
 import { setSelectedAddress } from './Source/redux/slices/selectedAddressSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigationRef } from './Source/navigation/navigationService';
-import { requestNotificationPermission, setupNotificationHandlers } from './Source/services/notificationService';
+import { useNotificationPermission } from './Source/hook/useNotificationPermission'
+import { initializeNotifications } from './Source/services/notificationService';
+import { NotificationPermissionDialog } from './Source/otherComponents/notificationDialog';
 
 const AppWrapper = () => {
   return (
@@ -32,6 +34,14 @@ const App = () => {
   const dispatch = useDispatch();
   const { token, user } = useSelector(state => state.auth);
 
+  // Use the notification permission hook
+  const {
+    showPermissionDialog,
+    handleAllowNotifications,
+    handleDenyNotifications,
+    checkAndShowPermissionDialog
+  } = useNotificationPermission();
+
   const loadStoredAddress = async () => {
     try {
       const stored = await AsyncStorage.getItem('selectedAddress');
@@ -44,22 +54,20 @@ const App = () => {
   };
 
   useEffect(() => {
-    const initNotifications = async () => {
-      await requestNotificationPermission();
-      setupNotificationHandlers();          
-    };
-    initNotifications();
-  }, []);
-
-  useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Initialize notifications if permission exists
+        const hasPermission = await checkAndShowPermissionDialog();
+        if (hasPermission) {
+          await initializeNotifications();
+        }
+
+        // Initialize rest of app
         await Promise.all([
           token ? dispatch(fetchCartItems()) : loadGuestCart().then(cart => dispatch(setGuestCart(cart))),
           token && user?.id ? dispatch(fetchWishlistItems(user.id)) : Promise.resolve()
         ]);
 
-        // Load stored address AFTER cart and wishlist
         await loadStoredAddress();
       } catch (error) {
         console.error('Initialization error:', error);
@@ -76,6 +84,13 @@ const App = () => {
       <RootStack />
       <CustomFlashMessage />
       <Toast config={toastConfig} />
+      
+      {showPermissionDialog && (
+        <NotificationPermissionDialog
+          onAllow={handleAllowNotifications}
+          onDeny={handleDenyNotifications}
+        />
+      )}
     </NavigationContainer>
   );
 };
