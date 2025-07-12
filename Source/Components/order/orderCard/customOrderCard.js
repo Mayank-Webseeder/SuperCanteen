@@ -31,6 +31,8 @@ const OrderCard = ({
   const imageKey = `${cardKey}_image`;
   const starsKey = `${cardKey}_stars`;
 
+  
+
   // Enhanced status mapping
   const getUIStatus = () => {
     const statusMap = {
@@ -203,7 +205,7 @@ const OrderCard = ({
               borderWidth={1}
             />
           )}
-          {enableTrack && (
+          {/* {enableTrack && (
             <CustomAuthButton
               key={`${cardKey}_track`}
               width={65}
@@ -215,8 +217,8 @@ const OrderCard = ({
               borderColor="#2E607426"
               borderWidth={1}
             />
-          )}
-          {enableReplace && (
+          )} */}
+          {/* {enableReplace && (
             <CustomAuthButton
               key={`${cardKey}_replace`}
               width={65}
@@ -228,23 +230,40 @@ const OrderCard = ({
               borderColor="#2E607426"
               borderWidth={1}
             />
-          )}
+          )} */}
         </View>
       );
     }
     return null;
   };
 
+const getVariantImage = (orderItem) => {
+  const baseUrl = IMGURL;
+  const matchedVariant = orderItem?.product?.variants?.find(
+    variant => variant._id === orderItem?.variantId
+  );
+
+  if (matchedVariant?.images?.[0]) {
+    return `${baseUrl}${matchedVariant.images[0]}`;
+  }
+
+  const fallbackImage = orderItem?.product?.images?.[0] || orderItem?.image;
+  return fallbackImage?.startsWith('http') ? fallbackImage : `${baseUrl}${fallbackImage}`;
+};
+
+
+
   return (
     <View style={styles.card} key={cardKey}>
       <View style={styles.row}>
         <View style={styles.iconContainer}>
-          <FastImage
-            key={imageKey}
-            style={styles.icon}
-            source={{ uri: IMGURL + (item.image || '') }}
-            resizeMode="contain"
-          />
+       <FastImage
+  key={imageKey}
+  style={styles.icon}
+  source={{ uri: getVariantImage(item.orderItems[0]) }}
+  resizeMode="contain"
+/>
+        
         </View>
 
         <View style={styles.infoContainer}>

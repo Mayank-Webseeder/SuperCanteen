@@ -9,6 +9,7 @@ import {
 
 export const useNotificationPermission = () => {
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
+  const [notificationInitialized, setNotificationInitialized] = useState(false);
 
   const checkAndShowPermissionDialog = async () => {
     const hasPermission = await checkNotificationPermissions();
@@ -31,14 +32,17 @@ export const useNotificationPermission = () => {
       } else {
         setShowPermissionDialog(true);
       }
-    } else {
+    } else if (!notificationInitialized) {
       await initializeNotifications();
+      setNotificationInitialized(true);
     }
   };
 
   const handleAllowNotifications = async () => {
     await openSystemNotificationSettings();
     setShowPermissionDialog(false);
+    // Re-check permission after settings change
+    setTimeout(checkAndShowPermissionDialog, 1000);
   };
 
   const handleDenyNotifications = async () => {
@@ -50,20 +54,22 @@ export const useNotificationPermission = () => {
     setShowPermissionDialog(false);
   };
 
-
-
   // Handle app state changes to check permissions when app comes to foreground
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+    const handleAppStateChange = async (nextAppState) => {
       if (nextAppState === 'active') {
-        const hasPermission = await checkNotificationPermissions();
-        if (hasPermission) {
-          await initializeNotifications();
-        }
+        await checkAndShowPermissionDialog();
       }
-    });
+    };
 
-    return () => subscription.remove();
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    
+    // Initial check
+    checkAndShowPermissionDialog();
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   return {

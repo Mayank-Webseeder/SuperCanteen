@@ -1,0 +1,1 @@
+export const SOCKET_URL = "https://www.api-supercanteen.webseeder.tech";

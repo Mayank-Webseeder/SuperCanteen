@@ -4,7 +4,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSelector, useDispatch } from 'react-redux';
 import moment from 'moment';
 import { fetchNotifications, fetchUnreadCount, markNotificationAsRead, markAllNotificationsAsRead } from '../../../redux/slices/notificationSlice';
-import { initSocket, disconnectSocket } from '../../../services/SocketService';
 import { COLORS } from '@constants/index';
 import { styles } from './styles';
 
@@ -44,35 +43,35 @@ const NotificationScreen = ({ navigation }) => {
   };
 
   // Socket connection
-  useEffect(() => {
-    if (!user?.id) return;
+  // useEffect(() => {
+  //   if (!user?.id) return;
 
-    const socket = initSocket();
+  //   const socket = initSocket();
 
-    const handleNewNotification = (notification) => {
-      console.log({
-        message: notification.title,
-        description: notification.message,
-        type: 'info',
-        duration: 3000,
-        floating: true
-      });
-      loadNotifications(); // Refresh notifications
-    };
+  //   const handleNewNotification = (notification) => {
+  //     console.log({
+  //       message: notification.title,
+  //       description: notification.message,
+  //       type: 'info',
+  //       duration: 3000,
+  //       floating: true
+  //     });
+  //     loadNotifications(); // Refresh notifications
+  //   };
 
-    socket.on('connect', () => {
-      setSocketConnected(true);
-      socket.emit('joinNotifications', { userId: user.id });
-    });
+  //   socket.on('connect', () => {
+  //     setSocketConnected(true);
+  //     socket.emit('joinNotifications', { userId: user.id });
+  //   });
 
-    socket.on('newNotification', handleNewNotification);
-    socket.on('disconnect', () => setSocketConnected(false));
+  //   socket.on('newNotification', handleNewNotification);
+  //   socket.on('disconnect', () => setSocketConnected(false));
 
-    return () => {
-      socket.off('newNotification', handleNewNotification);
-      disconnectSocket();
-    };
-  }, [user?.id]);
+  //   return () => {
+  //     socket.off('newNotification', handleNewNotification);
+  //     disconnectSocket();
+  //   };
+  // }, [user?.id]);
 
   const handleMarkAsRead = async (notification) => {
     if (!notification.read) {

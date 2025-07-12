@@ -233,7 +233,7 @@ const OrderConfirmFinal = () => {
       <View style={styles.footer}>    
         <TouchableOpacity 
           style={styles.shopButton}
-          onPress={() => navigation.navigate('Main')}
+          onPress={() =>   navigation.navigate('Main', { screen: 'Orders' })}
         >
           <Text style={styles.shopButtonText}>CONTINUE SHOPPING</Text>
         </TouchableOpacity>

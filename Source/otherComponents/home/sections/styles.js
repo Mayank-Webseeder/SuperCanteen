@@ -501,11 +501,14 @@ categoryImage: {
   },
   title:{
     fontSize: 16, fontFamily:"Inter-SemiBold", marginHorizontal: 22, 
-    marginBottom:4
+    marginTop:13,
+    marginBottom:6
   },
   titleStyle:{
   marginBottom: 12,
- 
+  },
+  horiZontal:{
+  width: '100%', height: 1, backgroundColor: '#F3F4F5'
   },
   name:{
     fontSize: 13, marginBottom: 4,

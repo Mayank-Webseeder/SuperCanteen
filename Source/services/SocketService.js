@@ -1,57 +1,57 @@
 import { io } from "socket.io-client";
-import { store } from '../redux/store';
+import { SOCKET_URL } from "@constants/env";
 
-const SOCKET_URL = "https://www.api-supercanteen.webseeder.tech";
+let socketInstance = null;
 
-let socket = null;
 
-export const initSocket = () => {
-  if (!socket) {
-    const { user } = store.getState().auth;
-
-    socket = io(SOCKET_URL, {
-      transports: ["websocket"],
-      autoConnect: true,
-      reconnection: true,
-      query: {
-        userId: user?.id,
-      },
-      auth: {
-        token: user?.token,
-      }
-    });
-
-    socket.on("connect", () => {
-      console.log("✅ Connected to socket:", socket.id);
-      socket.emit("joinUserRoom", user?.id); // Emit after connect
-    });
-
-    socket.on("connect_error", (err) => {
-      console.log("❌ Socket connect error:", err.message);
-    });
-
-    socket.onAny((event, ...args) => {
-      console.log("📡 Socket Event =>", event, args);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("🔌 Disconnected from socket:", reason);
-    });
+export const initializeSocket = (userId) => {
+   if (socketInstance && socketInstance.connected) {
+    return socketInstance;
   }
 
-  return socket;
+  if (socketInstance) {
+    socketInstance.disconnect();
+  }
+
+  socketInstance = io(SOCKET_URL, {
+    auth: { userId },
+    transports: ["websocket"],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
+
+  socketInstance.on("connect", () => {
+    console.log("🟢 Socket connected:", socketInstance.id);
+  });
+
+  socketInstance.on("disconnect", () => {
+    console.log("🔴 Socket disconnected");
+  });
+
+  socketInstance.on("connect_error", (err) => {
+    console.log(`Connection error: ${err.message}`);
+  });
+
+  return socketInstance;
 };
 
+export const isSocketConnected = () => socketInstance && socketInstance.connected;
+
 export const getSocket = () => {
-  if (!socket) throw new Error("Socket not initialized");
-  return socket;
+  if (!socketInstance) throw new Error("Socket not initialized");
+  return socketInstance;
 };
 
 export const disconnectSocket = () => {
-  if (socket) {
-    console.log("🧹 Disconnecting socket");
-    socket.removeAllListeners();
-    socket.disconnect();
-    socket = null;
+  if (socketInstance) {
+    socketInstance.disconnect();
+    socketInstance = null;
+    console.log("🛑 Socket manually disconnected");
   }
+};
+
+export const getActiveSocket = () => {
+  if (!socketInstance) throw new Error("Socket not initialized");
+  return socketInstance;
 };

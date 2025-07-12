@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
-    fontSize: FontSize(20),
+    fontSize: FontSize(18),
     fontFamily:'Inter-SemiBold',
     color: COLORS.modalTitle,
   },

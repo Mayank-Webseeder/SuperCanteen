@@ -1,4 +1,3 @@
-// Modular Firebase Messaging
 import {
   getMessaging,
   getToken,
@@ -6,22 +5,31 @@ import {
   setBackgroundMessageHandler,
 } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
-
 import notifee, {
   AndroidImportance,
   AndroidVisibility,
   AuthorizationStatus,
 } from '@notifee/react-native';
-
 import { Platform, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LOG_TAG = '[NotificationService]';
 const DEBUG = true;
 
-const messaging = getMessaging(getApp()); // ✅ Correct modular setup
+const messaging = getMessaging(getApp());
+
+// Track initialization state
+let notificationChannelInitialized = false;
+let notificationHandlersInitialized = false;
+const activeNotifications = new Set();
 
 // 1. Create Notification Channel (Android)
 export const initializeNotificationChannel = async () => {
+  if (notificationChannelInitialized) {
+    DEBUG && console.log(`${LOG_TAG} Channel already initialized`);
+    return;
+  }
+
   try {
     DEBUG && console.log(`${LOG_TAG} Creating notification channel`);
     await notifee.createChannel({
@@ -38,6 +46,7 @@ export const initializeNotificationChannel = async () => {
       showBadge: true,
       description: 'Special offers and order updates',
     });
+    notificationChannelInitialized = true;
     DEBUG && console.log(`${LOG_TAG} Channel created successfully`);
   } catch (e) {
     console.error(`${LOG_TAG} Channel creation failed`, e);
@@ -63,12 +72,24 @@ export const checkNotificationPermissions = async () => {
   }
 };
 
-// 3. Display Notification
+// 3. Display Notification (with enhanced duplicate prevention)
 export const displayNotification = async (notification, data) => {
   try {
+    const notificationId = data?.messageId || `notif_${Date.now()}`;
+    const notificationKey = `${notification.title}_${notification.body}`;
+    
+    // Skip if this notification is already active
+    if (activeNotifications.has(notificationKey)) {
+      DEBUG && console.log(`${LOG_TAG} Skipping duplicate notification`);
+      return;
+    }
+
+    activeNotifications.add(notificationKey);
+    
     DEBUG && console.log(`${LOG_TAG} Displaying notification`, notification);
+    
     await notifee.displayNotification({
-      id: Date.now().toString(),
+      id: notificationId,
       title: notification?.title ?? 'Notification',
       body: notification?.body ?? '',
       data: data ?? {},
@@ -77,48 +98,80 @@ export const displayNotification = async (notification, data) => {
         importance: AndroidImportance.HIGH,
         pressAction: { id: 'default' },
         smallIcon: 'ic_notification',
+        color: '#FF5722',
         vibrationPattern: [300, 500],
         lights: ['#FF5722', 300, 600],
       },
     });
+
+    // Remove from active set after 5 seconds
+    setTimeout(() => {
+      activeNotifications.delete(notificationKey);
+    }, 5000);
   } catch (e) {
     console.error(`${LOG_TAG} Failed to display`, e);
   }
 };
 
-// 4. Foreground + Background Notification Handlers
+// 4. Notification Handlers (with background/foreground separation)
 export const setupNotificationHandlers = () => {
+  if (notificationHandlersInitialized) {
+    DEBUG && console.log(`${LOG_TAG} Handlers already initialized`);
+    return () => {};
+  }
+
   DEBUG && console.log(`${LOG_TAG} Setting up handlers`);
+  notificationHandlersInitialized = true;
 
-  const unsubscribe = onMessage(messaging, async message => {
+  const handleForegroundMessage = async (message) => {
     DEBUG && console.log(`${LOG_TAG} Foreground message:`, message);
+    
+    if (!message.notification && !message.data?.title) return;
 
-    // ✅ Only show custom notification if it's a "data-only" message
-    if (message?.notification == null && message?.data?.title) {
-      await displayNotification({
-        title: message.data.title,
-        body: message.data.body,
-      }, message.data);
-    } else {
-      DEBUG && console.log(`${LOG_TAG} Skipping display — notification payload already handled by Firebase`);
-    }
-  });
+    await displayNotification({
+      title: message.notification?.title || message.data?.title,
+      body: message.notification?.body || message.data?.body,
+    }, {
+      ...message.data,
+      messageId: message.messageId
+    });
+  };
 
-  setBackgroundMessageHandler(messaging, async message => {
+  const handleBackgroundMessage = async (message) => {
     DEBUG && console.log(`${LOG_TAG} Background message:`, message);
+    
+    // Skip if this is a notification message (let system handle it)
+    if (message.notification) {
+      DEBUG && console.log(`${LOG_TAG} Skipping system notification in background`);
+      return;
+    }
 
-    // Background: Firebase shows notification, but we can still log or do something with data
-    if (message?.notification == null && message?.data?.title) {
+    // Only process data messages in background
+    if (message.data?.title) {
       await displayNotification({
         title: message.data.title,
         body: message.data.body,
-      }, message.data);
+      }, {
+        ...message.data,
+        messageId: message.messageId
+      });
     }
-  });
+  };
 
-  return () => unsubscribe();
+  // Foreground handler
+  const unsubscribeForeground = onMessage(messaging, handleForegroundMessage);
+
+  // Background handler (Android only)
+  if (Platform.OS === 'android') {
+    setBackgroundMessageHandler(messaging, handleBackgroundMessage);
+  }
+
+  return () => {
+    notificationHandlersInitialized = false;
+    unsubscribeForeground();
+    DEBUG && console.log(`${LOG_TAG} Notification handlers cleaned up`);
+  };
 };
-
 
 // 5. Initialize Notifications
 export const initializeNotifications = async () => {
@@ -127,14 +180,14 @@ export const initializeNotifications = async () => {
   const hasPermission = await checkNotificationPermissions();
   if (!hasPermission) {
     console.warn(`${LOG_TAG} Notification permission not granted`);
-    return;
+    return { token: null, unsubscribe: () => {} };
   }
 
   await initializeNotificationChannel();
 
   let token;
   try {
-    token = await getToken(messaging); // ✅ modular token fetch
+    token = await getToken(messaging);
     DEBUG && console.log(`${LOG_TAG} FCM Token:`, token);
   } catch (e) {
     console.error(`${LOG_TAG} Failed to get token`, e);

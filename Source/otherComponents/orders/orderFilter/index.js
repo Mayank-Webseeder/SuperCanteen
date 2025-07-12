@@ -15,8 +15,8 @@ const STATUS_OPTIONS = [
   'Shipped',
   'Delivered',
   'Cancelled',
-  'Return',
-  'Exchange'
+  // 'Return',
+  // 'Exchange'
 ];
 
 const TIME_OPTIONS = [

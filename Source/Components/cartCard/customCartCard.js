@@ -257,17 +257,7 @@ const CartCard = React.memo(
 
     if (errorProduct || (!product && !isLoadingProduct)) {
       return (
-        <Animated.View style={[styles.card, { opacity: 0.7 }]}>
-          <View style={styles.productUnavailable}>
-            <Text style={styles.unavailableText}>Product unavailable</Text>
-            <TouchableOpacity
-              onPress={handleRemove}
-              style={styles.removeUnavailable}
-            >
-              <Text style={styles.removeUnavailableText}>Remove</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
+    <></>
       );
     }
 

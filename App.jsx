@@ -5,18 +5,18 @@ import { Provider, useDispatch, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import RootStack from './Source/navigation/rootStack';
 import { store, persistor } from './Source/redux/store';
-import CustomFlashMessage from './Source/Components/flashMessage';
 import { fetchCartItems, setGuestCart, loadGuestCart } from './Source/redux/slices/cartSlice';
 import { fetchWishlistItems } from './Source/redux/slices/wishlistSlice';
-import Toast from 'react-native-toast-message';
-import { toastConfig } from '@components/toastConfig';
 import { setAuthInitialized } from './Source/redux/slices/authSlice';
 import { setSelectedAddress } from './Source/redux/slices/selectedAddressSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigationRef } from './Source/navigation/navigationService';
-import { useNotificationPermission } from './Source/hook/useNotificationPermission'
+import { useNotificationPermission } from './Source/hook/useNotificationPermission';
 import { initializeNotifications } from './Source/services/notificationService';
 import { NotificationPermissionDialog } from './Source/otherComponents/notificationDialog';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '@components/toastConfig';
+import CustomFlashMessage from '@components/flashMessage';
 
 const AppWrapper = () => {
   return (
@@ -33,8 +33,8 @@ const AppWrapper = () => {
 const App = () => {
   const dispatch = useDispatch();
   const { token, user } = useSelector(state => state.auth);
+  const isLoggedIn = !!token;
 
-  // Use the notification permission hook
   const {
     showPermissionDialog,
     handleAllowNotifications,
@@ -54,19 +54,26 @@ const App = () => {
   };
 
   useEffect(() => {
+    let unsubscribeNotifications;
+
     const initializeApp = async () => {
       try {
-        // Initialize notifications if permission exists
         const hasPermission = await checkAndShowPermissionDialog();
         if (hasPermission) {
-          await initializeNotifications();
+          const { unsubscribe } = await initializeNotifications();
+          unsubscribeNotifications = unsubscribe;
         }
 
-        // Initialize rest of app
-        await Promise.all([
-          token ? dispatch(fetchCartItems()) : loadGuestCart().then(cart => dispatch(setGuestCart(cart))),
-          token && user?.id ? dispatch(fetchWishlistItems(user.id)) : Promise.resolve()
-        ]);
+        // Initialize cart based on auth status
+        if (isLoggedIn) {
+          await dispatch(fetchCartItems());
+          if (user?.id) {
+            await dispatch(fetchWishlistItems(user.id));
+          }
+        } else {
+          const guestCart = await loadGuestCart();
+          dispatch(setGuestCart(guestCart));
+        }
 
         await loadStoredAddress();
       } catch (error) {
@@ -77,12 +84,20 @@ const App = () => {
     };
 
     initializeApp();
-  }, [token, user?.id, dispatch]);
+
+    return () => {
+      if (unsubscribeNotifications) {
+        unsubscribeNotifications();
+      }
+    };
+  }, [isLoggedIn, user?.id, dispatch]);
 
   return (
-    <NavigationContainer ref={navigationRef}>
-      <RootStack />
-      <CustomFlashMessage />
+    <>
+      <NavigationContainer ref={navigationRef}>
+        <RootStack />
+      </NavigationContainer>
+      <CustomFlashMessage/>
       <Toast config={toastConfig} />
       
       {showPermissionDialog && (
@@ -91,7 +106,7 @@ const App = () => {
           onDeny={handleDenyNotifications}
         />
       )}
-    </NavigationContainer>
+    </>
   );
 };
 

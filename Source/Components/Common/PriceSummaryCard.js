@@ -53,50 +53,41 @@ console.log("TAX IS", product.tax);
     isSingleProduct: true,
   };
 }
-    // === CASE 2: Cart checkout ===
-    let totalOriginal = 0;
-    let totalSelling = 0;
-    let tax = 0;
-    let shipping = 0;
-    let totalCouponDiscount = 0;
+let totalOriginal = 0;
+let totalSelling = 0;
+let tax = 0;
+let shipping = 0;
+let totalCouponDiscount = 0;
 
-    const itemsToUse =  cartItems;
-    itemsToUse.forEach(item => {
-     
-      const qty = item.qty || 1;
-      const mrp = item.mrp || item.product?.mrp || item.price || 0;
-      const price = item.offerPrice || item.price || item.product.offerPrice || mrp;
-      const additionalPrice = item.variantDetails?.additionalPrice || 0;
+const itemsToUse = cartItems;
 
- // 2. Calculate actual price per unit (including variant additional price)
-  const pricePerUnit = price + additionalPrice;
-  const itemSubtotal = pricePerUnit * qty;
-  
-  // 3. Calculate coupon discount if available
-  const productId = item.product?._id;
-  const coupon = appliedCoupons?.[productId];
-  let itemDiscount = 0;
-  
-  if (coupon) {
-    itemDiscount = (itemSubtotal * coupon.percentage) / 100;
-    totalCouponDiscount += itemDiscount;
-  }
-  
-  // 4. Accumulate totals
-  totalOriginal += mrp * qty;
+itemsToUse.forEach(item => {
+  const qty = item.qty || 1;
+
+  // ✅ Use selectedPrice from backend
+  const selectedPrice = item.selectedPrice || 0;
+
+  // ✅ Compute item total
+  const itemSubtotal = selectedPrice * qty;
   totalSelling += itemSubtotal;
-  
-  // 5. Calculate tax (10% on the item subtotal)
+
+  // ✅ Compute MRP total
+  const mrp = item.mrp || item.product?.mrp || selectedPrice;
+  totalOriginal += mrp * qty;
+
+  // ✅ Tax calculation (assume 10% default)
   const taxPercent = item.tax || item.product?.tax || 10;
   tax += (itemSubtotal * taxPercent) / 100;
-  
-  // 6. Add shipping
+
+  // ✅ Shipping
   const shippingRate = item.product?.shippingRate || 0;
   shipping += shippingRate;
-  
 });
 
-const total = totalSelling + tax + shipping - totalCouponDiscount;
+// ✅ Final total calculation
+const total = Math.round(totalSelling + tax + shipping - totalCouponDiscount);
+
+console.log("✅ Final Total:", total); // 👉 Should now be 5251
 
 return {
   originalPrice: totalOriginal,

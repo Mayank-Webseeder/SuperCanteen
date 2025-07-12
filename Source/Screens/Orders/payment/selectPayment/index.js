@@ -106,7 +106,7 @@ return {
       setIsProcessing(true);
       const payload = prepareOrderPayload("RazorPay");
       if (!payload) return;
-      const resultAction = await dispatch(createOrder(payload));       
+      const resultAction = await dispatch(createOrder(payload)); 
       if (resultAction.meta.requestStatus === 'fulfilled') {
         const data = resultAction.payload;
         navigation.navigate('RazorpayWebView', {

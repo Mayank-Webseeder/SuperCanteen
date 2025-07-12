@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ProductItemCard = ({ item }) => {
   const productData = item.product || item;
-  const variantDetails = item.variantDetails || productData.variantDetails;
+  const variantDetails = item.variantDetails || productData.selectedVariant;
 
   const mrp = variantDetails?.additionalPrice
     ? (productData?.mrp || 0) + variantDetails?.additionalPrice

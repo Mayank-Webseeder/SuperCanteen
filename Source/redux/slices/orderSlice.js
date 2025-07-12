@@ -79,6 +79,19 @@ const orderSlice = createSlice({
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
     },
+ updateOrderFromSocket: (state, action) => {
+  const updatedOrder = action.payload.order || action.payload; // Handle both formats
+  console.log("🔄 [Redux] Updating order:", updatedOrder._id);
+  
+  state.orders = state.orders.map(order => 
+    order._id === updatedOrder._id ? { ...order, ...updatedOrder } : order
+  );
+  
+  // If using currentOrder in your state
+  if (state.currentOrder?._id === updatedOrder._id) {
+    state.currentOrder = { ...state.currentOrder, ...updatedOrder };
+  }
+}
   },
   extraReducers: (builder) => {
     builder
@@ -135,7 +148,7 @@ const orderSlice = createSlice({
   },
 });
 
-export const { clearCurrentOrder } = orderSlice.actions;
+export const { clearCurrentOrder,updateOrderFromSocket } = orderSlice.actions;
 export default orderSlice.reducer;
 
 
