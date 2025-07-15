@@ -40,7 +40,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.white,
     paddingHorizontal: 16,
-    paddingBottom:16,
+    paddingVertical:16,
     marginHorizontal: 16,
     marginVertical: 6,
     borderRadius: 12,
