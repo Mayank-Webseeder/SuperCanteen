@@ -4,19 +4,18 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator
 } from 'react-native';
 import CustomAuthHeader from '../../../Components/CustomAuthHeader';
 import CustomTextInput from '../../../Components/inputField/customTextInput';
 import CustomAuthButton from '../../../Components/CustomAuthButton';
 import { Height, Width } from '../../../constants';
 import { validateEmail, validateName, validatePassword } from '../../../utils/validation';
-import { styles } from './styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { signupUser } from '../../../redux/slices/authSlice';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
+import { styles } from './styles';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -94,21 +93,27 @@ const SignUpScreen = () => {
   }, [navigation]);
 
   return (
-    <ScrollView 
-      showsVerticalScrollIndicator={false} 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
+     <ScrollView 
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
     >
-      <CustomAuthHeader title="Sign Up" />
-      <View style={styles.mainContainer}>
-        <View style={styles.main}>
+      <View style={styles.container}>
+        <CustomAuthHeader onBackPress={() => navigation.goBack()} title="Sign Up" />
+        
+        {/* Welcome Header */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.welcomeText}>Create Your Account</Text>
+          <Text style={styles.subtitleText}>Join us to start your shopping journey</Text>
+        </View>
+        
+        <View style={styles.inputView}>
           <CustomTextInput
-            label={'Name'}
+            label={'Full Name'}
             borderColor="#d2d2d2"
             value={formData.name}
             onChangeText={(text) => handleInputChange('name', text)}
             error={errors.name}
-            placeholder="Enter your name"
+            placeholder="Enter your full name"
           />
 
           <CustomTextInput
@@ -122,44 +127,49 @@ const SignUpScreen = () => {
           />
 
           <CustomTextInput
-            label={'Choose Password'}
+            label={'Password'}
             borderColor="#d2d2d2"
             secureTextEntry
             value={formData.password}
             onChangeText={(text) => handleInputChange('password', text)}
             error={errors.password}
-            placeholder="Enter your password"
+            placeholder="Create your password"
             passwordRules="minlength: 8; required: lower; required: upper; required: digit;"
           />
-
-          <View style={{ marginTop: Height(10) }}>
-            <CustomAuthButton
-              onPress={onpressSignUp}
-              width={Width(300)}
-              height={Height(38)}
-              title="Sign Up"
-              borderWidth={1}
-              borderColor="#2E6074"
-              br={3}
-              textStyle={styles.textStyle}
-              loading={loading}
-            />
-          </View>
         </View>
 
-        <View style={styles.orContainer}>
-          <Text style={styles.orText}>OR</Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={onGoogleSignIn}
-          activeOpacity={0.7}
-          style={styles.googleButton}
-        >
-          <FastImage
-            source={require('../../../../assets/Icons/GoogleIcon.png')}
-            style={styles.googleIcon}
+        <View style={styles.buttonView}>
+          <CustomAuthButton
+            onPress={onpressSignUp}
+            width={Width(300)}
+            height={Height(38)}
+            title="Sign Up"
+            borderWidth={1}
+            borderColor="#2E6074"
+            br={3}
+            textStyle={styles.textStyle}
+            loading={loading}
           />
+        </View>
+
+        {/* Modern Divider with OR */}
+        <View style={styles.modernDividerContainer}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Modern Google Button */}
+        <TouchableOpacity 
+          onPress={onGoogleSignIn} 
+          activeOpacity={0.7} 
+          style={styles.modernGoogleButton}
+        >
+          <FastImage 
+            source={require('../../../../assets/Icons/GoogleIcon.png')} 
+            style={styles.modernGoogleIcon} 
+          />
+          <Text style={styles.modernGoogleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
 
         <View style={styles.footerTextContainer}>

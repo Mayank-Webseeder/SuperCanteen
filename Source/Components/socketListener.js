@@ -1,41 +1,51 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { showMessage } from 'react-native-flash-message';
-import { initializeSocket } from '../utils/socket';
-
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { showOrderUpdateNotification } from '../services/notificationService';
+import { useSocket } from '../path/to/SocketProvider'; 
 const SocketListener = () => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.auth.user);
-  const token = useSelector(state => state.auth.token);
+  const { socket } = useSocket(); // Get socket from context
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
-    if (!user?.id) return;
-    
-    console.log("🔍 Initializing socket for user:", user.id);
-    const socket = initializeSocket(user.id);
+    if (!socket || !user?.id) {
+      console.log("⚠️ Socket not ready or user not available");
+      return;
+    }
 
-    const handleOrderUpdate = (updatedOrder) => {
-      console.log("📦 Order Updated via Socket:", updatedOrder);
-      
-      // Show notification
-      // showMessage({
-      //   message: `Order #${updatedOrder.orderNumber} Updated`,
-      //   description: `Status: ${updatedOrder.status.toUpperCase()}`,
-      //   type: 'info',
-      //   duration: 4000,
-      //   floating: true,
-      //   icon: 'info'
-      // });
+    console.log("🟢 SocketListener active with socket ID:", socket.id);
+
+    const handleOrderUpdate = async (data) => {
+      try {
+        // The backend sends both message and order in the payload
+        const { message, order: updatedOrder } = data;
+        console.log("📦 Order Updated via Socket:", updatedOrder);
+
+        // Dispatch to Redux
+        dispatch({
+          type: 'UPDATE_ORDER_FROM_SOCKET',
+          payload: updatedOrder
+        });
+
+        // Show native notification
+        await showOrderUpdateNotification({
+          ...updatedOrder,
+          message // Include the message in the notification data
+        });
+
+      } catch (error) {
+        console.error("❌ Error handling order update:", error);
+      }
     };
 
+    // Set up listener
     socket.on("orderUpdated", handleOrderUpdate);
 
     return () => {
-      console.log("🧹 Cleaning up socket");
+      // Clean up listener
       socket.off("orderUpdated", handleOrderUpdate);
-      socket.disconnect();
     };
-  }, [user?.id, token]);
+  }, [socket, user?.id, dispatch]);
 
   return null;
 };

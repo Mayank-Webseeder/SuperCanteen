@@ -2,81 +2,104 @@ import { StyleSheet } from "react-native";
 import { COLORS , FontSize , Height, Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
+    flexGrow: 1,
     backgroundColor: COLORS.white,
+  },
+  container: {
     flex: 1,
+    backgroundColor: COLORS.white,
+    paddingBottom: 20,
   },
-  inputView:{
-    rowGap: 10, marginTop: Height(15), marginHorizontal: Height(20)
+  headerContainer: {
+    paddingHorizontal: Width(20),
+    paddingBottom: Height(10),
+    marginTop:Height(6)
   },
-  buttonView:{
+  welcomeText: {
+    fontSize: FontSize(20),
+    fontFamily: 'Inter-SemiBold',
+    color: COLORS.green,
+    marginBottom: Height(5),
+  },
+  subtitleText: {
+    fontSize: FontSize(14),
+    fontFamily: 'Inter-Regular',
+    color: '#64748B',
+  },
+  inputView: {
+    rowGap: 10, 
+    marginTop: Height(7), 
+    marginHorizontal: Height(20)
+  },
+  buttonView: {
     marginTop: Height(20),
-   
   },
-  rowContainer:{
-    flexDirection: 'row', alignItems: 'center', marginVertical: 10,
-     marginTop:Width(14),
-     marginHorizontal:Width(24)
-  },
-  label: {
-    marginTop: 20,
-    fontSize: 14,
-    color: COLORS.content,
-    fontWeight: '600',
-  },
-  rememberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 15,
+  rowContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginVertical: 10,
+    marginTop: Width(14),
+    marginHorizontal: Width(24)
   },
   checkbox: {
     width: 17,
     height: 17,
     borderWidth: 1,
-    borderColor:COLORS.green,
+    borderColor: COLORS.green,
     borderRadius: 2,
     justifyContent: 'center',
     alignItems: 'center',
-  
   },
   rememberText: {
     fontSize: 13,
     color: COLORS.green,
-    bottom:16,
-    fontFamily:"Inter-Regular"
+    bottom: 16,
+    fontFamily: "Inter-Regular"
   },
-  text:{
-      fontSize: FontSize(12.5),
-      fontFamily:"Inter-Regular",
-      marginHorizontal:Width(9),
-      color:COLORS.green
+  text: {
+    fontSize: FontSize(12.5),
+    fontFamily: "Inter-Regular",
+    marginHorizontal: Width(9),
+    color: COLORS.green
   },
-  orContainer: {
+  modernDividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', 
-    marginVertical: 20,
-    marginTop:Height(30)
+    marginVertical: Height(20),
+    marginHorizontal: Width(24),
   },
-  line: {
+  dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: '#E2E8F0',
   },
-  orText: {
+  dividerText: {
     marginHorizontal: 10,
-    color: '#000',
-    fontWeight: '600',
+    color: '#64748B',
+    fontFamily: 'Inter-Medium',
+    fontSize: FontSize(12),
   },
-  googleButton: {
-    alignSelf: 'center',
-    padding: 10,
-
+  modernGoogleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingVertical: Height(12),
+    marginHorizontal: Width(24),
+    marginTop: Height(10),
   },
-  googleIcon: {
-      width: Height(40),
-    height: Height(40),
-    resizeMode: 'cover',
+  modernGoogleIcon: {
+    width: Height(20),
+    height: Height(20),
+    marginRight: Width(10),
+  },
+  modernGoogleButtonText: {
+    fontSize: FontSize(14),
+    fontFamily: 'Inter-Medium',
+    color: '#334155',
   },
   footerTextContainer: {
     flexDirection: 'row',
@@ -86,14 +109,15 @@ export const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: COLORS.green,
-    fontFamily:"Inter-Regular"
+    fontFamily: "Inter-Regular"
   },
   signInText: {
-     color: COLORS.green,
-        fontFamily:"Inter-Medium",
-        fontSize:FontSize(14)
+    color: COLORS.green,
+    fontFamily: "Inter-Medium",
+    fontSize: FontSize(14)
   },
-  textStyle:{
-    fontSize: 16, fontFamily: 'Inter-SemiBold'
+  textStyle: {
+    fontSize: 16, 
+    fontFamily: 'Inter-SemiBold'
   }
 });

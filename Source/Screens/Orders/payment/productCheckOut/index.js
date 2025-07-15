@@ -99,7 +99,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
       <View style={styles.borderStyle} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <AddressView navigation={navigation} address={selectedAddress} userId={user._id} />
+        <AddressView navigation={navigation} address={selectedAddress} userId={user?._id} />
 
         <Text style={productStyles.sectionTitle}>
           {fromCart ? `Your Items (${cartItems.length})` : 'Your Item'}

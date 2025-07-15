@@ -3,7 +3,6 @@ import { SOCKET_URL } from "@constants/env";
 
 let socketInstance = null;
 
-
 export const initializeSocket = (userId) => {
    if (socketInstance && socketInstance.connected) {
     return socketInstance;

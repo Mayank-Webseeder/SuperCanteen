@@ -42,37 +42,6 @@ const NotificationScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  // Socket connection
-  // useEffect(() => {
-  //   if (!user?.id) return;
-
-  //   const socket = initSocket();
-
-  //   const handleNewNotification = (notification) => {
-  //     console.log({
-  //       message: notification.title,
-  //       description: notification.message,
-  //       type: 'info',
-  //       duration: 3000,
-  //       floating: true
-  //     });
-  //     loadNotifications(); // Refresh notifications
-  //   };
-
-  //   socket.on('connect', () => {
-  //     setSocketConnected(true);
-  //     socket.emit('joinNotifications', { userId: user.id });
-  //   });
-
-  //   socket.on('newNotification', handleNewNotification);
-  //   socket.on('disconnect', () => setSocketConnected(false));
-
-  //   return () => {
-  //     socket.off('newNotification', handleNewNotification);
-  //     disconnectSocket();
-  //   };
-  // }, [user?.id]);
-
   const handleMarkAsRead = async (notification) => {
     if (!notification.read) {
       await dispatch(markNotificationAsRead(notification._id));

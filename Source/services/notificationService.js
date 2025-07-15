@@ -1,59 +1,233 @@
-import {
+import { 
   getMessaging,
   getToken,
   onMessage,
-  setBackgroundMessageHandler,
+    setBackgroundMessageHandler, 
 } from '@react-native-firebase/messaging';
+
 import { getApp } from '@react-native-firebase/app';
 import notifee, {
   AndroidImportance,
   AndroidVisibility,
   AuthorizationStatus,
+  AndroidStyle,
+  EventType, // Add this if you need event types
 } from '@notifee/react-native';
-import { Platform, Linking } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const messaging = getMessaging(getApp());
+const NOTIFICATION_STORAGE_KEY = '@displayed_notifications';
+const MAX_NOTIFICATION_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const LOG_TAG = '[NotificationService]';
 const DEBUG = true;
 
-const messaging = getMessaging(getApp());
-
 // Track initialization state
-let notificationChannelInitialized = false;
-let notificationHandlersInitialized = false;
-const activeNotifications = new Set();
+let isInitialized = false;
+let unsubscribeForeground = null;
+let cleanupInterval = null;
 
-// 1. Create Notification Channel (Android)
-export const initializeNotificationChannel = async () => {
-  if (notificationChannelInitialized) {
-    DEBUG && console.log(`${LOG_TAG} Channel already initialized`);
+// 1. Notification Channel Setup
+const initializeNotificationChannel = async () => {
+  try {
+    await notifee.createChannel({
+      id: 'default',
+      name: 'Deals & Updates',
+      importance: AndroidImportance.HIGH,
+      visibility: AndroidVisibility.PUBLIC,
+      sound: 'default',
+      lights: true,
+      lightColor: '#2E6074',
+      vibration: true,
+      bypassDnd: true,
+      showBadge: true,
+    });
+  } catch (error) {
+    console.error('Channel creation failed:', error);
+  }
+};
+
+// 2. Persistent Notification Tracking
+let displayedNotifications = new Map();
+
+const loadDisplayedNotifications = async () => {
+  try {
+    const stored = await AsyncStorage.getItem(NOTIFICATION_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      
+      if (Array.isArray(parsed)) {
+        const now = Date.now();
+        const filtered = parsed.filter(
+          ([id, timestamp]) => now - timestamp < MAX_NOTIFICATION_AGE_MS
+        );
+        displayedNotifications = new Map(filtered);
+        await saveDisplayedNotifications();
+      } else {
+        console.warn('Invalid notification storage format. Resetting...');
+        displayedNotifications = new Map();
+        await AsyncStorage.removeItem(NOTIFICATION_STORAGE_KEY); // Clean corrupted data
+      }
+    }
+  } catch (error) {
+    console.error('Error loading notifications:', error);
+    displayedNotifications = new Map(); // fallback to empty
+  }
+};
+
+const saveDisplayedNotifications = async () => {
+  try {
+    await AsyncStorage.setItem(
+      NOTIFICATION_STORAGE_KEY,
+      JSON.stringify(Array.from(displayedNotifications))
+    );
+  } catch (error) {
+    console.error('Error saving notifications:', error);
+  }
+};
+
+// 3. Notification Display with Deduplication
+const displayNotification = async (remoteMessage) => {
+  const { notification, data, messageId } = remoteMessage;
+  
+  if (!messageId) return;
+  
+  const now = Date.now();
+  const timestamp = displayedNotifications.get(messageId);
+  
+  // Skip if notification was shown recently
+  if (timestamp && (now - timestamp < MAX_NOTIFICATION_AGE_MS)) {
     return;
   }
 
   try {
-    DEBUG && console.log(`${LOG_TAG} Creating notification channel`);
-    await notifee.createChannel({
-      id: 'default',
-      name: 'Deals & Offers',
-      importance: AndroidImportance.HIGH,
-      visibility: AndroidVisibility.PUBLIC,
-      sound: 'default',
-      vibration: true,
-      vibrationPattern: [300, 500, 300, 500],
-      lights: true,
-      lightColor: '#FF5722',
-      bypassDnd: true,
-      showBadge: true,
-      description: 'Special offers and order updates',
+    // Update tracking
+    displayedNotifications.set(messageId, now);
+    await saveDisplayedNotifications();
+
+    // Display notification
+    await notifee.displayNotification({
+      id: messageId,
+      title: notification?.title || 'New Update',
+      body: notification?.body || '',
+      data,
+      android: {
+        channelId: 'default',
+        smallIcon: 'logo_colored',
+        color: '#2874F0',
+        timestamp: now,
+        showWhen: true,
+        autoCancel: true,
+        pressAction: { id: 'default', launchActivity: 'default' },
+        style: { type: AndroidStyle.BIGTEXT, text: notification?.body || '' },
+        backgroundColor: '#F5F5F5',
+      },
+      ios: {
+        threadId: 'flipkart-deals',
+      },
     });
-    notificationChannelInitialized = true;
-    DEBUG && console.log(`${LOG_TAG} Channel created successfully`);
-  } catch (e) {
-    console.error(`${LOG_TAG} Channel creation failed`, e);
+  } catch (error) {
+    console.error('Notification display failed:', error);
+    displayedNotifications.delete(messageId);
   }
 };
 
-// 2. Request Notification Permission
+// 4. Setup Handlers
+const setupNotificationHandlers = () => {
+  if (unsubscribeForeground) {
+    return () => unsubscribeForeground();
+  }
+
+  // Foreground handler
+  unsubscribeForeground = onMessage(messaging, displayNotification);
+
+  // Background handler (Android only) - FIXED
+  if (Platform.OS === 'android') {
+    messaging.setBackgroundMessageHandler(async remoteMessage => {
+      if (remoteMessage?.notification) {
+        console.log('[FCM] Skipped default system notification in background');
+        return;
+      }
+      await displayNotification(remoteMessage);
+    });
+  }
+
+  return () => {
+    if (unsubscribeForeground) {
+      unsubscribeForeground();
+      unsubscribeForeground = null;
+    }
+  };
+};
+
+
+// 5. Main Initialization Function
+export const initializeNotifications = async () => {
+  if (isInitialized) {
+    console.log('Notifications already initialized');
+    return { token: null, unsubscribe: () => {} };
+  }
+
+  try {
+    // Initialize channel and load stored notifications
+    await initializeNotificationChannel();
+    await loadDisplayedNotifications();
+
+    // Check and request permissions
+    const settings = await notifee.getNotificationSettings();
+    if (settings.authorizationStatus !== AuthorizationStatus.AUTHORIZED) {
+      await notifee.requestPermission({
+        sound: true,
+        announcement: true,
+        alert: true,
+      });
+    }
+
+    // Get FCM token
+    const token = await getToken(messaging);
+    console.log('FCM Token:', token);
+
+    // Setup handlers
+    const unsubscribe = setupNotificationHandlers();
+
+    // Setup periodic cleanup
+    cleanupInterval = setInterval(() => {
+      const now = Date.now();
+      for (const [id, timestamp] of displayedNotifications) {
+        if (now - timestamp > MAX_NOTIFICATION_AGE_MS) {
+          displayedNotifications.delete(id);
+        }
+      }
+      saveDisplayedNotifications();
+    }, 3600000);
+
+    // Refresh on app state changes
+    const appStateSubscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        loadDisplayedNotifications();
+      }
+    });
+
+    isInitialized = true;
+    
+    return { 
+      token, 
+      unsubscribe: () => {
+        clearInterval(cleanupInterval);
+        cleanupInterval = null;
+        appStateSubscription.remove();
+        unsubscribe();
+        isInitialized = false;
+      }
+    };
+  } catch (error) {
+    console.error('Notification initialization failed:', error);
+    return { token: null, unsubscribe: () => {} };
+  }
+};
+
+// 6. Utility function to check permissions (if needed)
 export const checkNotificationPermissions = async () => {
   try {
     DEBUG && console.log(`${LOG_TAG} Checking notification permissions`);
@@ -69,144 +243,5 @@ export const checkNotificationPermissions = async () => {
   } catch (err) {
     console.error(`${LOG_TAG} Permission check error:`, err);
     return false;
-  }
-};
-
-// 3. Display Notification (with enhanced duplicate prevention)
-export const displayNotification = async (notification, data) => {
-  try {
-    const notificationId = data?.messageId || `notif_${Date.now()}`;
-    const notificationKey = `${notification.title}_${notification.body}`;
-    
-    // Skip if this notification is already active
-    if (activeNotifications.has(notificationKey)) {
-      DEBUG && console.log(`${LOG_TAG} Skipping duplicate notification`);
-      return;
-    }
-
-    activeNotifications.add(notificationKey);
-    
-    DEBUG && console.log(`${LOG_TAG} Displaying notification`, notification);
-    
-    await notifee.displayNotification({
-      id: notificationId,
-      title: notification?.title ?? 'Notification',
-      body: notification?.body ?? '',
-      data: data ?? {},
-      android: {
-        channelId: 'default',
-        importance: AndroidImportance.HIGH,
-        pressAction: { id: 'default' },
-        smallIcon: 'ic_notification',
-        color: '#FF5722',
-        vibrationPattern: [300, 500],
-        lights: ['#FF5722', 300, 600],
-      },
-    });
-
-    // Remove from active set after 5 seconds
-    setTimeout(() => {
-      activeNotifications.delete(notificationKey);
-    }, 5000);
-  } catch (e) {
-    console.error(`${LOG_TAG} Failed to display`, e);
-  }
-};
-
-// 4. Notification Handlers (with background/foreground separation)
-export const setupNotificationHandlers = () => {
-  if (notificationHandlersInitialized) {
-    DEBUG && console.log(`${LOG_TAG} Handlers already initialized`);
-    return () => {};
-  }
-
-  DEBUG && console.log(`${LOG_TAG} Setting up handlers`);
-  notificationHandlersInitialized = true;
-
-  const handleForegroundMessage = async (message) => {
-    DEBUG && console.log(`${LOG_TAG} Foreground message:`, message);
-    
-    if (!message.notification && !message.data?.title) return;
-
-    await displayNotification({
-      title: message.notification?.title || message.data?.title,
-      body: message.notification?.body || message.data?.body,
-    }, {
-      ...message.data,
-      messageId: message.messageId
-    });
-  };
-
-  const handleBackgroundMessage = async (message) => {
-    DEBUG && console.log(`${LOG_TAG} Background message:`, message);
-    
-    // Skip if this is a notification message (let system handle it)
-    if (message.notification) {
-      DEBUG && console.log(`${LOG_TAG} Skipping system notification in background`);
-      return;
-    }
-
-    // Only process data messages in background
-    if (message.data?.title) {
-      await displayNotification({
-        title: message.data.title,
-        body: message.data.body,
-      }, {
-        ...message.data,
-        messageId: message.messageId
-      });
-    }
-  };
-
-  // Foreground handler
-  const unsubscribeForeground = onMessage(messaging, handleForegroundMessage);
-
-  // Background handler (Android only)
-  if (Platform.OS === 'android') {
-    setBackgroundMessageHandler(messaging, handleBackgroundMessage);
-  }
-
-  return () => {
-    notificationHandlersInitialized = false;
-    unsubscribeForeground();
-    DEBUG && console.log(`${LOG_TAG} Notification handlers cleaned up`);
-  };
-};
-
-// 5. Initialize Notifications
-export const initializeNotifications = async () => {
-  DEBUG && console.log(`${LOG_TAG} Initializing notifications`);
-
-  const hasPermission = await checkNotificationPermissions();
-  if (!hasPermission) {
-    console.warn(`${LOG_TAG} Notification permission not granted`);
-    return { token: null, unsubscribe: () => {} };
-  }
-
-  await initializeNotificationChannel();
-
-  let token;
-  try {
-    token = await getToken(messaging);
-    DEBUG && console.log(`${LOG_TAG} FCM Token:`, token);
-  } catch (e) {
-    console.error(`${LOG_TAG} Failed to get token`, e);
-  }
-
-  const unsubscribe = setupNotificationHandlers();
-
-  return { token, unsubscribe };
-};
-
-// 6. Open Native Notification Settings
-export const openSystemNotificationSettings = async () => {
-  try {
-    if (Platform.OS === 'android') {
-      await notifee.openNotificationSettings();
-    } else {
-      await Linking.openURL('app-settings:');
-    }
-  } catch (e) {
-    console.error(`${LOG_TAG} Error opening settings`, e);
   }
 };

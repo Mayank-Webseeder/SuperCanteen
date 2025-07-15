@@ -1,4 +1,4 @@
-import {  Height, Width } from '@constants/index';
+import {  COLORS, Height, Width } from '@constants/index';
 import React, {useEffect} from 'react';
 import {View, StyleSheet, Animated,Image} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,7 @@ const SplashScreen = () => {
 
   useEffect(() => {
     Animated.timing(logoScaleAnimation, {
-      toValue: 0.4,
+      toValue: 0.2,
       duration: 1000,
       useNativeDriver: true,
     }).start();
@@ -26,7 +26,7 @@ const SplashScreen = () => {
           styles.logoContainer,
           {transform: [{scale: logoScaleAnimation}]},
         ]}>
-        <Image tintColor={'white'} source={require('../../../assets/spalshLogo.png')} />
+        <Image source={require('../../../assets/spalshLogo.png')} />
       </Animated.View>
     </View>
   );
@@ -35,7 +35,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4D7C8E',
+    backgroundColor:COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -81,8 +81,6 @@ const orderSlice = createSlice({
     },
  updateOrderFromSocket: (state, action) => {
   const updatedOrder = action.payload.order || action.payload; // Handle both formats
-  console.log("🔄 [Redux] Updating order:", updatedOrder._id);
-  
   state.orders = state.orders.map(order => 
     order._id === updatedOrder._id ? { ...order, ...updatedOrder } : order
   );

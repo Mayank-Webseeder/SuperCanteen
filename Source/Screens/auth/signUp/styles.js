@@ -1,47 +1,77 @@
 import { StyleSheet } from "react-native";
-import { COLORS , FontSize , Height } from "../../../constants";
+import { COLORS , FontSize , Height,Width } from "../../../constants";
 
 export const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
+    flexGrow: 1,
     backgroundColor: COLORS.white,
+  },
+  container: {
     flex: 1,
+    backgroundColor: COLORS.white,
+    paddingBottom: 20,
   },
-  main:{
-    rowGap: 8,
-    marginTop:Height(15)
+  headerContainer: {
+    paddingHorizontal: Width(20),
+    paddingBottom: Height(10),
+     marginTop:Height(6)
   },
-  mainContainer:{
-    marginHorizontal:Height(20)
+  welcomeText: {
+    fontSize: FontSize(20),
+    fontFamily: 'Inter-SemiBold',
+    color: COLORS.green,
+    marginBottom: Height(5),
   },
-  textStyle:{
-    fontSize: 16 , fontFamily: 'Inter-SemiBold'
+  subtitleText: {
+    fontSize: FontSize(14),
+    fontFamily: 'Inter-Regular',
+    color: '#64748B',
   },
-  orContainer: {
+  inputView: {
+    rowGap: 10, 
+     marginTop: Height(7), 
+    marginHorizontal: Height(20)
+  },
+  buttonView: {
+    marginTop: Height(20),
+  },
+  modernDividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Center horizontally
-    marginVertical: 20,
+    marginVertical: Height(20),
+    marginHorizontal: Width(24),
   },
-  line: {
+  dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ccc',
+    backgroundColor: '#E2E8F0',
   },
-  orText: {
+  dividerText: {
     marginHorizontal: 10,
-    color: '#000',
-    fontWeight: '600',
-    fontSize:FontSize(15)
+    color: '#64748B',
+    fontFamily: 'Inter-Medium',
+    fontSize: FontSize(12),
   },
-  googleButton: {
-    alignSelf: 'center',
-    padding: 10,
-
+  modernGoogleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 8,
+    paddingVertical: Height(12),
+    marginHorizontal: Width(24),
+    marginTop: Height(10),
   },
-  googleIcon: {
-    width: Height(40),
-    height: Height(40),
-    resizeMode: 'cover',
+  modernGoogleIcon: {
+    width: Height(20),
+    height: Height(20),
+    marginRight: Width(10),
+  },
+  modernGoogleButtonText: {
+    fontSize: FontSize(14),
+    fontFamily: 'Inter-Medium',
+    color: '#334155',
   },
   footerTextContainer: {
     flexDirection: 'row',
@@ -51,11 +81,15 @@ export const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: COLORS.green,
-    fontFamily:"Inter-Regular"
+    fontFamily: "Inter-Regular"
   },
   signInText: {
     color: COLORS.green,
-    fontFamily:"Inter-Medium",
-    fontSize:FontSize(14)
+    fontFamily: "Inter-Medium",
+    fontSize: FontSize(14)
   },
+  textStyle: {
+    fontSize: 16, 
+    fontFamily: 'Inter-SemiBold'
+  }
 });

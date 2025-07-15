@@ -13,10 +13,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { navigationRef } from './Source/navigation/navigationService';
 import { useNotificationPermission } from './Source/hook/useNotificationPermission';
 import { initializeNotifications } from './Source/services/notificationService';
-import { NotificationPermissionDialog } from './Source/otherComponents/notificationDialog';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@components/toastConfig';
 import CustomFlashMessage from '@components/flashMessage';
+import notifee, { EventType } from '@notifee/react-native';
+
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  console.log('[Notifee Background Event]', type, detail);
+  if (type === EventType.ACTION_PRESS) {
+    console.log('User pressed action:', detail.pressAction?.id);
+  }
+});
 
 const AppWrapper = () => {
   return (
@@ -35,10 +42,7 @@ const App = () => {
   const { token, user } = useSelector(state => state.auth);
   const isLoggedIn = !!token;
 
-  const {
-    showPermissionDialog,
-    handleAllowNotifications,
-    handleDenyNotifications,
+   const {
     checkAndShowPermissionDialog
   } = useNotificationPermission();
 
@@ -99,13 +103,6 @@ const App = () => {
       </NavigationContainer>
       <CustomFlashMessage/>
       <Toast config={toastConfig} />
-      
-      {showPermissionDialog && (
-        <NotificationPermissionDialog
-          onAllow={handleAllowNotifications}
-          onDeny={handleDenyNotifications}
-        />
-      )}
     </>
   );
 };

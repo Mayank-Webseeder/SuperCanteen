@@ -4,13 +4,14 @@ import {
   View,
   TouchableOpacity,
   BackHandler,
+  ScrollView,
+  Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomTextInput from '../../../Components/inputField/customTextInput';
 import CustomAuthButton from '../../../Components/CustomAuthButton';
 import { Height, Width } from '../../../constants';
 import { validateEmail, validatePassword } from '../../../utils/validation';
-import { styles } from './styles';
 import CustomAuthHeader from '../../../Components/CustomAuthHeader';
 import { useSelector, useDispatch } from 'react-redux';
 import { loginUser } from '../../../redux/slices/authSlice';
@@ -19,8 +20,9 @@ import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import { mergeGuestCart } from '../../../redux/slices/cartSlice';
-import { getToken , getMessaging } from '@react-native-firebase/messaging';
+import { getToken, getMessaging } from '@react-native-firebase/messaging';
 import { saveFcmTokenToServer } from '../../../redux/slices/notificationSlice';
+import { styles } from './styles';
 
 const SigninScreen = () => {
   const navigation = useNavigation();
@@ -33,11 +35,11 @@ const SigninScreen = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
 
- useEffect(() => {
-  const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-    navigation.replace('App'); 
-    return true; 
-  });
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.replace('App'); 
+      return true; 
+    });
 
     const loadCredentials = async () => {
       try {
@@ -75,9 +77,6 @@ const SigninScreen = () => {
     return !emailError && !passwordError;
   }, [formData.email, formData.password]);
 
-
-  
-
   const onpressSignIn = useCallback(async () => {
     if (!validateForm()) return;
 
@@ -89,27 +88,25 @@ const SigninScreen = () => {
     );
     
     if (loginUser.fulfilled.match(resultAction)) {
-        const fcmToken = await getToken(getMessaging());
-          if (fcmToken) {
-          await dispatch(saveFcmTokenToServer(fcmToken));  
-  }
+      const fcmToken = await getToken(getMessaging());
+      if (fcmToken) {
+        await dispatch(saveFcmTokenToServer(fcmToken));  
+      }
 
-    try {
-      await dispatch(mergeGuestCart()).unwrap();
-    } catch (error) {
-      console.log('Cart merge failed (non-critical)', error);
-    }
+      try {
+        await dispatch(mergeGuestCart()).unwrap();
+      } catch (error) {
+        console.log('Cart merge failed (non-critical)', error);
+      }
 
-    // console.log("RESULT ACTION IS",resultAction?.payload?.token)
-
-       showMessage({
+      showMessage({
         message: 'Sign In Successful!',
         description: 'Welcome to our app',
         type: 'success',
         icon: 'success',
         duration: 3000,
       });
-      // Non-blocking credential storage
+
       if (rememberMe) {
         AsyncStorage.setItem('rememberedCredentials', JSON.stringify(formData))
           .catch(e => console.error('Storage error', e));
@@ -118,21 +115,20 @@ const SigninScreen = () => {
           .catch(e => console.error('Remove error', e));
       }
       
-    navigation.reset({
-  index: 0,
-  routes: [
-    {
-      name: 'App',
-      state: {
-        routes: [{ name: 'Main' }]
-      },
-    },
-  ],
-});
-     } else if (loginUser.rejected.match(resultAction)) {
-      // Show error message
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'App',
+            state: {
+              routes: [{ name: 'Main' }]
+            },
+          },
+        ],
+      });
+    } else if (loginUser.rejected.match(resultAction)) {
       showMessage({
-        message:  'Sign in failed',
+        message: 'Sign in failed',
         type: 'danger',
         icon: 'danger',
         duration: 4000,
@@ -153,81 +149,99 @@ const SigninScreen = () => {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <CustomAuthHeader   onBackPress={() => navigation.replace('App')}  title="Sign In" />
-      
-      <View style={styles.inputView}>
-        <CustomTextInput
-          label={'Email'}
-          borderColor="#d2d2d2"
-          keyboardType="email-address"
-          value={formData.email}
-          onChangeText={(text) => handleInputChange('email', text)}
-          error={errors.email}
-          placeholder="Enter your email"
-        />
+    <ScrollView 
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={styles.container}>
+       
 
-        <CustomTextInput
-          label={'Password'}
-          borderColor="#d2d2d2"
-          secureTextEntry
-          value={formData.password}
-          onChangeText={(text) => handleInputChange('password', text)}
-          error={errors.password}
-          placeholder="Enter your password"
-        />
+        <CustomAuthHeader onBackPress={() => navigation.replace('App')} title="Sign In" />
+
+           {/* Welcome Header */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.welcomeText}>Welcome Back!</Text>
+          <Text style={styles.subtitleText}>Sign in to continue your shopping experience</Text>
+        </View>
         
-        <Text onPress={onForgotPassword} style={styles.rememberText}>
-          Forgot Password
-        </Text> 
-      </View>
+        <View style={styles.inputView}>
+          <CustomTextInput
+            label={'Email'}
+            borderColor="#d2d2d2"
+            keyboardType="email-address"
+            value={formData.email}
+            onChangeText={(text) => handleInputChange('email', text)}
+            error={errors.email}
+            placeholder="Enter your email"
+          />
 
-      <View style={styles.buttonView}>
-        <CustomAuthButton
-          onPress={onpressSignIn}
-          width={Width(300)}
-          height={Height(38)}
-          title="Sign In"
-          borderWidth={1}
-          borderColor="#2E6074"
-          br={3}
-          textStyle={styles.textStyle}
-          loading={loading}
-        />
-      </View>
+          <CustomTextInput
+            label={'Password'}
+            borderColor="#d2d2d2"
+            secureTextEntry
+            value={formData.password}
+            onChangeText={(text) => handleInputChange('password', text)}
+            error={errors.password}
+            placeholder="Enter your password"
+          />
+          
+          <Text onPress={onForgotPassword} style={styles.rememberText}>
+            Forgot Password
+          </Text> 
+        </View>
 
-      <View style={styles.rowContainer}>
+        <View style={styles.buttonView}>
+          <CustomAuthButton
+            onPress={onpressSignIn}
+            width={Width(300)}
+            height={Height(38)}
+            title="Sign In"
+            borderWidth={1}
+            borderColor="#2E6074"
+            br={3}
+            textStyle={styles.textStyle}
+            loading={loading}
+          />
+        </View>
+
+        <View style={styles.rowContainer}>
+          <TouchableOpacity 
+            onPress={() => setRememberMe(!rememberMe)} 
+            style={styles.checkbox}
+          >
+            {rememberMe && <CheckBoxIcon/>}
+          </TouchableOpacity>
+          <Text style={styles.text}>Remember Me</Text>
+        </View>
+
+        {/* Modern Divider with OR */}
+        <View style={styles.modernDividerContainer}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Modern Google Button */}
         <TouchableOpacity 
-          onPress={() => setRememberMe(!rememberMe)} 
-          style={styles.checkbox}
+          onPress={onGoogleSignIn} 
+          activeOpacity={0.7} 
+          style={styles.modernGoogleButton}
         >
-          {rememberMe && <CheckBoxIcon/>}
+          <FastImage 
+            source={require('../../../../assets/Icons/GoogleIcon.png')} 
+            style={styles.modernGoogleIcon} 
+          />
+          <Text style={styles.modernGoogleButtonText}>Continue with Google</Text>
         </TouchableOpacity>
-        <Text style={styles.text}>Remember Me</Text>
-      </View>
 
-      <View style={styles.orContainer}>
-        <Text style={styles.orText}>OR</Text>
+        <View style={styles.footerTextContainer}>
+          <Text style={styles.footerText}>Don't have an account? </Text>
+          <TouchableOpacity onPress={onSignUpPress}>
+            <Text style={[styles.footerText, styles.signInText]}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <TouchableOpacity 
-        onPress={onGoogleSignIn} 
-        activeOpacity={0.7} 
-        style={styles.googleButton}
-      >
-        <FastImage 
-          source={require('../../../../assets/Icons/GoogleIcon.png')} 
-          style={styles.googleIcon} 
-        />
-      </TouchableOpacity>
-
-      <View style={styles.footerTextContainer}>
-        <Text style={styles.footerText}>Don't have an account? </Text>
-        <TouchableOpacity onPress={onSignUpPress}>
-          <Text style={[styles.footerText, styles.signInText]}>Sign Up</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </ScrollView>
   );
 };
 

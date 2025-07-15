@@ -1,7 +1,7 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import { View, FlatList, ActivityIndicator, RefreshControl, Text, Pressable} from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, FlatList, ActivityIndicator, RefreshControl, Text, Pressable } from 'react-native';
 import CustomBtn from '../../../Components/CustomFilterBtn';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import OrderFilterModal from '../../../otherComponents/orders/orderFilter';
 import SortIcon from 'react-native-vector-icons/MaterialIcons';
 import OrderListItem from '../../../otherComponents/orders/OrderListItem';
@@ -23,8 +23,6 @@ const STATUS_CONFIG = {
   'Shipped': ['shipped'],
   'Delivered': ['delivered', 'completed'],
   'Cancelled': ['cancelled', 'refunded'],
-  // 'Return': ['return_initiated'],
-  // 'Exchange': ['exchange_initiated']
 };
 
 const TIME_RANGES = {
@@ -47,6 +45,7 @@ const Orders = () => {
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [selectedOrderForCancel, setSelectedOrderForCancel] = useState(null);
   const [localOrders, setLocalOrders] = useState([]);
+  const [socket, setSocket] = useState(null);
 
   const navigation = useNavigation();
   const dispatch = useDispatch();
@@ -55,12 +54,75 @@ const Orders = () => {
   const { items, initialized } = useSelector((state) => state.cart);
   const itemCount = items?.length;
 
+  // Initialize socket connection
+  useEffect(() => {
+    if (!user?.id) {
+      console.log("No user ID available for socket connection");
+      return;
+    }
+
+    console.log("Initializing socket with user ID:", user.id);
+    const newSocket = initializeSocket(user.id);
+    setSocket(newSocket);
+    return () => {
+      console.log("Cleaning up socket connection");
+      if (newSocket) {
+        newSocket.off("connect");
+        newSocket.off("disconnect");
+        newSocket.off("connect_error");
+        newSocket.disconnect();
+      }
+    };
+  }, [user?.id]);
+
+  // Handle order updates from socket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleOrderUpdate = (updatedOrder) => {
+      try {
+        console.log("Order Updated via Socket:", updatedOrder);
+        
+        // Update local state
+        setLocalOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order._id === updatedOrder._id ? updatedOrder : order
+          )
+        );
+        
+        // Update Redux store
+        dispatch(updateOrderFromSocket(updatedOrder));
+        
+      console.log(`Order #${updatedOrder.orderId} status updated to ${updatedOrder.status}`)
+      } catch (error) {
+        console.error("Error handling order update:", error);
+      }
+    };
+
+    socket.on("orderUpdated", handleOrderUpdate);
+
+    return () => {
+      socket.off("orderUpdated", handleOrderUpdate);
+    };
+  }, [socket, dispatch]);
+
+  // Handle user logout
+  useEffect(() => {
+    if (!user?.id && socket) {
+      console.log("User logged out - disconnecting socket");
+      socket.disconnect();
+      setSocket(null);
+    }
+  }, [user?.id, socket]);
+
+  // Initialize with Redux orders
   useEffect(() => {
     if (reduxOrders.length > 0) {
       setLocalOrders(reduxOrders);
     }
   }, [reduxOrders]);
 
+  // Load initial orders
   useEffect(() => {
     loadOrders(1);
   }, []);
@@ -87,7 +149,7 @@ const Orders = () => {
         userId: user?.id, 
         page,
         status: apiStatusParams,
-        days, // Pass days parameter to API
+        days,
         search: searchQuery
       }));
     } finally {
@@ -169,7 +231,7 @@ const Orders = () => {
       setCancelModalVisible(false);
       setTimeout(() => {
         showMessage({
-          message: error?.message || 'Failed to cancel order',
+          message:error?.message,
           type: 'danger',
           duration: 3000,
           floating: true,
@@ -267,17 +329,18 @@ const Orders = () => {
 
       <View style={styles.orderHeaderRow}>
         <Text style={styles.title}>Your Orders</Text>
-        <CustomBtn
-          width={90}
-          height={30}
-          icon={
-            <View style={{transform: [{rotate: '270deg'}]}}>
-              <SortIcon name="sync-alt" size={20} color="#1C1B1F7D" />
-            </View>
-          }
-          title="Filter"
-          onPress={() => setModalVisible(true)}
-        />
+      <CustomBtn
+  width={90}
+  height={30}
+  icon={
+    <View style={{transform: [{rotate: '270deg'}]}}>
+      <SortIcon name="sync-alt" size={20} color="#1C1B1F7D" />
+    </View>
+  }
+  title="Filter"
+  onPress={() => setModalVisible(true)}
+/>
+
       </View>
 
       {showLoader ? (
