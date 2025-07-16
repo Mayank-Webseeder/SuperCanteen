@@ -15,7 +15,8 @@ export const settingsOptions = [
   { name: 'Manage Address', screen: 'AddressListScreen' },
   { name: 'Payment Methods', screen: 'PaymentScreen' },
   { name: 'Contact Support', screen: 'ContactSupport' },
-  { name: 'Rate Us', screen: '' }, // Add screen name later if needed
+  { name: 'Bug Report', screen:'BugReportScreen'}, 
+  { name: 'Rate Us', screen: '' },
 ];
 
 export const footerItems = ['FAQ', 'ABOUT US', 'TERMS OF USE', 'PRIVACY POLICY'];

@@ -40,7 +40,7 @@ export const UNREAD_COUNT = '/notification/unread-notificationCount'
 export const MARK_AS_READ = '/notification/markAsReadById'
 export const MARK_ALL_READ = '/notification/markAllAsRead/user'
 export const SAVE_FCM_TOKEN = '/users/save-token'
-
+export const BUG_REPORT = 'bug-report/submitBugReport'
 
 
 

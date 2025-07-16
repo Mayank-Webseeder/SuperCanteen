@@ -27,6 +27,8 @@ import FAQScreen from '@screens/otherSettings/faq';
 import CouponProductsScreen from '@screens/otherSettings/Coupons/CouponProducts';
 import AddressListScreen from '@components/address/addressList';
 import RazorpayWebView from '@screens/Orders/payment/razorpayWebView';
+import BugReportScreen from '@screens/otherSettings/bugReport';
+
 const Stack = createNativeStackNavigator();
 
 const AppStack = () => {
@@ -42,6 +44,7 @@ const AppStack = () => {
       <Stack.Screen name="Offers" component={OffersScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="ContactSupport" component={ContactSupport} />
+      <Stack.Screen name="BugReportScreen" component={BugReportScreen} />
       <Stack.Screen name="SuperCanteenRewards" component={SuperCanteenRewards} />
       <Stack.Screen name="AboutUs" component={AboutUsScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
@@ -63,7 +66,6 @@ const AppStack = () => {
       <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
       <Stack.Screen name="NotificationScreen" component={NotificationScreen} />
       <Stack.Screen name="RazorpayWebView" component={RazorpayWebView} />
-
     </Stack.Navigator>
   );
 };

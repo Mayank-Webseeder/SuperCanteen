@@ -110,7 +110,7 @@ const AccountScreen = ({ navigation }) => {
   key={name}
   onPress={() => {
     if (
-      (name === 'Personal Information' || name === 'Manage Address') &&
+      (name === 'Personal Information' || name === 'Manage Address' || name === 'Bug Report' || name === 'Notifications') &&
       !token
     ) {
       navigation.reset({
