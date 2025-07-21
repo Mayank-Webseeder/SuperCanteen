@@ -33,7 +33,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const cartItems = useSelector(state => state.cart?.items || []); // Get cart items from Redux
  
   // Payment options
-  const onlineOptions = ['Pay with Razorpay'];
+
   const deliveryOption = 'Cash on Delivery';
 
   const handleOptionSelect = (option) => {
@@ -194,15 +194,15 @@ return {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>
           
-          <Text style={styles.subSectionTitle}>Online Payment Options</Text>
-          {onlineOptions.map((option) => (
+          {/* <Text style={styles.subSectionTitle}>Online Payment Options</Text> */}
+          {/* {onlineOptions.map((option) => (
             <PaymentOption 
               key={option}
               option={option}
               isSelected={selectedOption === option}
               onSelect={handleOptionSelect}
             />
-          ))}
+          ))} */}
 
           <Text style={styles.subSectionTitle}>Pay on Delivery Options</Text>
           <PaymentOption 

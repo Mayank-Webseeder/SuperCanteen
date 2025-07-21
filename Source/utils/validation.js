@@ -1,6 +1,6 @@
 // utils/validation.js
 export const validateEmail = email => {
-  const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!email.trim()) {
     return 'Email is required';

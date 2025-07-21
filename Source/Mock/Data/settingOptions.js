@@ -13,7 +13,7 @@ export const settingsOptions = [
   { name: 'Personal Information', screen: 'LoginSecurity' },
   { name: 'Notifications', screen: 'NotificationScreen' },
   { name: 'Manage Address', screen: 'AddressListScreen' },
-  { name: 'Payment Methods', screen: 'PaymentScreen' },
+  // { name: 'Payment Methods', screen: 'PaymentScreen' },
   { name: 'Contact Support', screen: 'ContactSupport' },
   { name: 'Bug Report', screen:'BugReportScreen'}, 
   { name: 'Rate Us', screen: '' },

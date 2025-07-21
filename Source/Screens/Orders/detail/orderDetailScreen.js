@@ -25,7 +25,6 @@ const OrderDetailScreen = ({ route, navigation }) => {
   const { order } = route.params;
   const scrollY = new Animated.Value(0);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  // console.log("ORDER IS ******************",order)
   
   // Header animation values
   const headerHeight = scrollY.interpolate({

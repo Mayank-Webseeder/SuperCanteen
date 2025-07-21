@@ -58,7 +58,7 @@ const Categories = ({ navigation }) => {
           </View>
         }
         ListEmptyComponent = {
-     <EmptyState allEmpty/>
+   formattedCategories.length === 0 && !categoriesLoading ? <EmptyState allEmpty /> : null
   }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainerStyle}
