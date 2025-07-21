@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from '@components/toastConfig';
 import CustomFlashMessage from '@components/flashMessage';
 import notifee, { EventType } from '@notifee/react-native';
+import { StatusBar , SafeAreaView } from 'react-native';
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   console.log('[Notifee Background Event]', type, detail);
@@ -98,11 +99,19 @@ const App = () => {
 
   return (
     <>
-      <NavigationContainer ref={navigationRef}>
+     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+      <StatusBar
+       backgroundColor="transparent"
+        barStyle="dark-content"
+        translucent={false}
+      />
+ <NavigationContainer ref={navigationRef}>
         <RootStack />
       </NavigationContainer>
       <CustomFlashMessage/>
       <Toast config={toastConfig} />
+    </SafeAreaView>
+     
     </>
   );
 };
