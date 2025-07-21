@@ -28,6 +28,7 @@ import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
+import EmptyState from '@components/emptyComponent/EmptyState';
 
 const { width } = Dimensions.get('window');
 
@@ -323,6 +324,19 @@ const HomeScreen = ({ navigation, route }) => {
       );
     }
 
+    const isAllDataEmpty = 
+  (!brands || brands.length === 0) &&
+  (!filteredSubcategories || filteredSubcategories.length === 0) &&
+  (!products || products.length === 0);
+
+  if (isAllDataEmpty) {
+    return (
+      <View style={{flex:1,alignItems:"center",justifyContent:"center"}}>
+         <EmptyState  allEmpty/>
+      </View>
+    );
+  }
+
     return (
       <Animated.View style={{ opacity }}>
         <GetCategory
@@ -345,20 +359,24 @@ const HomeScreen = ({ navigation, route }) => {
               />
             </>
           )}
-          <HorizontalLine lineStyle={styles.horizontalLine} />
+        
           {filteredSubcategories.length > 0 && (
-            <ProductCategories
+            <>
+              <HorizontalLine lineStyle={styles.horizontalLine} />
+                <ProductCategories
               navigation={navigation}
               subcategories={filteredSubcategories}
               selectedCategoryId={selectedCategoryIndex}
               gotoScreen={'ProdcutCategory'}
               mainStyle={styles.mainStyle}
             />
+            </>
+          
           )}
           
           <SectionRenderer navigation={navigation} />
           
-          <HorizontalLine containerStyle={{ marginBottom: 2 }} />
+         {products.length > 0 &&  <HorizontalLine containerStyle={{ marginBottom: 2 }} />}
           {productsLoading ? (
             <ActivityIndicator size="large" color={COLORS.green} />
           ) : (

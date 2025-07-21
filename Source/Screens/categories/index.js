@@ -6,6 +6,7 @@ import Header from '../../otherComponents/home/header';
 import CustomCategoryList from '@components/CustomCategoryList';
 import { useSelector } from 'react-redux';
 import { formatCategoryData } from '../../utils/dataFormatters';
+import EmptyState from '@components/emptyComponent/EmptyState';
 
 const Categories = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState();
@@ -56,6 +57,9 @@ const Categories = ({ navigation }) => {
             />
           </View>
         }
+        ListEmptyComponent = {
+     <EmptyState allEmpty/>
+  }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainerStyle}
       />
@@ -84,4 +88,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize(13),
     paddingBottom:19
   },
+  emptyContainer: {
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginTop: Height(100),
+},
+emptyText: {
+  fontSize: FontSize(14),
+  color: '#888',
+  textAlign: 'center',
+},
 });

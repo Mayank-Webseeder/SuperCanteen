@@ -7,11 +7,14 @@ const EmptyState = ({
   subtitle = 'Just relax, let us help you find some first-class products', 
   buttonLabel = 'Continue Shopping', 
   onPress,
-  notDisplayButton 
+  notDisplayButton,
+  allEmpty
 }) => {
   return (
     <View style={styles.container}>
-      {imageSource && (
+     
+      {allEmpty ? <Text style={styles.title}>No data</Text> : <>
+       {imageSource && (
         <Image source={imageSource} style={styles.image} resizeMode="contain" />
       )}
       <Text style={styles.title}>{title}</Text>
@@ -19,7 +22,7 @@ const EmptyState = ({
 {!notDisplayButton && <TouchableOpacity style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>{buttonLabel}</Text>
       </TouchableOpacity>}
-      
+      </>}
     </View>
   );
 };

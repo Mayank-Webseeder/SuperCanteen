@@ -138,4 +138,12 @@ retryButtonText: {
   color: '#fff',
   fontWeight: 'bold',
 },
+emptyContainer:{
+  alignItems:"center",
+  justifyContent:"center",
+  flex:1
+},
+emptyText:{
+  color:COLORS.black
+}
 });
