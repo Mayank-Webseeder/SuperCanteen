@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,61 @@ import {
 import { styles } from './styles';
 import CustomHeader from '../../../Components/CustomHeader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
+import { createContactUs, resetContactUsState } from '../../../redux/slices/contactUsSlice';
+import { showMessage } from 'react-native-flash-message';
 
 export default function ContactSupport({ navigation }) {
+  const [message, setMessage] = useState('');
+  const [charCount, setCharCount] = useState(0);
+  const dispatch = useDispatch();
+  const { loading, error, isSubmitted } = useSelector((state) => state.contactUs);
+   const { token, user } = useSelector(state => state.auth);
   const openEmail = () => {
-    Linking.openURL('mailto:support@gstourism.com');
+    Linking.openURL('mailto:binarytopfunding@gmail.com');
   };
 
   const openDialer = () => {
     Linking.openURL('tel:+919999999999');
   };
+
+  const handleMessageChange = (text) => {
+    setMessage(text);
+    setCharCount(text.length);
+  };
+
+  const handleSubmit = () => {
+    if (!message.trim()) {
+       showMessage({
+                  message: 'Please enter your message',
+                  type: 'danger',
+                  icon: 'danger',
+                  duration: 4000,
+                });
+      return;
+    }
+    
+    dispatch(createContactUs({ message }));
+  };
+
+  React.useEffect(() => {
+    if (isSubmitted) {
+        showMessage({
+                    message: 'Your message has been submitted successfully!',
+                    type: 'success',
+                    icon: 'success',
+                    duration: 3000,
+                  });
+      setMessage('');
+      setCharCount(0);
+      dispatch(resetContactUsState());
+    }
+    
+    if (error) {
+     console.log('Error', error);
+      dispatch(resetContactUsState());
+    }
+  }, [isSubmitted, error]);
 
   return (
     <View style={styles.container}>
@@ -34,7 +80,7 @@ export default function ContactSupport({ navigation }) {
             <Ionicons name="mail" size={20} color="#2E6074" />
             <Text style={styles.cardTitle}> Email Us</Text>
           </View>
-          <Text style={styles.cardValue}>support@gstourism.com</Text>
+          <Text style={styles.cardValue}>binarytopfunding@gmail.com</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.cardBox} onPress={openDialer}>
@@ -57,11 +103,19 @@ export default function ContactSupport({ navigation }) {
           numberOfLines={5}
           maxLength={500}
           textAlignVertical="top"
+          value={message}
+          onChangeText={handleMessageChange}
         />
-        <Text style={styles.charCount}>0/500</Text>
+        <Text style={styles.charCount}>{charCount}/500</Text>
 
-        <TouchableOpacity style={styles.submitBtn}>
-          <Text style={styles.submitText}>Submit</Text>
+        <TouchableOpacity 
+          style={[styles.submitBtn, loading && styles.disabledBtn]} 
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.submitText}>
+            {loading ? 'Submitting...' : 'Submit'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

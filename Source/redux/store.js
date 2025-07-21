@@ -34,6 +34,7 @@ import paymentReducer from './slices/paymentSlice'
 import orderReducer from './slices/orderSlice'
 import notificationReducer from './slices/notificationSlice'
 import bugReportReducer from './slices/bugReportSlice'
+import contactUsReducer from './slices/contactUsSlice'
 
 // Combine all reducers
 const appReducer = combineReducers({
@@ -59,7 +60,8 @@ const appReducer = combineReducers({
     payment:paymentReducer,
     orders:orderReducer,
     notification:notificationReducer,
-    bugReport:bugReportReducer
+    bugReport:bugReportReducer,
+    contactUs:contactUsReducer
  
 });
 

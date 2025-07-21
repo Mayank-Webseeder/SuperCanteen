@@ -92,4 +92,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     fontSize: 16,
   },
+  disabledBtn: {
+  backgroundColor: '#cccccc',
+},
 });
