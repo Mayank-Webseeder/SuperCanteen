@@ -65,6 +65,7 @@ const NotificationScreen = ({ navigation }) => {
   };
 
   const NotificationItem = ({ item }) => {
+    console.log("ITEM IS",item)
     const notificationTypes = {
       order: { icon: 'shopping-bag', color: COLORS.green },
       payment: { icon: 'credit-card', color: COLORS.success },

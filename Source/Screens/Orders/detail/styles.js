@@ -146,6 +146,14 @@ invoiceButtonText: {
     fontSize: 12,
     color: '#666'
   },
+  colorStyle:{
+     width: 16,
+                height: 16,
+                marginLeft: 4,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: '#ccc',
+  },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -379,20 +387,7 @@ invoiceButtonText: {
     fontFamily:"Inter-Medium",
     marginLeft: 6
   },
-  swipeAction: {
-    backgroundColor: COLORS.green,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    height: '80%',
-    marginTop: 8,
-    borderRadius: 8
-  },
-  swipeActionText: {
-    color: '#FFF',
-    fontSize: 12,
-    marginTop: 4
-  },
+ 
   divider: {
     height: 1,
     backgroundColor: '#EEE',

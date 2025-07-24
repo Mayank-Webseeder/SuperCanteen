@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
   },
   content: {
   
-    paddingBottom: 10,
+    paddingBottom: Height(60),
   },
   mainStyle:{
     paddingHorizontal:24
@@ -68,7 +68,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
   },
   updateSection: {
-    marginTop: 32,
+    marginTop: 0,
     paddingTop: 16,
   
   },

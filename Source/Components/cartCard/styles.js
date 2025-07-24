@@ -394,8 +394,12 @@ removeText: {
     borderColor: '#d1e3ea', 
     alignSelf: 'flex-start',
      marginTop: Height(10),
+     flexDirection:"row",
+     alignItems:"center"
   },
-
+  colorStyle:{
+    height:13,width:13,borderRadius:40,
+  },
   variantPillText: {
     fontSize: 13,
     fontWeight: '500',

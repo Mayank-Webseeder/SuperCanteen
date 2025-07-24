@@ -7,6 +7,7 @@ import CustomCategoryList from '@components/CustomCategoryList';
 import { useSelector } from 'react-redux';
 import { formatCategoryData } from '../../utils/dataFormatters';
 import EmptyState from '@components/emptyComponent/EmptyState';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Categories = ({ navigation }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState();

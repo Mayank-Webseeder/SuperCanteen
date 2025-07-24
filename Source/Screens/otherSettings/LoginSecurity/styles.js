@@ -8,8 +8,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   content: {
-    padding: 15,
-    paddingBottom: 30,
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+    paddingVertical:2
   },
   section: {
     marginBottom: 20,

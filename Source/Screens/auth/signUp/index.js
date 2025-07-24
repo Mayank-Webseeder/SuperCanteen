@@ -12,7 +12,6 @@ import { Height, Width } from '../../../constants';
 import { validateEmail, validateName, validatePassword } from '../../../utils/validation';
 import { useSelector, useDispatch } from 'react-redux';
 import { signupUser } from '../../../redux/slices/authSlice';
-import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { showMessage } from 'react-native-flash-message';
 import { styles } from './styles';
@@ -84,9 +83,7 @@ const SignUpScreen = () => {
     }
   }, [formData, validateForm, dispatch]);
 
-  const onGoogleSignIn = useCallback(() => {
-    console.log('Google Sign In pressed');
-  }, []);
+
 
   const onSignInPress = useCallback(() => {
     navigation.navigate('Signin');
@@ -158,19 +155,6 @@ const SignUpScreen = () => {
           <Text style={styles.dividerText}>OR</Text>
           <View style={styles.dividerLine} />
         </View>
-
-        {/* Modern Google Button */}
-        <TouchableOpacity 
-          onPress={onGoogleSignIn} 
-          activeOpacity={0.7} 
-          style={styles.modernGoogleButton}
-        >
-          <FastImage 
-            source={require('../../../../assets/Icons/GoogleIcon.png')} 
-            style={styles.modernGoogleIcon} 
-          />
-          <Text style={styles.modernGoogleButtonText}>Continue with Google</Text>
-        </TouchableOpacity>
 
         <View style={styles.footerTextContainer}>
           <Text style={styles.footerText}>Already have an account? </Text>

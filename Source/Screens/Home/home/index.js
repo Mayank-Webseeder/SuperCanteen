@@ -52,7 +52,7 @@ const HomeScreen = ({ navigation, route }) => {
     useSelector(state => state.subCategory, shallowEqual);
   const { products, loading: productsLoading, error: productsError } = 
     useSelector(state => state.product, shallowEqual);
-
+    
   // Handle category selection from route params
   useEffect(() => {
     if (route.params?.selectedCategoryId && route.params.selectedCategoryId !== selectedCategoryIndex) {
@@ -324,7 +324,8 @@ const HomeScreen = ({ navigation, route }) => {
       );
     }
 
-    const isAllDataEmpty = 
+  const isAllDataEmpty = 
+  (!categories.length === 0) &&  
   (!brands || brands.length === 0) &&
   (!filteredSubcategories || filteredSubcategories.length === 0) &&
   (!products || products.length === 0);
@@ -371,7 +372,6 @@ const HomeScreen = ({ navigation, route }) => {
               mainStyle={styles.mainStyle}
             />
             </>
-          
           )}
           
           <SectionRenderer navigation={navigation} />
@@ -386,14 +386,15 @@ const HomeScreen = ({ navigation, route }) => {
               products={products}
             />
           )}
-        </View>
+        </View> 
       </Animated.View>
     );
   };
 
   return (
-    <View style={styles.container}>
+     <View style={styles.container}>
       <FlatList
+      contentContainerStyle={{paddingBottom:40}}
         data={[stickyHeader, renderContent()]}
         renderItem={({ item }) => item}
         keyExtractor={(_, index) => index.toString()}

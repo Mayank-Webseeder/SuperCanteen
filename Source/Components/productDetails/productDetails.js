@@ -56,6 +56,9 @@ const ProductDetails = ({ navigation, route }) => {
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
   
+
+  console.log("PRODUCT DATA IS",productData?.outOfStock)
+
   // Get image URLs for display
   const getImageUrls = (images) =>
     images?.length > 0
@@ -244,6 +247,8 @@ const ProductDetails = ({ navigation, route }) => {
 
   // Buy Now handler
   const handleBuyNow = () => {
+  try {
+    // Check user authentication
     if (!user || !user.username) {
       navigation.reset({
         index: 0,
@@ -252,19 +257,86 @@ const ProductDetails = ({ navigation, route }) => {
       return;
     }
 
-    const priceDetails = getPriceDetails();
+    // Stock validation
+    const availableStock = productData.countInStock || 0;
+    if (availableStock <= 0) {
+      showMessage({ message: 'Out of stock', type: 'danger' });
+      return;
+    }
+
+    // Handle variant stock
+    let variantStock = productData.countInStock || 0;
+    if (selectedVariant?.countInStock !== undefined) {
+      variantStock = selectedVariant.countInStock;
+    } 
+    else if (selectedVariant?.color && productData?.variants) {
+      const colorVariant = productData.variants.find(v => 
+        v.color?.code === selectedVariant.color?.code
+      );
+      variantStock = colorVariant?.countInStock ?? variantStock;
+    }
+    else if (selectedVariant?._id && productData?.variants) {
+      const variant = productData.variants.find(v => v._id === selectedVariant._id);
+      variantStock = variant?.countInStock ?? variantStock;
+    }
+
+    // Check variant stock
+    if (variantStock <= 0) {
+      showMessage({
+        message: selectedVariant?.color?.name 
+          ? `The ${selectedVariant.color.name} color is out of stock` 
+          : 'This item is out of stock',
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
+
+    // Check if quantity exceeds available stock
+    if (1 > variantStock) {
+      showMessage({
+        message: selectedVariant?.color?.name
+          ? `Only ${variantStock} ${selectedVariant.color.name} items available`
+          : `Only ${variantStock} items available`,
+        type: 'danger',
+        duration: 4000,
+      });
+      return;
+    }
+
+    // Variant selection validation
+    const hasSizeVariants = productData?.variants?.some(variant =>
+      variant?.name?.toLowerCase()?.includes('size')
+    );
     
+    if (hasSizeVariants && productData?.variants?.length > 0 && !selectedVariant) {
+      setSelectionError("Please select a size for this color");
+      return;
+    }
+
+    // Get calculated prices
+    const priceDetails = calculateProductPrice(
+      productData,
+      selectedVariant,
+      localAppliedCoupon
+    );
+
+    // Navigate to checkout
     navigation.navigate('ProductCheckoutScreen', { 
       product: {
         ...productData,
         ...priceDetails,
         ...(selectedVariant && { selectedVariant }),
         quantity: 1,
-        isSingleProductCheckout: true
+        isSingleProductCheckout: true,
+        availableStock: variantStock // Pass available stock to checkout
       },
-     
     });
-  };
+
+  } catch (error) {
+    showMessage({ message: error.message, type: 'danger' });
+  }
+};
 
   // Handle animation completion
   const handleAnimationComplete = () => {
@@ -397,10 +469,10 @@ const ProductDetails = ({ navigation, route }) => {
           </>
         )}
         
-        <AddressRow
+    {user?.id &&     <AddressRow
           navigation={navigation}
-          address={formattedProduct.shippingAddress}
-        />
+          address={user?.addresses}
+        />}
         
         <View style={styles.infoRow}>
           <PolicyIcon />
@@ -413,7 +485,7 @@ const ProductDetails = ({ navigation, route }) => {
         
         <View style={[styles.infoRow, { marginTop: 7 }]}>
           <CurruncyRupees />
-          <Text style={styles.infoText}>Cash on Delivery & UPI Available</Text>
+          <Text style={styles.infoText}>Cash on Delivery</Text>
         </View>
         
         <View style={styles.borderStyle} />

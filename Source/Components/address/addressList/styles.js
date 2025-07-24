@@ -1,14 +1,17 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet,Dimensions } from "react-native";
 import { Height } from "../../../constants";
+
+const { width, height } = Dimensions.get('window');
+
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  listContainer: {
-    padding: 16,
-    paddingBottom: 80,
+   listContainer: {
+    padding: width * 0.04, // 4% of screen width
+    paddingBottom: height * 0.2, // 10% of screen height
   },
   loadingContainer:{
     flex:1,
@@ -68,6 +71,10 @@ export const styles = StyleSheet.create({
     marginLeft: 4,
     fontFamily: 'Inter-SemiBold',
   },
+  defaultAddressCard: {
+  borderLeftWidth: 4,
+  borderLeftColor: '#2E6074',
+},
   defaultBadge: {
     backgroundColor: '#27ae60',
     borderRadius: 12,
@@ -80,6 +87,18 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Inter-Bold',
   },
+  setDefaultButton: {
+  padding: 2,
+  borderRadius: 4,
+  borderWidth: 1,
+  borderColor: '#2E6074',
+  marginLeft: 10,
+  paddingHorizontal:10
+},
+setDefaultButtonText: {
+  color: '#2E6074',
+  fontSize: 10,
+},
   actionsContainer: {
     flexDirection: 'row',
   },
@@ -117,7 +136,7 @@ export const styles = StyleSheet.create({
   },
   addButton: {
     position: 'absolute',
-    bottom: 24,
+    bottom: Height(55),
     right: 24,
     backgroundColor: '#2E6074',
     flexDirection: 'row',

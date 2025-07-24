@@ -5,8 +5,11 @@ import {
   Modal,
   Pressable,
   TouchableOpacity,
+  Dimensions
 } from 'react-native';
 import { styles } from './styles';
+
+const { width } = Dimensions.get('window');
 
 const STATUS_OPTIONS = [
   'All Orders',
@@ -15,8 +18,6 @@ const STATUS_OPTIONS = [
   'Shipped',
   'Delivered',
   'Cancelled',
-  // 'Return',
-  // 'Exchange'
 ];
 
 const TIME_OPTIONS = [
@@ -37,6 +38,9 @@ const OrderFilterModal = ({
   onApply,
   onCancel,
 }) => {
+  // Calculate button width based on screen size
+  const buttonWidth = (width - 50) / 2; // 60 = padding + gap
+
   return (
     <Modal
       visible={visible}
@@ -56,12 +60,13 @@ const OrderFilterModal = ({
           {/* Status Group */}
           <View style={styles.filterSection}>
             <Text style={styles.sectionTitle}>Order Status</Text>
-            <View style={styles.optionsContainer}>
+            <View style={styles.gridContainer}>
               {STATUS_OPTIONS.map((option) => (
                 <Pressable
                   key={`status-${option}`}
                   style={[
                     styles.optionButton,
+                    { width: buttonWidth },
                     selectedStatuses.includes(option) && styles.optionSelected,
                   ]}
                   onPress={() => toggleStatus(option)}
@@ -71,6 +76,8 @@ const OrderFilterModal = ({
                       styles.optionText,
                       selectedStatuses.includes(option) && styles.optionTextSelected,
                     ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   >
                     {option}
                   </Text>
@@ -82,12 +89,13 @@ const OrderFilterModal = ({
           {/* Time Group */}
           <View style={styles.filterSection}>
             <Text style={styles.sectionTitle}>Time Range</Text>
-            <View style={styles.optionsContainer}>
+            <View style={styles.gridContainer}>
               {TIME_OPTIONS.map((option) => (
                 <Pressable
                   key={`time-${option}`}
                   style={[
                     styles.optionButton,
+                    { width: buttonWidth },
                     selectedTime === option && styles.optionSelected,
                   ]}
                   onPress={() => setSelectedTime(option)}
@@ -97,6 +105,8 @@ const OrderFilterModal = ({
                       styles.optionText,
                       selectedTime === option && styles.optionTextSelected,
                     ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   >
                     {option}
                   </Text>

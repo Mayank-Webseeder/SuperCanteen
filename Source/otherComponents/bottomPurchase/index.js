@@ -1,8 +1,9 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity,SafeAreaView, Dimensions } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import CustomAuthButton from '../../Components/CustomAuthButton';
 import { COLORS, Width } from '../../constants';
 import { styles } from './styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BottomPurchaseBar = ({
   onSharePress,
@@ -12,9 +13,12 @@ const BottomPurchaseBar = ({
   selectionError,
 }) => {
   const isDisabled = selectionError;
+  const insets = useSafeAreaInsets();
+  const {height} = Dimensions.get('window')
 
   return (
-    <View style={styles.container}>
+     <SafeAreaView edges={['bottom']} style={styles.safeArea}>
+    <View style={[styles.container,   { paddingBottom: insets.bottom > 0 ? insets.bottom + 10 : height * 0.02 }  ]}>
       <TouchableOpacity style={styles.iconButton} onPress={onSharePress}>
         <FontAwesome name="share-alt" size={20} color="#2E6074" />
       </TouchableOpacity>
@@ -54,6 +58,7 @@ const BottomPurchaseBar = ({
         disabled={isDisabled}
       />
     </View>
+    </SafeAreaView>
   );
 };
 

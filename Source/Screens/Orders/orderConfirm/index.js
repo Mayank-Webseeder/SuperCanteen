@@ -23,11 +23,17 @@ const OrderConfirm = ({ route }) => {
     }).start();
 
     const timer = setTimeout(() => {
-      navigation.navigate('OrderConfirmFinal', { orderId });
+       navigation.navigate('OrderConfirmFinal', { orderId });
     }, 5000);
 
     return () => clearTimeout(timer);
   }, [orderId]);
+
+
+    const createdAt = new Date(currentOrder?.createdAt);
+ const deliveryDays = currentOrder?.orderItems?.[0]?.product?.deliveryDays;
+const deliveryDate = new Date(createdAt.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
+
 
   return (
     <View style={styles.container}>
@@ -45,16 +51,18 @@ const OrderConfirm = ({ route }) => {
         <Text style={styles.subtitle}>
           Your order #{currentOrder?.orderId} has been confirmed
         </Text>
+       
+       {  currentOrder?.orderItems?.[0]?.product?.deliveryDays &&  <View style={styles.deliveryInfo}>
         
-        <View style={styles.deliveryInfo}>
-          <Text style={styles.deliveryText}>
-            Estimated Delivery: {new Date(currentOrder?.createdAt).toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'short', 
-              day: 'numeric' 
-            })}
-          </Text>
-        </View>
+         <Text style={styles.timelineDate}>
+               Expected by {deliveryDate.toLocaleDateString('en-US', {
+                 weekday: 'long',
+                 month: 'short',
+                 day: 'numeric'
+               })}
+             </Text>
+        </View>} 
+        
       </Animated.View>
     </View>
   );

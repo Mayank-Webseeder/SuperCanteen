@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: Height(25),
+    bottom: Height(2),
     left: 0,
     right: 0,
     flexDirection: 'row',

@@ -3,6 +3,8 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../../constants";
 import { Height, Width } from '@constants/index';
 
+
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -15,7 +17,8 @@ export const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Width(12),
-    paddingBottom: Height(20),
+    paddingBottom:Height(50)
+  
   },
   card: {
     backgroundColor: COLORS.white,
@@ -88,20 +91,6 @@ export const styles = StyleSheet.create({
     color: COLORS.green,
     fontWeight: '600',
   },
-  defaultContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Height(8),
-    padding: Height(8),
-    borderRadius: 8,
-    backgroundColor: '#f8f9fa',
-  },
-  defaultText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: COLORS.green,
-    fontFamily: 'Inter-Medium',
-  },
   saveButton: {
     height: Height(46),
     borderRadius: 8,
@@ -118,7 +107,6 @@ export const styles = StyleSheet.create({
   },
   buttonView:{
     marginHorizontal:20,
-    marginBottom:8,
-    
+    bottom:Height(35)
   }
 });

@@ -10,10 +10,11 @@ import CustomAddressTextInput from '../../../Components/TextInput/customAddressT
 import CustomButton from '../../../Components/CustomBotton';
 import { styles } from './styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { addAddress, updateAddress } from '../../../redux/slices/addressSlice';
+import { addAddress,  updateAddress } from '../../../redux/slices/addressSlice';
 
 const CreateAddressScreen = ({ navigation, route }) => {
   const { addressToEdit } = route.params || {};
+  const extractedAddress = Array.isArray(addressToEdit) ? addressToEdit[0] : addressToEdit;
   const { user } = useSelector(state => state.auth);
   const { loading } = useSelector(state => state.address);
   const dispatch = useDispatch();
@@ -31,15 +32,37 @@ const CreateAddressScreen = ({ navigation, route }) => {
     isDefault: false,
   });
 
-  useEffect(() => {
-    if (addressToEdit) {
-      setFormData({
-        ...addressToEdit,
-        contact: addressToEdit.contactNo, 
-        pincode: addressToEdit.postalCode
-      });
-    }
-  }, [addressToEdit]);
+ useEffect(() => {
+  if (addressToEdit) {
+    setFormData({
+      name: emptyOrValue(addressToEdit.name),
+      contact: emptyOrValue(addressToEdit.contactNo),
+      address: emptyOrValue(addressToEdit.address),
+      city: emptyOrValue(addressToEdit.city),
+      state: emptyOrValue(addressToEdit.state),
+      pincode: emptyOrValue(addressToEdit.postalCode),
+      country: emptyOrValue(addressToEdit.country),
+      addressType: emptyOrValue(addressToEdit.addressType) || 'Home',
+      isDefault: addressToEdit?.isDefault || false,
+    });
+  }
+}, [addressToEdit]);
+
+useEffect(() => {
+  if (extractedAddress) {
+    setFormData({
+      name: emptyOrValue(extractedAddress.name),
+      contact: emptyOrValue(extractedAddress.contactNo),
+      address: emptyOrValue(extractedAddress.address),
+      city: emptyOrValue(extractedAddress.city),
+      state: emptyOrValue(extractedAddress.state),
+      pincode: emptyOrValue(extractedAddress.postalCode),
+      country: emptyOrValue(extractedAddress.country),
+      addressType: emptyOrValue(extractedAddress.addressType) || 'Home',
+      isDefault: extractedAddress?.isDefault || false,
+    });
+  }
+}, [extractedAddress]);
 
   const handleInputChange = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -71,56 +94,59 @@ const CreateAddressScreen = ({ navigation, route }) => {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const saveAddressData = useCallback(async () => {
-    if (!validateForm()) return;
+  const emptyOrValue = (value) => (value === null || value === undefined ? '' : value);
 
-    const mappedAddress = {
-      name: formData.name,
-      contactNo: formData.contact,
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      postalCode: formData.pincode,
-      country: formData.country,
-      addressType: formData.addressType,
-    };
 
-    try {
-      if (addressToEdit) {
-        await dispatch(updateAddress({
-          userId: user.id,
-          addressId: addressToEdit._id,
-          updatedAddress: mappedAddress
-        })).unwrap();
-         showMessage({
-              message: 'Address updated successfully!',
-              type: 'success',
-              icon: 'success',
-              duration: 3000,
-            });
-      } else {
-        await dispatch(addAddress({
-          userId: user.id,
-          address: mappedAddress
-        })).unwrap();
-         showMessage({
-              message: 'Address saved successfully!',
-              type: 'success',
-              icon: 'success',
-              duration: 3000,
-            });
-      }
+// Modify the saveAddressData function
+const saveAddressData = useCallback(async () => {
+  if (!validateForm()) return;
 
-      navigation.goBack();
-    } catch (error) {
-        showMessage({
-            message: error?.message || 'Failed to save the address.',
-            type: 'danger',
-            icon: 'danger',
-            duration: 4000,
-          });
+  const mappedAddress = {
+    name: formData.name,
+    contactNo: formData.contact,
+    address: formData.address,
+    city: formData.city,
+    state: formData.state,
+    postalCode: formData.pincode,
+    country: formData.country,
+    addressType: formData.addressType,
+    isDefault: formData.isDefault // Include this in the payload
+  };
+
+  try {
+    let savedAddress = null;
+
+    if (addressToEdit) {
+      console.log("ADDRESS TO EDIT")
+      const result = await dispatch(updateAddress({
+        userId: user.id,
+        addressId: addressToEdit._id,
+        updatedAddress: mappedAddress
+      })).unwrap();
+      savedAddress = result.updatedAddress;
+    } else {
+      const result = await dispatch(addAddress({
+        userId: user.id,
+        address: mappedAddress
+      })).unwrap();
+      savedAddress = result;
     }
-  }, [formData, validateForm, dispatch, user.id, addressToEdit, navigation]);
+
+    showMessage({
+      message: addressToEdit ? 'Address updated successfully!' : 'Address saved successfully!',
+      type: 'success',
+      duration: 3000,
+    });
+    
+    navigation.goBack();
+  } catch (error) {
+    showMessage({
+      message: error?.message || 'Failed to save the address.',
+      type: 'danger',
+      duration: 4000,
+    });
+  }
+}, [formData, validateForm, dispatch, user.id, addressToEdit, navigation]);
 
   return (
     <KeyboardAvoidingView
@@ -128,7 +154,7 @@ const CreateAddressScreen = ({ navigation, route }) => {
     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
   >
-     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+     {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
  <View style={styles.container}>
       <CustomCommonHeader
         navigation={navigation}
@@ -260,21 +286,8 @@ const CreateAddressScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             ))}
           </View>
-
-          <TouchableOpacity
-            style={styles.defaultContainer}
-            onPress={() => handleInputChange('isDefault', !formData.isDefault)}
-          >
-            <Icon
-              name={formData.isDefault ? 'check-box' : 'check-box-outline-blank'}
-              size={20}
-              color={formData.isDefault ? '#2E6074' : '#95a5a6'}
-            />
-            <Text style={styles.defaultText}>Set as default address</Text>
-          </TouchableOpacity>
         </View>
-
-        
+      
       </ScrollView>
       <View style={styles.buttonView}>
    <CustomButton
@@ -287,7 +300,7 @@ const CreateAddressScreen = ({ navigation, route }) => {
    
     </View>
 
-     </TouchableWithoutFeedback>
+     {/* </TouchableWithoutFeedback> */}
 
    
     </KeyboardAvoidingView>

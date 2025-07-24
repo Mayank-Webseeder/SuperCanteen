@@ -33,8 +33,6 @@ if (isSingleProduct) {
   const taxPercent = product.tax || 0;
 
   const tax = Math.round((actualPrice * taxPercent) / 100); // Round to nearest integer
-console.log("TAX IS", product.tax);
-
   // ✅ COUPON DISCOUNT
   const couponDiscount = appliedCoupon?.percentage
     ? (actualPrice * appliedCoupon.percentage) / 100
@@ -114,6 +112,7 @@ return {
 
   }, [product, cartItems, propItems, priceDetails, appliedCoupons]);
 
+  console.log("TAX AMOUNT IS",taxAmount)
 
   return (
     <View style={styles.container}>

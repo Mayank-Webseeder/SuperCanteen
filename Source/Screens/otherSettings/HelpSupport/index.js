@@ -19,6 +19,7 @@ import FastImage from 'react-native-fast-image';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserOrders } from '../../../redux/slices/orderSlice';
 import EmptyState from '@components/emptyComponent/EmptyState';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Status mapping configuration
 const STATUS_CONFIG = {

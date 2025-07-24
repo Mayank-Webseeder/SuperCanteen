@@ -15,6 +15,7 @@ import { fetchOrderById } from '../../../../redux/slices/orderSlice';
 import { COLORS } from '@constants';
 import { styles } from './styles';
 import { IMGURL } from '../../../../utils/dataFormatters'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const OrderConfirmFinal = () => {
   const navigation = useNavigation();
@@ -24,6 +25,9 @@ const OrderConfirmFinal = () => {
   const { currentOrder } = useSelector(state => state.orders);
   const [loading, setLoading] = useState(true);
   const fadeAnim = new Animated.Value(0);
+  const insets = useSafeAreaInsets();
+
+  console.log("order id",orderId)
   
   useEffect(() => {
     dispatch(fetchOrderById(orderId))
@@ -48,12 +52,12 @@ const OrderConfirmFinal = () => {
   const matchedVariant = item.product.variants.find(
     variant => variant._id === item.variantId
   );
-
+  
   return ( // ✅ return is required
     <View key={index} style={styles.itemCard}>
       <FastImage
         source={{
-          uri: matchedVariant
+          uri:matchedVariant?.images?.[0]
             ? `${IMGURL}${matchedVariant?.images?.[0]}`
             : `${IMGURL}${item.image}`
         }}
@@ -94,6 +98,13 @@ const OrderConfirmFinal = () => {
 };
 
 
+console.log("CURRUNT ORDER IS",currentOrder?.createdAt)
+
+  const createdAt = new Date(currentOrder?.createdAt);
+ const deliveryDays = currentOrder?.orderItems?.[0]?.product?.deliveryDays;
+const deliveryDate = new Date(createdAt.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
+
+  
   return (
     <Animated.View style={styles.container}>
       <CustomCommonHeader 
@@ -182,16 +193,17 @@ const OrderConfirmFinal = () => {
           
           <View style={styles.timelineItem}>
             <View style={[styles.timelineDot, { backgroundColor: '#BDBDBD' }]} />
-            <View style={styles.timelineContent}>
+         {currentOrder?.orderItems?.[0]?.product?.deliveryDays &&  <View style={styles.timelineContent}>
               <Text style={[styles.timelineTitle, { color: '#757575' }]}>Delivered</Text>
-              <Text style={styles.timelineDate}>
-                Expected by {new Date(currentOrder?.createdAt).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-              </Text>
-            </View>
+ <Text style={styles.timelineDate}>
+      Expected by {deliveryDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric'
+      })}
+    </Text>
+            </View> }
+           
           </View>
         </View>
 
@@ -230,7 +242,7 @@ const OrderConfirmFinal = () => {
       </ScrollView>
 
       {/* Footer Buttons */}
-      <View style={styles.footer}>    
+      <View style={[styles.footer,{ paddingBottom: insets.bottom + 10 }]}>    
         <TouchableOpacity 
           style={styles.shopButton}
           onPress={() =>   navigation.navigate('Main', { screen: 'Orders' })}

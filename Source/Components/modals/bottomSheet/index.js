@@ -19,7 +19,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = Height(650);
 
-const filterCategories = ['Brand', 'Color', 'Size', 'New', 'Popular'];
+// const filterCategories = ['Brand', 'Color', 'Size', 'New', 'Popular'];
+const filterCategories = ['Brand', 'New', 'Popular'];
 
 const CustomBottomSheet = ({ 
   visible, 
@@ -36,7 +37,7 @@ const CustomBottomSheet = ({
   const [selectedBrands, setSelectedBrands] = useState(initialFilters.brands || []);
   const [isNew, setIsNew] = useState(initialFilters.isNew || false);
   const [isPopular, setIsPopular] = useState(initialFilters.isPopular || false);
-
+  
   useEffect(() => {
     if (visible) {
       Animated.timing(slideAnim, {
@@ -169,37 +170,37 @@ const CustomBottomSheet = ({
       </View>
     );
 
-    const renderSizes = () => (
-      <View style={styles.rightPaneContainer}>
-        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-          <Text style={styles.sectionTitle}>Select Sizes</Text>
-          <ResetButton/>
-        </View>
-        <View style={styles.optionsGrid}>
-          {filterOptions.sizes.length === 0 ? (
-            <Text style={styles.emptyText}>No sizes available for this product.</Text>
-          ) : (
-            filterOptions.sizes.map(size => (
-              <TouchableOpacity
-                key={size}
-                style={[
-                  styles.sizeOption,
-                  selectedSizes.includes(size) && styles.sizeOptionSelected
-                ]}
-                onPress={() => toggleSelection(size, 'size')}
-              >
-                <Text style={[
-                  styles.sizeText,
-                  selectedSizes.includes(size) && styles.sizeTextSelected
-                ]}>
-                  {size}
-                </Text>
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-      </View>
-    );
+    // const renderSizes = () => (
+    //   <View style={styles.rightPaneContainer}>
+    //     <View style={{flexDirection:"row",justifyContent:"space-between"}}>
+    //       <Text style={styles.sectionTitle}>Select Sizes</Text>
+    //       <ResetButton/>
+    //     </View>
+    //     <View style={styles.optionsGrid}>
+    //       {filterOptions.sizes.length === 0 ? (
+    //         <Text style={styles.emptyText}>No sizes available for this product.</Text>
+    //       ) : (
+    //         filterOptions.sizes.map(size => (
+    //           <TouchableOpacity
+    //             key={size}
+    //             style={[
+    //               styles.sizeOption,
+    //               selectedSizes.includes(size) && styles.sizeOptionSelected
+    //             ]}
+    //             onPress={() => toggleSelection(size, 'size')}
+    //           >
+    //             <Text style={[
+    //               styles.sizeText,
+    //               selectedSizes.includes(size) && styles.sizeTextSelected
+    //             ]}>
+    //               {size}
+    //             </Text>
+    //           </TouchableOpacity>
+    //         ))
+    //       )}
+    //     </View>
+    //   </View>
+    // );
 
     const renderNew = () => (
       <View style={styles.rightPaneContainer}>
@@ -247,8 +248,8 @@ const CustomBottomSheet = ({
 
     return {
       Brand: renderBrands,
-      Color: renderColors,
-      Size: renderSizes,
+      // Color: renderColors,
+      // Size: renderSizes,
       New: renderNew,
       Popular: renderPopular
     };

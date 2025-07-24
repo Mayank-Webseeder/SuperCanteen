@@ -95,35 +95,7 @@ const AboutUsScreen = ({ navigation }) => {
             </View>
           </View>
         </View>
-        
-        {/* Team Section */}
-        <View style={[styles.section,{marginTop:Height(11)}]}>
-          <Text style={styles.sectionTitle}>Meet The Team</Text>
-          <Text style={styles.sectionText}>
-            Behind every great shopping experience is an amazing team. 
-            We're a diverse group of designers, developers, and customer 
-            service experts united by our passion for e-commerce.
-          </Text>
-          
-          <View style={styles.teamGrid}>
-            <View style={styles.teamMember}>
-              <View style={styles.teamIcon}>
-                <Icon name="person" size={30} color={COLORS.primary} />
-              </View>
-              <Text style={styles.teamName}>Alex Johnson</Text>
-              <Text style={styles.teamRole}>Founder & CEO</Text>
-            </View>
             
-            <View style={styles.teamMember}>
-              <View style={styles.teamIcon}>
-                <Icon name="person" size={30} color={COLORS.primary} />
-              </View>
-              <Text style={styles.teamName}>Sarah Williams</Text>
-              <Text style={styles.teamRole}>Head of Design</Text>
-            </View>
-          </View>
-        </View>
-        
         {/* CTA Section */}
         <View style={styles.ctaContainer}>
           <Icon name="shopping-cart" size={40} color={COLORS.white} style={styles.ctaIcon} />

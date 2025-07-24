@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Dimensions } from 'react-native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
 import CustomAuthButton from '../../../../Components/CustomAuthButton';
 import { Width } from "@constants";
@@ -14,10 +14,12 @@ import { showMessage } from 'react-native-flash-message';
 import { calculateFinalAmount } from '../../../../utils/helper';
 import { COLORS } from '@constants';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ProductItemCard = ({ item }) => {
   const productData = item.product || item;
   const variantDetails = item.variantDetails || productData.selectedVariant;
+ 
 
   const mrp = variantDetails?.additionalPrice
     ? (productData?.mrp || 0) + variantDetails?.additionalPrice
@@ -25,7 +27,9 @@ const ProductItemCard = ({ item }) => {
 
   const toShowImage = variantDetails?.images?.[0] || productData?.images?.[0];
   const displayPrice = item.selectedPrice || productData?.finalPrice || productData?.offerPrice || productData?.price;
-
+  const variantColor = variantDetails?.color
+  const variantSize = variantDetails?.size
+   console.log("VARIANT DETAILS IS====7777777777777========>",variantDetails)
   return (
     <View style={[productStyles.container, { marginBottom: item.product ? 13 : 8 }]}>
       <FastImage
@@ -41,17 +45,34 @@ const ProductItemCard = ({ item }) => {
           )}
         </View>
         <Text style={productStyles.qty}>Qty: {item.qty || 1}</Text>
-        <View style={productStyles.deliveryEstimate}>
+          <View style={productStyles.variantContainer}>
+                    {variantSize && (
+                      <View style={productStyles.variantPill}>
+                        <Text style={productStyles.variantPillText}>Size: {variantSize}</Text>
+                      </View>
+                    )}
+                    {variantColor?.code && (
+                      <View style={productStyles.variantPill}>
+                        <Text style={productStyles.variantPillText}>Color : </Text>
+                        <View style={[productStyles.colorStyle,{backgroundColor:variantColor?.code}]}/>
+                      </View>
+                    )}
+                  </View>
+        {productData?.deliveryDays && (
+           <View style={productStyles.deliveryEstimate}>
           <Icon
             name="truck-delivery-outline"
             size={16}
             color={COLORS.green}
             style={productStyles.deliveryIcon}
           />
+
           <Text style={productStyles.deliveryText}>
-            Est. delivery: {moment().add(productData?.deliveryDays || 3, 'days').format('Do MMM')}
+            Est. delivery: {moment().add(productData?.deliveryDays, 'days').format('Do MMM')}
           </Text>
         </View>
+        )}
+       
       </View>
     </View>
   );
@@ -63,6 +84,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
   const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
   const { items: cartItems } = useSelector(state => state.cart);
+    const insets = useSafeAreaInsets();
 
   const appliedCoupon = product?.isSingleProductCheckout
     ? product?.appliedCoupon || appliedCoupons[product?._id]
@@ -92,6 +114,8 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
       fromCart
     });
   };
+
+    const {height} = Dimensions.get('window')  
 
   return (
     <View style={styles.container}>
@@ -130,7 +154,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
         />
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer,{ paddingBottom: insets.bottom > 0 ? insets.bottom + 10 : height * 0.03 }]}>
         <View style={styles.paymentButton}>
           <Text style={styles.paymentText}>SELECT PAYMENT METHOD</Text>
         </View>

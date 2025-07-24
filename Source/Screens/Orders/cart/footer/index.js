@@ -2,11 +2,14 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 import { calculateFinalAmount } from '../../../../utils/helper'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Footer = ({ navigation }) => {
   const { items: cartItems } = useSelector(state => state.cart);
  const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
+    const insets = useSafeAreaInsets();
+    
   const finalAmount = calculateFinalAmount({
      cartItems,
      appliedCoupon:appliedCoupons
@@ -27,11 +30,9 @@ const Footer = ({ navigation }) => {
       navigation.navigate('ProductCheckoutScreen', { finalAmount , fromCart:true  });
     }
   };
-
-
-
+  
   return (
-    <View style={styles.footerContainer}>
+    <View style={[styles.footerContainer, { paddingBottom: insets.bottom + 10 }]}>
       <View style={styles.priceContainer}>
         <Text style={styles.itemCount}>{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</Text>
         <View style={styles.priceWrapper}>

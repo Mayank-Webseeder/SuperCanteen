@@ -253,7 +253,7 @@ const WishlistScreen = ({ navigation }) => {
   }, [skeletonAnimation]);
 
   const renderItem = useCallback(({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('ProductDetails', { productId: item?._id })} style={styles.card}>
       <TouchableOpacity
         style={styles.closeBtn}
         onPress={() => handleRemoveItem(item.wishlistId)}
@@ -304,7 +304,7 @@ const WishlistScreen = ({ navigation }) => {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   ), [handleRemoveItem, onAddToCart, cartLoadingId]);
 
   if (!isDataReady && !wishlistItems.length) {

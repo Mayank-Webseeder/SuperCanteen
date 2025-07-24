@@ -50,6 +50,7 @@ const OrderDetailScreen = ({ route, navigation }) => {
 
 const handleDownloadInvoice = async () => {
   try {
+    console.log("ORDER IS",order)
     const pdfPath = await generateAndSaveInvoice(order);
     console.log('PDF saved at:', pdfPath);
     if (Platform.OS === 'android') {
@@ -120,15 +121,6 @@ const handleDownloadInvoice = async () => {
     <Swipeable
       friction={2}
       leftThreshold={30}
-      renderRightActions={() => (
-        <TouchableOpacity 
-          style={styles.swipeAction}
-          onPress={() => navigation.navigate('ProductDetails', { productId: item.product._id })}
-        >
-          <Icon name="info" size={20} color="#fff" />
-          <Text style={styles.swipeActionText}>Details</Text>
-        </TouchableOpacity>
-      )}
     >
       <View style={styles.productCard}>
        <FastImage
@@ -141,17 +133,27 @@ const handleDownloadInvoice = async () => {
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
           
-          {item.variantDetails && (
-            <View style={styles.variantChips}>
-              {Object.entries(item.variantDetails).map(([key, value]) => (
-                <View key={key} style={styles.chip}>
-                  <Text style={styles.chipText}>
-                    {key}: {typeof value === 'object' ? value.name || value.value : value}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
+{item.variantDetails && (
+  <View style={styles.variantChips}>
+    {Object.entries(item.variantDetails).map(([key, value]) => (
+      <View key={key} style={styles.chip}>
+        {typeof value === 'object' && key.toLowerCase() === 'color' ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.chipText}>{key}:</Text>
+            <View
+              style={[styles.colorStyle,{  backgroundColor: value.code}]}
+            />
+          </View>
+        ) : (
+          <Text style={styles.chipText}>
+            {key}: {typeof value === 'object' ? value.name || value.value : value}
+          </Text>
+        )}
+      </View>
+    ))}
+  </View>
+)}
+
           
           <View style={styles.priceRow}>
             <Text style={styles.price}>₹{item.price.toLocaleString('en-IN')}</Text>
@@ -342,7 +344,7 @@ const handleDownloadInvoice = async () => {
 
 
       <ScrollView
-        contentContainerStyle={[styles.content,{paddingBottom: hasActionButtons ? 80 : 20}]}
+        contentContainerStyle={[styles.content,{paddingBottom: hasActionButtons ? 80 : 70}]}
         scrollEventThrottle={16}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],

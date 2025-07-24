@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
-import { COLORS, FontSize, Width } from "@constants";
+import { COLORS } from "@constants";
+import { Height } from "@constants/index";
 
 export const styles = StyleSheet.create({
   container: {
@@ -13,7 +14,7 @@ export const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
+    paddingBottom:Height(120),
     paddingTop:1
   },
   summaryCard: {

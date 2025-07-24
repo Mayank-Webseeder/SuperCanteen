@@ -151,7 +151,7 @@ const SortBottomSheet = ({ visible, onClose, onApply, selectedOption: propSelect
           </ScrollView>
         </View>
 
-        <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 43 }]}>
           <TouchableOpacity 
             onPress={onClose} 
             style={[styles.footerButton, styles.cancelButton]}

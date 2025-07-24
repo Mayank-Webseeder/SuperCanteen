@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 4,
     width: '100%',
+    color:COLORS.black
   },
   errorText: {
     marginTop: Height(6),

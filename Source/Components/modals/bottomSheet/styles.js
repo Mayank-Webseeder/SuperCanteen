@@ -17,7 +17,8 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: Width(10),
+    paddingTop:Height(22),
     paddingBottom: Platform.select({ ios: 20, android: 0 }), 
    
   },

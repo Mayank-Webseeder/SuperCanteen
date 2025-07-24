@@ -10,7 +10,8 @@ modalOverlay: {
   left: 0,
   right: 0,
   bottom: 0,
-  zIndex: 1000
+  zIndex: 1000,
+
 },
 modalContainer: {
   backgroundColor: '#fff',
@@ -18,7 +19,8 @@ modalContainer: {
   maxHeight: '80%',
   width: '90%',
   marginHorizontal: '5%',
-  alignSelf: 'center'
+  alignSelf: 'center',
+  
 },
 
   modalHeader: {
@@ -41,11 +43,13 @@ modalContainer: {
    
   },
   section: {
-    marginBottom: 15
+    marginBottom: 1,
+    paddingHorizontal:20,
+    paddingTop:15
   },
   sectionTitle: {
    fontFamily:"Inter-SemiBold",
-    marginBottom: 8
+    marginBottom: 4
   },
   subTitle:{
     color:COLORS.darkGray,

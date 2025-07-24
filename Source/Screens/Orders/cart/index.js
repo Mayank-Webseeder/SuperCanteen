@@ -207,7 +207,7 @@ export default function CartScreen({ navigation }) {
       </View>
       
       {/* Sort & Selection */}
-      <View style={styles.sortRow}>
+      {/* <View style={styles.sortRow}>
         <TouchableOpacity style={styles.sortButton}>
           <CustomBtn
             title="Filter"
@@ -221,7 +221,7 @@ export default function CartScreen({ navigation }) {
             }
           />
         </TouchableOpacity>
-      </View>
+      </View> */}
     
       {/* Cart Items */}
       <CustomCartCard navigation={navigation} items={filteredItems} />

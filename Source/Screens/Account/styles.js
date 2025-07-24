@@ -1,9 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { FontSize, Height } from '../../constants';
+import { COLORS, Height } from '../../constants';
 
 export const styles = StyleSheet.create({
   scrollContainer: {
     backgroundColor: '#fff',
+  
+    
   },
   container: {
     flex: 1,
@@ -67,7 +69,7 @@ export const styles = StyleSheet.create({
   },
   sectionBox: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 15,
   },
   sectionHeader: {
     fontSize: 16,
@@ -122,17 +124,19 @@ export const styles = StyleSheet.create({
 footerWrapper: {
   marginTop: 20,
   alignItems: 'center',
+  
  
 },
 
 footerCard: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
+    flexDirection: 'row',
+  justifyContent: 'space-around', // Changed from 'space-between'
   alignItems: 'center',
   backgroundColor: '#FFFFFF',
   borderRadius: 16,
   paddingVertical: 18,
   width: '100%',
+  maxWidth: 500, // Add maxWidth for larger screens
   elevation: 3,
   shadowColor: '#000',
   shadowOffset: { width: 0, height: 1 },
@@ -146,11 +150,12 @@ footerItemEqual: {
   flex: 1, // Equal space
   alignItems: 'center',
   justifyContent: 'center',
-  paddingHorizontal: 6,
+  minWidth: 80, // Minimum width for each item
+  paddingHorizontal: 4, // Reduced padding
 },
 
 footerIconCircle: {
-  backgroundColor: '#EDF6FA',
+   backgroundColor: '#EDF6FA',
   width: 48,
   height: 48,
   borderRadius: 24,
@@ -165,12 +170,14 @@ footerIconCircle: {
 },
 
 footerText: {
-  fontSize: FontSize(10),
+    fontSize: 10, // Use numeric value instead of FontSize()
   fontFamily: 'Inter-Medium',
   color: '#2E6074',
   textAlign: 'center',
-  maxWidth: 100, 
-  lineHeight:Height(18)
+  paddingHorizontal: 2, // Small padding
+  flexWrap: 'wrap', // Allow text to wrap
+  maxWidth: '100%', // Take full available width
+  marginTop:8
 },
 
 appVersionText: {
@@ -196,4 +203,33 @@ appVersionText: {
     color: '#999',
     fontFamily: 'Inter-Regular',
   },
+  loginPromptText: {
+  color: '#888',
+  fontSize: 12,
+  fontStyle: 'italic',
+},
+loginPromptContainer: {
+  backgroundColor: '#f5f5f5',
+  padding: 15,
+  borderRadius: 8,
+  marginTop: 5,
+  marginBottom: 10,
+},
+loginPromptDescription: {
+  color: '#555',
+  fontSize: 14,
+  marginBottom: 10,
+},
+loginButton: {
+  backgroundColor: '#2E6074',
+  padding: 10,
+  borderRadius: 5,
+  alignItems: 'center',
+},
+loginButtonText: {
+  color: COLORS.black,
+  fontWeight: 'Inter-Regular',
+  lineHeight:Height(20)
+
+},
 });

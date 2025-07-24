@@ -10,6 +10,7 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: COLORS.border,
     paddingTop: 10,
+    bottom:-19
   },
   footerButton: {
     flex: 1,

@@ -16,7 +16,7 @@ const CustomFlashMessage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 40,
+    marginBottom: 60,
     marginHorizontal: 20,
     borderRadius: 12,
     paddingVertical: 10,

@@ -502,7 +502,7 @@ categoryImage: {
   title:{
     fontSize: 16, fontFamily:"Inter-SemiBold", marginHorizontal: 22, 
     marginTop:13,
-    marginBottom:6
+    marginBottom:3
   },
   titleStyle:{
   marginBottom: 12,
@@ -516,12 +516,15 @@ categoryImage: {
     lineHeight:22
   },
   titleContainer:{
-    paddingVertical: 8 ,
-paddingHorizontal:10,
+paddingVertical: 8 ,
+paddingHorizontal:Width(14),
   },
   price:{
-    fontSize: 14, fontFamily:"Inter-Bold",
-    marginVertical:Height(2)
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.green,
+    marginVertical:Height(1),
+    marginTop:Height(4)
   }
  
 });

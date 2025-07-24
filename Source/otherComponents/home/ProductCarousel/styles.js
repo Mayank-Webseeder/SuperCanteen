@@ -101,7 +101,7 @@ export const styles = StyleSheet.create({
     color: COLORS.dark,
     marginBottom: Height(4),
     lineHeight: 18,
-    height: Height(36), // Fixed height for 2 lines
+    marginTop:Height(10)
   },
   gridProductName: {
     fontSize: 12,

@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getProfile, updateProfile } from '../../../redux/slices/userSlice';
 import CustomHeader from '../../../Components/CustomHeader';
 import { styles } from './styles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginSecurityScreen = ({ navigation }) => {
   const dispatch = useDispatch();

@@ -107,7 +107,7 @@ const CouponSection = ({ data = [],  productId , onCouponApplied , localAppliedC
             <Text style={styles.couponPercentage}>{coupon.percentage}% OFF</Text>
           </View>
           <View style={styles.couponFooter}>
-            <Text style={styles.couponExpiry}>Expires: {formatDate(coupon.expire)}</Text>
+          {coupon?.expire &&   <Text style={styles.couponExpiry}>Expires: {formatDate(coupon.expire)}</Text>}
             <Text style={styles.viewDetailsText}>View Details →</Text>
           </View>
         </TouchableOpacity>
@@ -137,13 +137,13 @@ const CouponSection = ({ data = [],  productId , onCouponApplied , localAppliedC
                   </Text>
                 </View>
               </View>
-              
-              <View style={styles.expiryRow}>
+              {selectedCoupon?.expire &&   <View style={styles.expiryRow}>
                 <MaterialIcons name="event" size={22} color="#4CAF50" />
                 <Text style={styles.expiryText}>
                   Expires on {selectedCoupon ? formatDate(selectedCoupon.expire) : ''}
                 </Text>
-              </View>
+              </View> }
+             
               
               <Text style={styles.termsText}>* Terms and conditions apply</Text>
             </View>

@@ -13,7 +13,8 @@ import ConfirmationModal from '../../../otherComponents/confirmationModal';
 import { styles } from './styles';
 import {
   deleteAddress,
-  fetchUserAddresses
+  fetchUserAddresses,
+  setDefaultAddress
 } from '../../../redux/slices/addressSlice';
 import {
   setSelectedAddress,
@@ -33,6 +34,24 @@ const AddressListScreen = ({ navigation, route }) => {
   const [addressToDelete, setAddressToDelete] = useState(null);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [selectedAddressId, setSelectedAddressId] = useState(globalSelectedAddress?._id || null);
+
+
+ useEffect(() => {
+  const initializeDefaultAddress = async () => {
+    const addresses = await dispatch(fetchUserAddresses(user.id)).unwrap();
+    
+    // Only auto-set if:
+    // 1. It's the first address AND
+    // 2. No addresses are currently marked as default
+    if (addresses.length === 1 && !addresses.some(a => a.isDefault)) {
+      await dispatch(setDefaultAddress({
+        userId: user.id,
+        addressId: addresses[0]._id
+      }));
+    }
+  };
+  initializeDefaultAddress();
+}, []);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
@@ -81,14 +100,15 @@ const AddressListScreen = ({ navigation, route }) => {
   }, [navigation, user.id]);
 
   const handleSelectAddress = async (address) => {
-    setSelectedAddressId(address._id);
-    dispatch(setSelectedAddress(address));
-    await AsyncStorage.setItem('selectedAddress', JSON.stringify(address));
+  // Only set as default if explicitly chosen (or modify as needed)
+  setSelectedAddressId(address._id);
+  dispatch(setSelectedAddress(address));
+  await AsyncStorage.setItem('selectedAddress', JSON.stringify(address));
 
-    if (route?.params?.fromCheckout) {
-      navigation.goBack();
-    }
-  };
+  if (route?.params?.fromCheckout) {
+    navigation.goBack();
+  }
+};
 
   const showDeleteConfirmation = (id) => {
     setAddressToDelete(id);
@@ -96,28 +116,31 @@ const AddressListScreen = ({ navigation, route }) => {
   };
 
   const handleDelete = async () => {
-    try {
-      await dispatch(deleteAddress({ userId: user.id, addressId: addressToDelete })).unwrap();
-      const updatedAddresses = await dispatch(fetchUserAddresses(user.id)).unwrap();
+  try {
+    const wasDefault = addresses.find(a => a._id === addressToDelete)?.isDefault;
 
-      if (addressToDelete === selectedAddressId) {
-        if (updatedAddresses.length > 0) {
-          const fallback = updatedAddresses[0];
-          setSelectedAddressId(fallback._id);
-          dispatch(setSelectedAddress(fallback));
-          await AsyncStorage.setItem('selectedAddress', JSON.stringify(fallback));
-        } else {
-          setSelectedAddressId(null);
-          dispatch(setSelectedAddress(null));
-          await AsyncStorage.removeItem('selectedAddress');
-        }
-      }
-    } catch (err) {
-      console.log("Delete error:", err);
-    } finally {
-      setDeleteModalVisible(false);
+    await dispatch(deleteAddress({ userId: user.id, addressId: addressToDelete })).unwrap();
+    const updatedAddresses = await dispatch(fetchUserAddresses(user.id)).unwrap();
+
+    // Set new default if deleted one was default
+    if (wasDefault && updatedAddresses.length > 0) {
+      const fallback = updatedAddresses[0];
+      await dispatch(setDefaultAddress({ userId: user.id, addressId: fallback._id }));
     }
-  };
+
+    // Update selected address logic
+    if (addressToDelete === selectedAddressId) {
+      const newSelection = updatedAddresses.find(a => a.isDefault) || updatedAddresses[0];
+      dispatch(setSelectedAddress(newSelection));
+      await AsyncStorage.setItem('selectedAddress', JSON.stringify(newSelection));
+    }
+  } catch (err) {
+    console.log("Delete error:", err);
+  } finally {
+    setDeleteModalVisible(false);
+  }
+};
+
 
   const handleEditAddress = (address) => {
     navigation.navigate('CreateAddressScreen', {
@@ -138,7 +161,8 @@ const AddressListScreen = ({ navigation, route }) => {
           ]}
         >
           <View style={styles.cardHeader}>
-            <View style={styles.addressTypeBadge}>
+            <View style={{flexDirection:"row",alignItems:"center"}}>
+                  <View style={styles.addressTypeBadge}>
               <Icon
                 name={item?.addressType === 'Office' ? 'business' : 'home'}
                 size={16}
@@ -146,6 +170,21 @@ const AddressListScreen = ({ navigation, route }) => {
               />
               <Text style={styles.addressTypeText}>{item?.addressType}</Text>
             </View>
+
+         {item?.isDefault ? (
+          <View style={styles.defaultBadge}>
+            <Text style={styles.defaultBadgeText}>Default</Text>
+          </View>
+        ) : (
+          <TouchableOpacity 
+            style={styles.setDefaultButton}
+            onPress={() => dispatch(setDefaultAddress({ userId: user.id, addressId: item._id }))}
+          >
+            <Text style={styles.setDefaultButtonText}>Set as Default</Text>
+          </TouchableOpacity>
+        )}     
+            </View>
+          
 
             <View style={styles.actionsContainer}>
               <TouchableOpacity
@@ -162,6 +201,8 @@ const AddressListScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           </View>
+
+          
 
           <View style={styles.cardBody}>
             <Text style={styles.nameText}>{item?.name}</Text>

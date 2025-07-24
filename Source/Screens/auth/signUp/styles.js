@@ -52,31 +52,10 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     fontSize: FontSize(12),
   },
-  modernGoogleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 8,
-    paddingVertical: Height(12),
-    marginHorizontal: Width(24),
-    marginTop: Height(10),
-  },
-  modernGoogleIcon: {
-    width: Height(20),
-    height: Height(20),
-    marginRight: Width(10),
-  },
-  modernGoogleButtonText: {
-    fontSize: FontSize(14),
-    fontFamily: 'Inter-Medium',
-    color: '#334155',
-  },
   footerTextContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
+    marginTop: 1,
   },
   footerText: {
     fontSize: 14,

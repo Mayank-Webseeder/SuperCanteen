@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     },
   scrollContent: { 
     padding: 16,
-    paddingBottom: Height(150)
+    paddingBottom: Height(160)
   },
   deliveryImage: {
     width: 40,
@@ -130,6 +130,42 @@ export const productStyles = StyleSheet.create({
     textDecorationLine: 'line-through',
     fontFamily: 'Inter-Regular'
   },
+  variantContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+       gap: 8,
+       marginTop:4,
+       right:8
+    },
+  
+    variantPill: {
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 16,
+      backgroundColor: '#e8f4f8', 
+      borderWidth: 1,
+      borderColor: '#d1e3ea', 
+      alignSelf: 'flex-start',
+       marginTop: Height(10),
+       flexDirection:"row",
+       alignItems:"center"
+    },
+    colorStyle:{
+      height:13,width:13,borderRadius:40,
+    },
+    variantPillText: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: '#2d3e50', 
+    },
+    colorPill: {
+      backgroundColor: '#f0f0f0',
+      borderColor: '#d9d9d9', 
+    },
+    sizePill: {
+      backgroundColor: '#e8f4f8',
+      borderColor: '#008ecc', 
+    },
   qty: {
     fontSize: 13,
     color: COLORS.gray,

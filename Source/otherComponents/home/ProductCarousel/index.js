@@ -23,10 +23,11 @@ import {
   fetchWishlistItems,
 } from '../../../redux/slices/wishlistSlice';
 import { showWishlistToast } from '../../../utils/helper';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.45;
-const CARD_HEIGHT = Height(190);
+const CARD_HEIGHT = Height(170);
 
 const ProductCarousel = ({
   products,
@@ -97,7 +98,6 @@ const ProductCarousel = ({
       ((item.mrp - item.offerPrice) / item.mrp) * 100
     );
     const isGrid = !horizontal;
-
     const scale = horizontal
       ? scrollX.interpolate({
           inputRange: [
@@ -177,11 +177,8 @@ const ProductCarousel = ({
                     }}
                   />
                 ) : isInWishlist(item._id) ? (
-                  <MaterialIcons
-                    name="favorite"
-                    size={isGrid ? 16 : 20}
-                    color={'#A94442'}
-                  />
+              
+                   <Ionicons name="heart"   size={isGrid ? 16 : 20} color={COLORS.error} />
                 ) : (
                   <MaterialIcons
                     name="favorite-border"
@@ -202,8 +199,7 @@ const ProductCarousel = ({
             >
               {item.name}
             </Text>
-
-            <View style={styles.priceContainer}>
+          <View style={styles.priceContainer}>
               <Text style={[styles.offerPrice, isGrid && styles.gridOfferPrice]}>
                 ₹{item.offerPrice}
               </Text>
@@ -212,7 +208,7 @@ const ProductCarousel = ({
                   ₹{item.mrp}
                 </Text>
               )}
-            </View>
+            </View> 
           </View>
         </TouchableOpacity>
       </Animated.View>

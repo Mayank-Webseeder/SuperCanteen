@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { showMessage } from 'react-native-flash-message';
+import { Height } from '@constants/index';
 
 const BugReportScreen = () => {
   const dispatch = useDispatch();
@@ -264,7 +265,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 10,
     backgroundColor: '#f5f5f5',
-    paddingBottom: 30,
+    paddingBottom: Height(70),
     paddingHorizontal:15
   },
   header: {

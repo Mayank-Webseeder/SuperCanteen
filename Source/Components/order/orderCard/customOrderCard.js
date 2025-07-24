@@ -31,8 +31,14 @@ const OrderCard = ({
   const imageKey = `${cardKey}_image`;
   const starsKey = `${cardKey}_stars`;
 
-  
-
+  const createdAt = new Date(item.createdAt || item.date);
+const deliveryDays = item?.orderItems?.[0]?.product?.deliveryDays || 0;
+const expectedDate = new Date(createdAt.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
+const formattedExpectedDate = expectedDate.toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'short',
+  day: 'numeric'
+});
   // Enhanced status mapping
   const getUIStatus = () => {
     const statusMap = {
@@ -82,20 +88,21 @@ const OrderCard = ({
   // Status-specific content
   const renderStatusContent = () => {
     const dateText = item.date || 'unknown date';
-    const deliveryDate = item.deliveryDate || 'soon';
+    
 
     switch(uiStatus) {
       case "arriving":
         return (
-          <View style={styles.productRow}>
-            <FastImage
-              style={styles.truckIcon}
-              source={require('../../../../assets/Icons/delivery_truck_speed.png')}
-            />
-            <Text style={styles.productDescription}>
-              Expected by {deliveryDate}
-            </Text>
-          </View>
+          item?.deliveryDate && 
+       <View style={styles.productRow}>
+      <FastImage
+        style={styles.truckIcon}
+        source={require('../../../../assets/Icons/delivery_truck_speed.png')}
+      />
+      <Text style={styles.productDescription}>
+        Expected by {item?.deliveryDate}
+      </Text>
+    </View>
         );
       
       case "cancelled":
@@ -167,7 +174,7 @@ const OrderCard = ({
                 source={require('../../../../assets/Icons/currency_rupee_circle.png')}
               />
               <Text style={styles.productDescription}>
-                Exchange Delivered on {dateText}
+                Expected by {item?.deliveryDate}
               </Text>
             </View>
             <Text style={styles.productDescription}>

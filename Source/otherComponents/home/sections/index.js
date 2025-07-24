@@ -22,7 +22,7 @@ import { showWishlistToast } from '../../../utils/helper';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.45;
-const CARD_HEIGHT = 240;
+const CARD_HEIGHT = 190;
 
 const SectionRenderer = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -85,7 +85,7 @@ const SectionRenderer = ({ navigation }) => {
     }
   };
 
-  const renderCard = (item, sectionType) => {
+  const renderCard = (item) => {
     const productId = item.product?._id;
     const showLottie = lottieStates[productId];
     const isFavourite = isInWishlist(productId);

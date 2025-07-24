@@ -12,7 +12,7 @@ const BottomActionButtons = ({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+    <View style={[styles.footer, { paddingBottom: insets.bottom + 30 }]}>
       <TouchableOpacity
         onPress={onCancel}
         style={[styles.footerButton, styles.cancelButton]}

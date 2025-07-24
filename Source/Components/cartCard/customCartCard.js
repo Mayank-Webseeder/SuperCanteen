@@ -143,6 +143,7 @@ const CartCard = React.memo(
     onRemoveItem,
     isDeleteLoading,
   }) => {
+    console.log("ITEM IS",item?.variantDetails)
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
  const [activeButton, setActiveButton] = useState(null); // Local loader state for quantity changes
@@ -395,9 +396,10 @@ const CartCard = React.memo(
                 <Text style={styles.variantPillText}>Size: {item.variantDetails.size}</Text>
               </View>
             )}
-            {item?.variantDetails?.color?.name && (
-              <View style={[styles.variantPill, { backgroundColor: '#f0f0f0' }]}>
-                <Text style={styles.variantPillText}>Color: {item.variantDetails.color.name}</Text>
+            {item?.variantDetails?.color?.code && (
+              <View style={styles.variantPill}>
+                <Text style={styles.variantPillText}>Color : </Text>
+                <View style={[styles.colorStyle,{backgroundColor:item?.variantDetails?.color?.code}]}/>
               </View>
             )}
           </View>
@@ -465,6 +467,8 @@ const CustomCartCard = () => {
   const [deletingItemId, setDeletingItemId] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
+  
+  console.log("ITEMS IS",items)
 
   useEffect(() => {
     dispatch(fetchCartItems());

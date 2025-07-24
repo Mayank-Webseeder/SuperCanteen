@@ -32,6 +32,8 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
 
+
+
   // Filter and sort states
   const [filters, setFilters] = useState({
     colors: [],
@@ -66,9 +68,17 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   // Memoized data transformations
   const products = useMemo(() => productsBySubcategory[selectedCategory] || [], [productsBySubcategory, selectedCategory]);
   const segments = useMemo(() => segmentsByCategory.segments || [], [segmentsByCategory]);
-  const formattedSegments = useMemo(() => formateSubCategorySegments(segments), [segments]);
+ const formattedSegments = useMemo(() => {
+  if (brandId) {
+    // Return brand-specific segments if available
+    return brandProducts.segments ? formateSubCategorySegments(brandProducts.segments) : [];
+  }
+  return formateSubCategorySegments(segments);
+}, [segments, brandId, brandProducts]);
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
+
+
 
   // Filter options extraction with memoization
   const filterOptions = useMemo(() => {
@@ -83,21 +93,27 @@ const ProductCategoryScreen = ({ navigation, route }) => {
         brands.add(product.brand.name);
       }
 
-      product.variants?.forEach(variant => {
-        const color = typeof variant.color === 'string' ? variant.color.trim() : '';
-        if (color) {
-          colors.add(color);
-        }
+     product.variants?.forEach(variant => {
+    const colorObj = variant?.color;
+  // ✅ Extract the color code if it's an object with a 'code' property
+  const color = typeof colorObj === 'object' && colorObj?.code ? colorObj.code.trim() : '';
 
-        if (typeof variant.size === 'string') {
-          variant.size.split(',').forEach(size => {
-            const trimmedSize = size.trim();
-            if (trimmedSize) {
-              sizes.add(trimmedSize);
-            }
-          });
-        }
-      });
+  console.log("colors is", color);
+
+  if (color) {
+    colors.add(color);
+  }
+
+  if (typeof variant.size === 'string') {
+    variant.size.split(',').forEach(size => {
+      const trimmedSize = size.trim();
+      if (trimmedSize) {
+        sizes.add(trimmedSize);
+      }
+    });
+  }
+});
+
 
       const oneMonthAgo = new Date();
       oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -270,11 +286,12 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   // Initial data loading
   useEffect(() => {
     if (brandId) {
+      setSelectedSegment(null);
       fetchBrandProducts();
     } else if (selectedCategory) {
       fetchCategoryData();
     }
-  }, [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
+  },  [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
 
   // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
@@ -359,7 +376,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
       )}
 
       {/* Filter Buttons */}
-      <View style={styles.bottomSheetContainer}>
+     {!brandId && <View style={styles.bottomSheetContainer}>
         <SortBottomSheet 
           visible={sortSheetVisible} 
           onClose={() => setSortSheetVisible(false)}
@@ -397,7 +414,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
             </View>
           }
         />
-      </View>
+      </View> }
 
       <HorizontalLine />
 

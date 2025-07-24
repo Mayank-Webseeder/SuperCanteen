@@ -61,6 +61,21 @@ export const deleteAddress = createAsyncThunk(
   }
 );
 
+export const setDefaultAddress = createAsyncThunk(
+  'address/setDefaultAddress',
+  async ({ userId, addressId }, { rejectWithValue }) => {
+    try {
+      const response = await postData(
+        `/users/set-default-address/${userId}`,
+        { addressId }
+      );
+      return addressId;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || 'Failed to set default address');
+    }
+  }
+);
+
 const addressSlice = createSlice({
   name: 'address',
   initialState: {
@@ -138,7 +153,21 @@ const addressSlice = createSlice({
       .addCase(deleteAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+
+
+      // In addressSlice.js - fix the extra }) in setDefaultAddress case
+.addCase(setDefaultAddress.fulfilled, (state, action) => {
+  const defaultId = action.payload;
+  state.addresses = state.addresses.map(addr => ({
+    ...addr,
+    isDefault: addr._id === defaultId
+  }));
+})
+.addCase(setDefaultAddress.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
   }
 });
 

@@ -221,19 +221,6 @@ const SigninScreen = () => {
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Modern Google Button */}
-        <TouchableOpacity 
-          onPress={onGoogleSignIn} 
-          activeOpacity={0.7} 
-          style={styles.modernGoogleButton}
-        >
-          <FastImage 
-            source={require('../../../../assets/Icons/GoogleIcon.png')} 
-            style={styles.modernGoogleIcon} 
-          />
-          <Text style={styles.modernGoogleButtonText}>Continue with Google</Text>
-        </TouchableOpacity>
-
         <View style={styles.footerTextContainer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <TouchableOpacity onPress={onSignUpPress}>

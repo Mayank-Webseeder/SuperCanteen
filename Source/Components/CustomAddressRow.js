@@ -1,40 +1,50 @@
-// AddressRow.js
-import React from 'react';
+import React, {  useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { COLORS, FontSize, Width } from '../constants';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { COLORS, FontSize, Height, Width } from '../constants';
+import { useSelector } from 'react-redux';
 
-const AddressRow = ({ navigation, address }) => {
-  // Format address for display
+const AddressRow = () => {
+  const navigation = useNavigation();
+  const selectedAddress = useSelector(state => state.selectedAddress); 
+  const [address, setAddress] = useState(selectedAddress);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setAddress(selectedAddress?.selectedAddress);
+    }, [selectedAddress])
+  );
+
   const formatAddress = () => {
     if (!address) return '';
-    
     const parts = [
-      address.apartment,
-      address.street,
-      address.landmark,
+      address.name,
+      address.address,
       address.city,
-      address.pincode
+      address.state,
+      address.postalCode,
+      address.country
     ].filter(Boolean);
-    
     return parts.join(', ');
   };
 
   return (
-    <View style={styles.container}>
-     {address &&  <View style={styles.left}>
-        <Ionicons name="location-outline" size={20} color="black" />
-        <Text 
-          style={styles.addressText}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {formatAddress()}
-        </Text>
-      </View>}
-      <TouchableOpacity onPress={() => navigation.navigate('CreateAddressScreen')}>
-        <Text style={styles.changeText}>Change Address</Text>
-      </TouchableOpacity>
+    <View
+      style={styles.container}>
+      {address ? (
+        <View style={styles.left}>
+          <Ionicons name="location-outline" size={20} color="black" />
+          <Text style={styles.addressText} numberOfLines={1} ellipsizeMode="tail">
+            {formatAddress()}
+          </Text>
+        </View>
+      ) : (
+        <TouchableOpacity style={styles.address}  onPress={() => navigation.navigate('AddressListScreen', { addressToEdit: address })}>
+                   <Text style={styles.addAddressText}>+ Add Address</Text>
+        </TouchableOpacity>
+
+      )}
     </View>
   );
 };
@@ -63,12 +73,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     flexShrink: 1,
   },
-  changeText: {
+  addAddressText: {
+    fontSize: FontSize(13),
     color: COLORS.green,
     fontFamily: 'Inter-SemiBold',
-    fontSize: FontSize(13),
-    textDecorationLine: "underline"
+    textDecorationLine: 'underline',
   },
+  address:{
+    marginHorizontal:Height(6)
+  }
 });
 
 export default AddressRow;

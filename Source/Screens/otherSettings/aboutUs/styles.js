@@ -117,42 +117,7 @@ export const styles = StyleSheet.create({
   },
   
   // Team Section
-  teamGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 0,
-  
-
-  },
-  teamMember: {
-    width: '48%',
-    alignItems: 'center',
-   
-  },
-  teamIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 40,
-    backgroundColor: COLORS.lightGray,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  teamName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 4,
-    fontFamily: 'Inter-SemiBold',
-    textAlign: 'center',
-  },
-  teamRole: {
-    fontSize: 14,
-    color: COLORS.muted,
-    fontFamily: 'Inter-Regular',
-    textAlign: 'center',
-  },
-  
+ 
   // CTA Section
   ctaContainer: {
     backgroundColor: COLORS.green,

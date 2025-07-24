@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthStack from './authStack';
 import AppStack from './appStack';
 import SplashScreen from '@screens/splash';
+import OrderConfirmFinal from '../Screens/Orders/orderConfirm/orderFinal';
 
 const Stack = createNativeStackNavigator();
 

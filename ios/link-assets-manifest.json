@@ -2,6 +2,14 @@
   "migIndex": 1,
   "data": [
     {
+      "path": "assets/Background/help-chat.png",
+      "sha1": "4a43bd44d0086e151d08b4a6f494fbef42dffd2c"
+    },
+    {
+      "path": "assets/Background/help-order.png",
+      "sha1": "9714c13445321a58ad226d4ab70f1c8238b2fc28"
+    },
+    {
       "path": "assets/fonts/Inter-Black.otf",
       "sha1": "68c456410eebd937a6496fff66d71311c8e844f7"
     },
@@ -72,6 +80,122 @@
     {
       "path": "assets/fonts/Inter-ThinItalic-BETA.otf",
       "sha1": "90e9ca831b887bb67b1aa612511ce5bcc918df0b"
+    },
+    {
+      "path": "assets/Icons/add_home.png",
+      "sha1": "edba9c0b444f4c6c1d83ae6d3b53d1545315e749"
+    },
+    {
+      "path": "assets/Icons/AlIcons.png",
+      "sha1": "e125870c15b83fd21f53b5a8f1691dcb6463c18c"
+    },
+    {
+      "path": "assets/Icons/Bag.png",
+      "sha1": "1eef945b450b3aa63869e831325ecc0d4300a7a2"
+    },
+    {
+      "path": "assets/Icons/currency_rupee_circle.png",
+      "sha1": "29850033d67d0356f2f871cee590da2b86e4c65b"
+    },
+    {
+      "path": "assets/Icons/delivery_truck_speed.png",
+      "sha1": "6df34c548a27d06718e80ca5fe2d9b5a6869db04"
+    },
+    {
+      "path": "assets/Icons/deployed_code_account.png",
+      "sha1": "27228ab94c9f9609d2139c1d266302691b955820"
+    },
+    {
+      "path": "assets/Icons/emptyCart.jpg",
+      "sha1": "c0e7cb47cf966c088e6bfb8bf52256a17a42606a"
+    },
+    {
+      "path": "assets/Icons/emptyWishlist.jpg",
+      "sha1": "d90072a952658aad9b6934c6a91cd69170bf702d"
+    },
+    {
+      "path": "assets/Icons/GoogleIcon.png",
+      "sha1": "45ecc7c5cc9d7ccfcca156a8d092385ef91eae7c"
+    },
+    {
+      "path": "assets/Icons/money_bag.png",
+      "sha1": "b8ffa75169523a69c38fd6838840ceb27f3cdae0"
+    },
+    {
+      "path": "assets/Icons/shopping_cart.png",
+      "sha1": "400640d3881e6273061de8d16747b9873ce8ef0d"
+    },
+    {
+      "path": "assets/Icons/svgIcons/account_circle.js",
+      "sha1": "2dde4cba4abf40e972203eda7c6df3d064c49045"
+    },
+    {
+      "path": "assets/Icons/svgIcons/arrow_back.js",
+      "sha1": "c5a33aed3d79f406857bf42f98bd1b5a87982a45"
+    },
+    {
+      "path": "assets/Icons/svgIcons/category.js",
+      "sha1": "f1ca08c99ef1525108462b1dae94d11b53073901"
+    },
+    {
+      "path": "assets/Icons/svgIcons/checkBoxIcon.js",
+      "sha1": "fe1ec8321f84d0330afa70f4fea6448823e9dd7d"
+    },
+    {
+      "path": "assets/Icons/svgIcons/close.js",
+      "sha1": "f80c98cb30e2c79f9047e8d93a78a8ac3f62e656"
+    },
+    {
+      "path": "assets/Icons/svgIcons/copy.js",
+      "sha1": "00e63ac2bf45a921a221dc1c5a3efa4692f91dc4"
+    },
+    {
+      "path": "assets/Icons/svgIcons/currencyRupees.js",
+      "sha1": "dda1c54612a3ca3f1c6e3d10d7f9843adf4c681a"
+    },
+    {
+      "path": "assets/Icons/svgIcons/home.js",
+      "sha1": "827feb4127b7af8ed5502f6bac3cbc784ea5a913"
+    },
+    {
+      "path": "assets/Icons/svgIcons/orders.js",
+      "sha1": "a0b3947cb3b191ecce8ddbc1962b437c62136305"
+    },
+    {
+      "path": "assets/Icons/svgIcons/policyIcon.js",
+      "sha1": "43814dcd1ef24578cacd4039d9eea9e290de81c7"
+    },
+    {
+      "path": "assets/Icons/svgIcons/search.js",
+      "sha1": "73ab1c31bf7df40b7d1e9c130cd6aacfaa4b87e2"
+    },
+    {
+      "path": "assets/lottie/animation.json",
+      "sha1": "ceec91d492ce8e226874a3180438943ea690a9bd"
+    },
+    {
+      "path": "assets/lottie/notification.json",
+      "sha1": "3d6b92eafb72c1dfd0b60be9752a3f6c24c019e9"
+    },
+    {
+      "path": "assets/lottie/shopping.json",
+      "sha1": "b2107eaf06fa12a02fdfd02cadf46604d7939968"
+    },
+    {
+      "path": "assets/lottie/success.json",
+      "sha1": "b38b84227c31dc18e2a1eaff2b2dabe02d15afe6"
+    },
+    {
+      "path": "assets/no-order.png",
+      "sha1": "e3c15b83e251d92328cfd60a2ba5456fbc019aac"
+    },
+    {
+      "path": "assets/OrderPlaced.png",
+      "sha1": "c8bdb44fa49bb94ba18bb8bd25b0fda070040e71"
+    },
+    {
+      "path": "assets/spalshLogo.png",
+      "sha1": "01b9a66acf0cb5ce4334bd260aa47111f8029502"
     }
   ]
 }

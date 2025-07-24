@@ -15,6 +15,7 @@ import { showMessage } from 'react-native-flash-message';
 import EmptyState from '@components/emptyComponent/EmptyState';
 import { initializeSocket } from "../../../services/SocketService";
 import FastImage from 'react-native-fast-image';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const STATUS_CONFIG = {
   'All Orders': [],

@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectSelectedAddress } from '../../../../redux/slices/selectedAddressSlice';
 import { createOrder } from '../../../../redux/slices/paymentSlice';
 import { calculateFinalAmount } from '../../../../utils/helper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PaymentMethodScreen = ({ navigation, route }) => {
   // State management
@@ -25,6 +26,7 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { appliedCoupons } = useSelector(state => state.coupon);
   const {  user } = useSelector(state => state.auth);
+  const insets = useSafeAreaInsets();
   
   // Redux and route data
   const dispatch = useDispatch();
@@ -188,8 +190,11 @@ return {
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Select Payment Method" />
-      
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView showsVerticalScrollIndicator={false}  contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 80 } // Extra space for button
+        ]}
+      >
         {/* Payment Options Section */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>PAYMENT OPTIONS</Text>
@@ -243,13 +248,14 @@ return {
     total: (product?.offerPrice || product?.price || 0) + (product?.deliveryCharge || 0)
   }}
 />
-
       </ScrollView>
       
       {/* Confirm Order Button */}
-   <TouchableOpacity
+        <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + 10 }]}>
+
+  <TouchableOpacity
   style={[
-    styles.confirmButton, 
+    styles.confirmButton,
     (!agreed || isProcessing) && styles.disabledButton
   ]}
   onPress={handleConfirmOrder}
@@ -264,7 +270,8 @@ return {
     </Text>
   )}
 </TouchableOpacity>
-
+        </View>
+ 
     </View>
   );
 };

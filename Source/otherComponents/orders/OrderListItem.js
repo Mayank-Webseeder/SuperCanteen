@@ -15,13 +15,16 @@ const OrderListItem = ({ order, onPress,onCancel }) => {
   };
 
   // Get delivery date (3 days from order date)
-  const getDeliveryDate = () => {
-    if (!order.createdAt) return '';
-    const deliveryDate = new Date(order.createdAt);
-    deliveryDate.setDate(deliveryDate.getDate() + 3);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${deliveryDate.getDate()} ${months[deliveryDate.getMonth()]}`;
-  };
+const getDeliveryDate = (order) => {
+  if (!order.createdAt || !order.orderItems?.length) return '';
+
+  const deliveryDays = order.orderItems[0]?.product?.deliveryDays ;
+  const deliveryDate = new Date(order.createdAt);
+  deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${deliveryDate.getDate()} ${months[deliveryDate.getMonth()]}`;
+};
 
   // Calculate total items count
   const totalItems = order.orderItems?.reduce((sum, item) => sum + (item.qty || 0), 0) || 0;
@@ -49,7 +52,7 @@ const OrderListItem = ({ order, onPress,onCancel }) => {
     name: primaryProduct.name || 'Product',
     image: primaryProduct.image || '',
     date: formatDate(order.createdAt),
-    deliveryDate: getDeliveryDate(),
+    deliveryDate: getDeliveryDate(order),
     price: order.totalPrice || 0,
     items: totalItems,
     status: statusMap[order.status?.toLowerCase()] || 'arriving',

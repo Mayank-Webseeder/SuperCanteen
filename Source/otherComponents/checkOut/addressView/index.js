@@ -3,19 +3,27 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { styles } from './styles';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
-import { selectSelectedAddress } from '../../../redux/slices/selectedAddressSlice'
+import { selectSelectedAddress } from '../../../redux/slices/selectedAddressSlice';
+import { setDefaultAddress } from '../../../redux/slices/addressSlice';
 
 const AddressView = ({ navigation }) => {
   const selectedAddress = useSelector(selectSelectedAddress);
+  const defaultAddress = useSelector(setDefaultAddress);
+  
   const handleChangeAddress = () => {
     navigation.navigate('AddressListScreen', { fromCheckout: true });
   };
-  
+
+  // Check if selected address is default
+  const isDefault = selectedAddress?._id === defaultAddress?._id;
+
   return (
     <View style={styles.card}>
       <View style={styles.sectionHeader}>
         <Ionicons name="location-outline" size={20} color="#2E6074" />
         <Text style={styles.sectionTitle}>Delivery Address</Text>
+        {/* Only added this line - shows (Default) text next to title when applicable */}
+        {isDefault && <Text style={styles.sectionTitle}> (Default)</Text>}
       </View>
 
       {selectedAddress ? (
