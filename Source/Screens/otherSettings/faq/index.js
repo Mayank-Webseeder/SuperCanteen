@@ -74,7 +74,7 @@ const FAQScreen = ({ navigation }) => {
             autoFocus={false}
             containerStyle={styles.searchInput}
             backgroundColor={'#fff'}
-            inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+            inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2 }}
           />
         </View>
 

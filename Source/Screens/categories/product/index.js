@@ -135,7 +135,7 @@ const ProductsScreen = ({ navigation, route }) => {
               backgroundColor={'#fff'}
               disabled
               containerStyle={styles.searchInput}
-              inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+              inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2 }}
             />
           </Pressable>
         </View>

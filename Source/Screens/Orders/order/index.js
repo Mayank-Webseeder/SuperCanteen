@@ -53,7 +53,8 @@ const Orders = () => {
   const { orders: reduxOrders, loading, pagination, cancelLoading } = useSelector(state => state.orders);
   const { user } = useSelector(state => state.auth);
   const { items, initialized } = useSelector((state) => state.cart);
-  const itemCount = items?.length;
+const validCartItems = React.useMemo(() => items?.filter(item => item.product !== null), [items]);
+const itemCount = validCartItems.length;
 
   // Initialize socket connection
   useEffect(() => {
@@ -305,7 +306,7 @@ const Orders = () => {
             onSubmitEditing={handleSearchSubmit}
             backgroundColor={'#fff'}
             containerStyle={styles.searchInput}
-            inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+            inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2 }}
           />
         </View>
         <Pressable 

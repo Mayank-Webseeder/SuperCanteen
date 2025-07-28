@@ -29,6 +29,7 @@ import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
 import EmptyState from '@components/emptyComponent/EmptyState';
+import { fetchSections } from '../../../redux/slices/sectionSlice'
 
 const { width } = Dimensions.get('window');
 
@@ -101,58 +102,53 @@ const HomeScreen = ({ navigation, route }) => {
   }, [categories]);
 
   // Data loading with useFocusEffect
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-      
-      const fetchData = async () => {
-        try {
-          if (!initialLoadComplete) {
-            setIsReady(false);
-            await Promise.all([
-              dispatch(getCategories()),
-              dispatch(getSubCategories())
-            ]);
-            
-            if (isActive && isMounted) {
-              setInitialLoadComplete(true);
-              setIsReady(true);
-            }
-          } else {
-            // Refresh data when revisiting
-            const promises = [dispatch(getCategories())];
-            
-            if (selectedCategoryIndex) {
-              promises.push(dispatch(getProductsByCategory(selectedCategoryIndex)));
-            }
-            
-            await Promise.all(promises);
-            if (isActive && isMounted) setIsReady(true);
-          }
-        } catch (error) {
-          console.error('Data loading error:', error);
-          if (isActive && isMounted) setIsReady(true);
+useFocusEffect(
+  useCallback(() => {
+    let isActive = true;
+
+    const fetchData = async () => {
+      try {
+        const promises = [];
+
+        // Fetch categories & subcategories only if not already fetched
+        if (!categories?.length) promises.push(dispatch(getCategories()));
+        if (!subCategories?.length) promises.push(dispatch(getSubCategories()));
+        if (!sections?.length) promises.push(dispatch(fetchSections()));
+
+        // Only fetch products if not already loaded
+        if (!products?.length && selectedCategoryIndex) {
+          promises.push(dispatch(getProductsByCategory(selectedCategoryIndex)));
         }
-      };
 
-      const task = InteractionManager.runAfterInteractions(() => {
-        fetchData();
-        
-        const timeout = setTimeout(() => {
-          if (isActive && isMounted && !isReady) {
-            setIsReady(true);
-          }
-        }, 5000);
+        await Promise.all(promises);
+        if (isActive && isMounted) {
+          setInitialLoadComplete(true);
+          setIsReady(true);
+        }
+      } catch (error) {
+        if (isActive && isMounted) setIsReady(true);
+      }
+    };
 
-        return () => clearTimeout(timeout);
-      });
+    InteractionManager.runAfterInteractions(() => fetchData());
 
-      return () => {
-        isActive = false;
-        task.cancel();
-      };
-    }, [initialLoadComplete, isMounted, selectedCategoryIndex])
-  );
+    return () => {
+      isActive = false;
+    };
+  }, [categories, subCategories, selectedCategoryIndex])
+);
+
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    if (selectedCategoryIndex) {
+      dispatch(getProductsByCategory(selectedCategoryIndex));
+    }
+  }, 1000 * 60 * 5); // every 5 minutes
+
+  return () => clearInterval(interval);
+}, [selectedCategoryIndex]);
+
 
   // Handle category changes
   const handleCategoryChange = useCallback((categoryId) => {
@@ -189,6 +185,7 @@ const HomeScreen = ({ navigation, route }) => {
       await Promise.all([
         dispatch(getCategories()),
         dispatch(getSubCategories()),
+        dispatch(fetchSections()),
         selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
       ]);
     } catch (err) {
@@ -215,6 +212,7 @@ const HomeScreen = ({ navigation, route }) => {
       return acc;
     }, []);
   }, [products]);
+
 
   // Header component
   const stickyHeader = (
@@ -304,6 +302,10 @@ const HomeScreen = ({ navigation, route }) => {
     );
   };
 
+  const renderSection = useCallback(() => (
+  <SectionRenderer navigation={navigation} />
+), [navigation]);
+
   // Main content renderer
   const renderContent = () => {
     if (!isReady) {
@@ -364,7 +366,7 @@ const HomeScreen = ({ navigation, route }) => {
           {filteredSubcategories.length > 0 && (
             <>
               <HorizontalLine lineStyle={styles.horizontalLine} />
-                <ProductCategories
+              <ProductCategories
               navigation={navigation}
               subcategories={filteredSubcategories}
               selectedCategoryId={selectedCategoryIndex}
@@ -374,7 +376,7 @@ const HomeScreen = ({ navigation, route }) => {
             </>
           )}
           
-          <SectionRenderer navigation={navigation} />
+        {renderSection()}
           
          {products.length > 0 &&  <HorizontalLine containerStyle={{ marginBottom: 2 }} />}
           {productsLoading ? (

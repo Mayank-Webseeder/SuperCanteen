@@ -55,9 +55,10 @@ const ProductDetails = ({ navigation, route }) => {
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
+
+console.log("AMIMATION IMAGE IS",animationImage)
   
 
-  console.log("PRODUCT DATA IS",productData?.outOfStock)
 
   // Get image URLs for display
   const getImageUrls = (images) =>
@@ -103,152 +104,111 @@ const ProductDetails = ({ navigation, route }) => {
     }
   };
 
-  // Add to cart function
-  const OnAddToCart = (item) => {
-    try {
-      const selectedItem = item || productData;
-      const selectedProductId = selectedItem?.id || productId;
-      const availableStock = selectedItem.countInStock || 0;
+const OnAddToCart = (item) => {
+  try {
+    const selectedItem = item || productData;
+    const selectedProductId = selectedItem?.id || productId;
+    const hasVariants = Array.isArray(selectedItem?.variants) && selectedItem.variants.length > 0;
 
-      if (availableStock <= 0) {
-        showMessage({ message: 'Out of stock', type: 'danger' });
-        return;
-      }
+    let variantStock = 0;
+    let variantOutOfStock = false;
 
-      // Find existing cart item
-      const cartItem = cartItems.find(ci => 
-        (ci.product?._id === selectedItem._id || ci.product === selectedItem._id) && 
-        (!ci.variantId || ci.variantId === selectedVariant?._id)
-      );
-      
-      const currentQty = cartItem?.qty || 0;
-      if (currentQty + 1 > availableStock) {
-        throw new Error(`Only ${availableStock} available`);
-      }
+     if (selectedItem.outOfStock) {
+      showMessage({ 
+        message: 'This product is currently unavailable', 
+        type: 'danger' 
+      });
+      return;
+    }
 
-      // Handle variants
-      const isFromSimilarProducts = !!item;
-      const hasSizeVariants = selectedItem?.variants?.some(variant =>
-        variant?.name?.toLowerCase()?.includes('size')
-      );
+    if (hasVariants && selectedVariant?._id) {
+      const variant = selectedItem.variants.find(v => v._id === selectedVariant._id);
+      variantStock = variant?.countInStock ?? 0;
+      variantOutOfStock = variant?.outOfStock ?? false;
+    } else {
+      variantStock = selectedItem.countInStock || 0;
+      variantOutOfStock = selectedItem.outOfStock || false;
+    }
 
-      const finalVariant = isFromSimilarProducts
-        ? selectedItem?.variantDetails || {}
-        : selectedVariant || {
-            additionalPrice: 0,
-            images: selectedItem.images,
-            sku: selectedItem.sku || '',
-          };
+    if (variantOutOfStock || variantStock <= 0) {
+      showMessage({
+        message: 'This item is out of stock',
+        type: 'danger',
+      });
+      return;
+    }
 
-      // Check variant stock
-      let variantStock = selectedItem.countInStock || 0;
-      if (finalVariant?.countInStock !== undefined) {
-        variantStock = finalVariant.countInStock;
-      } 
-      else if (finalVariant?.color && selectedItem?.variants) {
-        const colorVariant = selectedItem.variants.find(v => 
-          v.color?.code === finalVariant.color?.code
-        );
-        variantStock = colorVariant?.countInStock ?? variantStock;
-      }
-      else if (finalVariant?._id && selectedItem?.variants) {
-        const variant = selectedItem.variants.find(v => v._id === finalVariant._id);
-        variantStock = variant?.countInStock ?? variantStock;
-      }
+    // Find existing cart item
+    const cartItem = cartItems.find(ci =>
+      (ci.product?._id === selectedItem._id || ci.product === selectedItem._id) &&
+      (!ci.variantId || ci.variantId === selectedVariant?._id)
+    );
 
-      // Stock validation
-      if (variantStock <= 0) {
-        showMessage({
-          message: finalVariant?.color?.name 
-            ? `The ${finalVariant.color.name} color is out of stock` 
-            : 'This item is out of stock',
-          type: 'danger',
-          duration: 4000,
-        });
-        return;
-      }
+    const currentQty = cartItem?.qty || 0;
+    if (currentQty + 1 > variantStock) {
+      showMessage({
+        message: `Only ${variantStock} available. You already have ${currentQty} in your cart.`,
+        type: 'danger',
+      });
+      return;
+    }
 
-      if (currentQty + 1 > variantStock) {
-        showMessage({
-          message: finalVariant?.color?.name
-            ? `Only ${variantStock} ${finalVariant.color.name} items available (${currentQty} in cart)`
-            : `Only ${variantStock} items available (${currentQty} in cart)`,
-          type: 'danger',
-          duration: 4000,
-        });
-        return;
-      }
+    const finalVariant = selectedVariant || {
+      additionalPrice: 0,
+      images: selectedItem.images,
+      sku: selectedItem.sku || '',
+    };
 
-      // Variant selection validation
-      if (!isFromSimilarProducts && hasSizeVariants && selectedItem?.variants?.length > 0 && !selectedVariant) {
-        setSelectionError("Please select a size for this color");
-        return;
-      }
+    const priceDetails = calculateProductPrice(selectedItem, finalVariant, localAppliedCoupon);
 
-      // Get calculated prices
-      const priceDetails = calculateProductPrice(
-        selectedItem,
-        finalVariant,
-        localAppliedCoupon
-      );
+    // Prepare animation image
+    const imageUrl = finalVariant?.images?.[0]
+      ? `${finalVariant.images[0]}`
+      : selectedItem.images?.[0]
+      ? `${IMGURL}${selectedItem.images[0]}`
+      : null;
 
-      // Prepare image for animation
-      const variantImage = finalVariant?.images?.[0];
-      const productImage = Array.isArray(selectedItem?.images) && selectedItem.images.length > 0
-        ? selectedItem.images[0]
-        : selectedItem?.image || null;
+    setAnimationImage(imageUrl);
+    setAddtoCartLoading(true);
+    setAnimationKey(prev => prev + 1);
+    setShowAnimation(true);
 
-      const imageUrl = typeof variantImage === 'object' && variantImage?.url
-        ? `${IMGURL}${variantImage.url}`
-        : typeof variantImage === 'string'
-        ? `${IMGURL}${variantImage}`
-        : typeof productImage === 'object' && productImage?.url
-        ? `${IMGURL}${productImage.url}`
-        : typeof productImage === 'string'
-        ? productImage
-        : null;
+    // Prepare cart payload
+    const cartPayload = {
+      productId: selectedProductId,
+      quantity: 1,
+      price: priceDetails.finalPrice,
+      originalPrice: priceDetails.variantPrice,
+      ...(priceDetails.coupon && {
+        coupon: priceDetails.coupon,
+        discountAmount: priceDetails.discountAmount,
+        discountPercentage: priceDetails.discountPercentage
+      }),
+      ...(selectedItem?.isDigital !== undefined && { isDigital: selectedItem?.isDigital }),
+      ...(finalVariant?._id && { variantId: finalVariant._id }),
+      ...(finalVariant && Object.keys(finalVariant).length > 0 && { variantDetails: finalVariant }),
+    };
 
-      // Animation setup
-      setAnimationImage(imageUrl);
-      setAddtoCartLoading(true);
-      setAnimationKey(prev => prev + 1);
-      setShowAnimation(true);
+    dispatch(addToCart(cartPayload))
+      .then(() => {
+        console.log("🛒 Added to cart:", cartPayload);
+      })
+      .catch((error) => {
+        console.log("❌ Add to cart failed", error);
+        setAddtoCartLoading(false);
+        setShowAnimation(false);
+      });
 
-      // Prepare cart payload
-      const cartPayload = {
-        productId: selectedProductId,
-        quantity: 1,
-        price: priceDetails.finalPrice,
-        originalPrice: priceDetails.variantPrice,
-        ...(priceDetails.coupon && { 
-          coupon: priceDetails.coupon,
-          discountAmount: priceDetails.discountAmount,
-          discountPercentage: priceDetails.discountPercentage
-        }),
-        ...(selectedItem?.isDigital !== undefined && { isDigital: selectedItem?.isDigital }),
-        ...(finalVariant?._id && { variantId: finalVariant?._id }),
-        ...(finalVariant && Object.keys(finalVariant).length > 0 && { variantDetails: finalVariant }),
-      };
+  } catch (error) {
+    showMessage({ message: error.message, type: 'danger' });
+  }
+};
 
-      dispatch(addToCart(cartPayload))
-        .then(() => {
-          console.log("🛒 Added to cart:", cartPayload);
-        })
-        .catch((error) => {
-          console.log("❌ Add to cart failed", error);
-          setAddtoCartLoading(false);
-          setShowAnimation(false);
-        });
-      
-    } catch (error) {
-      showMessage({ message: error.message, type: 'danger' });
-    }  
-  };
 
   // Buy Now handler
-  const handleBuyNow = () => {
+const handleBuyNow = () => {
   try {
-    // Check user authentication
+    // Check if user is logged in
     if (!user || !user.username) {
       navigation.reset({
         index: 0,
@@ -257,79 +217,47 @@ const ProductDetails = ({ navigation, route }) => {
       return;
     }
 
-    // Stock validation
-    const availableStock = productData.countInStock || 0;
-    if (availableStock <= 0) {
-      showMessage({ message: 'Out of stock', type: 'danger' });
+      if (productData.outOfStock) {
+      showMessage({ 
+        message: 'This product is currently unavailable', 
+        type: 'danger' 
+      });
       return;
     }
 
-    // Handle variant stock
-    let variantStock = productData.countInStock || 0;
-    if (selectedVariant?.countInStock !== undefined) {
-      variantStock = selectedVariant.countInStock;
-    } 
-    else if (selectedVariant?.color && productData?.variants) {
-      const colorVariant = productData.variants.find(v => 
-        v.color?.code === selectedVariant.color?.code
-      );
-      variantStock = colorVariant?.countInStock ?? variantStock;
-    }
-    else if (selectedVariant?._id && productData?.variants) {
+    const hasVariants = Array.isArray(productData?.variants) && productData.variants.length > 0;
+
+    let variantStock = 0;
+    let variantOutOfStock = false;
+
+    if (hasVariants && selectedVariant?._id) {
       const variant = productData.variants.find(v => v._id === selectedVariant._id);
-      variantStock = variant?.countInStock ?? variantStock;
+      variantStock = variant?.countInStock ?? 0;
+      variantOutOfStock = variant?.outOfStock ?? false;
+    } else {
+      variantStock = productData.countInStock || 0;
+      variantOutOfStock = productData.outOfStock || false;
     }
 
-    // Check variant stock
-    if (variantStock <= 0) {
+    if (variantOutOfStock || variantStock <= 0) {
       showMessage({
-        message: selectedVariant?.color?.name 
-          ? `The ${selectedVariant.color.name} color is out of stock` 
-          : 'This item is out of stock',
+        message: 'This item is out of stock',
         type: 'danger',
         duration: 4000,
       });
       return;
     }
 
-    // Check if quantity exceeds available stock
-    if (1 > variantStock) {
-      showMessage({
-        message: selectedVariant?.color?.name
-          ? `Only ${variantStock} ${selectedVariant.color.name} items available`
-          : `Only ${variantStock} items available`,
-        type: 'danger',
-        duration: 4000,
-      });
-      return;
-    }
+    const priceDetails = calculateProductPrice(productData, selectedVariant, localAppliedCoupon);
 
-    // Variant selection validation
-    const hasSizeVariants = productData?.variants?.some(variant =>
-      variant?.name?.toLowerCase()?.includes('size')
-    );
-    
-    if (hasSizeVariants && productData?.variants?.length > 0 && !selectedVariant) {
-      setSelectionError("Please select a size for this color");
-      return;
-    }
-
-    // Get calculated prices
-    const priceDetails = calculateProductPrice(
-      productData,
-      selectedVariant,
-      localAppliedCoupon
-    );
-
-    // Navigate to checkout
-    navigation.navigate('ProductCheckoutScreen', { 
+    navigation.navigate('ProductCheckoutScreen', {
       product: {
         ...productData,
         ...priceDetails,
         ...(selectedVariant && { selectedVariant }),
         quantity: 1,
         isSingleProductCheckout: true,
-        availableStock: variantStock // Pass available stock to checkout
+        availableStock: variantStock
       },
     });
 
@@ -337,6 +265,7 @@ const ProductDetails = ({ navigation, route }) => {
     showMessage({ message: error.message, type: 'danger' });
   }
 };
+
 
   // Handle animation completion
   const handleAnimationComplete = () => {
@@ -427,7 +356,7 @@ const ProductDetails = ({ navigation, route }) => {
               backgroundColor={'#fff'}
               disabled
               containerStyle={styles.searchInput}
-              inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
+              inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2}}
             />
           </Pressable>
         </View>

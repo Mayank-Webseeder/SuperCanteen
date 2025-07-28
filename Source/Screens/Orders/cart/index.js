@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   ScrollView,
-  TouchableOpacity,
   Animated,
   RefreshControl
 } from 'react-native';
@@ -19,7 +18,8 @@ import Footer from './footer';
 import EmptyState from '@components/emptyComponent/EmptyState';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 import { styles } from './styles';
-
+import { fetchCartItems } from '../../../redux/slices/cartSlice'
+import { useDispatch } from 'react-redux';
 const STATUS_CONFIG = {
   'All Items': [],
   'Makeup': ['makeup', 'cosmetics', 'beauty'],
@@ -41,6 +41,7 @@ export default function CartScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [skeletonAnimation] = useState(new Animated.Value(0));
+  const dispatch = useDispatch()
   
   const { items, loading: cartLoading } = useSelector((state) => ({
     items: state.cart.items,
@@ -63,27 +64,31 @@ export default function CartScreen({ navigation }) {
     }
   }, []);
 
-  const filteredItems = useMemo(() => {
-    if (!items || items.length === 0) return [];
+const filteredItems = useMemo(() => {
+  if (!items || items.length === 0) return [];
+  
+  return items.filter(item => {
+    // Skip items with null product (or show them differently)
+    if (!item.product) return false; // or true if you want to keep them
     
-    return items.filter(item => {
-      // Status filter
-      const statusMatch = selectedStatuses.includes('All Items') || 
-        selectedStatuses.some(status => {
-          const statusValues = STATUS_CONFIG[status] || [status.toLowerCase()];
-          const itemTags = item.product?.tags?.map(tag => tag.toLowerCase()) || [];
-          const itemName = item.product?.name?.toLowerCase() || '';
-          
-          return statusValues.some(val => 
-            itemTags.includes(val) || itemName.includes(val))
-        });
-      
-      // Time filter
-      const timeMatch = checkTimeFilter(item.createdAt, selectedTime);
-      
-      return statusMatch && timeMatch;
-    });
-  }, [items, selectedStatuses, selectedTime, checkTimeFilter]);
+    // Status filter
+    const statusMatch = selectedStatuses.includes('All Items') || 
+      selectedStatuses.some(status => {
+        const statusValues = STATUS_CONFIG[status] || [status.toLowerCase()];
+        const itemTags = item.product?.tags?.map(tag => tag.toLowerCase()) || [];
+        const itemName = item.product?.name?.toLowerCase() || '';
+        
+        return statusValues.some(val => 
+          itemTags.includes(val) || itemName.includes(val))
+      });
+    
+    // Time filter
+    const timeMatch = checkTimeFilter(item.createdAt, selectedTime);
+    
+    return statusMatch && timeMatch;
+  });
+}, [items, selectedStatuses, selectedTime, checkTimeFilter]);
+
 
   const toggleStatus = (status) => {
     setSelectedStatuses(prev => {
@@ -108,11 +113,9 @@ export default function CartScreen({ navigation }) {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate refresh - replace with actual data fetching
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, []);
+    dispatch(fetchCartItems())
+      .finally(() => setRefreshing(false));
+  }, [dispatch]);
 
   // Skeleton animation
   useEffect(() => {
@@ -144,32 +147,26 @@ export default function CartScreen({ navigation }) {
 
   // Data loading with focus effect
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       let isActive = true;
-
-      const loadCartData = async () => {
+      
+      const loadData = async () => {
+        setIsLoading(true);
         try {
-          setIsLoading(true);
-          // Simulate data loading - replace with actual data fetching
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          if (isActive) {
-            setIsLoading(false);
-          }
+          await dispatch(fetchCartItems());
         } catch (error) {
-          console.error('Cart loading error:', error);
-          if (isActive) {
-            setIsLoading(false);
-          }
+          console.error('Failed to load cart:', error);
+        } finally {
+          if (isActive) setIsLoading(false);
         }
       };
-
-      loadCartData();
-
+      
+      loadData();
+      
       return () => {
         isActive = false;
       };
-    }, [])
+    }, [dispatch])
   );
 
   const renderSkeleton = () => (

@@ -3,8 +3,6 @@ import { StyleSheet } from "react-native";
 import { COLORS } from "../../../constants";
 import { Height, Width } from '@constants/index';
 
-
-
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -17,8 +15,7 @@ export const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Width(12),
-    paddingBottom:Height(50)
-  
+    paddingBottom: Height(60)
   },
   card: {
     backgroundColor: COLORS.white,
@@ -39,15 +36,14 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  inputStyle:{
-   paddingVertical:13
+  inputStyle: {
+    paddingVertical: 13
   },
   cardTitle: {
     marginLeft: Width(8),
     fontSize: 16,
     fontWeight: '600',
     color: '#2c3e50',
-    fontFamily: 'Inter-SemiBold',
   },
   row: {
     flexDirection: 'row',
@@ -57,14 +53,11 @@ export const styles = StyleSheet.create({
   halfInput: {
     width: '48%',
   },
-  thirdInput: {
-    width: '31%',
-  },
   typeBtnContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: Height(8),
-    marginTop:Height(6)
+    marginTop: Height(6)
   },
   typeButton: {
     width: '31%',
@@ -85,7 +78,6 @@ export const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 13,
     color: '#95a5a6',
-    fontFamily: 'Inter-Medium',
   },
   selectedTypeButtonText: {
     color: COLORS.green,
@@ -100,13 +92,106 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
-    marginVertical:18
+    marginVertical: 18
   },
-  textArea:{
-   marginVertical:3
+  textArea: {
+    marginVertical: 3
   },
-  buttonView:{
-    marginHorizontal:20,
-    bottom:Height(35)
-  }
+  buttonView: {
+    marginHorizontal: 20,
+    bottom: Height(30)
+  },
+  addressModeToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    color: '#2c3e50',
+    fontWeight: '500'
+  },
+  toggleLink: {
+    color: '#2E6074',
+    fontSize: 13,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#2E6074',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  locationButtonText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  manualModalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+    zIndex: 1000,
+  },
+  manualModalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+  },
+  manualModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  manualModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  manualModalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 12,
+    minHeight: 120,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  manualModalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  manualModalCancel: {
+    padding: 10,
+    marginRight: 10,
+  },
+  manualModalCancelText: {
+    color: '#666',
+  },
+  manualModalConfirm: {
+    backgroundColor: '#2E6074',
+    padding: 10,
+    borderRadius: 4,
+  },
+  manualModalConfirmText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
 });

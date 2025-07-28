@@ -31,8 +31,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSegment, setSelectedSegment] = useState(null);
-
-
+  const [customFormattedProducts, setCustomFormattedProducts] = useState([]);
 
   // Filter and sort states
   const [filters, setFilters] = useState({
@@ -67,6 +66,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
 
   // Memoized data transformations
   const products = useMemo(() => productsBySubcategory[selectedCategory] || [], [productsBySubcategory, selectedCategory]);
+  
   const segments = useMemo(() => segmentsByCategory.segments || [], [segmentsByCategory]);
  const formattedSegments = useMemo(() => {
   if (brandId) {
@@ -75,65 +75,57 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   }
   return formateSubCategorySegments(segments);
 }, [segments, brandId, brandProducts]);
+
+
+const modifiedformattedSegments = [
+    ...formattedSegments,
+    {
+      _id: 'all-icons',
+      name: 'All',
+      icon: require('../../../../assets/Icons/AlIcons.png'),
+      isAllIcon: true,
+    },
+  ];
+
   const formattedProducts = useMemo(() => formatProductBySegment(segmentProducts), [segmentProducts]);
   const formattedBrandProducts = useMemo(() => brandProducts, [brandProducts]);
 
-
-
   // Filter options extraction with memoization
-  const filterOptions = useMemo(() => {
-    const brands = new Set();
-    const colors = new Set();
-    const sizes = new Set();
-    let hasNewProducts = false;
-    let hasPopularProducts = false;
+const filterOptions = useMemo(() => {
+  const brands = new Set();
+  let hasNewProducts = false;
+  let hasPopularProducts = false;
 
-    products.forEach(product => {
-      if (product.brand?.name) {
-        brands.add(product.brand.name);
-      }
+  // Use either segment products or main products
+  const productsToUse = selectedSegment && selectedSegment !== "all-icons" 
+    ? segmentProducts 
+    : products;
 
-     product.variants?.forEach(variant => {
-    const colorObj = variant?.color;
-  // ✅ Extract the color code if it's an object with a 'code' property
-  const color = typeof colorObj === 'object' && colorObj?.code ? colorObj.code.trim() : '';
+  productsToUse.forEach(product => {
+    // 1. Extract brands
+    if (product.brand?.name) {
+      brands.add(product.brand.name);
+    }
 
-  console.log("colors is", color);
+    // 2. Check for new products (created in last 30 days)
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    if (new Date(product.createdAt) > oneMonthAgo) {
+      hasNewProducts = true;
+    }
 
-  if (color) {
-    colors.add(color);
-  }
+    // 3. Check for popular products
+    if (product.isBestSeller || (product.rating || 0) >= 4) {
+      hasPopularProducts = true;
+    }
+  });
 
-  if (typeof variant.size === 'string') {
-    variant.size.split(',').forEach(size => {
-      const trimmedSize = size.trim();
-      if (trimmedSize) {
-        sizes.add(trimmedSize);
-      }
-    });
-  }
-});
-
-
-      const oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-      if (new Date(product.createdAt) > oneMonthAgo) {
-        hasNewProducts = true;
-      }
-
-      if (product.isBestSeller) {
-        hasPopularProducts = true;
-      }
-    });
-
-    return {
-      brands: Array.from(brands),
-      colors: Array.from(colors),
-      sizes: Array.from(sizes),
-      hasNewProducts,
-      hasPopularProducts,
-    };
-  }, [products]);
+  return {
+    brands: Array.from(brands).sort(), // Sorted alphabetically
+    hasNewProducts,
+    hasPopularProducts,
+  };
+}, [products, segmentProducts, selectedSegment]); // Recompute when these change
 
   // Apply filters and sorting with memoization
   const filteredProducts = useMemo(() => {
@@ -205,6 +197,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
 
     return result;
   }, [products, filters, sortOption]);
+  
 
   // Dynamic Sort Options Based on Available Product Data
   const availableSortOptions = useMemo(() => {
@@ -249,11 +242,17 @@ const ProductCategoryScreen = ({ navigation, route }) => {
   }, []);
 
   // Handle segment selection
-  const handleSegmentSelect = useCallback((segmentId) => {
-    setSelectedSegment(segmentId);
+const handleSegmentSelect = useCallback((segmentId) => {
+  setSelectedSegment(segmentId);
+
+  if (segmentId === "all-icons") {
+    const formatted = formateSubCategoryProducts(filteredProducts);
+    setCustomFormattedProducts(formatted);
+  } else {
     dispatch(clearSegmentProducts());
     dispatch(fetchProductsBySegment(segmentId));
-  }, [dispatch]);
+  }
+}, [dispatch, filteredProducts]);
 
   // Fetch data functions
   const fetchBrandProducts = useCallback(async () => {
@@ -293,6 +292,12 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     }
   },  [brandId, selectedCategory, fetchBrandProducts, fetchCategoryData]);
 
+ useEffect(() => {
+  if (selectedSegment === 'all-icons') {
+    setCustomFormattedProducts(formateSubCategoryProducts(filteredProducts));
+  }
+}, [filteredProducts, selectedSegment]);
+
   // Handle pull-to-refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -322,15 +327,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
     setShowSheet(false);
   }, []);
 
-  const getActiveFilterCount = (filters) => {
-    let count = 0;
-    count += filters.colors.length;
-    count += filters.sizes.length;
-    count += filters.brands.length;
-    if (filters.isNew) count++;
-    if (filters.isPopular) count++;
-    return count;
-  };
+  
 
   // Optimized render sections
   const renderSection = useCallback(({ item }) => item, []);
@@ -348,7 +345,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
               backgroundColor={'#fff'}
               disabled
               containerStyle={styles.searchInput}
-              inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
+              inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2}}
             />
           </Pressable>
         </View>
@@ -363,14 +360,15 @@ const ProductCategoryScreen = ({ navigation, route }) => {
             gap={10}
             horizontal={true}
             borderRadius={32}
-            data={formattedSegments}
+            data={modifiedformattedSegments}
             colors={['#2E6074', '#3CAEA3']}
             textStyle={styles.text}
             selected={selectedSegment}
             onSelect={handleSegmentSelect}
             selectedBorderColor={COLORS.green}
             bgColor="#D4E7F2"
-            imageSize={38}
+            imageSize={38} 
+            imageStyle={styles.imageStyle}
           />
         </View>
       )}
@@ -456,7 +454,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
           containerStyle={styles.errorContainer}
         />
       ) : selectedSegment ? (
-        formattedProducts?.length > 0 ? (
+     (selectedSegment === "all-icons" ? customFormattedProducts : formattedProducts)?.length > 0 ? (
           <View style={styles.mainContainer}>
             <CustomProductCard
               height={Height(120)}
@@ -466,7 +464,7 @@ const ProductCategoryScreen = ({ navigation, route }) => {
               numColumns={2}
               width={Width(140)}
               horizontal={false}
-              data={formattedProducts}
+           data={selectedSegment === "all-icons" ? customFormattedProducts : formattedProducts}
             />
           </View>
         ) : (

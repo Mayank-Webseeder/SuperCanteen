@@ -167,7 +167,7 @@ export const styles = StyleSheet.create({
     sectionWrapper: {
      paddingHorizontal:10, 
       paddingVertical: Height(5),
-      paddingTop:Height(10)
+      paddingTop:Height(5)
     },
     sectionTitle: {
       fontSize: 16,

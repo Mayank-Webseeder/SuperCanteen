@@ -105,7 +105,7 @@ const SearchScreen = ({ navigation }) => {
           autoFocus={true}
           containerStyle={styles.searchInput}
           backgroundColor={'#fff'}
-          inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+          inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2 }}
         />
       </View>
     </View>

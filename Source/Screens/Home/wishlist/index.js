@@ -51,6 +51,8 @@ const WishlistScreen = ({ navigation }) => {
     lastAdded
   } = useSelector(selectWishlistWithCategories);
 
+  console.log("WHISTITEMS IS=========================>",wishlistItems)
+
   // Skeleton animation
   useEffect(() => {
     const animateSkeleton = () => {
@@ -358,7 +360,7 @@ const WishlistScreen = ({ navigation }) => {
           autoFocus={false}
           containerStyle={styles.searchInput}
           backgroundColor={'#f5f5f5'}
-          inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2 }}
+          inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2 }}
         />
       </View>
 

@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import LottieView from 'lottie-react-native';
 import { styles } from './styles';
 import { addToWishlist, removeFromWishlist } from '../../../redux/slices/wishlistSlice';
+import { COLORS } from '@constants/index';
+import { showWishlistToast } from '../../../utils/helper'
 
 const CustomSimilarProducts = ({
   cardWidth = 160,
@@ -50,10 +52,12 @@ const CustomSimilarProducts = ({
       dispatch(removeFromWishlist({ wishlistId, userId }));
       setWishlistState(prev => ({ ...prev, [productId]: false }));
       setLottieState(prev => ({ ...prev, [productId]: false }));
+        showWishlistToast('Removed from Wishlist', '💔');
     } else {
       dispatch(addToWishlist({ productId, token }));
       setWishlistState(prev => ({ ...prev, [productId]: true }));
       setLottieState(prev => ({ ...prev, [productId]: true }));
+        showWishlistToast('Added to Wishlist', '❤️');
     }
 
     setTimeout(() => {
@@ -97,7 +101,8 @@ const CustomSimilarProducts = ({
                   style={{ width: 32, height: 32 }}
                 />
               ) : isInWishlist(item.id) ? (
-                <Ionicons name="heart" size={18} color="#A94442" />
+                   <Ionicons name="heart"   size={18} color={COLORS.error} />
+              
               ) : (
                 <Ionicons name="heart-outline" size={18} color="#000" />
               )}

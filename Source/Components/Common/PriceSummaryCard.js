@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails = {} }) => {
 const { items: cartItems } = useSelector((state) => state.cart)
 const { appliedCoupons } = useSelector(state => state.coupon)
+
  const appliedCoupon = product?.isSingleProductCheckout 
       ? appliedCoupons[product?._id]
       : appliedCoupons?.cartWide;
@@ -21,7 +22,6 @@ const { appliedCoupons } = useSelector(state => state.coupon)
     isSingleProduct
   } = useMemo(() => {
     const isSingleProduct = !!product;
-    
     // === CASE 1: Single product checkout ===
 if (isSingleProduct) {
   const basePrice = product.offerPrice || product.price || 0;
@@ -51,16 +51,29 @@ if (isSingleProduct) {
     isSingleProduct: true,
   };
 }
-let totalOriginal = 0;
+    let totalOriginal = 0;
     let totalSelling = 0;
     let tax = 0;
     let shipping = 0;
     let totalCouponDiscount = 0;
 
     const itemsToUse =  cartItems;
-    console.log("ITEMS TO USE",cartItems)
-    itemsToUse.forEach(item => {
-     
+    itemsToUse
+  .filter(item => {
+    // If variant exists, check its stock
+    if (item.variantDetails) {
+      return (
+        item.variantDetails.countInStock > 0 &&
+        item.variantDetails.outOfStock !== true
+      );
+    }
+
+    // Fallback to parent product stock
+    return (
+      (item.product?.countInStock ?? 0) > 0 &&
+      item.product?.outOfStock !== true
+    );
+  }).forEach(item => { 
       const qty = item.qty || 1;
       const mrp = item.mrp || item.product?.mrp || item.price || 0;
       const price = item.offerPrice || item.price || item.product.offerPrice || mrp;
@@ -87,7 +100,7 @@ let totalOriginal = 0;
   totalSelling += itemSubtotal;
   
   // 5. Calculate tax (10% on the item subtotal)
-  const taxPercent = item.tax || item.product?.tax || 10;
+  const taxPercent = item.tax || item.product?.tax;
   tax += (itemSubtotal * taxPercent) / 100;
   
   // 6. Add shipping
@@ -111,8 +124,6 @@ return {
 
 
   }, [product, cartItems, propItems, priceDetails, appliedCoupons]);
-
-  console.log("TAX AMOUNT IS",taxAmount)
 
   return (
     <View style={styles.container}>

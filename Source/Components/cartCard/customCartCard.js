@@ -143,7 +143,6 @@ const CartCard = React.memo(
     onRemoveItem,
     isDeleteLoading,
   }) => {
-    console.log("ITEM IS",item?.variantDetails)
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const dispatch = useDispatch();
  const [activeButton, setActiveButton] = useState(null); // Local loader state for quantity changes
@@ -156,7 +155,8 @@ const CartCard = React.memo(
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
     const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
-    
+  
+
     const availableStock = useMemo(() => {
       if (!product) return 0;
       
@@ -170,8 +170,8 @@ const CartCard = React.memo(
       return product.countInStock || 0;
     }, [product, item.variantId]);
 
-    const isOutOfStock = product?.outOfStock || availableStock <= 0;
-
+    const isOutOfStock = item.product?.outOfStock || availableStock <= 0;
+    
     useEffect(() => {
       if (productId && !product && !isLoadingProduct && !errorProduct) {
         dispatch(fetchCartProductById(productId));
@@ -280,6 +280,7 @@ const CartCard = React.memo(
         style={[
           styles.card,
           isSelected && styles.selectedCard,
+          isOutOfStock && styles.outOfStockCard,
           { transform: [{ scale: scaleAnim }]},
         ]}
       >
@@ -318,10 +319,18 @@ const CartCard = React.memo(
 
         <View style={styles.details}>
           <View style={styles.titleRow}>
-            <Text style={styles.title} numberOfLines={1}>
-              {product?.name}
-            </Text>
-            <Text style={styles.price}>₹{Math.round(item.selectedPrice)}</Text>
+            <Text style={[
+          styles.title, 
+          isOutOfStock && styles.outOfStockText
+        ]} numberOfLines={1}>
+          {product?.name}
+        </Text>
+        <Text style={[
+          styles.price,
+          isOutOfStock && styles.outOfStockText
+        ]}>
+          {isOutOfStock ? 'Unavailable' : `₹${Math.round(item.selectedPrice)}`}
+        </Text>
           </View>
 
           <Text style={styles.subtitle} numberOfLines={2}>
@@ -331,7 +340,7 @@ const CartCard = React.memo(
           {/* Out of stock badge */}
           {isOutOfStock && (
             <View style={styles.outOfStockBadge}>
-              <Text style={styles.outOfStockText}>Out of Stock</Text>
+              <Text style={[styles.outOfStockText,{color:COLORS.white}]}>Out of Stock</Text>
             </View>
           )}
           
@@ -351,7 +360,7 @@ const CartCard = React.memo(
 
             <View style={styles.stepperContainer}>
             <TouchableOpacity
-  onPress={() => handleQtyChange(item.qty - 1, 'decrement')}
+  onPress={() => !isOutOfStock && handleQtyChange(item.qty - 1, 'decrement')}
   style={[
     styles.stepperButton,
     (item.qty <= 1 || activeButton !== null) && styles.stepperButtonDisabled,
@@ -370,7 +379,7 @@ const CartCard = React.memo(
 <Text style={styles.qtyText}>{item.qty}</Text>
 
 <TouchableOpacity
-  onPress={() => handleQtyChange(item.qty + 1, 'increment')}
+  onPress={() =>  !isOutOfStock &&  handleQtyChange(item.qty + 1, 'increment')}
   style={[
     styles.stepperButton,
     (item.qty >= availableStock || activeButton !== null) && styles.stepperButtonDisabled,
@@ -467,8 +476,6 @@ const CustomCartCard = () => {
   const [deletingItemId, setDeletingItemId] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const slideAnim = useRef(new Animated.Value(300)).current;
-  
-  console.log("ITEMS IS",items)
 
   useEffect(() => {
     dispatch(fetchCartItems());
@@ -495,11 +502,11 @@ const CustomCartCard = () => {
       setShowConfirmation(false); 
     } else {
       // Select all
-      const allItemIds = items.map((item) => item._id || item.id);
-      setSelectedItems(allItemIds);
-      setIsAllSelected(true);
+      const allValidItemIds = validItems.map((item) => item._id || item.id);
+    setSelectedItems(allValidItemIds);
+    setIsAllSelected(true);
     }
-  }, [isAllSelected, items]);
+  }, [isAllSelected, validItems]);
 
   const confirmAction = useCallback(() => {
     if (selectedItems.length > 0) {
@@ -564,6 +571,8 @@ const CustomCartCard = () => {
     [dispatch]
   );
 
+  const validItems = useMemo(() => items.filter(item => item.product !== null), [items]);
+
   useEffect(() => {
     if (showConfirmation) {
       Animated.timing(slideAnim, {
@@ -624,7 +633,7 @@ const CustomCartCard = () => {
           </TouchableOpacity>
 
           <Text style={styles.selectionText}>
-            {selectedCount}/{items.length} ITEMS SELECTED
+            {selectedCount}/{validItems.length} ITEMS SELECTED
           </Text>
         </View>
 
@@ -646,7 +655,7 @@ const CustomCartCard = () => {
       </View>
 
       <FlatList
-        data={items}
+       data={validItems}
         keyExtractor={(item) => (item._id || item.id).toString()}
         renderItem={({ item }) => (
           <CartCard

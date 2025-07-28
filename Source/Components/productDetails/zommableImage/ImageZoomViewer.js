@@ -120,7 +120,7 @@ const ImageZoomViewer = ({ visible, imageUrls = [], onClose }) => {
 
         {/* Close Button */}
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <AntDesign name="close" size={28} color="#FFF" />
+          <AntDesign name="close" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
     </Modal>

@@ -331,6 +331,7 @@ export const formatProductsByBrand = (products = []) => {
     subCategory: product.subCategory?.name || '',
     subCategoryId: product.subCategory?._id || '', // ✅ Added this line
     segment: product.segment?.name || '',
+    isEnable:product.isEnable,
 
     // Pricing & Details
     offerPrice: product.offerPrice,

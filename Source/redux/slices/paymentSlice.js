@@ -70,18 +70,15 @@ const paymentSlice = createSlice({
 })
 .addCase(createOrder.rejected, (state, action) => {
   state.loading = false;
-  state.error = action.payload;
-  
+  state.error = action.payload;  
 })
 .addCase(getRazorpayKey.fulfilled, (state, action) => {
   state.loading = false;
   state.razorpayKey = action.payload?.key || '';
-  console.log("✅ Razorpay Key from backend:", action.payload);
 })   
 .addCase(getRazorpayKey.rejected, (state, action) => {
     state.loading = false;
     state.error = action.payload;
-    console.log("rejected is",action.payload)
       })
   .addCase(verifyPayment.pending, (state) => {
     state.verificationLoading = true;
@@ -91,13 +88,11 @@ const paymentSlice = createSlice({
   .addCase(verifyPayment.fulfilled, (state, action) => {
     state.verificationLoading = false;
     state.isVerified = true;
-    console.log("VERIFIED PAYMENT IS",action.payload)
   })
   .addCase(verifyPayment.rejected, (state, action) => {
     state.verificationLoading = false;
     state.verificationError = action.payload;
     state.isVerified = false;
-    console.log("OAYMENT REJECTED IS",action.payload)
   });
   }
 });

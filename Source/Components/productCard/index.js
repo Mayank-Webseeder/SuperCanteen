@@ -14,6 +14,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToWishlist, removeFromWishlist } from '../../redux/slices/wishlistSlice';
 import { styles } from './styles';
 import { COLORS } from '@constants/index';
+import { showWishlistToast } from '../../utils/helper'
+import EmptyComponent from '@components/emptyComponent';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -26,11 +28,11 @@ const CustomProductCard = ({
   const [loadingImages, setLoadingImages] = useState({});
   const [lottieState, setLottieState] = useState({});
   const [wishlistState, setWishlistState] = useState({});
-
   const dispatch = useDispatch();
   const userId = useSelector(state => state.auth.user?.id);
   const token = useSelector(state => state.auth.token);
   const wishlistItems = useSelector(state => state.wishlist.items);
+  const enabledProducts = data.filter(product => product?.isEnable);
 
   const isInWishlist = (productId) =>
     wishlistItems?.some(item => item._id === productId) || wishlistState[productId];
@@ -59,12 +61,14 @@ const CustomProductCard = ({
       dispatch(removeFromWishlist({ wishlistId, userId }));
       setWishlistState(prev => ({ ...prev, [productId]: false }));
       setLottieState(prev => ({ ...prev, [productId]: false }));
+      showWishlistToast('Removed from Wishlist', '💔');
       console.log('✅ Removed from wishlist:', wishlistId);
     } else {
       dispatch(addToWishlist({ productId, token }));
       setWishlistState(prev => ({ ...prev, [productId]: true }));
       setLottieState(prev => ({ ...prev, [productId]: true }));
       console.log('✅ Added to wishlist:', productId);
+      showWishlistToast('Added to Wishlist', '❤️');
     }
 
     setTimeout(() => {
@@ -106,7 +110,7 @@ const CustomProductCard = ({
   return (
     <View style={[styles.container, containerStyle]}>
       <FlatList
-        data={data}
+        data={enabledProducts}
         numColumns={numColumns}
         keyExtractor={(item) => item._id || item.id}
         showsHorizontalScrollIndicator={false}
@@ -192,6 +196,8 @@ const CustomProductCard = ({
             </TouchableOpacity>
           );
         }}
+
+        ListEmptyComponent={() => <EmptyComponent/>}
       />
     </View>
   );

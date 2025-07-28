@@ -31,6 +31,7 @@ const CustomCategoryList = ({
   gotoScreen,
   categoryContainerStyle,
   imageContainerStyle,
+  allIconStyle
 }) => {
   return (
     <View style={[containerStyle]}>
@@ -57,8 +58,9 @@ const CustomCategoryList = ({
                 onPress={() => onSelect(item._id)}
                 style={[
                   styles.categoryContainer,
-                  { marginRight: gap },
+                  { marginRight: gap},
                   categoryContainerStyle,
+                
                 ]}
               >
                 <View style={[styles.allIconCircle]}>
@@ -178,6 +180,7 @@ const styles = StyleSheet.create({
   categoryContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   categoryText: {
     fontSize: FontSize(14),
@@ -218,5 +221,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 6,
+    
   },
 });

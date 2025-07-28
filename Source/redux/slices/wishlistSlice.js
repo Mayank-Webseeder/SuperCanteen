@@ -26,18 +26,22 @@ const extractCategoryIds = (products) => {
 export const fetchWishlistItems = createAsyncThunk(
   'wishlist/fetchWishlistItems',
   async (userId, { rejectWithValue }) => {
+    console.log("USER ID IS",userId)
     try {
       const response = await getData(`${GET_WHISHLIST_BY_USERID}/${userId}`);
       const products = response.data.products || [];
       return {
-        items: products.map(item => ({
-          ...item.product,
-          wishlistId: item.product._id,
-          addedAt: item.addedAt
-        })),
+       items: products
+  .filter(item => item.product !== null)
+  .map(item => ({
+    ...item.product,
+    wishlistId: item.product._id,
+    addedAt: item.addedAt
+  })),
         categories: extractCategoryIds(products)
       };
     } catch (err) {
+      console.log("ERROR IS",err)
       return rejectWithValue(err.response?.data?.message || 'Failed to fetch wishlist');
     }
   }
@@ -62,10 +66,12 @@ export const addToWishlist = createAsyncThunk(
 export const removeFromWishlist = createAsyncThunk(
   'wishlist/removeFromWishlist',
   async ({ wishlistId, userId }, { rejectWithValue }) => {
+    console.log("WHISHLIST ID IS and USER ID IS",wishlistId,userId)
     try {
       await deleteData(`${REMOVE_FROM_WISHLIST}/${userId}/product/${wishlistId}`);
       return wishlistId;
     } catch (err) {
+      console.log("error is",err)
       return rejectWithValue(err.response?.data?.message || 'Failed to remove item');
     }
   }
@@ -116,6 +122,7 @@ const wishlistSlice = createSlice({
             state.categories.push(action.payload.category);
           }
         }
+        console.log("FULLFIELD WHISHLIST",action.payload)
       })
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
         const removedItem = state.items.find(item => item.wishlistId === action.payload);
@@ -125,10 +132,12 @@ const wishlistSlice = createSlice({
             !state.items.some(item => item.category === removedItem.category)) {
           state.categories = state.categories.filter(catId => catId !== removedItem.category);
         }
+        console.log("REMOVED FROM WHISHLIST",action.payload)
       })
       .addCase(removeFromWishlist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.log("REJECTED FROM WHISHLIST IS",action.payload)
       })
   }
 });

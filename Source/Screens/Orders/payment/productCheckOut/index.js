@@ -29,10 +29,10 @@ const ProductItemCard = ({ item }) => {
   const displayPrice = item.selectedPrice || productData?.finalPrice || productData?.offerPrice || productData?.price;
   const variantColor = variantDetails?.color
   const variantSize = variantDetails?.size
-   console.log("VARIANT DETAILS IS====7777777777777========>",variantDetails)
   return (
     <View style={[productStyles.container, { marginBottom: item.product ? 13 : 8 }]}>
       <FastImage
+        resizeMode={'contain'}
         source={{ uri: `${IMGURL}${toShowImage}` }}
         style={productStyles.image}
       />
@@ -79,43 +79,59 @@ const ProductItemCard = ({ item }) => {
 };
 
 const ConfirmOrderScreen = ({ navigation, route }) => {
-  const { product, fromCart } = route?.params || {};
+  const { product, fromCart, cartItems: passedCartItems = [] } = route?.params || {};
   const { selectedAddress } = useSelector(state => state.selectedAddress);
   const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
-  const { items: cartItems } = useSelector(state => state.cart);
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
+  const { height } = Dimensions.get('window');
+  // ✅ Use passed cartItems if from cart; otherwise fallback to Redux with filter
+  const reduxCartItems = useSelector(state => state.cart?.items || []);
+  const fallbackCartItems = reduxCartItems.filter(item => {
+    const availableStock = item?.product?.outOfStock 
+      ? 0 
+      : (item?.variantDetails?.countInStock || item?.product?.countInStock || 0);
+    return availableStock > 0;
+  });
 
+  const cartItemsToUse = fromCart ? (passedCartItems.length > 0 ? passedCartItems : fallbackCartItems) : [];
   const appliedCoupon = product?.isSingleProductCheckout
     ? product?.appliedCoupon || appliedCoupons[product?._id]
     : appliedCoupons;
 
   const finalAmount = calculateFinalAmount({
     product: product?.isSingleProductCheckout ? product : null,
-    cartItems,
+    cartItems: cartItemsToUse,
     appliedCoupon,
   });
 
-  const handleProceedToPayment = () => {
-    if (!selectedAddress) {
-      showMessage({
-        message: 'Please select a delivery address',
-        type: 'danger',
-        icon: 'danger',
-        duration: 4000,
-      });
-      return;
-    }
+ const handleProceedToPayment = () => {
+  if (!selectedAddress) {
+    showMessage({
+      message: 'Please select a delivery address',
+      type: 'danger',
+      icon: 'danger',
+      duration: 4000,
+    });
+    return;
+  }
+
+  if (fromCart) {
+    navigation.navigate('PaymentMethodScreen', {
+      cartItems: cartItemsToUse,
+      selectedAddress,
+      fromCart: true,
+    });
+  } else {
     navigation.navigate('PaymentMethodScreen', {
       product: {
         ...product,
         selectedAddress,
       },
-      fromCart
+      fromCart: false,
     });
-  };
-
-    const {height} = Dimensions.get('window')  
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -126,11 +142,12 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
         <AddressView navigation={navigation} address={selectedAddress} userId={user?._id} />
 
         <Text style={productStyles.sectionTitle}>
-          {fromCart ? `Your Items (${cartItems.length})` : 'Your Item'}
+          {fromCart ? `Your Items (${cartItemsToUse.length})` : 'Your Item'}
         </Text>
+
         <View>
           {fromCart ? (
-            cartItems.map((item, index) => (
+            cartItemsToUse.map((item, index) => (
               <ProductItemCard
                 key={item._id || index}
                 item={item}
@@ -144,7 +161,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
 
         <PriceSummaryCard
           product={product?.isSingleProductCheckout ? product : null}
-          cartItems={fromCart ? cartItems : null}
+          cartItems={fromCart ? cartItemsToUse : null}
           priceDetails={{
             subtotal: product?.offerPrice || product?.price || 0,
             deliveryCharge: product?.deliveryCharge || 0,
@@ -154,7 +171,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
         />
       </ScrollView>
 
-      <View style={[styles.footer,{ paddingBottom: insets.bottom > 0 ? insets.bottom + 10 : height * 0.03 }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom > 0 ? insets.bottom + 10 : height * 0.03 }]}>
         <View style={styles.paymentButton}>
           <Text style={styles.paymentText}>SELECT PAYMENT METHOD</Text>
         </View>
@@ -169,5 +186,6 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
     </View>
   );
 };
+
 
 export default ConfirmOrderScreen;

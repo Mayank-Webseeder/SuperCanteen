@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, Ale
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { styles } from './styles';
 import HorizontalLine from '../home/horizontalLine';
+import { Width } from '@constants/index';
 
 const InvoiceModal = ({ order, onClose, onDownload }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -84,7 +85,7 @@ const InvoiceModal = ({ order, onClose, onDownload }) => {
               <Text style={styles.sectionTitle}>Order Items</Text>
               {order?.orderItems?.map((item, index) => (
                 <View key={index} style={styles.itemRow}>
-                  <Text style={[styles.subTitle, { width: 260, lineHeight: 22 }]}>
+                  <Text style={[styles.subTitle,{width:Width(180),lineHeight:22}]}>
                     {item.name} × {item.qty}
                   </Text>
                   <Text style={styles.subTitle}>₹{(item.price * item.qty).toFixed(2)}</Text>

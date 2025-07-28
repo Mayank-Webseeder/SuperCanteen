@@ -11,7 +11,8 @@ const CustomHeader = ({ label, showCartIcon, containerStyle, notShowingBackIcon,
   const navigation = useNavigation();
   const { items = [] } = useSelector((state) => state.cart);
   const { user } = useSelector(state => state.auth);
-  const itemCount = items?.length || 0;
+const validCartItems = React.useMemo(() => items?.filter(item => item.product !== null), [items]);
+const itemCount = validCartItems.length;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const prevCountRef = useRef(itemCount);
 

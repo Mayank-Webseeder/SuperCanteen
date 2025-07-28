@@ -27,7 +27,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.45;
-const CARD_HEIGHT = Height(170);
+const CARD_HEIGHT = Height(220);
 
 const ProductCarousel = ({
   products,
@@ -52,8 +52,17 @@ const ProductCarousel = ({
     }
   }, [dispatch, userId, initialized]);
 
-  const isInWishlist = productId =>
-    wishlistItems?.some(item => item._id === productId) || wishlistState[productId];
+const isInWishlist = (productId) => {
+  if (!initialized) return false;
+
+  const inRedux = wishlistItems?.some(
+    item => item._id === productId || item.product?._id === productId
+  );
+
+  // Optimistically return local state while Redux catches up
+  return wishlistState[productId] ?? inRedux;
+};
+
 
   const handleWishlistToggle = productId => {
     if (!user || !user.username) {
@@ -125,7 +134,8 @@ const ProductCarousel = ({
           style={[
             styles.cardContainer,
             {
-              height: isGrid ? Height(180) : CARD_HEIGHT,
+            minHeight: isGrid ? Height(150) : Height(190),
+             maxHeight: isGrid ? Height(250) : CARD_HEIGHT,
               padding: isGrid ? Width(5) : Width(8),
               marginTop: isGrid ? Height(10) : '',
               marginHorizontal: isGrid ? 2 : '',
@@ -215,51 +225,59 @@ const ProductCarousel = ({
     );
   };
 
-  return (
-    <View style={styles.container}>
-      {products.length > 0 && (
-        <HeaderRow containerStyle={{ marginTop: Height(10), ...containerStyle }} title={title} />
-      )}
 
-      {horizontal ? (
-        <Animated.FlatList
-          data={products}
-          renderItem={renderItem}
-          keyExtractor={item => item._id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.flatListContent}
-          snapToInterval={CARD_WIDTH + Width(16)}
-          decelerationRate="fast"
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-            { useNativeDriver: true }
-          )}
-          scrollEventThrottle={16}
-          removeClippedSubviews={true}
-          initialNumToRender={5}
-          maxToRenderPerBatch={6}
-          windowSize={7}
-        />
-      ) : (
-        <FlatList
-          data={products}
-          renderItem={renderItem}
-          keyExtractor={item => item._id}
-          numColumns={3}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.gridContentContainer,
-            { marginTop: horizontal ? Height(10) : '' },
-          ]}
-          removeClippedSubviews={true}
-          initialNumToRender={6}
-          maxToRenderPerBatch={9}
-          windowSize={7}
-        />
-      )}
-    </View>
-  );
+  const enabledProducts = products.filter(product => product.isEnable);
+
+ return (
+  <View style={styles.container}>
+    {enabledProducts.length > 0 ? (
+      <>
+        <HeaderRow containerStyle={{ marginTop: Height(10), ...containerStyle }} title={title} />
+
+        {horizontal ? (
+          <Animated.FlatList
+            data={enabledProducts}
+            renderItem={renderItem}
+            keyExtractor={item => item._id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.flatListContent}
+            snapToInterval={CARD_WIDTH + Width(16)}
+            decelerationRate="fast"
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+            removeClippedSubviews={true}
+            initialNumToRender={5}
+            maxToRenderPerBatch={6}
+            windowSize={7}
+          />
+        ) : (
+          <FlatList
+            data={enabledProducts}
+            renderItem={renderItem}
+            keyExtractor={item => item._id}
+            numColumns={3}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.gridContentContainer,
+              { marginTop: horizontal ? Height(10) : '' },
+            ]}
+            removeClippedSubviews={true}
+            initialNumToRender={6}
+            maxToRenderPerBatch={9}
+            windowSize={7}
+          />
+        )}
+      </>
+    ) : (
+     <></>
+    )}
+  </View>
+);
+
 };
 
 export default ProductCarousel;

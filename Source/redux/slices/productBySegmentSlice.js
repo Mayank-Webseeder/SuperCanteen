@@ -41,12 +41,11 @@ const productBySegmentSlice = createSlice({
       .addCase(fetchProductsBySegment.fulfilled, (state, action) => {
         state.loading = false;
         state.segmentProducts = action.payload;
-        console.log("FULLFIELLDE DATA IS",action.payload)
       })
       .addCase(fetchProductsBySegment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        console.log("REJECTED IS",action.payload)
+       
       });
   }
 });

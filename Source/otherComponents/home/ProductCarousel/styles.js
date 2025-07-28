@@ -26,7 +26,6 @@ export const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
     flex: 1,
-    
   
   },
   imageContainer: {
@@ -84,7 +83,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     paddingHorizontal: Width(5),
-    paddingBottom: Height(5),
+    
   },
   iconStyle:{
      width: 40,
@@ -99,9 +98,8 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Inter-SemiBold",
     color: COLORS.dark,
-    marginBottom: Height(4),
-    lineHeight: 18,
-    marginTop:Height(10)
+    lineHeight: Height(20),
+    marginTop:Height(6)
   },
   gridProductName: {
     fontSize: 12,
@@ -112,6 +110,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     marginTop: 'auto',
+   
   },
   offerPrice: {
     fontSize: 16,

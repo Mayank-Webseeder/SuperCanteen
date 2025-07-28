@@ -6,52 +6,66 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const Footer = ({ navigation }) => {
   const { items: cartItems } = useSelector(state => state.cart);
- const { user } = useSelector(state => state.auth);
+  const { user } = useSelector(state => state.auth);
   const { appliedCoupons } = useSelector(state => state.coupon);
-    const insets = useSafeAreaInsets();
-    
+  const insets = useSafeAreaInsets();
+
+  // ✅ Filter in-stock items
+  const inStockCartItems = cartItems.filter(item => {
+    const availableStock = item?.product?.outOfStock 
+      ? 0 
+      : (item?.variantDetails?.countInStock || item?.product?.countInStock || 0);
+    return availableStock > 0;
+  });
+
   const finalAmount = calculateFinalAmount({
-     cartItems,
-     appliedCoupon:appliedCoupons
-   });
+    cartItems: inStockCartItems,  // 👈 use only in-stock items
+    appliedCoupon: appliedCoupons
+  });
 
+  const itemCount = inStockCartItems.reduce((count, item) => count + (item.qty || 1), 0);
 
-  const itemCount = cartItems.reduce((count, item) => count + (item.qty || 1), 0);
-  const  handleCheckout = () => {
-    if (cartItems.length === 0) {
-      return;
-    }
-      if (!user || !user.username) {
+  const handleCheckout = () => {
+    if (inStockCartItems.length === 0) return;
+
+    if (!user || !user.username) {
       navigation.reset({
         index: 0,
         routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
       });
     } else {
-      navigation.navigate('ProductCheckoutScreen', { finalAmount , fromCart:true  });
+      navigation.navigate('ProductCheckoutScreen', { 
+        finalAmount, 
+        fromCart: true,
+        cartItems: inStockCartItems  // 👈 pass filtered data to checkout
+      });
     }
   };
-  
+
   return (
     <View style={[styles.footerContainer, { paddingBottom: insets.bottom + 10 }]}>
       <View style={styles.priceContainer}>
-        <Text style={styles.itemCount}>{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</Text>
+        <Text style={styles.itemCount}>
+          {itemCount} {itemCount === 1 ? 'Item' : 'Items'}
+        </Text>
         <View style={styles.priceWrapper}>
           <Text style={styles.priceLabel}>Total:</Text>
           <Text style={styles.priceValue}>₹{Math.round(finalAmount)}</Text>
         </View>
       </View>
       <TouchableOpacity
-        style={[styles.checkoutButton, (cartItems.length === 0) && styles.disabledButton]}
+        style={[styles.checkoutButton, (inStockCartItems.length === 0) && styles.disabledButton]}
         onPress={handleCheckout}
-        disabled={cartItems.length === 0}
+        disabled={inStockCartItems.length === 0}
       >
         <Text style={styles.checkoutText}>
-          {cartItems.length > 0 ? 'Proceed to Checkout' : 'Cart Empty'}
+          {inStockCartItems.length > 0 ? 'Proceed to Checkout' : 'Cart is Empty'}
         </Text>
       </TouchableOpacity>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   footerContainer: {

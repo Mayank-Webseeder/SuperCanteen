@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
   },
   footerButton:{
    flexDirection:"row",
-   marginLeft:Height(30)
+   marginLeft:Height(20)
   },
    resetText:{
     color:COLORS.green,
@@ -137,7 +137,8 @@ checkboxLabel: {
   marginLeft: 10,
   fontSize: FontSize(13),
   color: '#333',
-  width:Width(160)
+  width:Width(160),
+  lineHeight:Height(19)
 },
 rightPaneContainer: {
   padding: 15,

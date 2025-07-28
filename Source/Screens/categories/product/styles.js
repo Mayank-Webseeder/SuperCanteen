@@ -155,6 +155,12 @@ export const styles = StyleSheet.create({
      marginBottom:20,
      paddingHorizontal:10
   },
+  allIconStyle:{
+   marginRight:Height(5)
+  },
+  categoryContainerStyle:{
+   marginRight:Height(6)
+  },
   bottomSheetContainer:{
     flexDirection: 'row', marginHorizontal: 20, columnGap: 10, marginBottom: Height(6),
     marginTop:2
@@ -192,10 +198,7 @@ export const styles = StyleSheet.create({
     width:Width(7)
   },
   imageStyle:{
-     height:Height(150),
-    width:"100%",
-    resizeMode:"cover",
-    borderRadius:0,
+    borderRadius:20,
   
   },
   carouselContainerStyle:{

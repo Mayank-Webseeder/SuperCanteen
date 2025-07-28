@@ -31,7 +31,7 @@ const CustomBottomSheet = ({
   onReset
 }) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-  const [selectedCategory, setSelectedCategory] = useState('Color');
+  const [selectedCategory, setSelectedCategory] = useState('Brand');
   const [selectedColors, setSelectedColors] = useState(initialFilters.colors || []);
   const [selectedSizes, setSelectedSizes] = useState(initialFilters.sizes || []);
   const [selectedBrands, setSelectedBrands] = useState(initialFilters.brands || []);

@@ -361,7 +361,6 @@ removeText: {
     zIndex: 1,
   },
   outOfStockText: {
-    color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
   },

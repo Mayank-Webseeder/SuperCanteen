@@ -19,6 +19,11 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BOTTOM_SHEET_HEIGHT = Height(650);
 
 const defaultSortOptions = [
+//   Best Seller
+
+// Featured
+
+// Digital Product
   'Popular',
   'Price: Low to High',
   'Price: High to Low',

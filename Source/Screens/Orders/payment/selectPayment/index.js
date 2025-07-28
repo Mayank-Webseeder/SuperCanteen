@@ -30,10 +30,9 @@ const PaymentMethodScreen = ({ navigation, route }) => {
   
   // Redux and route data
   const dispatch = useDispatch();
-  const { product = {}, fromCart } = route?.params || {};
+  const { product = {}, fromCart ,cartItems} = route?.params || {};
   const selectedAddress = useSelector(selectSelectedAddress);
-  const cartItems = useSelector(state => state.cart?.items || []); // Get cart items from Redux
- 
+  // const cartItems = useSelector(state => state.cart?.items || []); // Get cart items from Redux
   // Payment options
 
   const deliveryOption = 'Cash on Delivery';
@@ -187,6 +186,7 @@ return {
     }
   };
 
+
   return (
     <View style={styles.container}>
       <CustomCommonHeader navigation={navigation} title="Select Payment Method" />
@@ -239,7 +239,7 @@ return {
         </View>
 
         {/* Price Summary - Dynamic based on product */}
-      <PriceSummaryCard 
+       <PriceSummaryCard 
   product={product?.isSingleProductCheckout ? product : null}
   priceDetails={{
     subtotal: product?.offerPrice || product?.price || 0,
@@ -247,7 +247,7 @@ return {
     couponDiscount: 0,
     total: (product?.offerPrice || product?.price || 0) + (product?.deliveryCharge || 0)
   }}
-/>
+/> 
       </ScrollView>
       
       {/* Confirm Order Button */}

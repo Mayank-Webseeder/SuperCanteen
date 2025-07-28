@@ -3,11 +3,14 @@ import { styles } from './styles';
 import CustomSearch from '../../../Components/searchInput';
 import FastImage from 'react-native-fast-image';
 import { useSelector } from 'react-redux';
+import React from 'react';
 
 // Header.js
 export default function Header({ navigation ,containerStyle}) {
 const { items, initialized } = useSelector((state) => state.cart);
-  const itemCount = items?.length;
+const validCartItems = React.useMemo(() => items?.filter(item => item.product !== null), [items]);
+const itemCount = validCartItems.length;
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -20,7 +23,7 @@ const { items, initialized } = useSelector((state) => state.cart);
             backgroundColor={'#fff'}
             disabled
             containerStyle={[styles.searchInput,containerStyle]}
-            inputStyle={{ fontSize: 14, paddingVertical: 11, marginLeft: 2}}
+            inputStyle={{ fontSize: 14, paddingVertical: 10, marginLeft: 2}}
           />
         </Pressable>
          <Pressable 

@@ -27,7 +27,8 @@ const OrderConfirmFinal = () => {
   const fadeAnim = new Animated.Value(0);
   const insets = useSafeAreaInsets();
 
-  console.log("order id",orderId)
+  console.log("CURRUNT ORDER IS===================>",currentOrder)
+
   
   useEffect(() => {
     dispatch(fetchOrderById(orderId))
@@ -191,9 +192,10 @@ const deliveryDate = new Date(createdAt.getTime() + deliveryDays * 24 * 60 * 60 
             </View>
           </View>
           
+          {currentOrder?.orderItems?.[0]?.product?.deliveryDays && 
           <View style={styles.timelineItem}>
             <View style={[styles.timelineDot, { backgroundColor: '#BDBDBD' }]} />
-         {currentOrder?.orderItems?.[0]?.product?.deliveryDays &&  <View style={styles.timelineContent}>
+          <View style={styles.timelineContent}>
               <Text style={[styles.timelineTitle, { color: '#757575' }]}>Delivered</Text>
  <Text style={styles.timelineDate}>
       Expected by {deliveryDate.toLocaleDateString('en-US', {
@@ -202,9 +204,10 @@ const deliveryDate = new Date(createdAt.getTime() + deliveryDays * 24 * 60 * 60 
         day: 'numeric'
       })}
     </Text>
-            </View> }
+            </View> 
            
           </View>
+}
         </View>
 
         {/* Payment Summary */}
