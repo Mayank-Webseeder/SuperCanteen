@@ -56,9 +56,6 @@ const ProductDetails = ({ navigation, route }) => {
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
 
-console.log("AMIMATION IMAGE IS",animationImage)
-  
-
 
   // Get image URLs for display
   const getImageUrls = (images) =>
@@ -162,11 +159,15 @@ const OnAddToCart = (item) => {
     const priceDetails = calculateProductPrice(selectedItem, finalVariant, localAppliedCoupon);
 
     // Prepare animation image
-    const imageUrl = finalVariant?.images?.[0]
-      ? `${finalVariant.images[0]}`
-      : selectedItem.images?.[0]
-      ? `${IMGURL}${selectedItem.images[0]}`
-      : null;
+  const imageUrl = finalVariant?.images?.[0]
+  ? finalVariant.images[0].startsWith('https://')
+    ? finalVariant.images[0]
+    : `${IMGURL}${finalVariant.images[0]}`
+  : selectedItem?.images?.[0]
+  ? selectedItem.images[0].startsWith('https://')
+    ? selectedItem.images[0]
+    : `${IMGURL}${selectedItem.images[0]}`
+  : null;
 
     setAnimationImage(imageUrl);
     setAddtoCartLoading(true);

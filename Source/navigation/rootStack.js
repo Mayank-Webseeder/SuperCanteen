@@ -3,16 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthStack from './authStack';
 import AppStack from './appStack';
 import SplashScreen from '@screens/splash';
-import CreateAddressScreen from '../Components/address/createAddress';
 
 const Stack = createNativeStackNavigator();
 
 export default function RootStack() {
   return (
-    <Stack.Navigator    screenOptions={{ headerShown: false }}>
-         <Stack.Screen  name="SplashScreen" component={SplashScreen} />    
-      <Stack.Screen  name="CreateAddressScreen" component={CreateAddressScreen} />    
-       
+    <Stack.Navigator  screenOptions={{ headerShown: false }}>
+    <Stack.Screen  name="SplashScreen" component={SplashScreen} />       
     <Stack.Screen name="App" component={AppStack} /> 
       <Stack.Screen 
         name="Auth" 

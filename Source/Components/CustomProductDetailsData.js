@@ -1,66 +1,89 @@
 import React, { useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { Height } from '../constants';
-import { stripHtml } from '../utils/dataFormatters';
+import RenderHtml from 'react-native-render-html';
 import Collapsible from 'react-native-collapsible';
 import { COLORS } from '../constants';
+import { decode } from 'html-entities';
 
 const CustomProductDetailsData = ({ productData }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const { width } = useWindowDimensions();
 
-  // Clean description
-  const descriptionText = productData?.description
-    ? stripHtml(productData.description)
-    : '';
+  // HTML render configuration
+  const htmlConfig = {
+    baseStyle: {
+      fontSize: 14,
+      color: '#2E6074',
+      lineHeight: 22,
+      fontFamily: 'Inter-Regular',
+    },
+    tagsStyles: {
+      strong: {
+        fontWeight: 'bold',
+        color: '#2E6074',
+      },
+      em: {
+        fontStyle: 'italic',
+      },
+      p: {
+        // marginBottom: 3,
+      },
+      ul: {
+        // marginBottom: 3,
+        paddingLeft: 20,
+      },
+      ol: {
+        marginBottom: 6,
+        paddingLeft: 20,
+      },
+      li: {
+        // marginBottom: 3,
+      },
+      a: {
+        color: COLORS.primary,
+        textDecorationLine: 'underline',
+      },
+      br: {
+        height: 12,
+      },
+    },
+    enableExperimentalBRCollapsing: true,
+    enableExperimentalGhostLinesPrevention: true,
+    defaultTextProps: {
+      selectable: true,
+    },
+    systemFonts: ['Inter-Regular', 'Inter-Bold', 'Inter-SemiBold']
+  };
 
-  // Only show "Read More" if > 150 chars
-  const showReadMore = descriptionText.length > 150;
-
-  // Prepare spec lines for bullets
+  // Prepare specification lines with HTML support
   const specLines = useMemo(() => {
     if (!productData?.specification) return [];
-    // split on newlines or periods
-    return stripHtml(productData.specification)
-      .split(/\r?\n|\.\s+/)
+    return productData.specification
+      .split(/<br\s*\/?>|<\/p>|<\/li>/)
       .map(line => line.trim())
-      .filter(line => line.length > 0);
+      .filter(line => line.length > 0 && !line.match(/^<\w+>$/));
   }, [productData.specification]);
+
+  // Only show "Read More" if content is long
+  const showReadMore = productData?.description?.length > 200;
 
   return (
     <ScrollView style={styles.container}>
-      {/* Specifications */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle,{marginTop:14}]}>Product Details</Text>
-        {specLines.length > 0 ? (
-          <View style={styles.specsContainer}>
-            {specLines.map((line, i) => (
-              <View style={styles.specRow} key={i}>
-                <Text style={styles.bullet}></Text>
-                <Text style={styles.specValue}>{line}</Text>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <Text style={styles.noDetails}>No specifications available</Text>
-        )}
-      </View>
-
-      {/* Description */}
-      {descriptionText ? (
+       {/* Description */}
+      {productData?.description && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={[styles.sectionTitle, { marginTop: 14 }]}>Description</Text>
           <Collapsible
             collapsed={isCollapsed}
             collapsedHeight={100}
-            duration={300}       // smooth 300ms animation
+            duration={300}
           >
-            <Text style={styles.descriptionText}>{descriptionText}</Text>
+            <RenderHtml
+              contentWidth={width - 32}
+              source={{ html: decode(productData.description) }}
+              {...htmlConfig}
+            />
           </Collapsible>
           {showReadMore && (
             <TouchableOpacity
@@ -73,10 +96,21 @@ const CustomProductDetailsData = ({ productData }) => {
             </TouchableOpacity>
           )}
         </View>
-      ) : null}
+      )}
 
-    
-    
+      {/* Specifications */}
+{specLines.length > 0 &&  
+  <View style={styles.section}>
+  <Text style={[styles.sectionTitle, { marginTop: 6 }]}>Specifications</Text>
+  <View style={styles.specsContainer}>
+    <RenderHtml
+      contentWidth={width - 60}
+      source={{ html: decode(specLines.join('<br/>')) }}
+      {...htmlConfig}
+    />
+  </View>
+</View> }
+     
     </ScrollView>
   );
 };
@@ -107,17 +141,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: 8,
-    justifyContent:"center"
+    justifyContent: "center"
   },
   bullet: {
-    height:6,
-    width:6,
-    borderRadius:20,
-    backgroundColor:COLORS.green,
-    alignItems:"center",
-    justifyContent:"center",
-    textAlign:"center",
-    marginTop:Height(7)
+    height: 6,
+    width: 6,
+    borderRadius: 20,
+    backgroundColor: COLORS.green,
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    marginTop: Height(7)
   },
   specValue: {
     flex: 1,
@@ -125,7 +159,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: '#2E6074',
     fontFamily: 'Inter-Regular',
-    marginHorizontal:7
+    marginHorizontal: 7
   },
   noDetails: {
     color: '#999',
@@ -140,7 +174,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     paddingHorizontal: 16,
   },
-  readMoreButton: { marginTop: 10, paddingHorizontal: 16 },
+  readMoreButton: { marginTop: 10, paddingHorizontal: 4 },
   readMoreText: {
     color: '#2E6074AD',
     fontSize: 14,

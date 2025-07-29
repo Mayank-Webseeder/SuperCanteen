@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
   },
   scrollContainer: {
     paddingHorizontal: Width(12),
-    paddingBottom: Height(60)
+    paddingBottom: Height(120)
   },
   card: {
     backgroundColor: COLORS.white,
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
   },
   buttonView: {
     marginHorizontal: 20,
-    bottom: Height(30)
+    bottom: Height(22)
   },
   addressModeToggle: {
     flexDirection: 'row',
