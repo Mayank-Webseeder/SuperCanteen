@@ -230,13 +230,14 @@ const filteredItems = useMemo(() => {
     </ScrollView>
   );
 
+
   return (
     <View style={styles.container}>
       <CustomCommonHeader title={'Your Cart'} navigation={navigation} />
       
       {isLoading ? (
         renderSkeleton()
-      ) : items.length > 0 ? (
+      ) :  filteredItems.length > 0 ? (
         renderCartContent()
       ) : (
         renderEmptyCart()

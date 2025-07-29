@@ -56,6 +56,13 @@ appVersion: {
   gradientHeader: {
     overflow: 'hidden',
   },
+skeletonStyle : {
+    backgroundColor: '#E1E9EE',
+    borderRadius: 4,
+    overflow: 'hidden',
+    position: 'relative', // Add this
+    zIndex: 1, // Add this to ensure it renders above other elements
+  },
   categories:{
   marginHorizontal:Height(5),
   marginTop:Height(10)

@@ -176,24 +176,35 @@ useEffect(() => {
       }).start();
     }
   }, [isReady, opacity, isMounted]);
-
-  const handleRefresh = useCallback(async () => {
-    if (!isMounted) return;
+const handleRefresh = useCallback(async () => {
+  if (!isMounted) return;
+  
+  setRefreshing(true);
+  setIsReady(false); // Add this line
+  
+  try {
+    await Promise.all([
+      dispatch(getCategories()),
+      dispatch(getSubCategories()),
+      dispatch(fetchSections()),
+      selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
+    ]);
     
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        dispatch(getCategories()),
-        dispatch(getSubCategories()),
-        dispatch(fetchSections()),
-        selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
-      ]);
-    } catch (err) {
-      console.error('Refresh Error:', err);
-    } finally {
-      if (isMounted) setRefreshing(false);
+    // Add this block to ensure UI updates even if some requests fail
+    setTimeout(() => {
+      if (isMounted) {
+        setIsReady(true);
+        setRefreshing(false);
+      }
+    }, 1000); // Fallback timeout
+  } catch (err) {
+    console.error('Refresh Error:', err);
+    if (isMounted) {
+      setIsReady(true);
+      setRefreshing(false);
     }
-  }, [dispatch, selectedCategoryIndex, isMounted]);
+  }
+}, [dispatch, selectedCategoryIndex, isMounted]);
 
   // Memoized data
   const filteredSubcategories = useMemo(() => {
@@ -229,35 +240,36 @@ useEffect(() => {
   );
 
   // Skeleton component
-  const renderSkeleton = () => {
-    const shimmerAnimation = skeletonAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['-100%', '100%']
-    });
+const renderSkeleton = () => {
+  const shimmerAnimation = skeletonAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['-100%', '100%']
+  });
 
-    const SkeletonElement = ({ width, height, style = {} }) => (
-      <View 
-        style={[
-          {
-            width,
-            height,
-            backgroundColor: '#E1E9EE',
-            borderRadius: 4,
-            overflow: 'hidden',
-          },
-          style,
-        ]}
-      >
-        <Animated.View
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#F2F8FC',
-            transform: [{ translateX: shimmerAnimation }],
-          }}
-        />
-      </View>
-    );
+  const SkeletonElement = ({ width, height, style = {} }) => (
+    <View 
+      style={[
+       styles.skeletonStyle,
+        {
+          width,
+          height,
+        },
+        style,
+      ]}
+    >
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#F2F8FC',
+          transform: [{ translateX: shimmerAnimation }],
+        }}
+      />
+    </View>
+  );
 
     return (
       <View style={styles.skeletonContainer}>
