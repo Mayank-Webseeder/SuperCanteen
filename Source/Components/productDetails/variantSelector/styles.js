@@ -31,7 +31,8 @@ export const styles = StyleSheet.create({
     fontFamily:"Inter-Medium",
     color: '#333',
     marginTop:3,
-    marginBottom:1
+    marginBottom:1,
+   
   },
   selectedSizeText: {
     fontSize: 14,
@@ -159,5 +160,14 @@ imagePlaceholder: {
 errorText: {
   color: COLORS.error,
   fontSize: 14
-}
+},
+disabledSize: {
+  backgroundColor: '#F5F5F5', // faded gray
+  borderColor: '#F5F5F5',
+},
+
+
+ disabledText: {
+    color: '#999',
+  },
 });

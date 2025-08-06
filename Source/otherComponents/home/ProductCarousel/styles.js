@@ -124,7 +124,7 @@ export const styles = StyleSheet.create({
   },
   mrpPrice: {
     fontSize: 12,
-    color: COLORS.gray,
+    color: '#a19a9aff',
     textDecorationLine: 'line-through',
     includeFontPadding: false,
   },

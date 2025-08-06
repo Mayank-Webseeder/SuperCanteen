@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -45,6 +45,7 @@ const ProductDetails = ({ navigation, route }) => {
   const [animationKey, setAnimationKey] = useState(0);
   const [animationImage, setAnimationImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
+
   const [selectionError, setSelectionError] = useState(null);
   const [localAppliedCoupon, setLocalAppliedCoupon] = useState(null);
   const cartItems = useSelector(state => state.cart.items);
@@ -55,24 +56,46 @@ const ProductDetails = ({ navigation, route }) => {
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
+const didSetDefaultVariant = useRef(false);
+const variantRef = useRef(null);
+
+const prevProductId = useRef(null);
+useEffect(() => {
+    if (productId !== prevProductId.current) {
+      setSelectedVariant(null);
+      variantRef.current = null;
+      prevProductId.current = productId;
+      didSetDefaultVariant.current = false;
+    }
+  }, [productId]);
+
 
 
   // Get image URLs for display
-  const getImageUrls = (images) =>
-    images?.length > 0
-      ? images.map(img =>
-          img?.url
-            ? img.url.startsWith('http') ? img.url : `${IMGURL}${img.url}`
-            : typeof img === 'string' && img.startsWith('http')
-            ? img
-            : `${IMGURL}${img}`
-        )
-      : [];
+const getImageUrls = (images) => {
+  if (!images || !Array.isArray(images)) return [];
+  return images.map(img => {
+    const url = img?.url || img;
+    return url?.startsWith('http') ? url : `${IMGURL}${url}`;
+  }).filter(Boolean);
+};
 
-  const imagesToShow =
-    selectedVariant && getImageUrls(selectedVariant.images).length > 0
-      ? getImageUrls(selectedVariant.images)
-      : getImageUrls(productData?.images);
+const imagesToShow = useMemo(() => {
+  const currentVariant = variantRef.current; // Get most recent value
+  
+  // 1. Check for explicit deselection
+  if (currentVariant === null) {
+    return getImageUrls(productData?.images);
+  }
+  
+  // 2. Check for variant images
+  if (currentVariant?.images?.length) {
+    return getImageUrls(currentVariant.images);
+  }
+
+  return getImageUrls(productData?.images);
+}, [productData, selectedVariant]); // Still include selectedVariant to trigger updates
+
 
   // Reusable price calculation
   const getPriceDetails = useCallback((item = productData, variant = selectedVariant) => {
@@ -81,11 +104,12 @@ const ProductDetails = ({ navigation, route }) => {
 
 
 
-  // Handle variant selection
-  const handleVariantChange = (variant) => {
-    setSelectedVariant(variant);
-    setSelectionError(null);
-  };
+const handleVariantChange = useCallback((variant) => {
+  variantRef.current = variant; // Store in ref for immediate access
+  setSelectedVariant(variant);
+}, []);
+
+
 
   // Share product
   const shareWithImage = async () => {

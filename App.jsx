@@ -108,7 +108,7 @@ const App = () => {
         translucent={false}
       />
          <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}   edges={['top', 'left', 'right']}>
-    <NavigationContainer ref={navigationRef}>
+       <NavigationContainer ref={navigationRef}>
         <RootStack />
       </NavigationContainer>
       <CustomFlashMessage/>

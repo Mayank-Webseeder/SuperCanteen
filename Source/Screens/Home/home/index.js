@@ -170,7 +170,7 @@ useEffect(() => {
   useEffect(() => {
     if (isMounted) {
       Animated.timing(opacity, {
-        toValue: isReady ? 1 : 0,
+        toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }).start();
