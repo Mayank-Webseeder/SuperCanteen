@@ -176,12 +176,12 @@ useEffect(() => {
       }).start();
     }
   }, [isReady, opacity, isMounted]);
-const handleRefresh = useCallback(async () => {
+
+  const handleRefresh = useCallback(async () => {
   if (!isMounted) return;
   
   setRefreshing(true);
-  setIsReady(false); // Add this line
-  
+  // Keep content visible during refresh by not resetting isReady
   try {
     await Promise.all([
       dispatch(getCategories()),
@@ -189,20 +189,15 @@ const handleRefresh = useCallback(async () => {
       dispatch(fetchSections()),
       selectedCategoryIndex && dispatch(getProductsByCategory(selectedCategoryIndex)),
     ]);
-    
-    // Add this block to ensure UI updates even if some requests fail
+  } catch (error) {
+    console.error('Refresh failed:', error);
+  } finally {
+    // Always ensure refresh ends
     setTimeout(() => {
       if (isMounted) {
-        setIsReady(true);
         setRefreshing(false);
       }
-    }, 1000); // Fallback timeout
-  } catch (err) {
-    console.error('Refresh Error:', err);
-    if (isMounted) {
-      setIsReady(true);
-      setRefreshing(false);
-    }
+    }, 1000); // Minimum loading indicator duration
   }
 }, [dispatch, selectedCategoryIndex, isMounted]);
 
@@ -320,9 +315,9 @@ const renderSkeleton = () => {
 
   // Main content renderer
   const renderContent = () => {
-    if (!isReady) {
-      return renderSkeleton();
-    }
+    if ((!isReady && !refreshing) || (productsLoading && !initialLoadComplete)) {
+    return renderSkeleton();
+  }
 
     if (categoriesError || subCategoriesError || productsError) {
       return (
@@ -427,6 +422,11 @@ const renderSkeleton = () => {
         windowSize={7}
         key={`home-${selectedCategoryIndex}`}
         extraData={selectedCategoryIndex}
+         ListEmptyComponent={
+    !refreshing && isReady && products.length === 0 ? (
+      <EmptyState allEmpty />
+    ) : null
+  }
       />
     </View>
   );

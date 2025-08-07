@@ -1,21 +1,123 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
 import { styles } from './styles';
 import { IMGURL } from '../../../utils/dataFormatters';
 
-const VariantSelector = ({ product, onVariantChange, selectionError, setSelectionError }) => {
-  const [selectedVariant, setSelectedVariant] = useState(null);
-  const [colorOptions, setColorOptions] = useState([]);
-  const [sizeOptions, setSizeOptions] = useState([]);
-  const [availableSizesForColor, setAvailableSizesForColor] = useState([]);
-  const fadeAnim = useState(new Animated.Value(0))[0];
-  const [selectedColorCode, setSelectedColorCode] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
+const initialState = {
+  selectedVariant: null,
+  colorOptions: [],
+  sizeOptions: [],
+  availableSizesForColor: [],
+  selectedColorCode: null,
+  selectedSize: null,
+};
 
-  console.log("ddddddddddddddddd",selectedSize)
- 
+function variantReducer(state, action) {
+  switch (action.type) {
+    case 'SET_OPTIONS':
+      return {
+        ...initialState,
+        colorOptions: action.colorOptions,
+        sizeOptions: action.sizeOptions,
+      };
+    case 'SELECT_COLOR':
+      return {
+        ...state,
+        selectedColorCode: action.colorCode,
+        availableSizesForColor: action.availableSizes,
+        selectedSize: action.defaultSize,
+        selectedVariant: action.defaultVariant,
+      };
+    case 'SELECT_SIZE':
+      return {
+        ...state,
+        selectedSize: action.size,
+        selectedVariant: action.variant,
+      };
+    case 'RESET_COLOR':
+      return {
+    ...state,
+    selectedColorCode: null,
+    selectedSize: null,
+    selectedVariant: null,
+    availableSizesForColor: [],
+  };
+    default:
+      return state;
+  }
+}
+
+const VariantSelector = ({ product, onVariantChange, selectionError, setSelectionError}) => {
+  const [state, dispatch] = useReducer(variantReducer, initialState);
+  const fadeAnim = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    console.log("ffffffffffff",  state.selectedVariant,
+)
+
+}, [state.selectedVariant]);
+
+useEffect(() => {
+  if (!product?.variants?.length) return;
+
+  // Check if variants have proper color definitions
+  const hasRealColors = product.variants.some(v => v.color?.code && v.color.code.trim() !== '');
+  
+  if (!hasRealColors) {
+    // Create a "color" option for each variant
+    const variantOptions = product.variants.map(variant => ({
+      name: variant.size || 'Variant',
+      code: variant._id, // Use variant ID as unique code
+      image: getImageUrl(variant.images?.[0] || product.images?.[0]),
+      variantId: variant._id
+    }));
+
+      console.log("ddddddddddddddddddddffffffff",variantOptions)
+
+
+    const allSizes = new Set(
+      product.variants
+        .filter(v => v.size && v.size.trim().toLowerCase() !== 'free')
+        .map(v => v.size)
+    );
+
+    dispatch({
+      type: 'SET_OPTIONS',
+      colorOptions: variantOptions,
+      sizeOptions: Array.from(allSizes),
+    });
+    return;
+  }
+
+  // Original color-based logic
+  const uniqueColors = {};
+  const allSizes = new Set();
+
+  product.variants.forEach((variant) => {
+    const { name, code } = variant.color || {};
+    const colorKey = `${name}-${code}`;
+    if (!uniqueColors[colorKey]) {
+      uniqueColors[colorKey] = {
+        name: name || '',
+        code: code || '',
+        image: getImageUrl(variant.images?.[0] || product.images?.[0]),
+      };
+    }
+
+    if (variant.size && variant.size.trim().toLowerCase() !== 'free') {
+      allSizes.add(variant.size);
+    }
+  });
+
+  dispatch({
+    type: 'SET_OPTIONS',
+    colorOptions: Object.values(uniqueColors),
+    sizeOptions: Array.from(allSizes),
+  });
+}, [product?.id]);
+
 
   const getImageUrl = (img) => {
     if (!img) return null;
@@ -23,41 +125,6 @@ const VariantSelector = ({ product, onVariantChange, selectionError, setSelectio
     if (img.url) return img.url.startsWith('http') ? img.url : `${IMGURL}${img.url}`;
     return null;
   };
-
-  useEffect(() => {
-    if (!product?.variants?.length) return;
-
-    const uniqueColors = {};
-    const allSizes = new Set();
-
-    product.variants.forEach((variant) => {
-      const { name, code } = variant.color || {};
-      const colorKey = `${name}-${code}`;
-      if (!uniqueColors[colorKey]) {
-        uniqueColors[colorKey] = {
-          name: name || '',
-          code: code || '',
-          image: getImageUrl(variant.images?.[0] || product.images?.[0]),
-        };
-      }
-
-      if (variant.size && variant.size.trim().toLowerCase() !== 'free') {
-        allSizes.add(variant.size);
-      }
-    });
-
-    // Only set options, no default selections
-    setColorOptions(Object.values(uniqueColors));
-    setSizeOptions(Array.from(allSizes));
-    setAvailableSizesForColor([]); // Start with empty available sizes
-    setSelectedColorCode(null);
-    setSelectedSize(null);
-    setSelectedVariant(null);
-    onVariantChange?.(null);
-
-  }, [product?.id]);
-
-  
 
 
   useEffect(() => {
@@ -68,183 +135,258 @@ const VariantSelector = ({ product, onVariantChange, selectionError, setSelectio
     }).start();
   }, []);
 
- const handleColorSelect = (color) => {
-  if (selectedColorCode === color.code) {
-    // Deselect if the same color is tapped again
-    setSelectedColorCode(null);
-    setAvailableSizesForColor([]);
-    setSelectedSize(null);
-    setSelectedVariant(null);
+  useEffect(() => {
+    onVariantChange?.(state.selectedVariant);
+  }, [state.selectedVariant]);
+
+// handleColorSelect
+const handleColorSelect = (option) => {
+  const isSameSelected = state.selectedColorCode === option.code;
+
+  if (isSameSelected) {
+    dispatch({ type: 'RESET_COLOR' });
     onVariantChange?.(null);
     return;
   }
 
-  const variantsWithColor = product.variants.filter(
-    (v) => v.color?.code === color.code
-  );
+  // Case 1: When options have variantId (direct variant selection)
+  if (option.variantId) {
+    const selectedVariant = product.variants.find(v => v._id === option.variantId);
+    onVariantChange?.(selectedVariant || null);
+    dispatch({
+      type: 'SELECT_COLOR',
+      colorCode: option.code,
+      availableSizes: selectedVariant?.size ? [selectedVariant.size] : [],
+      defaultSize: selectedVariant?.size || null,
+      defaultVariant: selectedVariant || null,
+    });
+    return;
+  }
 
-  const sizes = variantsWithColor
-    .filter((v) => v.size && v.size.trim().toLowerCase() !== 'free')
-    .map((v) => v.size);
+  // Case 2: When options are regular color options (no variantId)
+  const matchingVariants = product.variants.filter(v => {
+    // Match by color code if available, otherwise by color name
+    if (v.color?.code) return v.color.code === option.code;
+    if (v.color?.name) return v.color.name === option.name;
+    return false;
+  });
 
-  const uniqueSizes = [...new Set(sizes)];
+  // Find the first variant with this color that has a size
+  const sizedVariant = matchingVariants.find(v => v.size);
+  
+  // Fallback to first variant if none have sizes
+  const selectedVariant = sizedVariant || matchingVariants[0];
 
-  // Select first size by default (if available)
-  const defaultSize = uniqueSizes.length > 0 ? uniqueSizes[0] : null;
+  if (!selectedVariant) {
+    console.warn("No variant found for selected color");
+    return;
+  }
 
-  // Find the variant that matches the selected color and default size
-  const defaultVariant = variantsWithColor.find(
-    (v) => v.size === defaultSize
-  );
+  // Get available sizes for this color
+  const availableSizes = matchingVariants
+    .filter(v => v.size)
+    .map(v => v.size);
 
-  setSelectedColorCode(color.code);
-  setAvailableSizesForColor(uniqueSizes);
-  setSelectedSize(defaultSize);
-  setSelectedVariant(defaultVariant || null);
-  onVariantChange?.(defaultVariant || null);
-  setSelectionError(null);
+  // Update parent immediately
+  onVariantChange?.(selectedVariant);
+
+  dispatch({
+    type: 'SELECT_COLOR',
+    colorCode: option.code,
+    availableSizes: [...new Set(availableSizes)],
+    defaultSize: selectedVariant.size || null,
+    defaultVariant: selectedVariant,
+  });
 };
 
+const handleSizeSelect = async (size) => {
+  const isSameSizeSelected = state.selectedSize === size;
 
-const handleSizeSelect = (size) => {
-  // Toggle size selection
-  if (selectedSize === size) {
-    setSelectedSize(null);
-    setSelectedVariant(null);
+  if (isSameSizeSelected) {
+    dispatch({
+      type: 'SELECT_SIZE',
+      size: null,
+      variant: null,
+    });
     onVariantChange?.(null);
+    dispatch({ type: 'RESET_COLOR' });
     return;
   }
 
-  const variantsWithSize = product.variants.filter(
-    (v) => v.size === size
-  );
+  // Find all variants with this size
+  const variantsWithSize = product.variants.filter(v => v.size === size);
+  if (variantsWithSize.length === 0) return;
 
-  // If a color is already selected, prefer that
   let matchingVariant = null;
+  let colorOptionToSelect = null;
 
-  if (selectedColorCode) {
-    matchingVariant = variantsWithSize.find(
-      (v) => v.color?.code === selectedColorCode
-    );
-
-    if (matchingVariant) {
-      setSelectedSize(size);
-      setSelectedVariant(matchingVariant);
-      onVariantChange?.(matchingVariant);
-      setSelectionError?.(null);
-      return;
-    }
+  // Case 1: When we have a selected color
+  if (state.selectedColorCode) {
+    matchingVariant = variantsWithSize.find(v => {
+      if (state.colorOptions.some(opt => opt.variantId)) {
+        const selectedOption = state.colorOptions.find(opt => opt.code === state.selectedColorCode);
+        return v._id === selectedOption?.variantId;
+      } else {
+        if (v.color?.code) return v.color.code === state.selectedColorCode;
+        if (v.color?.name) {
+          const selectedOption = state.colorOptions.find(opt => opt.code === state.selectedColorCode);
+          return v.color.name === selectedOption?.name;
+        }
+        return false;
+      }
+    });
   }
 
-  // If no color is selected or matching variant not found with selected color,
-  // default to the first variant and auto-select its color
-  if (variantsWithSize.length > 0) {
-    const variant = variantsWithSize[0];
-    const color = variant.color;
+  // Case 2: When no color is selected or no matching color variant found
+  if (!matchingVariant) {
+    matchingVariant = variantsWithSize[0];
+    
+    // Find matching color option
+    colorOptionToSelect = state.colorOptions.find(opt => {
+      if (opt.variantId) {
+        return opt.variantId === matchingVariant._id;
+      } else {
+        if (matchingVariant.color?.code) return opt.code === matchingVariant.color.code;
+        if (matchingVariant.color?.name) return opt.name === matchingVariant.color.name;
+        return false;
+      }
+    });
+  }
 
-    if (color) {
-      // Get all available sizes for this color
-      const sizesForColor = product.variants
-        .filter((v) => v.color?.code === color.code)
-        .map((v) => v.size);
-      const uniqueSizes = [...new Set(sizesForColor)];
-
-      setSelectedColorCode(color.code);
-      setAvailableSizesForColor(uniqueSizes);
+  // Update selection
+  if (matchingVariant) {
+    // First update the size selection
+    dispatch({
+      type: 'SELECT_SIZE',
+      size,
+      variant: matchingVariant,
+    });
+    
+    // Then update the color selection if needed
+    if (colorOptionToSelect) {
+      dispatch({
+        type: 'SELECT_COLOR',
+        colorCode: colorOptionToSelect.code,
+        availableSizes: [size], // Since we're selecting a specific size
+        defaultSize: size,
+        defaultVariant: matchingVariant,
+      });
     }
-
-    setSelectedSize(size);
-    setSelectedVariant(variant);
-    onVariantChange?.(variant);
-    setSelectionError?.(null);
-  } else {
-    // No matching variant found
-    setSelectedSize(size);
-    setSelectedVariant(null);
-    onVariantChange?.(null);
+    
+    // Finally notify parent
+    onVariantChange?.(matchingVariant);
   }
 };
 
 
-  const renderColorOption = (color, index) => {
-    const isSelected = selectedColorCode === color.code;
-    return (
-      <TouchableOpacity
-        key={index}
-        onPress={() => handleColorSelect(color)}
-        style={styles.colorOption}
-        activeOpacity={0.7}
-      >
-        <Animated.View style={[styles.colorImageContainer, isSelected && selectedSize !== null  && styles.selectedColor]}>
-          <FastImage
-            source={{ uri: color.image }}
-            style={styles.colorImage}
-            resizeMode={FastImage.resizeMode.cover}
-          />
-          {isSelected && selectedSize !== null && (
-            <View style={styles.checkBadge}>
-              <Ionicons name="checkmark" size={14} color="#FFF" />
-            </View>
-          )}
-        </Animated.View>
-      </TouchableOpacity>
-    );
-  };
 
-  const renderSizeOption = (size, index) => {
-    const isSelected = selectedSize === size;
-    const isAvailable = availableSizesForColor.includes(size);
-    
-    return (
-      <TouchableOpacity
-        key={index}
-        onPress={() => handleSizeSelect(size)}
+const renderColorOption = (option, index) => {
+  const isSelected = state.selectedColorCode === option.code;
+
+  return (
+    <TouchableOpacity
+      key={`${index}-${option.code}`}
+      onPress={() => handleColorSelect(option)}
+      style={styles.colorOption}
+      activeOpacity={0.7}
+    >
+      <Animated.View
         style={[
-          styles.sizeOption, 
-          isSelected && styles.selectedSize,
-          
-             
+          styles.colorImageContainer,
+          isSelected && styles.selectedColor,
         ]}
-        
-        
       >
-        <Text style={[
-          styles.sizeText, 
-          isSelected && styles.selectedSizeText,
-          
-          
-        ]}>
-          {size}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+        <FastImage
+          source={{ uri: option.image }}
+          style={styles.colorImage}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+        {isSelected && (
+          <View style={styles.checkBadge}>
+            <Ionicons name="checkmark" size={14} color="#FFF" />
+          </View>
+        )}
+      </Animated.View>
+      {/* Show size label if in variant ID mode */}
+    
+    </TouchableOpacity>
+  );
+};
+
+
+ const renderSizeOption = (size, index) => {
+  const isSelected = state.selectedSize === size;
+  
+  // Determine if size is available
+  let isAvailable = true;
+  if (state.availableSizesForColor.length > 0) {
+    isAvailable = state.availableSizesForColor.includes(size);
+  }
+
+  // Check if we're in variant ID mode
+  const isVariantIdMode = state.colorOptions.some(opt => opt.variantId);
+  if (isVariantIdMode) {
+    // In variant ID mode, all sizes are available since each "color" is a complete variant
+    isAvailable = true;
+  }
+
+  return (
+    <TouchableOpacity
+      key={index}
+      onPress={() => isAvailable && handleSizeSelect(size)}
+      style={[
+        styles.sizeOption, 
+        isSelected && styles.selectedSize,
+        !isAvailable && styles.disabledSize,
+      ]}
+      disabled={!isAvailable}
+    >
+      <Text style={[
+        styles.sizeText, 
+        isSelected && styles.selectedSizeText,
+      ]}>
+        {size}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
   if (!product?.variants?.length) return null;
 
-  return (
-    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Variants</Text>
-      </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.colorsContainer}>
-        {colorOptions.map(renderColorOption)}
-      </ScrollView>
+ return (
+  <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+    {state.colorOptions.length > 0 && (
+      <>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Options</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.colorsContainer}
+        >
+          {state.colorOptions.map(renderColorOption)}
+        </ScrollView>
+      </>
+    )}
 
-      {sizeOptions.length > 0 && (
-        <>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Sizes</Text>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sizesContainer}>
-            {sizeOptions.map(renderSizeOption)}
-          </ScrollView>
-        </>
-      )}
+    {state.sizeOptions.length > 0 && (
+      <>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Sizes</Text>
+        </View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.sizesContainer}
+        >
+          {state.sizeOptions.map(renderSizeOption)}
+        </ScrollView>
+      </>
+    )}
+  </Animated.View>
+);
 
-
-    </Animated.View>
-  );
 };
 
 export default VariantSelector;

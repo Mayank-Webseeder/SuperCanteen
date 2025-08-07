@@ -407,6 +407,7 @@ const handleBuyNow = () => {
             onVariantChange={handleVariantChange}
             selectionError={selectionError} 
             setSelectionError={setSelectionError}
+           
           />
         )}
         
