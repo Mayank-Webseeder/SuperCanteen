@@ -1,4 +1,4 @@
-import React , {useState} from 'react';
+import React , {useEffect, useState} from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -24,8 +24,13 @@ const AccountScreen = ({ navigation }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { token, user } = useSelector(state => state.auth);
   const [loading,setLoading] = useState(false)
-  const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
-  const buildNumber = DeviceInfo.getBuildNumber(); // e.g., "5"
+   const [version, setVersion] = useState('');
+
+    useEffect(() => {
+    const v = DeviceInfo.getVersion(); // e.g. "1.0.0"
+    setVersion(v);
+  }, []);
+
 
 
 const rateUs = () => {
@@ -239,7 +244,7 @@ const rateUs = () => {
               ))}
             </View>
 
-            <Text style={styles.appVersionText}>App Version {appVersion} (Build {buildNumber})</Text>
+            <Text style={styles.appVersionText}>App Version {version}</Text>
           </View>
         </View>
         
