@@ -21,11 +21,11 @@ export default function ContactSupport({ navigation }) {
   const { loading, error, isSubmitted } = useSelector((state) => state.contactUs);
    const { token, user } = useSelector(state => state.auth);
   const openEmail = () => {
-    Linking.openURL('mailto:binarytopfunding@gmail.com');
+    Linking.openURL('mailto:support@supercanteen.in');
   };
 
   const openDialer = () => {
-    Linking.openURL('tel:+919999999999');
+    Linking.openURL('tel:+919557919140');
   };
 
   const handleMessageChange = (text) => {
@@ -80,7 +80,7 @@ export default function ContactSupport({ navigation }) {
             <Ionicons name="mail" size={20} color="#2E6074" />
             <Text style={styles.cardTitle}> Email Us</Text>
           </View>
-          <Text style={styles.cardValue}>binarytopfunding@gmail.com</Text>
+          <Text style={styles.cardValue}>support@supercanteen.in</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.cardBox} onPress={openDialer}>
@@ -88,7 +88,7 @@ export default function ContactSupport({ navigation }) {
             <Ionicons name="call" size={20} color="#2E6074" />
             <Text style={styles.cardTitle}> Call Us</Text>
           </View>
-          <Text style={styles.cardValue}>+91 99999 99999</Text>
+          <Text style={styles.cardValue}>+91 9557919140</Text>
         </TouchableOpacity>
 
         <View style={styles.messageRow}>

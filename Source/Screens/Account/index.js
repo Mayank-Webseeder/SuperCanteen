@@ -4,7 +4,9 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  InteractionManager
+  InteractionManager,
+  Linking,
+  Platform
 } from 'react-native';
 import CustomHeader from '../../Components/CustomHeader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -14,11 +16,26 @@ import { styles } from './styles';
 import { iconOptions, settingsOptions } from '../../Mock/Data/settingOptions';
 import { logout } from '../../redux/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import DeviceInfo from 'react-native-device-info';
+
 
 const AccountScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { token, user } = useSelector(state => state.auth);
+  const [loading,setLoading] = useState(false)
+  const appVersion = DeviceInfo.getVersion(); // e.g., "1.0.0"
+  const buildNumber = DeviceInfo.getBuildNumber(); // e.g., "5"
+
+
+const rateUs = () => {
+  // Show a quick loading state
+  setLoading(true);
+  setTimeout(() => {
+    setLoading(false);
+    Linking.openURL("https://play.google.com/store/apps/details?id=com.supercanteen&pcampaignid=web_share");
+  }, 300); // 300ms delay for smoothness
+};
 
  const onLogoutBtnClick = async () => {
   try {
@@ -160,6 +177,11 @@ const AccountScreen = ({ navigation }) => {
               <TouchableOpacity
                 key={name}
                 onPress={() => {
+                   if (name === 'Rate Us') {
+          rateUs(); // open Play Store
+          return;
+        }
+
                   if (
                     (name === 'Bug Report' || name === 'Notifications') &&
                     !token
@@ -217,7 +239,7 @@ const AccountScreen = ({ navigation }) => {
               ))}
             </View>
 
-            <Text style={styles.appVersionText}>App Version 1.0.0</Text>
+            <Text style={styles.appVersionText}>App Version {appVersion} (Build {buildNumber})</Text>
           </View>
         </View>
         

@@ -23,7 +23,7 @@ const AddressView = ({ navigation }) => {
         <Ionicons name="location-outline" size={20} color="#2E6074" />
         <Text style={styles.sectionTitle}>Delivery Address</Text>
         {/* Only added this line - shows (Default) text next to title when applicable */}
-        {isDefault && <Text style={styles.sectionTitle}> (Default)</Text>}
+        {isDefault && <Text style={styles.sectionTitle}></Text>}
       </View>
 
       {selectedAddress ? (
