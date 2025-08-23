@@ -9,7 +9,7 @@ const SplashScreen = () => {
 
   useEffect(() => {
     Animated.timing(logoScaleAnimation, {
-      toValue: 0.2,
+      toValue: 0.3,
       duration: 1000,
       useNativeDriver: true,
     }).start();

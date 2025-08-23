@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
     mainContainer:{
       paddingHorizontal:Width(6)
     },
+    
      disabledStyle: {
     opacity: 1
   },

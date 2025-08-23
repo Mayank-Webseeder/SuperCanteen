@@ -9,6 +9,53 @@ mainContent: {
   backgroundColor: '#fff',
   paddingBottom: Height(20),
 },
+  searchPressable: {
+    flex: 1,
+    marginHorizontal: 10,
+    marginLeft:6
+  },
+  emptyStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    minHeight: 300,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
+    marginBottom: 20,
+    textAlign: 'center',
+    fontFamily: 'Inter-Medium',
+    lineHeight: 22,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    borderColor: COLORS.green,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    minWidth: 120,
+  },
+  secondaryButtonText: {
+    color: COLORS.green,
+    fontFamily: 'Inter-SemiBold',
+    textAlign: 'center',
+  },
+  emptyStateActions: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+  },
+    searchInput: {
+    height: Height(34),  // Reduced height
+    borderRadius: 5,     // Tighter radius
+    paddingHorizontal: 12,
+    fontSize: 14,        // Smaller font
+    marginLeft:2
+  },
 
 footerContainer: {
   padding: 16,

@@ -18,7 +18,7 @@ export default function RootStack() {
           presentation: 'modal',
           gestureEnabled: true
         }} 
-      />  
+      />   
     </Stack.Navigator>
   );
 }

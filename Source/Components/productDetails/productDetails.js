@@ -400,7 +400,7 @@ const handleBuyNow = () => {
           selectedVariant={selectedVariant}
           priceDetails={getPriceDetails()}
         />
-        
+{/*         
         {formattedProduct?.variants?.length > 0 && (
           <VariantSelector 
             product={formattedProduct} 
@@ -409,7 +409,7 @@ const handleBuyNow = () => {
             setSelectionError={setSelectionError}
            
           />
-        )}
+        )} */}
         
         {productData?.coupons?.length > 0 && (
           <>

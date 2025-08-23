@@ -30,9 +30,6 @@ const SectionRenderer = ({ navigation }) => {
   const token = useSelector(state => state.auth.token);
   const userId = useSelector(state => state.auth.user?.id);
   const user = useSelector(state => state.auth.user);
-
-  console.log("whislist items is",wishlistItems)
-
    const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   
   useEffect(() => {

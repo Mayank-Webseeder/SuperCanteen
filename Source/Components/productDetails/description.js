@@ -3,6 +3,7 @@ import { styles } from './styles';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { COLORS } from '@constants/index';
+import PackSize from './packSize';
 
 export default function Description({ productData, selectedVariant,priceDetails }) {
   const rating = productData?.rating || 0;
@@ -96,6 +97,16 @@ export default function Description({ productData, selectedVariant,priceDetails 
           Warranty: {productData.warrantyPeriod} months
         </Text>
       )}
+
+       <PackSize
+          item={{
+            weight: productData?.shippingInfo?.weight,
+            weightUnit: productData?.shippingInfo?.weightUnit,
+            price: baseOfferPrice,
+          }}
+          selected={true}
+          onSelect={() => {}}
+        />
     </View>
   );
 }

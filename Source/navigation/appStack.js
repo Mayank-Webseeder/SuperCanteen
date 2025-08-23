@@ -28,7 +28,7 @@ import CouponProductsScreen from '@screens/otherSettings/Coupons/CouponProducts'
 import AddressListScreen from '@components/address/addressList';
 import RazorpayWebView from '@screens/Orders/payment/razorpayWebView';
 import BugReportScreen from '@screens/otherSettings/bugReport';
-
+import categoryProductsScreen from '@screens/Home/home/categoryProductsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +51,8 @@ const AppStack = () => {
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="FAQ" component={FAQScreen} />
       <Stack.Screen name="CouponProduct" component={CouponProductsScreen} />
+      <Stack.Screen name="categoryProductsScreen" component={categoryProductsScreen} />
+
      
  
       {/* Protected screens */}

@@ -35,7 +35,7 @@ import orderReducer from './slices/orderSlice'
 import notificationReducer from './slices/notificationSlice'
 import bugReportReducer from './slices/bugReportSlice'
 import contactUsReducer from './slices/contactUsSlice'
-
+import allProductReducer from './slices/allProductsSlice'
 // Combine all reducers
 const appReducer = combineReducers({
      auth:authReducer,
@@ -61,7 +61,8 @@ const appReducer = combineReducers({
     orders:orderReducer,
     notification:notificationReducer,
     bugReport:bugReportReducer,
-    contactUs:contactUsReducer
+    contactUs:contactUsReducer,
+    allProducts:allProductReducer
  
 });
 

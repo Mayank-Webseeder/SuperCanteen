@@ -155,7 +155,7 @@ const CustomCategoryList = ({
                 style={[
                   styles.categoryText,
                   {
-                    color: isSelected ? COLORS.green : textColor,
+                    color: textColor,
                     marginTop: Height(8),
                     fontWeight: isSelected ? '600' : '500',
                   },
