@@ -26,10 +26,6 @@ const OrderConfirmFinal = () => {
   const [loading, setLoading] = useState(true);
   const fadeAnim = new Animated.Value(0);
   const insets = useSafeAreaInsets();
-
-  console.log("CURRUNT ORDER IS===================>",currentOrder)
-
-  
   useEffect(() => {
     dispatch(fetchOrderById(orderId))
       .then(() => setLoading(false));
@@ -97,9 +93,6 @@ const OrderConfirmFinal = () => {
     </View>
   );
 };
-
-
-console.log("CURRUNT ORDER IS",currentOrder?.createdAt)
 
   const createdAt = new Date(currentOrder?.createdAt);
  const deliveryDays = currentOrder?.orderItems?.[0]?.product?.deliveryDays;

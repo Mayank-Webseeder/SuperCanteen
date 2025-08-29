@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 14,
-    color: "#000",
-    fontFamily:"Inter-SemiBold"
+    color:COLORS.modalTitle,
+    fontFamily:"Inter-Medium"
   },
 });
 

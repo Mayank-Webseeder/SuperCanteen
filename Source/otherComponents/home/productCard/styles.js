@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
     padding: moderateScale(8),
   },
   weightContainer: {
-  paddingVertical: 4,
+  paddingTop: 4,
   borderRadius: 4,
   alignSelf: 'flex-start',
   marginTop: 4,
@@ -73,26 +73,24 @@ weightText: {
   },
   productInfo: {
     paddingHorizontal: moderateScale(12),
-    paddingVertical:moderateScale(10)
+   paddingBottom:verticalScale(10)
   },
   brandName: {
     color: '#666',
     fontSize: moderateScale(12),
-    marginBottom: verticalScale(4),
-    fontWeight: '500',
+       fontWeight: '500',
   },
   productName: {
-    fontWeight: '600',
-    fontSize: moderateScale(14),
-    marginBottom: verticalScale(8),
+     fontFamily:"Inter-SemiBold",
+    fontSize: moderateScale(12),
     color: '#333',
     lineHeight: moderateScale(18),
-    height: moderateScale(36), // Fixed height for 2 lines
+   marginTop:verticalScale(4)
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(8),
+   marginTop:verticalScale(8)
   },
   offerPrice: {
     fontSize: moderateScale(16),
@@ -107,6 +105,7 @@ weightText: {
   },
   cartButtonContainer: {
     alignSelf: 'flex-start',
+    marginTop:10
   },
   addToCartBtn: {
     backgroundColor:COLORS.green,

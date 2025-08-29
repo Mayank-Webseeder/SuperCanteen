@@ -312,9 +312,6 @@ const renderSkeleton = () => {
   (!brands || brands.length === 0) &&
   (!filteredSubcategories || filteredSubcategories.length === 0)
   // (!products || products.length === 0)
-
-  console.log("Is all data empty is",isAllDataEmpty,products)
-
   if (isAllDataEmpty) {
     return (
      <View style={styles.emptyStateContainer}>

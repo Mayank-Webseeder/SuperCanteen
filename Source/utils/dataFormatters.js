@@ -130,7 +130,8 @@ export const formatProductDetailData = (product) => {
       height: product.height,
       width: product.width,
       weight: product.weight,
-      shippingRate: product.shippingRate
+      shippingRate: product.shippingRate,
+      weightUnit:product.weightUnit
     },
     slabs: product.slabs,
     createdAt: product.createdAt

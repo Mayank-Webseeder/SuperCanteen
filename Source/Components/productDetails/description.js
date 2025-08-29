@@ -6,6 +6,7 @@ import { COLORS } from '@constants/index';
 import PackSize from './packSize';
 
 export default function Description({ productData, selectedVariant,priceDetails }) {
+  console.log("PRODUCT DATA IS================>",productData)
   const rating = productData?.rating || 0;
   const reviews = productData?.numReviews || 0;
 
@@ -98,7 +99,7 @@ export default function Description({ productData, selectedVariant,priceDetails 
         </Text>
       )}
 
-       <PackSize
+     <PackSize
           item={{
             weight: productData?.shippingInfo?.weight,
             weightUnit: productData?.shippingInfo?.weightUnit,
@@ -106,7 +107,7 @@ export default function Description({ productData, selectedVariant,priceDetails 
           }}
           selected={true}
           onSelect={() => {}}
-        />
+        /> 
     </View>
   );
 }

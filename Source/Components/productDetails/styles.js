@@ -150,9 +150,9 @@ export const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: 16,
-      marginVertical: 6,
-      marginTop:10,
-      // paddingVertical:6
+      paddingBottom:10 ,
+      marginTop:10
+       
     },
     borderStyle:{
        borderTopWidth: 1,

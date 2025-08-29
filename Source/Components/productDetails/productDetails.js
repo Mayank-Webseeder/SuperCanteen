@@ -16,7 +16,6 @@ import HorizontalLine from '../../otherComponents/home/horizontalLine';
 import BottomPurchaseBar from '../../otherComponents/bottomPurchase';
 import CustomSimilarProducts from '../order/similarProducts/customSimilarProdcuts';
 import AddressRow from '@components/CustomAddressRow';
-import { PolicyIcon } from '../../../assets/Icons/svgIcons/policyIcon';
 import { CurruncyRupees } from '../../../assets/Icons/svgIcons/currencyRupees';
 import CustomProductDetailsData from '@components/CustomProductDetailsData';
 import { Height } from '@constants/index';
@@ -34,6 +33,7 @@ import Share from 'react-native-share';
 import { showMessage } from 'react-native-flash-message';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 import { calculateProductPrice } from '../../utils/helper'
+import { ReturnsSection } from '../../otherComponents/home/returnsSection'
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -45,7 +45,6 @@ const ProductDetails = ({ navigation, route }) => {
   const [animationKey, setAnimationKey] = useState(0);
   const [animationImage, setAnimationImage] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
-
   const [selectionError, setSelectionError] = useState(null);
   const [localAppliedCoupon, setLocalAppliedCoupon] = useState(null);
   const cartItems = useSelector(state => state.cart.items);
@@ -58,7 +57,6 @@ const ProductDetails = ({ navigation, route }) => {
   const { user } = useSelector(state => state.auth);
 const didSetDefaultVariant = useRef(false);
 const variantRef = useRef(null);
-
 const prevProductId = useRef(null);
 useEffect(() => {
     if (productId !== prevProductId.current) {
@@ -105,6 +103,7 @@ const imagesToShow = useMemo(() => {
 
 
 const handleVariantChange = useCallback((variant) => {
+  console.log("SELECTED VARIANT IS",variant)
   variantRef.current = variant; // Store in ref for immediate access
   setSelectedVariant(variant);
 }, []);
@@ -342,8 +341,7 @@ const handleBuyNow = () => {
   }
 
   const formattedProduct = formatProductDetailData(product?.product);
-  if (!formattedProduct) return null;
-  
+  if (!formattedProduct) return null;  
   // Format similar products data
   const similarProductsData = formateSubCategoryProducts(
     subCategoryProducts.filter(p => p._id !== productId)
@@ -400,16 +398,14 @@ const handleBuyNow = () => {
           selectedVariant={selectedVariant}
           priceDetails={getPriceDetails()}
         />
-{/*         
+        
         {formattedProduct?.variants?.length > 0 && (
-          <VariantSelector 
-            product={formattedProduct} 
-            onVariantChange={handleVariantChange}
-            selectionError={selectionError} 
-            setSelectionError={setSelectionError}
+        <VariantSelector 
+          variants={formattedProduct?.variants}
+          onVariantChange={handleVariantChange}
            
           />
-        )} */}
+        )}
         
         {productData?.coupons?.length > 0 && (
           <>
@@ -429,24 +425,18 @@ const handleBuyNow = () => {
           address={user?.addresses}
         />}
         
-        <View style={styles.infoRow}>
-          <PolicyIcon />
-          <Text style={styles.infoText}>
-            {formattedProduct?.returnPolicy?.returnable
-              ? `${formattedProduct?.returnPolicy?.returnWindow} Days Return Policy`
-              : 'No returns available'}
-          </Text>
-        </View>
+      
         
-        <View style={[styles.infoRow, { marginTop: 7 }]}>
+        <View style={styles.infoRow}>
           <CurruncyRupees />
           <Text style={styles.infoText}>Cash on Delivery</Text>
         </View>
         
         <View style={styles.borderStyle} />
         <CustomProductDetailsData productData={formattedProduct} />
-        
-        {similarLoading ? (
+{formattedProduct?.returnPolicy?.returnable && (
+  <ReturnsSection returnWindow={formattedProduct?.returnPolicy?.returnWindow} />
+)}        {similarLoading ? (
           <ActivityIndicator size="small" color="#416F81" style={{ marginVertical: 20 }} />
         ) : similarError ? (
           <Text style={styles.errorText}>Failed to load similar products</Text>

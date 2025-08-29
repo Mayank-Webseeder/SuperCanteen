@@ -52,9 +52,6 @@ const AppStack = () => {
       <Stack.Screen name="FAQ" component={FAQScreen} />
       <Stack.Screen name="CouponProduct" component={CouponProductsScreen} />
       <Stack.Screen name="categoryProductsScreen" component={categoryProductsScreen} />
-
-     
- 
       {/* Protected screens */}
       <Stack.Screen name="Wishlist" component={WishlistScreen} />
       <Stack.Screen name="OrderDetailScreen" component={OrderDetailScreen} />
