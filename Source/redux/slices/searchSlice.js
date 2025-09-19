@@ -12,7 +12,7 @@ export const fetchSearchResults = createAsyncThunk(
       
       const [productsRes, suggestionsRes] = await Promise.all([
         getData(`${FETCHPRODUCTS}${encodeURIComponent(keyword)}`),
-        getData(`${GETALLPRODUCTS}${encodeURIComponent(keyword)}&limit=5`)
+        getData(`${GETALLPRODUCTS}${encodeURIComponent(keyword)}&limit=100`)
       ]);
 
       return {

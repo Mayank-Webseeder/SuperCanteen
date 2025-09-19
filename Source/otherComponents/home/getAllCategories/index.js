@@ -81,14 +81,14 @@ const styles = StyleSheet.create({
     height: Height(100),
   },
   header: {
-    paddingTop: Height(12),
-    paddingHorizontal: Width(16),
-    paddingBottom: Height(3),
+    paddingTop: Height(8),
+    paddingHorizontal: Width(20),
+    paddingBottom: Height(6),
   },
   headerTitle: {
     fontSize: FontSize(15),
     fontFamily: "Inter-SemiBold",
-    color: COLORS.darkText,
+    color: COLORS.green,
   },
   scrollContent: {
     paddingBottom: Height(10),

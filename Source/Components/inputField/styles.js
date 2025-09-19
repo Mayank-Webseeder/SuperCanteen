@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { Height } from "../../constants";
+import { COLORS, Height } from "../../constants";
 
 export const styles = StyleSheet.create({
   container: {
@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     marginBottom: Height(8),
     rowGap: 10 ,
     fontFamily: 'Inter-SemiBold',
+    color:COLORS.black
     
   },
   inputContainer: {

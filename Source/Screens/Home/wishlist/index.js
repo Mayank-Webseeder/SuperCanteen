@@ -7,7 +7,8 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  Animated
+  Animated,
+  Dimensions 
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import CustomCommonHeader from '@components/Common/CustomCommonHeader';
@@ -39,6 +40,7 @@ const WishlistScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [skeletonAnimation] = useState(new Animated.Value(0));
   const [isDataReady, setIsDataReady] = useState(false);
+  const screenWidth = Dimensions.get('window').width;
   
   const { user } = useSelector(state => state.auth);
   const userId = user?.id;
@@ -211,10 +213,10 @@ const WishlistScreen = ({ navigation }) => {
   }, []);
 
   const renderSkeletonItem = useCallback(() => {
-    const shimmerAnimation = skeletonAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['-100%', '100%']
-    });
+  const shimmerAnimation = skeletonAnimation.interpolate({
+  inputRange: [0, 1],
+  outputRange: [-screenWidth, screenWidth], // ✅ numbers, not strings
+});
 
     return (
       <View style={styles.card}>

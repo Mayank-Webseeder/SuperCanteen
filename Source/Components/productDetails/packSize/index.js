@@ -1,79 +1,57 @@
+import React, { useEffect } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { styles } from "./styles";
 import { COLORS } from "@constants/index";
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
-const PackSize = ({ item, selected, onSelect }) => {
+const PackSize = ({ flatVariants, selectedVariant, onVariantChange }) => {
+  useEffect(() => {
+    if (flatVariants?.length > 0 && !selectedVariant) {
+      onVariantChange(flatVariants[0]); // default first selection
+    }
+  }, [flatVariants]);
+
   return (
-    <TouchableOpacity activeOpacity={0.8}
-      style={[
-        styles.packSizeContainer,
-        selected ? styles.packSizeSelected : null,
-      ]}
-      onPress={() => onSelect(item)}
-    >
-      {/* Radio Button */}
-       <View style={styles.radioCircle}>
-        {selected && <View style={styles.radioDot} />}
-      </View> 
+    <View style={styles.container}>
+      <Text style={styles.label}>PACK SIZE</Text>
+      {flatVariants.map((variant) => (
+        <TouchableOpacity
+          key={variant._id}
+          style={[
+            styles.option,
+            selectedVariant?._id === variant._id && styles.selectedOption,
+          ]}
+          onPress={() => onVariantChange(variant)}
+          activeOpacity={0.8}
+        >
+          {/* Radio Circle */}
+          <View style={styles.radioWrapper}>
+            {selectedVariant?._id === variant._id ? (
+              <Icon name="radio-button-on" size={18} color={COLORS.green} />
+            ) : (
+              <Icon name="radio-button-off" size={18} color="#999" />
+            )}
+          </View>
 
-      {/* Weight */}
-     <Text style={styles.weightText}>
-        {item.weight} {item.weightUnit}
-      </Text> 
+          {/* Variant Info */}
+          <View style={styles.info}>
+            <Text
+              style={[
+                styles.size,
+                selectedVariant?._id === variant._id,
+              ]}
+            >
+              {variant.size}
+            </Text>
+          </View>
 
-      {/* Price (aligned right) */}
-       <Text style={styles.priceText}>₹ {item.price}</Text>
-    </TouchableOpacity>
+          {/* Price */}
+          <Text style={styles.price}>₹ {variant.offerPrice}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
   );
 };
 
-const styles = StyleSheet.create({
-  packSizeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: COLORS.aliceBlue,
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 6,
-    backgroundColor: "#fff",
-     marginHorizontal:9,
-     marginLeft:5,
-     paddingVertical:10,
-     marginBottom:17
-  },
-  packSizeSelected: {
-  backgroundColor:COLORS.aliceBlue,
-  },
-  radioCircle: {
-    height: 15,
-    width: 15,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: COLORS.green,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  radioDot: {
-    height: 8,
-    width: 8,
-    borderRadius: 5,
-    backgroundColor: COLORS.green,
-    marginBottom:0.4
-  },
-  weightText: {
-    fontSize: 14,
-    color: "#333",
-    flex: 1,
-    fontFamily:"Inter-Regular"
-  },
-  priceText: {
-    fontSize: 14,
-    color:COLORS.modalTitle,
-    fontFamily:"Inter-Medium"
-  },
-});
 
 export default PackSize;

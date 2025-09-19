@@ -167,7 +167,7 @@ const ProductsScreen = ({ navigation, route }) => {
         )
       ) : <ContentSkeletonLoader type="brand" />}
 
-      <HorizontalLine lineStyle={styles.lineStyle} />
+     {filteredSubCategories.length > 0 &&  <HorizontalLine lineStyle={styles.lineStyle} /> }
 
       {/* Subcategories */}
       {isReady ? (
@@ -183,7 +183,7 @@ const ProductsScreen = ({ navigation, route }) => {
             />
           </View>
         ) : (
-          <Text style={{ textAlign: 'center', color: '#999' }}>No subcategories found</Text>
+          <></>
         )
       ) : <ContentSkeletonLoader type="category" />}
 
@@ -224,7 +224,7 @@ const ProductsScreen = ({ navigation, route }) => {
               containerStyle={{ marginVertical: Height(20) }}
             />
           )}
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={{ flexGrow: 1 ,paddingBottom:50}}
           showsVerticalScrollIndicator={false}
         />
       </PullToRefresh>

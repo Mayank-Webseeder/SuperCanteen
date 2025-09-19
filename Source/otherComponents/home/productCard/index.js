@@ -21,10 +21,10 @@ const { width } = Dimensions.get('window');
 const itemWidth = (width - moderateScale(50)) / 2; 
 const itemHeight = (width - moderateScale(40)) / 2.5;
 
-const ModernProductGrid = ({ products, navigation, loadMore, loading }) => {
+const ModernProductGrid = ({ products, navigation, loadMore, loading, hasMore }) => {
   const dispatch = useDispatch();
   const [cartLoadingId, setCartLoadingId] = useState(null);
-  const [localLoading, setLocalLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const handleAddToCart = async (item) => {
     setCartLoadingId(item._id);
@@ -43,14 +43,15 @@ const ModernProductGrid = ({ products, navigation, loadMore, loading }) => {
     }
   };
 
+  // FIXED: Simplified load more handler
   const handleLoadMore = useCallback(() => {
-    if (!localLoading && loadMore && !loading) {
-      setLocalLoading(true);
+    if (loadMore && hasMore && !loading && !isLoadingMore) {
+      setIsLoadingMore(true);
       loadMore();
-      // Auto reset after delay to prevent rapid calls
-      setTimeout(() => setLocalLoading(false), 1000);
+      // Reset loading state after a short delay
+      setTimeout(() => setIsLoadingMore(false), 1000);
     }
-  }, [localLoading, loadMore, loading]);
+  }, [loadMore, hasMore, loading, isLoadingMore]);
 
   const handleProductPress = useCallback((productId) => {
     navigation.navigate('ProductDetails', { productId });
@@ -82,7 +83,6 @@ const ModernProductGrid = ({ products, navigation, loadMore, loading }) => {
             </View>
           )}
           
-          {/* Discount badge */}
           {discountPercentage > 0 && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>{discountPercentage}% OFF</Text>
@@ -175,10 +175,10 @@ const ModernProductGrid = ({ products, navigation, loadMore, loading }) => {
         initialNumToRender={8}
         maxToRenderPerBatch={8}
         windowSize={5}
-        onEndReached={loadMore ? handleLoadMore : undefined}
-        onEndReachedThreshold={0.2}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5} // Increased threshold for better detection
         ListFooterComponent={
-          (loading || localLoading) ? (
+          (loading || isLoadingMore) && hasMore ? (
             <View style={styles.loadingFooter}>
               <ActivityIndicator color={COLORS.green} size="small" />
             </View>

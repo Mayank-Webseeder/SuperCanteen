@@ -19,14 +19,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const ProductItemCard = ({ item }) => {
   const productData = item.product || item;
   const variantDetails = item.variantDetails || productData.selectedVariant;
- 
-
-  const mrp = variantDetails?.additionalPrice
-    ? (productData?.mrp || 0) + variantDetails?.additionalPrice
+  const mrp = variantDetails?.mrp
+    ?  variantDetails?.mrp
     : productData?.mrp;
 
   const toShowImage = variantDetails?.images?.[0] || productData?.images?.[0];
-  const displayPrice = item.selectedPrice || productData?.finalPrice || productData?.offerPrice || productData?.price;
+  const displayPrice = variantDetails?.offerPrice || productData?.finalPrice || productData?.offerPrice || productData?.price;
   const variantColor = variantDetails?.color
   const variantSize = variantDetails?.size
   return (
@@ -85,6 +83,7 @@ const ConfirmOrderScreen = ({ navigation, route }) => {
   const { appliedCoupons } = useSelector(state => state.coupon);
   const insets = useSafeAreaInsets();
   const { height } = Dimensions.get('window');
+
   // ✅ Use passed cartItems if from cart; otherwise fallback to Redux with filter
   const reduxCartItems = useSelector(state => state.cart?.items || []);
   const fallbackCartItems = reduxCartItems.filter(item => {

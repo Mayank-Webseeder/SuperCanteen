@@ -155,7 +155,6 @@ const CartCard = React.memo(
     const isLoadingProduct = loading[productId] || false;
     const errorProduct = errors[productId];
     const matchedVariant = item?.variantDetails || product?.variants?.find((v) => v._id === item.variantId);
-  
 
     const availableStock = useMemo(() => {
       if (!product) return 0;
@@ -256,6 +255,9 @@ const CartCard = React.memo(
       onRemoveItem(item._id || item.id);
     }, [item, onRemoveItem]);
 
+
+    const offerPrice = matchedVariant ? matchedVariant?.offerPrice : item.selectedPrice
+
     if (errorProduct || (!product && !isLoadingProduct)) {
       return (
     <></>
@@ -329,7 +331,7 @@ const CartCard = React.memo(
           styles.price,
           isOutOfStock && styles.outOfStockText
         ]}>
-          {isOutOfStock ? 'Unavailable' : `₹${Math.round(item.selectedPrice)}`}
+          {isOutOfStock ? 'Unavailable' : `₹${Math.round(offerPrice)}`}
         </Text>
           </View>
 
@@ -347,7 +349,7 @@ const CartCard = React.memo(
           {product?.mrp && (
             <View style={styles.priceInfo}>
               <Text style={styles.originalPrice}>
-                ₹{matchedVariant ? (matchedVariant?.additionalPrice + product.mrp) : product.mrp}
+                ₹{matchedVariant ? matchedVariant.mrp : product.mrp}
               </Text>
               <Text style={styles.discount}>{discount}% off</Text>
             </View>
@@ -414,16 +416,19 @@ const CartCard = React.memo(
           </View>
           
           {/* Stock message */}
-          {!isOutOfStock && availableStock > 0 && (
-            <Text style={[
-              styles.stockMessage,
-              availableStock < 5 && styles.lowStockMessage
-            ]}>
-              {availableStock < 5 
-                ? `Only ${availableStock} left!` 
-                : `${availableStock} available`}
-            </Text>
-          )}
+         {!isOutOfStock && availableStock > 0 && (
+  availableStock < 5 ? (
+    <Text
+      style={[
+        styles.stockMessage,
+        styles.lowStockMessage
+      ]}
+    >
+      Only {availableStock} left!
+    </Text>
+  ) : null
+)}
+
           
           <View style={styles.deliveryInfo}>
             <Feather name="truck" size={14} color="#416E81" />

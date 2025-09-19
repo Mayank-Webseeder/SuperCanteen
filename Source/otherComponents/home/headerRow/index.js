@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native'
-import { Height } from '../../../constants'
+import { COLORS, Height } from '../../../constants'
 
 export default function HeaderRow({title, containerStyle}) {
   return (
@@ -22,5 +22,6 @@ const styles = StyleSheet.create({
   textStyle:{
     fontSize: 15,
     fontFamily:"Inter-SemiBold",
+    color:COLORS.black
   },
 })

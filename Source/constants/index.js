@@ -6,11 +6,30 @@ import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 const { width, height } = Dimensions.get('window');
 
 // Helper functions
-export const Width = (value) => scale(value);
-export const Height = (value) => verticalScale(value);
-export const FontSize = (value) => moderateScale(value);
-export const Padding = (value) => scale(value);
-export const Margin = (value) => scale(value);
+export const Width = (value) => {
+  const result = scale(value);
+  return typeof result === 'number' ? result : Number(result);
+};
+export const Height = (value) => {
+  const result = verticalScale(value);
+  return typeof result === 'number' ? result : Number(result);
+};
+export const FontSize = (value) => {
+  const result = moderateScale(value);
+  return typeof result === 'number' ? result : Number(result);
+};
+
+export const Padding = (value) => {
+  const result = scale(value);
+  return typeof result === 'number' ? result : Number(result);
+};
+
+export const Margin = (value) => {
+  const result = scale(value);
+  return typeof result === 'number' ? result : Number(result);
+};
+
+ 
 
 // COLORS
 export const COLORS = {

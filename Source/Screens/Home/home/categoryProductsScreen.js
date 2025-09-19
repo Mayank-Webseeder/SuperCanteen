@@ -5,7 +5,6 @@ import {
   RefreshControl,
   Animated,
   InteractionManager,
-  ScrollView,
   Dimensions,
   TouchableOpacity,
   Text,
@@ -17,7 +16,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import HorizontalLine from '../../../otherComponents/home/horizontalLine';
 import Brandcarousel from '../../../otherComponents/home/brandcarousel';
 import ProductCategories from '../../../otherComponents/home/productCategories';
-import ProductCarousel from '../../../otherComponents/home/ProductCarousel';
 import SectionRenderer from '../../../otherComponents/home/sections';
 
 import { styles } from './styles';
@@ -25,15 +23,11 @@ import { COLORS } from '@constants/index';
 import { getCategories } from '../../../redux/slices/categorySlice';
 import { getSubCategories } from '../../../redux/slices/subcategorySlice';
 import { getProductsByCategory } from '../../../redux/slices/productSlice';
-import EmptyState from '@components/emptyComponent/EmptyState';
 import { fetchSections } from '../../../redux/slices/sectionSlice'
 import CustomHeader from '@components/CustomHeader';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomSearch from '../../../Components/searchInput';
-
-
-const { width } = Dimensions.get('window');
-
+import { ActivityIndicator } from 'react-native';
 
 const CategoryProductsScreen = ({ navigation, route }) => {
   // State management
@@ -211,78 +205,13 @@ useEffect(() => {
   
   // Skeleton component
 const renderSkeleton = () => {
-  const shimmerAnimation = skeletonAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['-100%', '100%']
-  });
-
-  const SkeletonElement = ({ width, height, style = {} }) => (
-    <View 
-      style={[
-       styles.skeletonStyle,
-        {
-          width,
-          height,
-        },
-        style,
-      ]}
-    >
-      <Animated.View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: '#F2F8FC',
-          transform: [{ translateX: shimmerAnimation }],
-        }}
-      />
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 ,marginTop:20}}>
+      <ActivityIndicator size="large" color={COLORS.green} />
+      <Text style={{ marginTop: 10, color: COLORS.green }}>Loading...</Text>
     </View>
   );
-
-    return (
-      <View style={styles.skeletonContainer}>
-        {/* Header Skeleton */}
-        <SkeletonElement width={width - 32} height={60} style={{ marginBottom: 16 }} />
-        
-        {/* Categories Skeleton */}
-        <View style={styles.skeletonCategoryRow}>
-          {[...Array(5)].map((_, i) => (
-            <SkeletonElement key={`cat-${i}`} width={60} height={60} style={{ borderRadius: 30 }} />
-          ))}
-        </View>
-        
-        {/* Brands Skeleton */}
-        <View style={styles.skeletonSection}>
-          <SkeletonElement width={120} height={20} style={{ marginBottom: 12 }} />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {[...Array(3)].map((_, i) => (
-              <SkeletonElement key={`brand-${i}`} width={100} height={100} style={{ marginRight: 12 }} />
-            ))}
-          </ScrollView>
-        </View>
-        
-        {/* Products Skeleton */}
-        <View style={styles.skeletonSection}>
-          <SkeletonElement width={120} height={20} style={{ marginBottom: 22 }} />
-          <View style={styles.skeletonProductGrid}>
-            {[...Array(6)].map((_, i) => (
-              <SkeletonElement 
-                key={`prod-${i}`} 
-                width={(width / 2) - 24} 
-                height={150} 
-                style={{ 
-                  marginBottom: 16, 
-                  marginRight: i % 2 === 0 ? 16 : 0 
-                }}
-              />
-            ))}
-          </View>
-        </View>
-      </View>
-    );
-  };
+};
 
   const renderSection = useCallback(() => (
   <SectionRenderer navigation={navigation} />
@@ -330,8 +259,9 @@ const renderSkeleton = () => {
   }
 
     return (
+    
       <Animated.View style={{ opacity }}>
-        <View style={[styles.mainContent,{marginTop:10}]}>
+        <View style={[styles.mainContent]}>
           {brands.length > 0 && (
             <>
               <HorizontalLine lineStyle={styles.lineStyle} />
@@ -362,19 +292,6 @@ const renderSkeleton = () => {
           
         {renderSection()}
           
-      {/* {products.length > 0 &&  <HorizontalLine containerStyle={{ marginBottom: 2 }} />}
-          {productsLoading ? (
-            <ActivityIndicator size="large" color={COLORS.green} />
-          ) : (
-           <View style={{marginHorizontal:8}}>
- <ProductCarousel
-              horizontal={false}
-              navigation={navigation}
-              products={products}
-             
-            />
-            </View>
-          )}  */}
         </View> 
       </Animated.View>
     );

@@ -18,7 +18,6 @@ import CustomSimilarProducts from '../order/similarProducts/customSimilarProdcut
 import AddressRow from '@components/CustomAddressRow';
 import { CurruncyRupees } from '../../../assets/Icons/svgIcons/currencyRupees';
 import CustomProductDetailsData from '@components/CustomProductDetailsData';
-import { Height } from '@constants/index';
 import Description from './description';
 import CustomZoomCasual from './zommableImage/customZoomCasual';
 import { fetchProductsBySubcategory } from '../../redux/slices/subCategoryProductSlice';
@@ -34,6 +33,21 @@ import { showMessage } from 'react-native-flash-message';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
 import { calculateProductPrice } from '../../utils/helper'
 import { ReturnsSection } from '../../otherComponents/home/returnsSection'
+import PackSize from './packSize';
+
+// Memoized components to prevent unnecessary re-renders
+const MemoizedCustomHeader = React.memo(CustomHeader);
+const MemoizedHorizontalLine = React.memo(HorizontalLine);
+const MemoizedCustomZoomCasual = React.memo(CustomZoomCasual);
+const MemoizedDescription = React.memo(Description);
+const MemoizedPackSize = React.memo(PackSize);
+const MemoizedVariantSelector = React.memo(VariantSelector);
+const MemoizedCouponSection = React.memo(CouponSection);
+const MemoizedAddressRow = React.memo(AddressRow);
+const MemoizedCustomProductDetailsData = React.memo(CustomProductDetailsData);
+const MemoizedReturnsSection = React.memo(ReturnsSection);
+const MemoizedCustomSimilarProducts = React.memo(CustomSimilarProducts);
+const MemoizedBottomPurchaseBar = React.memo(BottomPurchaseBar);
 
 const ProductDetails = ({ navigation, route }) => {
   const { productId } = route?.params;
@@ -44,77 +58,119 @@ const ProductDetails = ({ navigation, route }) => {
   const [showAnimation, setShowAnimation] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
   const [animationImage, setAnimationImage] = useState(null);
-  const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectionError, setSelectionError] = useState(null);
   const [localAppliedCoupon, setLocalAppliedCoupon] = useState(null);
   const cartItems = useSelector(state => state.cart.items);
   const productData = product?.product;
+  
+  // FIX: Clear previous product data when productId changes
+  const [currentProductId, setCurrentProductId] = useState(productId);
+  const [localProductData, setLocalProductData] = useState(null);
+
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const subCategoryProducts = useSelector(
     state => state.subCategoryProducts.productsBySubcategory[productData?.subCategory] || []
   );
   const similarLoading = useSelector(state => state.subCategoryProducts.loading);
   const similarError = useSelector(state => state.subCategoryProducts.error);
   const { user } = useSelector(state => state.auth);
-const didSetDefaultVariant = useRef(false);
-const variantRef = useRef(null);
-const prevProductId = useRef(null);
-useEffect(() => {
-    if (productId !== prevProductId.current) {
+  const didSetDefaultVariant = useRef(false);
+  const variantRef = useRef(null);
+  const prevProductId = useRef(null);
+
+  // FIX: Reset all local state when productId changes
+  useEffect(() => {
+    if (productId !== currentProductId) {
+      setCurrentProductId(productId);
+      setLocalProductData(null);
       setSelectedVariant(null);
+      setLocalAppliedCoupon(null);
+      setSelectionError(null);
       variantRef.current = null;
-      prevProductId.current = productId;
       didSetDefaultVariant.current = false;
+      prevProductId.current = productId;
     }
   }, [productId]);
 
+  // FIX: Update local product data only when we have fresh data
+  useEffect(() => {
+    if (product?.product && product.product._id === productId) {
+      setLocalProductData(product.product);
+    }
+  }, [product, productId]);
 
+  // Set default variant when product data loads
+  useEffect(() => {
+    if (localProductData?.productType === "WeightPack") {
+      if (Array.isArray(localProductData?.flatVariants) && localProductData?.flatVariants.length > 0) {
+        setSelectedVariant(localProductData?.flatVariants[0]);
+      } else {
+        setSelectedVariant(null);
+      }
+    }
+  }, [localProductData]);
 
-  // Get image URLs for display
-const getImageUrls = (images) => {
-  if (!images || !Array.isArray(images)) return [];
-  return images.map(img => {
-    const url = img?.url || img;
-    return url?.startsWith('http') ? url : `${IMGURL}${url}`;
-  }).filter(Boolean);
-};
+  // Get image URLs for display - memoized
+  const getImageUrls = useCallback((images) => {
+    if (!images || !Array.isArray(images)) return [];
+    return images.map(img => {
+      const url = img?.url || img;
+      return url?.startsWith('http') ? url : `${IMGURL}${url}`;
+    }).filter(Boolean);
+  }, [IMGURL]);
 
-const imagesToShow = useMemo(() => {
-  const currentVariant = variantRef.current; // Get most recent value
-  
-  // 1. Check for explicit deselection
-  if (currentVariant === null) {
-    return getImageUrls(productData?.images);
-  }
-  
-  // 2. Check for variant images
-  if (currentVariant?.images?.length) {
-    return getImageUrls(currentVariant.images);
-  }
+  const imagesToShow = useMemo(() => {
+    // If we have a selected variant with images, use those
+    if (selectedVariant?.images?.length) {
+      return getImageUrls(selectedVariant.images);
+    }
 
-  return getImageUrls(productData?.images);
-}, [productData, selectedVariant]); // Still include selectedVariant to trigger updates
+    // Otherwise use product images
+    return getImageUrls(localProductData?.images);
+  }, [localProductData, selectedVariant, getImageUrls]);
 
+  const hasVariants = useMemo(() => {
+    return Array.isArray(localProductData?.colorVariants) && localProductData.colorVariants.length > 0;
+  }, [localProductData]);
 
-  // Reusable price calculation
-  const getPriceDetails = useCallback((item = productData, variant = selectedVariant) => {
-    return calculateProductPrice(item, variant, localAppliedCoupon);
-  }, [productData, selectedVariant, localAppliedCoupon]);
+  const flattenedVariants = useMemo(() => {
+    if (!hasVariants) return [];
+    return localProductData.colorVariants.flatMap(colorVar =>
+      colorVar.sizes.map(size => ({
+        colorCode: colorVar.code,
+        colorName: colorVar.name,
+        images: colorVar.images,
+        ...size
+      }))
+    );
+  }, [localProductData, hasVariants]);
 
+  const getPriceDetails = useCallback(
+    (variant = hasVariants ? selectedVariant : null) => {
+      return calculateProductPrice(localProductData, variant, localAppliedCoupon);
+    },
+    [localProductData, selectedVariant, localAppliedCoupon, hasVariants]
+  );
 
+  useEffect(() => {
+    if (hasVariants && flattenedVariants.length > 0 && !selectedVariant) {
+      setSelectedVariant(flattenedVariants[0]);
+    }
+  }, [flattenedVariants, hasVariants]);
 
-const handleVariantChange = useCallback((variant) => {
-  console.log("SELECTED VARIANT IS",variant)
-  variantRef.current = variant; // Store in ref for immediate access
-  setSelectedVariant(variant);
-}, []);
+  const handleVariantChange = useCallback((variant) => {
+    setSelectedVariant(variant);
+    variantRef.current = variant;
+    setSelectionError(null);
+  }, []);
 
-
-
-  // Share product
-  const shareWithImage = async () => {
+  // Share product - memoized
+  const shareWithImage = useCallback(async () => {
+    if (!localProductData) return;
+    
     const shareOptions = {
-      title: productData?.name,
-      message: stripHtml(productData?.description),
+      title: localProductData?.name,
+      message: stripHtml(localProductData?.description),
       urls: [imagesToShow].flat(),
     };
     try {
@@ -122,207 +178,223 @@ const handleVariantChange = useCallback((variant) => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [localProductData, imagesToShow]);
 
-const OnAddToCart = (item) => {
-  try {
-    const selectedItem = item || productData;
-    const selectedProductId = selectedItem?.id || productId;
-    const hasVariants = Array.isArray(selectedItem?.variants) && selectedItem.variants.length > 0;
+  const OnAddToCart = useCallback((item) => {
+    try {
+      const selectedItem = item || localProductData;
+      if (!selectedItem) return;
+      
+      const selectedProductId = selectedItem?.id || productId;
+      const hasVariants = Array.isArray(selectedItem?.variants) && selectedItem.variants.length > 0;
 
-    let variantStock = 0;
-    let variantOutOfStock = false;
+      let variantStock = 0;
+      let variantOutOfStock = false;
 
-     if (selectedItem.outOfStock) {
-      showMessage({ 
-        message: 'This product is currently unavailable', 
-        type: 'danger' 
-      });
-      return;
-    }
+      if (selectedItem.outOfStock) {
+        showMessage({ 
+          message: 'This product is currently unavailable', 
+          type: 'danger' 
+        });
+        return;
+      }
 
-    if (hasVariants && selectedVariant?._id) {
-      const variant = selectedItem.variants.find(v => v._id === selectedVariant._id);
-      variantStock = variant?.countInStock ?? 0;
-      variantOutOfStock = variant?.outOfStock ?? false;
-    } else {
-      variantStock = selectedItem.countInStock || 0;
-      variantOutOfStock = selectedItem.outOfStock || false;
-    }
+      if (hasVariants && selectedVariant?._id) {
+        const variant = selectedItem.variants.find(v => v._id === selectedVariant._id);
+        variantStock = variant?.countInStock ?? 0;
+        variantOutOfStock = variant?.outOfStock ?? false;
+      } else {
+        variantStock = selectedItem.countInStock || 0;
+        variantOutOfStock = selectedItem.outOfStock || false;
+      }
 
-    if (variantOutOfStock || variantStock <= 0) {
-      showMessage({
-        message: 'This item is out of stock',
-        type: 'danger',
-      });
-      return;
-    }
+      if (variantOutOfStock || variantStock <= 0) {
+        showMessage({
+          message: 'This item is out of stock',
+          type: 'danger',
+        });
+        return;
+      }
 
-    // Find existing cart item
-    const cartItem = cartItems.find(ci =>
-      (ci.product?._id === selectedItem._id || ci.product === selectedItem._id) &&
-      (!ci.variantId || ci.variantId === selectedVariant?._id)
-    );
+      // Find existing cart item
+      const cartItem = cartItems.find(ci =>
+        (ci.product?._id === selectedItem._id || ci.product === selectedItem._id) &&
+        (!ci.variantId || ci.variantId === selectedVariant?._id)
+      );
 
-    const currentQty = cartItem?.qty || 0;
-    if (currentQty + 1 > variantStock) {
-      showMessage({
-        message: `Only ${variantStock} available. You already have ${currentQty} in your cart.`,
-        type: 'danger',
-      });
-      return;
-    }
+      const currentQty = cartItem?.qty || 0;
+      if (currentQty + 1 > variantStock) {
+        showMessage({
+          message: `Only ${variantStock} available. You already have ${currentQty} in your cart.`,
+          type: 'danger',
+        });
+        return;
+      }
 
-    const finalVariant = selectedVariant || {
-      additionalPrice: 0,
-      images: selectedItem.images,
-      sku: selectedItem.sku || '',
-    };
+      const finalVariant = selectedVariant || {
+        images: selectedItem.images,
+        sku: selectedItem.sku || '',
+      };
 
-    const priceDetails = calculateProductPrice(selectedItem, finalVariant, localAppliedCoupon);
+      const priceDetails = calculateProductPrice(selectedItem, finalVariant, localAppliedCoupon);
+      // Prepare animation image
+      const imageUrl = finalVariant?.images?.[0]
+        ? finalVariant.images[0].startsWith('https://')
+          ? finalVariant.images[0]
+          : `${IMGURL}${finalVariant.images[0]}`
+        : selectedItem?.images?.[0]
+        ? selectedItem.images[0].startsWith('https://')
+          ? selectedItem.images[0]
+          : `${IMGURL}${selectedItem.images[0]}`
+        : null;
 
-    // Prepare animation image
-  const imageUrl = finalVariant?.images?.[0]
-  ? finalVariant.images[0].startsWith('https://')
-    ? finalVariant.images[0]
-    : `${IMGURL}${finalVariant.images[0]}`
-  : selectedItem?.images?.[0]
-  ? selectedItem.images[0].startsWith('https://')
-    ? selectedItem.images[0]
-    : `${IMGURL}${selectedItem.images[0]}`
-  : null;
+      setAnimationImage(imageUrl);
+      setAddtoCartLoading(true);
+      setAnimationKey(prev => prev + 1);
+      setShowAnimation(true);
 
-    setAnimationImage(imageUrl);
-    setAddtoCartLoading(true);
-    setAnimationKey(prev => prev + 1);
-    setShowAnimation(true);
-
-    // Prepare cart payload
-    const cartPayload = {
-      productId: selectedProductId,
-      quantity: 1,
-      price: priceDetails.finalPrice,
-      originalPrice: priceDetails.variantPrice,
-      ...(priceDetails.coupon && {
-        coupon: priceDetails.coupon,
-        discountAmount: priceDetails.discountAmount,
-        discountPercentage: priceDetails.discountPercentage
-      }),
-      ...(selectedItem?.isDigital !== undefined && { isDigital: selectedItem?.isDigital }),
-      ...(finalVariant?._id && { variantId: finalVariant._id }),
-      ...(finalVariant && Object.keys(finalVariant).length > 0 && { variantDetails: finalVariant }),
-    };
-
-    dispatch(addToCart(cartPayload))
-      .then(() => {
-        console.log("🛒 Added to cart:", cartPayload);
-      })
-      .catch((error) => {
-        console.log("❌ Add to cart failed", error);
-        setAddtoCartLoading(false);
-        setShowAnimation(false);
-      });
-
-  } catch (error) {
-    showMessage({ message: error.message, type: 'danger' });
-  }
-};
-
-
-  // Buy Now handler
-const handleBuyNow = () => {
-  try {
-    // Check if user is logged in
-    if (!user || !user.username) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
-      });
-      return;
-    }
-
-      if (productData.outOfStock) {
-      showMessage({ 
-        message: 'This product is currently unavailable', 
-        type: 'danger' 
-      });
-      return;
-    }
-
-    const hasVariants = Array.isArray(productData?.variants) && productData.variants.length > 0;
-
-    let variantStock = 0;
-    let variantOutOfStock = false;
-
-    if (hasVariants && selectedVariant?._id) {
-      const variant = productData.variants.find(v => v._id === selectedVariant._id);
-      variantStock = variant?.countInStock ?? 0;
-      variantOutOfStock = variant?.outOfStock ?? false;
-    } else {
-      variantStock = productData.countInStock || 0;
-      variantOutOfStock = productData.outOfStock || false;
-    }
-
-    if (variantOutOfStock || variantStock <= 0) {
-      showMessage({
-        message: 'This item is out of stock',
-        type: 'danger',
-        duration: 4000,
-      });
-      return;
-    }
-
-    const priceDetails = calculateProductPrice(productData, selectedVariant, localAppliedCoupon);
-
-    navigation.navigate('ProductCheckoutScreen', {
-      product: {
-        ...productData,
-        ...priceDetails,
-        ...(selectedVariant && { selectedVariant }),
+      // Prepare cart payload
+      const cartPayload = {
+        productId: selectedProductId,
         quantity: 1,
-        isSingleProductCheckout: true,
-        availableStock: variantStock
-      },
-    });
+        price: priceDetails.finalPrice,
+        originalPrice: priceDetails.variantPrice,
+        ...(priceDetails.coupon && {
+          coupon: priceDetails.coupon,
+          discountAmount: priceDetails.discountAmount,
+          discountPercentage: priceDetails.discountPercentage
+        }),
+        ...(selectedItem?.isDigital !== undefined && { isDigital: selectedItem?.isDigital }),
+        ...(finalVariant?._id && { variantId: finalVariant._id }),
+        ...(finalVariant && Object.keys(finalVariant).length > 0 && { variantDetails: finalVariant }),
+      };
 
-  } catch (error) {
-    showMessage({ message: error.message, type: 'danger' });
-  }
-};
+      dispatch(addToCart(cartPayload))
+        .then(() => {
+          console.log("🛒 Added to cart:", cartPayload);
+        })
+        .catch((error) => {
+          console.log("❌ Add to cart failed", error);
+          setAddtoCartLoading(false);
+          setShowAnimation(false);
+        });
 
+    } catch (error) {
+      showMessage({ message: error.message, type: 'danger' });
+    }
+  }, [localProductData, productId, selectedVariant, cartItems, localAppliedCoupon, dispatch]);
+
+  // Buy Now handler - memoized
+  const handleBuyNow = useCallback(() => {
+    try {
+      // Check if user is logged in
+      if (!user || !user.username) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth', state: { routes: [{ name: 'Signin' }] } }],
+        });
+        return;
+      }
+
+      // Check if we have product data
+      if (!localProductData) {
+        showMessage({
+          message: 'Product data not loaded yet',
+          type: 'warning',
+        });
+        return;
+      }
+
+      // Check if variant selection is required but not made
+      if (hasVariants && !selectedVariant) {
+        setSelectionError('Please select a variant');
+        showMessage({
+          message: 'Please select a variant first',
+          type: 'warning',
+        });
+        return;
+      }
+
+      const finalVariant = hasVariants ? selectedVariant : null;
+
+      // Get stock information
+      const stock = finalVariant?.countInStock ?? localProductData.countInStock ?? 0;
+      const outOfStock = finalVariant?.outOfStock ?? localProductData.outOfStock ?? false;
+
+      if (outOfStock || stock <= 0) {
+        showMessage({ 
+          message: 'This product is currently unavailable', 
+          type: 'danger' 
+        });
+        return;
+      }
+
+      const priceDetails = getPriceDetails(finalVariant);
+
+      navigation.navigate('ProductCheckoutScreen', {
+        product: {
+          ...localProductData,
+          ...priceDetails,
+          selectedVariant: finalVariant,
+          quantity: finalVariant?.minOrderQuantity ?? localProductData.minOrderQuantity ?? 1,
+          isSingleProductCheckout: true,
+          availableStock: stock
+        },
+      });
+
+    } catch (error) {
+      showMessage({ message: error.message, type: 'danger' });
+    }
+  }, [user, localProductData, selectedVariant, getPriceDetails, navigation, hasVariants]);
 
   // Handle animation completion
-  const handleAnimationComplete = () => {
+  const handleAnimationComplete = useCallback(() => {
     setShowAnimation(false);
     setAddtoCartLoading(false);
-  };
+  }, []);
 
-  // Refresh data
+  // Refresh data - memoized
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await dispatch(fetchProductById(productId)).unwrap();
-      if (productData?.subCategory) {
-        await dispatch(fetchProductsBySubcategory(productData.subCategory));
+      if (localProductData?.subCategory) {
+        await dispatch(fetchProductsBySubcategory(localProductData.subCategory));
       }
     } catch (error) {
       console.error("Refresh failed:", error);
     } finally {
       setRefreshing(false);
     }
-  }, [productId, dispatch, productData?.subCategory]);
+  }, [productId, dispatch, localProductData?.subCategory]);
 
   // Initial data load
   useEffect(() => {
-    if (productId) dispatch(fetchProductById(productId));
+    if (productId) {
+      dispatch(fetchProductById(productId));
+    }
   }, [productId, dispatch]);
 
   // Load similar products
   useEffect(() => {
-    if (productData?.subCategory) {
-      dispatch(fetchProductsBySubcategory(productData.subCategory));
+    if (localProductData?.subCategory) {
+      dispatch(fetchProductsBySubcategory(localProductData.subCategory));
     }
-  }, [productData?.subCategory, dispatch]);
+  }, [localProductData?.subCategory, dispatch]);
+
+  // Memoized formatted product
+  const formattedProduct = useMemo(() => {
+    return localProductData ? formatProductDetailData(localProductData) : null;
+  }, [localProductData]);
+
+  console.log("Lcal product data is",localProductData)
+
+  // Memoized similar products data
+  const similarProductsData = useMemo(() => {
+    return formateSubCategoryProducts(
+      subCategoryProducts.filter(p => p._id !== productId)
+    );
+  }, [subCategoryProducts, productId]);
 
   if (loading) {
     return (
@@ -340,21 +412,16 @@ const handleBuyNow = () => {
     );
   }
 
-  const formattedProduct = formatProductDetailData(product?.product);
-  if (!formattedProduct) return null;  
-  // Format similar products data
-  const similarProductsData = formateSubCategoryProducts(
-    subCategoryProducts.filter(p => p._id !== productId)
-  );
+  if (!formattedProduct) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#416F81" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>
-      <AddToCartAnimation
-        key={animationKey}
-        visible={showAnimation}
-        imageUrl={animationImage}
-        onComplete={handleAnimationComplete}
-      />
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -367,9 +434,13 @@ const handleBuyNow = () => {
             tintColor={'#416F81'}
           />
         }
+        // Performance optimizations for ScrollView
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={5}
+        windowSize={5}
       >
         <View style={styles.mainContainer}>
-          <CustomHeader navigation={navigation} showCartIcon={true} />
+          <MemoizedCustomHeader navigation={navigation} showCartIcon={true} />
           <Pressable 
             style={styles.searchPressable}
             onPress={() => navigation.navigate('Search')}
@@ -385,34 +456,45 @@ const handleBuyNow = () => {
         </View>
         
         <View>
-          <HorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
-          <CustomZoomCasual
-            cardHeight={Height(200)}
-            onImagePress={(uri) => console.log('Image pressed:', uri)}
+          <MemoizedHorizontalLine containerStyle={{ paddingVertical: 6 }} lineStyle={{ backgroundColor: '#E8E8E8' }} />
+          <MemoizedCustomZoomCasual
+            onImagePress={(uri) =>{}}
             data={imagesToShow}
           />
         </View>
         
-        <Description 
+        <MemoizedDescription 
           productData={formattedProduct}
           selectedVariant={selectedVariant}
-          priceDetails={getPriceDetails()}
+          onVariantChange={handleVariantChange}
         />
         
-        {formattedProduct?.variants?.length > 0 && (
-        <VariantSelector 
-          variants={formattedProduct?.variants}
-          onVariantChange={handleVariantChange}
-           
-          />
-        )}
+        {localProductData.productType === "WeightPack"  && <>
+          {localProductData?.flatVariants?.length > 0 && (
+            <MemoizedPackSize
+              flatVariants={localProductData.flatVariants}
+              selectedVariant={selectedVariant}
+              onVariantChange={handleVariantChange}
+            />
+          )}
+        </>}
+
+        {localProductData.productType === "ColorSize" && <>
+          {hasVariants && (
+            <MemoizedVariantSelector
+              variants={flattenedVariants}
+              onVariantChange={handleVariantChange}
+              setSelectionError={setSelectionError}
+            />
+          )}
+        </> }
         
-        {productData?.coupons?.length > 0 && (
+        {localProductData?.coupons?.length > 0 && (
           <>
             <View style={styles.borderStyle}/>
-            <CouponSection
-              productId={productData?._id}
-              data={productData?.coupons}
+            <MemoizedCouponSection
+              productId={localProductData?._id}
+              data={localProductData?.coupons}
               onCouponApplied={setLocalAppliedCoupon}
               localAppliedCoupon={localAppliedCoupon}
               priceDetails={getPriceDetails()}
@@ -420,12 +502,12 @@ const handleBuyNow = () => {
           </>
         )}
         
-    {user?.id &&     <AddressRow
-          navigation={navigation}
-          address={user?.addresses}
-        />}
-        
-      
+        {user?.id && (
+          <MemoizedAddressRow
+            navigation={navigation}
+            address={user?.addresses}
+          />
+        )}
         
         <View style={styles.infoRow}>
           <CurruncyRupees />
@@ -433,17 +515,22 @@ const handleBuyNow = () => {
         </View>
         
         <View style={styles.borderStyle} />
-        <CustomProductDetailsData productData={formattedProduct} />
-{formattedProduct?.returnPolicy?.returnable && (
-  <ReturnsSection returnWindow={formattedProduct?.returnPolicy?.returnWindow} />
-)}        {similarLoading ? (
-          <ActivityIndicator size="small" color="#416F81" style={{ marginVertical: 20 }} />
+        <MemoizedCustomProductDetailsData productData={formattedProduct} />
+        
+        {formattedProduct?.returnPolicy?.returnable && (
+          <MemoizedReturnsSection returnWindow={formattedProduct?.returnPolicy?.returnWindow} />
+        )}
+        
+        {similarLoading ? (
+         <View style={styles.loadingContainer}>
+           <ActivityIndicator size="small" color="#416F81"/>
+         </View>
         ) : similarError ? (
           <Text style={styles.errorText}>Failed to load similar products</Text>
         ) : similarProductsData.length > 0 ? (
           <View style={styles.sectionWrapper}>
             <Text style={styles.sectionTitle}>You might also like</Text>
-            <CustomSimilarProducts
+            <MemoizedCustomSimilarProducts
               data={similarProductsData}
               navigation={navigation}
               onAddToCart={OnAddToCart}
@@ -451,17 +538,23 @@ const handleBuyNow = () => {
           </View>
         ) : null}
       </ScrollView>
-      
-      <BottomPurchaseBar
+       <AddToCartAnimation
+        key={animationKey}
+        visible={showAnimation}
+        imageUrl={animationImage}
+        onComplete={handleAnimationComplete}
+      />
+      <MemoizedBottomPurchaseBar
         addToCartLoading={addToCartLoading}
         onSharePress={shareWithImage}
-        onAddToCart={() => OnAddToCart()}
+        onAddToCart={OnAddToCart}
         onBuyNow={handleBuyNow}
         selectedVariant={selectedVariant}
         selectionError={selectionError}
+        hasVariants={hasVariants}
       />
     </View>
   );
 };
 
-export default ProductDetails;
+export default React.memo(ProductDetails);

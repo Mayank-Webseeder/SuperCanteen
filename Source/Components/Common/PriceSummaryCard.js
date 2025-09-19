@@ -7,6 +7,8 @@ const PriceSummaryCard = ({ product = null, items: propItems = [], priceDetails 
 const { items: cartItems } = useSelector((state) => state.cart)
 const { appliedCoupons } = useSelector(state => state.coupon)
 
+  console.log("VARIANT DETAILS IS",product?.selectedVariant)
+
  const appliedCoupon = product?.isSingleProductCheckout 
       ? appliedCoupons[product?._id]
       : appliedCoupons?.cartWide;
@@ -24,11 +26,10 @@ const { appliedCoupons } = useSelector(state => state.coupon)
     const isSingleProduct = !!product;
     // === CASE 1: Single product checkout ===
 if (isSingleProduct) {
-  const basePrice = product.offerPrice || product.price || 0;
-  const variantExtra = product?.selectedVariant?.additionalPrice || 0;
+  const basePrice = product?.selectedVariant?.offerPrice ?  product?.selectedVariant?.offerPrice  : product.offerPrice || product.price || 0;
 
-  const actualPrice = basePrice + variantExtra; // Price to apply tax & coupon on
-  const mrp = (product?.mrp || basePrice) + variantExtra;
+  const actualPrice = basePrice ; // Price to apply tax & coupon on
+  const mrp =  product?.selectedVariant?.mrp ? product?.selectedVariant?.mrp  : (product?.mrp || basePrice) ;
   const shipping = product.shippingRate || 0;
   const taxPercent = product.tax || 0;
 
@@ -76,13 +77,10 @@ if (isSingleProduct) {
   }).forEach(item => { 
       const qty = item.qty || 1;
       const mrp = item.mrp || item.product?.mrp || item.price || 0;
-      const price = item.offerPrice || item.price || item.product.offerPrice || mrp;
-      const additionalPrice = item.variantDetails?.additionalPrice || 0;
-
-
+      const price = item.variantDetails?.offerPrice ? item.variantDetails?.offerPrice :  item.offerPrice || item.price || item.product.offerPrice || mrp;
 
  // 2. Calculate actual price per unit (including variant additional price)
-  const pricePerUnit = price + additionalPrice;
+  const pricePerUnit = price ;
   const itemSubtotal = pricePerUnit * qty;
   
   // 3. Calculate coupon discount if available

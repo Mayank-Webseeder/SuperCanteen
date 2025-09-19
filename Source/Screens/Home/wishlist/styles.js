@@ -62,7 +62,7 @@ export const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: FontSize(13),
-    color: COLORS.gray,
+    color: COLORS.black,
     fontFamily: 'Inter-Medium'
   },
   activeCategoryText: {

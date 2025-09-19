@@ -131,76 +131,7 @@ const CustomBottomSheet = ({
       </View>
     );
 
-    const renderColors = () => (
-      <View style={styles.panelContainer}>
-        <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-          <Text style={styles.sectionTitle}>Select Colors</Text>
-          <ResetButton/>
-        </View>
-        <View style={styles.colorContainer}>
-          {filterOptions.colors.length === 0 ? (
-            <Text style={styles.emptyText}>No colors available for this product.</Text>
-          ) : (
-            filterOptions.colors.map(color => (
-              <TouchableOpacity
-                key={color}
-                style={[
-                  styles.colorItem,
-                  selectedColors.includes(color)
-                ]}
-                onPress={() => toggleSelection(color, 'color')}
-              >
-                <View style={[
-                  styles.colorCircleStyle,
-                  { backgroundColor: color.toLowerCase() }
-                ]} />
-                <Text style={styles.optionText}>{color}</Text>
-                {selectedColors.includes(color) && (
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={20}
-                    color="#376275"
-                    style={styles.checkIcon}
-                  />
-                )}
-              </TouchableOpacity>
-            ))
-          )}
-        </View>
-      </View>
-    );
-
-    // const renderSizes = () => (
-    //   <View style={styles.rightPaneContainer}>
-    //     <View style={{flexDirection:"row",justifyContent:"space-between"}}>
-    //       <Text style={styles.sectionTitle}>Select Sizes</Text>
-    //       <ResetButton/>
-    //     </View>
-    //     <View style={styles.optionsGrid}>
-    //       {filterOptions.sizes.length === 0 ? (
-    //         <Text style={styles.emptyText}>No sizes available for this product.</Text>
-    //       ) : (
-    //         filterOptions.sizes.map(size => (
-    //           <TouchableOpacity
-    //             key={size}
-    //             style={[
-    //               styles.sizeOption,
-    //               selectedSizes.includes(size) && styles.sizeOptionSelected
-    //             ]}
-    //             onPress={() => toggleSelection(size, 'size')}
-    //           >
-    //             <Text style={[
-    //               styles.sizeText,
-    //               selectedSizes.includes(size) && styles.sizeTextSelected
-    //             ]}>
-    //               {size}
-    //             </Text>
-    //           </TouchableOpacity>
-    //         ))
-    //       )}
-    //     </View>
-    //   </View>
-    // );
+  
 
     const renderNew = () => (
       <View style={styles.rightPaneContainer}>

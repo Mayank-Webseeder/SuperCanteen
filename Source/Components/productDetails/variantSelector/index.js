@@ -1,149 +1,179 @@
+import { COLORS } from "@constants/index";
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  ScrollView, 
+  StyleSheet
+} from "react-native";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
-const VariantSelector = ({ variants = [], onVariantChange }) => {
+const VariantSelector = ({ variants = [], onVariantChange, setSelectionError }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
 
   // ✅ Unique colors
   const colors = Array.from(
-    new Map(variants.map(v => [v.color.code, v.color])).values()
+    new Map(
+      variants.map(v => [v.colorCode, { code: v.colorCode, name: v.colorName }])
+    ).values()
   );
 
-  // ✅ Unique sizes (always show all)
-  const allSizes = Array.from(new Set(variants.map(v => v.size)));
+  // ✅ Unique sizes (for all variants)
+  const allSizes = Array.from(new Set(variants.map(v => v.size).filter(Boolean)));
 
-  // ✅ Sizes available for the selected color
+  // ✅ Sizes available for selected color
   const availableSizes = selectedColor
-    ? variants.filter(v => v.color.code === selectedColor).map(v => v.size)
+    ? variants.filter(v => v.colorCode === selectedColor).map(v => v.size)
     : [];
 
-  // 🔥 Auto-select first variant on mount
+  // ✅ Default select first color + size on mount
   useEffect(() => {
     if (variants.length > 0 && !selectedColor && !selectedSize) {
-      const firstVariant = variants[0];
-      setSelectedColor(firstVariant.color.code);
-      setSelectedSize(firstVariant.size);
-      onVariantChange?.(firstVariant);
+      const first = variants[0];
+      setSelectedColor(first.colorCode);
+      setSelectedSize(first.size);
     }
   }, [variants]);
 
-  // 🔥 Trigger callback whenever both are selected
+  // ✅ Trigger callback only when both selected
   useEffect(() => {
     if (selectedColor && selectedSize) {
       const variant = variants.find(
-        v => v.color.code === selectedColor && v.size === selectedSize
+        v => v.colorCode === selectedColor && v.size === selectedSize
       );
       if (variant) {
         onVariantChange?.(variant);
+        setSelectionError?.(null);
       }
     }
   }, [selectedColor, selectedSize]);
 
   const handleColorSelect = (colorCode) => {
     setSelectedColor(colorCode);
-
-    // Auto-select first available size of this color
-    const firstSize = variants.find(v => v.color.code === colorCode)?.size || null;
-    setSelectedSize(firstSize);
+    // auto-select first available size for this color
+    const firstSize = variants.find(v => v.colorCode === colorCode)?.size;
+    setSelectedSize(firstSize || null);
   };
 
   const handleSizeSelect = (size) => {
     if (availableSizes.includes(size)) {
       setSelectedSize(size);
+      setSelectionError?.(null);
+    } else {
+      setSelectionError?.("Selected size is not available");
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Colors */}
+      {/* Colors Section */}
       {colors.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Colors</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.row}>
-            {colors.map((c, i) => {
-              const isSelected = selectedColor === c.code;
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Select Color</Text>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.colorsContainer}
+          >
+            {colors.map((color, index) => {
+              const isSelected = selectedColor === color.code;
               return (
                 <TouchableOpacity
-                  key={i}
-                  style={[
+                  key={index}
+                  style={styles.colorItem}
+                  onPress={() => handleColorSelect(color.code)}
+                >
+                  <View style={[
                     styles.colorCircle,
-                    { backgroundColor: c.code },
+                    { backgroundColor: color.code || '#ccc' },
                     isSelected && styles.selectedColor,
-                  ]}
-                  onPress={() => handleColorSelect(c.code)}
-                />
+                  ]}>
+                    {isSelected && (
+                      <MaterialIcons 
+                        name="check" 
+                        size={16} 
+                        color={COLORS.green} 
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.colorName}>{color.name}</Text>
+                </TouchableOpacity>
               );
             })}
           </ScrollView>
-        </>
+        </View>
       )}
 
-      {/* Sizes (always show all) */}
+      {/* Sizes Section */}
       {allSizes.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>Sizes</Text>
-          <View style={styles.row}>
-            {allSizes.map((s, i) => {
-              const isAvailable = availableSizes.includes(s);
-              const isSelected = selectedSize === s;
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle,{marginBottom:7}]}>Select Size</Text>
+          <View style={styles.sizesContainer}>
+            {allSizes.map((size, index) => {
+              const isAvailable = availableSizes.includes(size);
+              const isSelected = selectedSize === size;
               return (
                 <TouchableOpacity
-                  key={i}
+                  key={index}
                   style={[
                     styles.sizeBox,
-                    isSelected && styles.selectedSize,
-                    !isAvailable && styles.disabledBox,
+                    isSelected && styles.selectedSizeBox,
+                    !isAvailable && styles.disabledSizeBox,
                   ]}
                   disabled={!isAvailable}
-                  onPress={() => handleSizeSelect(s)}
+                  onPress={() => handleSizeSelect(size)}
                 >
-                  <Text
-                    style={[
-                      styles.sizeText,
-                      isSelected && styles.selectedSizeText,
-                      !isAvailable && styles.disabledText,
-                    ]}
-                  >
-                    {s}
+                  <Text style={[
+                    styles.sizeText,
+                    isSelected && styles.selectedSizeText,
+                    !isAvailable && styles.disabledText,
+                  ]}>
+                    {size}
                   </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
-        </>
+        </View>
       )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 10 },
-  sectionTitle: { fontSize: 16, fontWeight: "bold", marginVertical: 8 },
-  row: { flexDirection: "row", flexWrap: "wrap" },
-  colorCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-    borderWidth: 2,
-    borderColor: "#ccc",
-  },
-  selectedColor: { borderColor: "#007bff", borderWidth: 3 },
-  sizeBox: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginRight: 8,
+  container: { paddingBottom: 12, paddingHorizontal:16 },
+  section: { marginBottom: 10,marginTop:10 },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    fontFamily: 'Inter-SemiBold',
     marginBottom: 8,
+    textTransform:"uppercase",
   },
-  selectedSize: { backgroundColor: "#007bff", borderColor: "#007bff" },
-  sizeText: { color: "#333" },
-  selectedSizeText: { color: "#fff" },
-  disabledBox: { opacity: 0.4 },
-  disabledText: { color: "#999" },
+  colorsContainer: { paddingRight: 8 },
+  colorItem: { marginRight: 10, alignItems: "center" },
+  colorCircle: {
+    width: 32, height: 32, borderRadius: 18,
+    borderWidth: 1.5, borderColor: '#e0e0e0',
+    justifyContent: 'center', alignItems: 'center',
+  },
+  selectedColor: { borderColor: COLORS.green, borderWidth: 1 },
+  colorName: { fontSize: 12, marginTop: 4, textAlign: "center", color: '#333',    fontFamily: 'Inter-Regular'},
+  sizesContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8,marginTop:4 },
+  sizeBox: {
+    minWidth: 44, height: 36, borderWidth: 1,
+    borderColor: COLORS.border, borderRadius: 6,
+    paddingHorizontal: 10, justifyContent: 'center',
+    alignItems: 'center', backgroundColor: '#fff',
+  },
+  selectedSizeBox: { backgroundColor: COLORS.green, borderColor:COLORS.green },
+  disabledSizeBox: { opacity: 0.4 },
+  sizeText: { fontSize: 13, fontWeight: '500', color: '#333', fontFamily: 'Inter-Medium' },
+  selectedSizeText: { color: '#fff', fontWeight: '600' },
+  disabledText: { color: '#999' },
 });
 
 export default VariantSelector;

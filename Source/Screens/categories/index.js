@@ -210,109 +210,105 @@ const CategoryScreen = ({ navigation }) => {
     </TouchableOpacity>
   ), [activeCategory, handleCategorySelect]);
 
-  const renderNoData = useCallback((msg) => (
-    <View style={styles.noDataContainer}>
-      <Text style={styles.noDataText}>{msg}</Text>
+ 
+
+  const renderGridItem = useCallback(({ item, isProduct = false, isOwnCategory = false }) => (
+  <TouchableOpacity
+    style={styles.gridItem}
+    onPress={() => {
+      if (isProduct) {
+        navigation.navigate('ProductDetails', {
+          productId: item._id,
+          title: item.name,
+        });
+      } else if (isOwnCategory) {
+        // 👇 navigate to a different screen for own category
+        navigation.navigate('ProductsByCategoryScreen', {
+          categoryId: item._id,
+          categoryName: item.name,
+        });
+      } else {
+        navigation.navigate('ProdcutCategory', {
+          selectedCategory: item._id,
+          categoryData: item,
+        });
+      }
+    }}
+  >
+    <View style={styles.gridImageContainer}>
+      <Image
+        source={{ uri: isProduct ? `${IMGURL}${item.images[0]}` : `${IMGURL}/${item.image}` }}
+        style={styles.gridImage}
+        resizeMode="cover"
+      />
     </View>
-  ), []);
+    <Text style={styles.gridText} numberOfLines={2}>
+      {item.name}
+    </Text>
 
-  const renderGridItem = useCallback(({ item, isProduct = false }) => (
-    <TouchableOpacity
-      style={styles.gridItem}
-      onPress={() => {
-        if (isProduct) {
-          navigation.navigate('ProductDetails', {
-            productId: item._id,
-            title: item.name,
-          });
-        } else {
-          navigation.navigate('ProdcutCategory', {
-            selectedCategory: item._id,
-            categoryData: item,
-          });
-        }
-      }}
-    >
-      <View style={styles.gridImageContainer}>
-        <Image
-          source={{ uri: isProduct ? `${IMGURL}${item.images[0]}` : `${IMGURL}/${item.image}` }}
-          style={styles.gridImage}
-          resizeMode="cover"
-        />
-      </View>
-      <Text style={styles.gridText} numberOfLines={2}>
-        {item.name}
-      </Text>
-
-      {isProduct && (
-        <View style={styles.priceContainer}>
-          <Text style={styles.productPrice}>₹{item.offerPrice || item.price}</Text>
-          {item.mrp > (item.offerPrice || item.price) && (
-            <Text style={styles.originalPrice}>₹{item.mrp}</Text>
-          )}
-        </View>
-      )}
-    </TouchableOpacity>
-  ), [navigation]);
-
-  const renderCategorySection = useCallback((category) => {
-    const isLoadingThisCategory =
-      loading && activeCategory === category._id && !allProducts[category._id];
-    const isEmpty = !isLoadingThisCategory && !category.hasSubcategories;
-
-    return (
-      <View
-        key={category._id}
-        onLayout={event => trackCategoryPosition(category._id, event)}
-        style={styles.categorySection}
-      >
-        {/* Section Header */}
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={styles.sectionHeaderText}>{category.name}</Text>
-            <View style={styles.titleLine} />
-          </View>
-        </View>
-
-        {isLoadingThisCategory ? (
-          <View style={styles.loadingContainer}>
-            {/* Loader here */}
-          </View>
-        ) : isEmpty ? (
-          renderNoData("No data available")
-        ) : (
-          <>
-            {/* Subcategories */}
-            {category.hasSubcategories && (
-              <View style={styles.gridSection}>
-                <View style={styles.gridContainer}>
-                  {category.data.map(sub => (
-                    <View key={sub._id} style={styles.gridItemWrapper}>
-                      {renderGridItem({ item: sub, isProduct: false })}
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
-
-            {/* Products (commented out in your code) */}
-            {/* {category.hasProducts && (
-              <View style={styles.gridSection}>
-                <Text style={styles.title}>Products</Text>
-                <View style={styles.gridContainer}>
-                  {category.products.map(prod => (
-                    <View key={prod._id} style={styles.gridItemWrapper}>
-                      {renderGridItem({ item: prod, isProduct: true })}
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )} */}
-          </>
+    {isProduct && (
+      <View style={styles.priceContainer}>
+        <Text style={styles.productPrice}>₹{item.offerPrice || item.price}</Text>
+        {item.mrp > (item.offerPrice || item.price) && (
+          <Text style={styles.originalPrice}>₹{item.mrp}</Text>
         )}
       </View>
-    );
-  }, [loading, activeCategory, allProducts]);
+    )}
+  </TouchableOpacity>
+), [navigation]);
+
+
+ const renderCategorySection = useCallback((category) => {
+  const isLoadingThisCategory =
+    loading && activeCategory === category._id && !allProducts[category._id];
+  const isEmpty = !isLoadingThisCategory && !category.hasSubcategories;
+
+  return (
+    <View
+      key={category._id}
+      onLayout={event => trackCategoryPosition(category._id, event)}
+      style={styles.categorySection}
+    >
+      {/* Section Header */}
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionTitleContainer}>
+          <Text style={styles.sectionHeaderText}>{category.name}</Text>
+          <View style={styles.titleLine} />
+        </View>
+      </View>
+
+      {isLoadingThisCategory ? (
+        <View style={styles.loadingContainer}>
+          {/* Loader here */}
+        </View>
+      ) : (
+        <>
+          {/* Subcategories exist */}
+          {category.hasSubcategories ? (
+            <View style={styles.gridSection}>
+              <View style={styles.gridContainer}>
+                {category.data.map(sub => (
+                  <View key={sub._id} style={styles.gridItemWrapper}>
+                    {renderGridItem({ item: sub, isProduct: false })}
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : (
+            // No subcategories → show category itself
+            <View style={styles.gridSection}>
+              <View style={styles.gridContainer}>
+                <View style={styles.gridItemWrapper}>
+                  {renderGridItem({ item: category, isProduct: false, isOwnCategory: true })}
+                </View>
+              </View>
+            </View>
+          )}
+        </>
+      )}
+    </View>
+  );
+}, [loading, activeCategory, allProducts]);
 
   /* ---------------------- Render ---------------------- */
 

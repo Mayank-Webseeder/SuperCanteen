@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   View,
-  ScrollView,
   RefreshControl,
   Animated,
   InteractionManager,
   TouchableOpacity,
   Text,
-  StyleSheet
+  StyleSheet,
+  FlatList
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -25,17 +25,16 @@ import { fetchSections } from '../../../redux/slices/sectionSlice';
 import ModernProductGrid from '../../../otherComponents/home/productCard';
 import { getAllProducts, resetProducts } from '../../../redux/slices/allProductsSlice';
 import ContentSkeletonLoader from '@components/Common/contentSkeletonLoader';
+
 const DATA_CACHE_TIME = 5 * 60 * 1000;
+const PRODUCT_BATCH_SIZE = 15; // Reduced batch size for better performance
 
 const HomeScreen = ({ navigation, route }) => {
   // State management
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [viewMode, setViewMode] = useState('all');
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
   const opacity = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
 
@@ -48,19 +47,28 @@ const HomeScreen = ({ navigation, route }) => {
     timestamp: 0
   });
 
+  // Debounce refs to prevent rapid state updates
+  const loadMoreDebounceRef = useRef(false);
+  const categoryChangeDebounceRef = useRef(false);
+
   const dispatch = useDispatch();
 
-  // Redux selectors
-  const { categories, loading: categoriesLoading, error: categoriesError } = 
-    useSelector(state => state.category, shallowEqual);
-  const { subCategories, loading: subCategoriesLoading, error: subCategoriesError } = 
-    useSelector(state => state.subCategory, shallowEqual);
-  const { products, loading: productsLoading, error: productsError } = 
-    useSelector(state => state.product, shallowEqual);
-  const { items, loading: allProductsLoading, page, pagination, limit } = 
-    useSelector(state => state.allProducts);
-  const { items: sections, loading: sectionsLoading } = 
-    useSelector(state => state.section, shallowEqual);
+  // Optimized Redux selectors with minimal re-renders
+  const categories = useSelector(state => state.category.categories, shallowEqual);
+  const categoriesLoading = useSelector(state => state.category.loading);
+  const categoriesError = useSelector(state => state.category.error);
+  
+  const subCategories = useSelector(state => state.subCategory.subCategories, shallowEqual);
+  const products = useSelector(state => state.product.products, shallowEqual);
+  
+  const allProductsItems = useSelector(state => state.allProducts.items, shallowEqual);
+  const allProductsLoading = useSelector(state => state.allProducts.loading);
+  const allProductsPage = useSelector(state => state.allProducts.page);
+  const allProductsPagination = useSelector(state => state.allProducts.pagination);
+  const allProductsLimit = useSelector(state => state.allProducts.limit);
+  
+  const sections = useSelector(state => state.section.items, shallowEqual);
+  const sectionsLoading = useSelector(state => state.section.loading);
 
   // Track mount state
   useEffect(() => {
@@ -70,59 +78,58 @@ const HomeScreen = ({ navigation, route }) => {
     if (dataCacheRef.current.timestamp > 0 && 
         now - dataCacheRef.current.timestamp < DATA_CACHE_TIME) {
       setIsReady(true);
-      setInitialLoadComplete(true);
+    }
+
+    // Initial data load with debounce
+    if (now - dataCacheRef.current.timestamp > DATA_CACHE_TIME) {
+      const timer = setTimeout(() => {
+        dispatch(resetProducts());
+        dispatch(getAllProducts({ page: 1, limit: PRODUCT_BATCH_SIZE }));
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
 
     return () => {
       isMountedRef.current = false;
     };
-  }, []);
+  }, [dispatch]);
 
-  // Initial data load
-  useEffect(() => {
-    const now = Date.now();
-    if (now - dataCacheRef.current.timestamp > DATA_CACHE_TIME) {
-      dispatch(resetProducts());
-      dispatch(getAllProducts({ page: 1, limit: 20 }));
-    }
-  }, []);
-
-  // Data loading with useFocusEffect
+  // Data loading with useFocusEffect - optimized with cleanup
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
+      let timeoutId = null;
 
       const fetchData = async () => {
         try {
+          if (!isActive) return;
+          
           const now = Date.now();
           const isDataFresh = now - dataCacheRef.current.timestamp < DATA_CACHE_TIME;
           
           if (isDataFresh && dataCacheRef.current.categories) {
             if (isActive && isMountedRef.current) {
-              setInitialLoadComplete(true);
               setIsReady(true);
             }
             return;
           }
 
           const promises = [];
-          let needsFetch = false;
 
           if (!categories?.length || !isDataFresh) {
             promises.push(dispatch(getCategories()));
-            needsFetch = true;
           }
           if (!subCategories?.length || !isDataFresh) {
             promises.push(dispatch(getSubCategories()));
-            needsFetch = true;
           }
           if (!sections?.length || !isDataFresh) {
             promises.push(dispatch(fetchSections()));
-            needsFetch = true;
           }
 
-          if (needsFetch) {
+          if (promises.length > 0) {
             await Promise.all(promises);
+            // Update cache only with necessary data
             dataCacheRef.current = {
               categories: categories,
               subCategories: subCategories,
@@ -132,9 +139,7 @@ const HomeScreen = ({ navigation, route }) => {
           }
 
           if (isActive && isMountedRef.current) {
-            setInitialLoadComplete(true);
             setIsReady(true);
-            setLastFetchTime(Date.now());
           }
         } catch (error) {
           console.error('Data fetch error:', error);
@@ -142,36 +147,23 @@ const HomeScreen = ({ navigation, route }) => {
         }
       };
 
-      const timeoutId = setTimeout(() => {
+      // Use debounced data fetching
+      timeoutId = setTimeout(() => {
         InteractionManager.runAfterInteractions(fetchData);
-      }, 300);
+      }, 150);
 
       return () => {
         isActive = false;
-        clearTimeout(timeoutId);
+        if (timeoutId) clearTimeout(timeoutId);
       };
-    }, [categories, subCategories, sections])
+    }, [categories, subCategories, sections, dispatch])
   );
 
-  // Auto-refresh interval
-  useEffect(() => {
-    let interval;
-    if (viewMode === 'category' && selectedCategoryIndex) {
-      interval = setInterval(() => {
-        const now = Date.now();
-        if (now - lastFetchTime > DATA_CACHE_TIME) {
-          dispatch(getProductsByCategory(selectedCategoryIndex));
-          setLastFetchTime(now);
-        }
-      }, DATA_CACHE_TIME);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [selectedCategoryIndex, viewMode, lastFetchTime]);
-
+  // Debounced category change handler
   const handleCategoryChange = useCallback((categoryId) => {
+    if (categoryChangeDebounceRef.current) return;
+    categoryChangeDebounceRef.current = true;
+    
     const category = categories?.find(c => c._id === categoryId);
     
     if (categoryId !== selectedCategoryIndex) {
@@ -185,7 +177,14 @@ const HomeScreen = ({ navigation, route }) => {
         })
         .catch(() => {
           if (isMountedRef.current) setIsReady(true);
+        })
+        .finally(() => {
+          setTimeout(() => {
+            categoryChangeDebounceRef.current = false;
+          }, 300);
         });
+    } else {
+      categoryChangeDebounceRef.current = false;
     }
     
     if (category) {
@@ -194,14 +193,14 @@ const HomeScreen = ({ navigation, route }) => {
         category: category
       });
     }
-  }, [navigation, categories, selectedCategoryIndex]);
+  }, [navigation, categories, selectedCategoryIndex, dispatch]);
 
   const handleShowAllProducts = useCallback(() => {
     setViewMode('all');
     setSelectedCategoryIndex(null);
     setIsReady(false);
     
-    dispatch(getAllProducts({ page: 1, limit: 20 }))
+    dispatch(getAllProducts({ page: 1, limit: PRODUCT_BATCH_SIZE }))
       .then(() => {
         if (isMountedRef.current) setIsReady(true);
       })
@@ -237,60 +236,53 @@ const HomeScreen = ({ navigation, route }) => {
         dispatch(getCategories()),
         dispatch(getSubCategories()),
         dispatch(fetchSections()),
+        dispatch(getAllProducts({ page: 1, limit: PRODUCT_BATCH_SIZE })),
       ];
 
-      if (viewMode === 'all') {
-        promises.push(dispatch(getAllProducts({ page: 1, limit: 20 })));
-      } else if (viewMode === 'category' && selectedCategoryIndex) {
-        promises.push(dispatch(getProductsByCategory(selectedCategoryIndex)));
-      }
-
       await Promise.all(promises);
-      setLastFetchTime(Date.now());
     } catch (error) {
       console.error('Refresh failed:', error);
     } finally {
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          setRefreshing(false);
-        }
-      }, 1000);
+      if (isMountedRef.current) {
+        setRefreshing(false);
+      }
     }
-  }, [dispatch, selectedCategoryIndex, viewMode]);
+  }, [dispatch]);
 
+  // Debounced load more function
   const loadMore = useCallback(() => {
-    if (viewMode === 'all' && !allProductsLoading && !isLoadingMore && 
-        pagination && page < pagination.totalPages) {
-      setIsLoadingMore(true);
-      dispatch(getAllProducts({ page: page + 1, limit }))
-        .finally(() => setIsLoadingMore(false));
+    if (loadMoreDebounceRef.current) return;
+    
+    if (viewMode === 'all' && 
+        !allProductsLoading && 
+        allProductsPagination && 
+        allProductsPage < allProductsPagination.totalPages) {
+      
+      loadMoreDebounceRef.current = true;
+      
+      dispatch(getAllProducts({ page: allProductsPage + 1, limit: PRODUCT_BATCH_SIZE }))
+        .finally(() => {
+          setTimeout(() => {
+            loadMoreDebounceRef.current = false;
+          }, 500);
+        });
     }
-  }, [allProductsLoading, isLoadingMore, pagination, page, limit, viewMode, dispatch]);
+  }, [viewMode, allProductsLoading, allProductsPagination, allProductsPage, dispatch]);
 
-  // Memoized data
+  // Memoized data with optimized filtering
   const filteredSubcategories = useMemo(() => {
     if (!subCategories || !selectedCategoryIndex) return [];
     return subCategories.filter(item => item.category?._id === selectedCategoryIndex);
   }, [subCategories, selectedCategoryIndex]);
 
-  const brands = useMemo(() => {
-    if (!products) return [];
-    const seen = new Set();
-    return products.reduce((acc, product) => {
-      if (product.brand && !seen.has(product.brand._id)) {
-        seen.add(product.brand._id);
-        acc.push(product.brand);
-      }
-      return acc;
-    }, []);
-  }, [products]);
+  // Current products to display with efficient filtering
+  const currentProducts = useMemo(() => 
+    allProductsItems.filter(product => product.isEnable),
+    [allProductsItems]
+  );
 
-  // Current products to display
-  const currentProducts =items;
-  const currentLoading =  allProductsLoading 
-
-  // Header component
-  const renderHeader = useCallback(() => (
+  // Memoized header component
+  const renderHeader = useMemo(() => (
     <View style={{ backgroundColor: '#A3B9C3' }}>
       <LinearGradient
         colors={['#A3B9C3', '#FFFFFF']}
@@ -303,18 +295,19 @@ const HomeScreen = ({ navigation, route }) => {
     </View>
   ), [navigation]);
 
-  const renderSection = useCallback(() => (
+  // Memoized section renderer
+  const renderSection = useMemo(() => (
     <SectionRenderer navigation={navigation} />
   ), [navigation]);
 
-  // Main content renderer
+  // Main content renderer with optimized conditions
   const renderContent = useCallback(() => {
     // Show skeleton loader while loading
-    if ((!isReady && !refreshing) || (currentLoading && !initialLoadComplete)) {
+    if ((!isReady && !refreshing) || (allProductsLoading && !isReady)) {
       return <ContentSkeletonLoader />;
     }
 
-    if (categoriesError || subCategoriesError || productsError) {
+    if (categoriesError) {
       return (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load data. Please try again.</Text>
@@ -330,8 +323,6 @@ const HomeScreen = ({ navigation, route }) => {
 
     const isAllDataEmpty = 
       (!categories || categories.length === 0) &&  
-      (!brands || brands.length === 0) &&
-      (!filteredSubcategories || filteredSubcategories.length === 0) &&
       (!currentProducts || currentProducts.length === 0);
 
     if (isAllDataEmpty) {
@@ -358,41 +349,49 @@ const HomeScreen = ({ navigation, route }) => {
             products={currentProducts} 
             navigation={navigation}
             loadMore={viewMode === 'all' ? loadMore : undefined}
-            loading={viewMode === 'all' ? isLoadingMore || allProductsLoading : false}
+            loading={allProductsLoading}
+            hasMore={allProductsPagination ? allProductsPage < allProductsPagination.totalPages : false}
           />
-          {renderSection()}   
+          {renderSection}   
         </View> 
       </Animated.View>
     );
   }, [
-    isReady, refreshing, currentLoading, initialLoadComplete, 
-    categoriesError, subCategoriesError, productsError, 
-    categories, brands, filteredSubcategories, currentProducts,
-    navigation, selectedCategoryIndex, viewMode, 
-    handleCategoryChange, handleShowAllProducts, handleRefresh,
-    loadMore, isLoadingMore, allProductsLoading, renderSection,
-    opacity
+    isReady, refreshing, allProductsLoading, 
+    categoriesError, categories, currentProducts, navigation, selectedCategoryIndex, 
+    viewMode, handleCategoryChange, handleShowAllProducts, handleRefresh,
+    loadMore, allProductsPagination, allProductsPage, renderSection, opacity
   ]);
+
+  // Optimized FlatList configuration
+  const flatListProps = useMemo(() => ({
+    data: [],
+    keyExtractor: (_, index) => index.toString(),
+    ListHeaderComponent: (
+      <>
+        {renderHeader}
+        {renderContent()}
+      </>
+    ),
+    refreshControl: (
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        colors={[COLORS.green]}
+        tintColor={COLORS.green}
+      />
+    ),
+    showsVerticalScrollIndicator: false,
+    initialNumToRender: 5,
+    maxToRenderPerBatch: 7,
+    windowSize: 10,
+    removeClippedSubviews: true,
+    updateCellsBatchingPeriod: 50,
+  }), [renderHeader, renderContent, refreshing, handleRefresh]);
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={localStyles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[COLORS.green]}
-            tintColor={COLORS.green}
-          />
-        }
-        stickyHeaderIndices={[0]}
-      >
-        {renderHeader()}
-        {renderContent()}
-      </ScrollView>
+      <FlatList {...flatListProps} />
     </View>
   );
 };

@@ -11,7 +11,10 @@ export const styles = StyleSheet.create({
     loadingContainer:{
        flex: 1,
   padding: 15, 
-  backgroundColor: '#fff'
+  backgroundColor: '#fff',
+  paddingTop:Height(20),
+  alignItems:"center",
+  justifyContent:"center"
     },
     mainContainer:{
       paddingHorizontal:Width(6)
@@ -33,6 +36,11 @@ export const styles = StyleSheet.create({
     borderRadius: Height(10),
     marginHorizontal: 10,
   },
+  row:{
+   flexDirection:"row",
+   justifyContent:"space-between",
+   alignItems:"center",
+  },
   title: {
     fontSize: FontSize(16),
    fontFamily:'Inter-SemiBold',
@@ -40,6 +48,18 @@ export const styles = StyleSheet.create({
     marginBottom: 5,
     lineHeight: 24,
   },
+  colorText: {
+  fontSize: 14,
+  color: '#666', // subtle grey
+  marginBottom: 5,
+   fontFamily:'Inter-Regular',
+},
+textStyle:{
+        color: '#808080', 
+        fontFamily:"Inter-Medium",
+          fontSize: 12,
+          marginBottom:1
+    },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -60,33 +80,61 @@ export const styles = StyleSheet.create({
     color: '#999',
   },
   priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    justifyContent:"space-between",
-    marginTop:3
-  },
-   stockContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2E6074',
-    marginRight: 8,
-  },
-  originalPrice: {
-    fontSize: 16,
-    color: '#999',
-    textDecorationLine: 'line-through',
-    marginRight: 8,
-  },
-  discount: {
-    fontSize: 14,
-    color: '#4CAF50',
-    fontWeight: '600',
-  },
+  // paddingHorizontal: 16,
+  paddingTop: 6,
+},
+rowTop: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+},
+leftTop: {
+  flex: 1,            // give left block the flexible width
+  marginRight: 8,
+},
+priceLine: {
+  flexDirection: 'row',
+  alignItems: 'baseline',
+  flexShrink: 1,
+},
+price: {
+  fontSize: 20,
+ fontFamily:"Inter-SemiBold",
+ color:COLORS.green
+},
+unitText: {
+  fontSize: 13,
+  color: '#67707A',
+  marginLeft: 3,
+  flexShrink: 1,
+   fontFamily:"Inter-Regular",
+},
+unitTextLong: {
+  fontSize: 13,
+  color: '#67707A',
+  marginTop: 2,
+  flexShrink: 1,
+     fontFamily:"Inter-Regular",
+},
+rowBottom: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 4,
+  marginBottom:8
+},
+originalPrice: {
+  fontSize: 14,
+  color: '#8A8F98',
+  textDecorationLine: 'line-through',
+  marginRight: 8,
+     fontFamily:"Inter-Regular",
+},
+discount: {
+  fontSize: 13,
+   fontFamily:"Inter-Medium",
+  color: COLORS.success,
+},
+
   deliveryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -140,6 +188,14 @@ export const styles = StyleSheet.create({
       marginVertical: Height(4),
      
     },
+     variantTitle: {
+    fontSize: 12.6,
+    fontFamily: "Inter-SemiBold",
+    marginBottom: 4,
+    color: "#333",
+     textTransform: "uppercase",
+    
+  },
     label: {
       color: '#000',
       fontFamily: 'Inter-Medium',

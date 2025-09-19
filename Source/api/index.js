@@ -8,13 +8,13 @@ export const GETALLCATEGORIES = `/category/getAllCategories`
 export const GETALLBRANDS = `/brand/getAllBrands`
 export const PRODUCTBYID = `/products/getProductById`
 export const PRODUCTBYCATEGORY = '/products/allProducts?category='
-export const FETCHPRODUCTBYSUBCATEGORY = '/products/getProductBySubCategory'
+export const FETCHPRODUCTBYSUBCATEGORY = '/products/allProducts?subCategory='
 export const GETALLSUBCATEGORIES = '/subcategories/getAllsubCategoriesList'
 export const FETCHPRODUCTS ='/products/fetchProducts?keyword='
 export const GETALLPRODUCTS = '/products/allProducts?search='
 export const POPULARPRODUCTS = '/products/allProducts?limit=6&sort=-popularity'
 export const GETPRODUCTBYSEGMENT = '/segment/segmentsBySubCategory/'
-export const GET_PRODUCT_BY_SEGMENT = '/products/getProductBySegment/'
+export const GET_PRODUCT_BY_SEGMENT = '/products/allProducts?segment='
 export const GET_PRODUCT_BY_BRAND = '/products/allProducts?brand='
 export const CART_BASE = `${BASE_URL}/cart`;
 export const ADD_TO_WISHLIST = '/wishlist/addToWishlist';

@@ -78,14 +78,11 @@ export const calculateProductPrice = (product, variant = null, coupon = null) =>
 export const calculateFinalAmount = ({ product = null, cartItems = [], appliedCoupon }) => {
   // === CASE: Single Product Checkout ===
   if (product?.isSingleProductCheckout) {
-    const qty = product.quantity || 1;
+    const qty =  1;
 
-    const basePrice = product.offerPrice || product.price || 0;
-    const variantPrice = product?.selectedVariant?.additionalPrice || 0;
-
-    const pricePerItem = basePrice + variantPrice;
+    const basePrice = product?.selectedVariant?.offerPrice ? product?.selectedVariant?.offerPrice : product.offerPrice || product.price || 0;
+    const pricePerItem = basePrice ;
     const subtotal = pricePerItem * qty;
-
     const taxPercent = product.tax || 0;
     const tax = (subtotal * taxPercent) / 100;
 
@@ -96,6 +93,7 @@ export const calculateFinalAmount = ({ product = null, cartItems = [], appliedCo
       : appliedCoupon?.discountValue || 0;
 
     const total = subtotal + tax + shipping - couponDiscount;
+
 
     return Math.round(total);
   }
@@ -125,6 +123,7 @@ cartItems.forEach(item => {
 
   // === 2. Get base price ===
   const basePrice =
+    item?.variantDetails?.offerPrice ?  item?.variantDetails?.offerPrice :
     item.product?.offerPrice ||
     item.offerPrice ||
     item.price ||
@@ -132,13 +131,9 @@ cartItems.forEach(item => {
     0;
 
   // === 3. Variant additional price ===
-  const variantPrice =
-    item?.selectedVariant?.additionalPrice ||
-    item?.variantDetails?.additionalPrice ||
-    0;
-
+ 
   // === 4. Final price calculations ===
-  const pricePerItem = basePrice + variantPrice;
+  const pricePerItem = basePrice ;
   const itemSubtotal = pricePerItem * qty;
 
   // === 5. Tax ===

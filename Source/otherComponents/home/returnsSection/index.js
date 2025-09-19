@@ -26,7 +26,7 @@ export const ReturnsSection = ({returnWindow}) => {
         </View>
         <View style={styles.iconItem}>
          <ReturnMoneyIcon/>
-          <Text style={styles.iconText}>Return and{'\n'}get money</Text>
+          <Text style={styles.iconText}>Return and{'\n'}get replacement</Text>
         </View>
       </View>
 
@@ -34,7 +34,7 @@ export const ReturnsSection = ({returnWindow}) => {
       <Text style={styles.infoText}>
         Changed your mind, or having sizing issues? Bring the product with
         original tags and invoice within <Text style={styles.boldTitle}>{returnWindow}</Text> days and get
-        money back. T&C apply.
+         replacement. T&C apply.
       </Text>
 
       {/* Brand Owner */}
@@ -56,6 +56,8 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(14),
     fontFamily:"Inter-SemiBold",
     marginBottom: moderateScale(12),
+    color:COLORS.black,
+    marginTop:2
   },
   iconsRow: {
     flexDirection: "row",
@@ -71,7 +73,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: moderateScale(6),
     color:COLORS.black,
-    fontFamily:"Inter-Regular",
+    fontFamily:"Inter-SemiBold",
     lineHeight:14
   },
   infoText: {

@@ -72,7 +72,8 @@ export const styles = StyleSheet.create({
     marginTop:Height(-18)
   },
   categortTitleStyle:{
-    marginHorizontal:4
+    marginHorizontal:4,
+    
   },
   marginTop:{
     marginTop: 20
@@ -152,7 +153,7 @@ export const styles = StyleSheet.create({
   },
   categoryList:{
      marginVertical: 1,
-     marginBottom:20,
+      marginBottom:3,
      paddingHorizontal:10
   },
   allIconStyle:{

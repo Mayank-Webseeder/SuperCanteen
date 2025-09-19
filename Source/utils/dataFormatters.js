@@ -100,15 +100,23 @@ export const formatProductDetailData = (product) => {
   return {
     id: product._id,
     name: product.name,
+    color:product.color,
     images: Array.isArray(product.images)
       ? product.images.map(img => `${IMGURL}${img}`)
       : [],
+    hasVariants:product.hasVariants,
+    productType:product.productType,
+    size:product.size,
+    color:product.color,
+    flatVariants:product.flatVariants ,
+    colorVariants:product.colorVariants,
     brand: product.brand ? {
       id: product.brand._id,
       name: product.brand.name,
       image: product.brand.image ? `${IMGURL}${product.brand.image}` : null,
       about: product.brand.aboutTheBrand
     } : null,
+    warrantyPeriod:product.warrantyPeriod,
     category: product.category,
     subCategory: product.subCategory,
     description: product.description,
@@ -120,7 +128,6 @@ export const formatProductDetailData = (product) => {
     rating: product.rating,
     numReviews: product.numReviews,
     stock: product.countInStock,
-    variants: product.variants,
     attributes: product.attributes,
     returnPolicy: {
       returnable: product.returnable,
@@ -131,9 +138,7 @@ export const formatProductDetailData = (product) => {
       width: product.width,
       weight: product.weight,
       shippingRate: product.shippingRate,
-      weightUnit:product.weightUnit
     },
-    slabs: product.slabs,
     createdAt: product.createdAt
   };
 };
@@ -164,6 +169,7 @@ export const formateSubCategoryProducts = (products = []) => {
     countInStock: product.countInStock || 0,
     outOfStock: product.outOfStock || false,
     isEnable: product.isEnable || false,
+    isAvailable:product.isAvailable,
     isFeatured: product.isFeatured || false,
     isBestSeller: product.isBestSeller || false,
     unit: product.unit || '',
@@ -216,7 +222,8 @@ export const formateSubCategorySegments = (segments = []) => {
     keywords: segment.keywords || [],
     isActive: segment.isActive || false,
     createdAt: segment.createdAt,
-    updatedAt: segment.updatedAt
+    updatedAt: segment.updatedAt,
+    isAvailable:segment.isAvailable
   }));
 };
 
@@ -276,6 +283,7 @@ export const formatProductBySegment = (products = []) => {
     countInStock: product.countInStock || 0,
     outOfStock: product.outOfStock || false,
     isEnable: product.isEnable || false,
+    isAvailable:product.isAvailable ,
     isFeatured: product.isFeatured || false,
     isBestSeller: product.isBestSeller || false,
     unit: product.unit || '',

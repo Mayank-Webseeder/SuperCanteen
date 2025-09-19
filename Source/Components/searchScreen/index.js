@@ -75,10 +75,14 @@ const SearchScreen = ({ navigation }) => {
     setShowSuggestions(false);
   };
 
+  const availableResults = results.filter(product => product.isAvailable);
+
   // Group products by category
   const groupProductsByCategory = () => {
     const grouped = {};
-    results.forEach(product => {
+    results
+    .filter(product => product.isAvailable)
+     availableResults.forEach(product => {
       if (!grouped[product.category]) {
         grouped[product.category] = [];
       }
@@ -88,6 +92,7 @@ const SearchScreen = ({ navigation }) => {
   };
 
   const groupedProducts = formatProductGroupedData(groupProductsByCategory())
+
 
   return (
   <View style={styles.container}>
@@ -123,7 +128,7 @@ const SearchScreen = ({ navigation }) => {
             <View style={styles.noDataContainer}>
               <Text style={styles.noDataText}>{error}</Text>
             </View>
-          ) : searchQuery && results.length === 0 ? (
+          ) : searchQuery && availableResults.length === 0 ? (
             <View style={styles.noDataContainer}>
               <Text style={styles.noDataText}>No products found for "{searchQuery}"</Text>
               <Text style={styles.suggestionText}>Try searching for something else</Text>
@@ -139,7 +144,7 @@ const SearchScreen = ({ navigation }) => {
                     containerStyle={{marginBottom:6,paddingHorizontal:10}}
                   />
                   <CustomCategoryList
-                    data={groupedProducts[categoryId]}
+                  data={groupedProducts[categoryId]?.filter(p => p.isEnable)}
                     horizontal={false}
                     numColumns={3}
                     bgColor="#D4DEF226"

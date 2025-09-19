@@ -2,29 +2,35 @@ import { COLORS } from "@constants/index";
 import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
-    padding: 8,
+    padding: 4,
+    marginTop:10
+
   },
   listContent: {
     paddingHorizontal: 4,
+   
+  
   },
   columnWrapper: {
     justifyContent: 'space-between',
-    marginBottom: 0,
+ marginBottom:10
+
   },
   card: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor:'#ffffff',
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 16,
+     marginLeft:10,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  
+   
+   
   },
   imageContainer: {
-   
     backgroundColor: '#F8F9FA',
     justifyContent: 'center',
     alignItems: 'center',
@@ -64,7 +70,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Inter-Bold',
   },
   detailsContainer: {
-    padding: 12,
+    paddingHorizontal: 12,
   },
   brandName: {
     fontSize: 10,
@@ -76,12 +82,13 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
     color: '#2D3748',
-    marginBottom: 8,
+    marginBottom: 4,
   
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom:11.5
   },
   currentPrice: {
     fontSize: 16,
